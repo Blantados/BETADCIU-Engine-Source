@@ -239,7 +239,7 @@ class Stage extends MusicBeatState
 				swagBacks['street'] = street;
 				toAdd.push(street);
 			}
-			case 'philly-wire':
+			/*case 'philly-wire':
 			{
 				camZoom = 1.05;
 
@@ -343,7 +343,7 @@ class Stage extends MusicBeatState
 				gfBG2.updateHitbox();
 				swagBacks['gfBG2'] = gfBG2;
 				toAdd.push(gfBG2);	
-			}
+			}*/
 			case 'limo':
 			{
 				camZoom = 0.9;
@@ -650,7 +650,7 @@ class Stage extends MusicBeatState
 				toAdd.push(santa);
 				animatedBacks.push(santa);
 			}
-			case 'mallSoft':
+			/*case 'mallSoft':
 			{
 				camZoom = 0.80;
 
@@ -758,7 +758,7 @@ class Stage extends MusicBeatState
 					swagBacks['softBFBG'] = softBFBG;
 					toAdd.push(softBFBG);
 				}
-			}
+			}*/
 			case 'mallEvil' | 'mallAnnie':
 			{
 				switch (daStage)
@@ -866,7 +866,7 @@ class Stage extends MusicBeatState
 			}
 
 			//all the different schools for roses remix to make use of the new stage switch system since the old one sucks
-			case 'grillbys' | 'school-baldi' | 'mushroom-kingdom' | 'eddhouse-pixel':
+			/*case 'grillbys' | 'school-baldi' | 'mushroom-kingdom' | 'eddhouse-pixel':
 			{
 				var bgPre:String = "";
 				var bgPre2:String = "";
@@ -1098,9 +1098,9 @@ class Stage extends MusicBeatState
 
 				altSuffix = '-pixelcorrupted';
 				introAssets = ['weeb/pixelUI/ready-pixel', 'weeb/pixelUI/set-pixel', 'weeb/pixelUI/date-pixel'];
-			}
+			}*/
 
-			case 'schoolEvil' | 'schoolEvild4':
+			case 'schoolEvil':
 			{
 				camZoom = 1.05;
 
@@ -1114,9 +1114,6 @@ class Stage extends MusicBeatState
 					case 'schoolEvil': 
 						bg.frames = Paths.getSparrowAtlas('weeb/animatedEvilSchool', 'week6');
 						altSuffix = '-pixel';
-					case 'schoolEvild4': 
-						bg.frames = Paths.getSparrowAtlas('corruption/weeb/animatedEvilSchool');
-						altSuffix = '-pixelcorrupted';
 				}
 
 				bg.animation.addByPrefix('idle', 'background 2', 24);
@@ -1129,7 +1126,7 @@ class Stage extends MusicBeatState
 				introAssets = ['weeb/pixelUI/ready-pixel', 'weeb/pixelUI/set-pixel', 'weeb/pixelUI/date-pixel'];
 			}
 
-			case 'school-monika':
+			/*case 'school-monika':
 			{
 				camZoom = 1.05;
 				altSuffix = '-pixel';
@@ -1203,7 +1200,7 @@ class Stage extends MusicBeatState
 				}
 
 				introAssets = ['weeb/pixelUI/ready-pixel', 'weeb/pixelUI/set-pixel', 'weeb/pixelUI/date-pixel'];
-			}
+			}*/
 
 			case 'tank' | 'tank2':
 			{
@@ -6518,13 +6515,57 @@ class Stage extends MusicBeatState
 		
 		switch (curStage)
 		{
-			case 'halloween' | 'halloweenmanor':
+			case 'halloween':
 				if (FlxG.random.bool(Conductor.bpm > 320 ? 100 : 10) && curBeat > lightningStrikeBeat + lightningOffset)
 				{
 					lightningStrikeShit();
 					trace('spooky');
 				}
-			case 'auditorHell':
+			case 'limo':
+				swagGroup['grpLimoDancers'].forEach(function(dancer:BackgroundDancer)
+				{
+					dancer.dance();
+				});
+
+				if (FlxG.random.bool(10) && fastCarCanDrive)
+					fastCarDrive();
+			case 'school':
+				swagBacks['bgGirls'].dance();
+			case 'tank2' | 'tank':
+				if (curBeat % 2 == 0)
+				{	
+					swagBacks['tankWatchtower'].animation.play('idle', true);
+					swagBacks['tank0'].animation.play('idle', true);
+					swagBacks['tank1'].animation.play('idle', true);
+					swagBacks['tank2'].animation.play('idle', true);
+					swagBacks['tank4'].animation.play('idle', true);
+					swagBacks['tank5'].animation.play('idle', true);
+					swagBacks['tank3'].animation.play('idle', true);
+				}
+			case "philly":
+				if (!trainMoving) {
+					trainCooldown += 1;
+				}	
+				if (curBeat % 8 == 4 && FlxG.random.bool(Conductor.bpm > 320 ? 150 : 30) && !trainMoving && trainCooldown > 8)
+				{
+					trainCooldown = FlxG.random.int(-4, 0);
+					trainStart();
+					trace('train');
+				}
+				
+				if (curBeat % 4 == 0)
+				{
+					var phillyCityLights = swagGroup['phillyCityLights'];
+					phillyCityLights.forEach(function(light:FlxSprite)
+					{
+						light.visible = false;
+					});
+
+					curLight = FlxG.random.int(0, phillyCityLights.length - 1);
+
+					phillyCityLights.members[curLight].visible = true;
+				}
+			/*case 'auditorHell':
 				{
 					if (PlayState.instance.dad.curCharacter == 'exTricky')
 					{
@@ -6564,15 +6605,9 @@ class Stage extends MusicBeatState
 
 					wirephillyCityLights.members[curLight2].visible = true;
 				}
-
-			case 'school' | 'school-baldi' | 'grillbys' | 'mushroom-kingdom' | 'eddhouse-pixel':
-				swagBacks['bgGirls'].dance();
-				if (curStage == 'mushroom-kingdom')
-				{
-					swagBacks['amyPixelBG'].dance();
-					swagBacks['bgGirls2'].dance();
-				}
-			case 'school-monika':
+				*/
+		
+			/*case 'school-monika':
 				if (songLowercase == 'shinkyoku')
 				swagBacks['bgGirls2'].dance();
 			case 'neopolis':
@@ -6586,14 +6621,6 @@ class Stage extends MusicBeatState
 					swagBacks['upperBoppers'].animation.play('bop', true);
 				if (curBeat % 2 == 0)
 					swagBacks['bottomBoppers'].animation.play('bop', true);
-			case 'limo':
-				swagGroup['grpLimoDancers'].forEach(function(dancer:BackgroundDancer)
-				{
-					dancer.dance();
-				});
-
-				if (FlxG.random.bool(10) && fastCarCanDrive)
-					fastCarDrive();
 			case 'limoholo' | 'limoholo-night':
 				swagGroup['grpLimoDancersHolo'].forEach(function(dancer:BackgroundDancerHolo)
 				{
@@ -6614,36 +6641,6 @@ class Stage extends MusicBeatState
 				swagBacks['softBFBG'].animation.play('idle');
 			case 'pillars':
 				swagBacks['speaker'].animation.play('bop');
-			case "philly" | "phillyannie" | "prologue" | "neon" | "gfroom":
-				if (curStage != "prologue" && curStage != "neon" && curStage != 'gfroom')
-				{
-					if (!trainMoving) {
-						trainCooldown += 1;
-					}	
-					if (curBeat % 8 == 4 && FlxG.random.bool(Conductor.bpm > 320 ? 150 : 30) && !trainMoving && trainCooldown > 8)
-					{
-						trainCooldown = FlxG.random.int(-4, 0);
-						trainStart();
-						trace('train');
-					}
-				}
-				
-				if (curBeat % 4 == 0)
-				{
-					var phillyCityLights = swagGroup['phillyCityLights'];
-					phillyCityLights.forEach(function(light:FlxSprite)
-					{
-						light.visible = false;
-					});
-
-					curLight = FlxG.random.int(0, phillyCityLights.length - 1);
-
-					phillyCityLights.members[curLight].visible = true;
-				}
-
-				if (songLowercase == 'technokinesis' && curStage == 'neon') {
-					swagBacks['chara'].animation.play('idle');
-				}
 			case 'kbStreet':
 				if(curBeat >= 80 && curBeat <= 208) 
 				{
@@ -6664,17 +6661,6 @@ class Stage extends MusicBeatState
 				if(curLight > 4) curLight = 0;
 
 				bgs.members[curLight].visible = true;
-			case 'tank2' | 'tank':
-				if (curBeat % 2 == 0)
-				{	
-					swagBacks['tankWatchtower'].animation.play('idle', true);
-					swagBacks['tank0'].animation.play('idle', true);
-					swagBacks['tank1'].animation.play('idle', true);
-					swagBacks['tank2'].animation.play('idle', true);
-					swagBacks['tank4'].animation.play('idle', true);
-					swagBacks['tank5'].animation.play('idle', true);
-					swagBacks['tank3'].animation.play('idle', true);
-				}
 			case 'reactor':
 				if(curBeat % 4 == 0) 
 				{
@@ -6756,7 +6742,7 @@ class Stage extends MusicBeatState
 						swagBacks['manifestHole'].animation.play('idle');
 					}
 				}			
-			}*/
+			}
 			case 'night':
 				if (!PlayState.instance.dad.animation.curAnim.name.startsWith('sing'))
 					swagBacks['pc'].animation.play('idle');
@@ -6895,7 +6881,7 @@ class Stage extends MusicBeatState
 					}
 				}
 			case 'acrimony':
-				swagBacks['modCrowdBig'].animation.play('bop', true);
+				swagBacks['modCrowdBig'].animation.play('bop', true);*/
 		}
 	}
 
