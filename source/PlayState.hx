@@ -4136,24 +4136,6 @@ class PlayState extends MusicBeatState
 		}
 
 		#if debug
-		if (FlxG.keys.justPressed.EIGHT)
-		{
-			persistentUpdate = false;
-
-			if (FlxG.keys.pressed.SHIFT)
-			{
-				MusicBeatState.switchState(new PositionDebug(dad.curCharacter));
-				PositionDebug.isDad = true;
-				PositionDebug.isBF = false;
-			}
-			else
-			{
-				MusicBeatState.switchState(new AnimationDebug(dad.curCharacter));
-				AnimationDebug.isDad = true;
-				AnimationDebug.isBF = false;
-			}
-		}
-
 		if(FlxG.keys.justPressed.THREE) //Go 10 seconds into the future, credit: Shadow Mario#9396
 		{ 
 			var shiftPressed:Bool = false;
