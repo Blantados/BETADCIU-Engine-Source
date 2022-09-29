@@ -1,0 +1,163 @@
+{
+	"animations": [
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "idle",
+			"loop": false,
+			"name": "Mom Idle0",
+			"playerOffsets": [
+				0,
+				0
+			]
+		},
+		{
+			"offsets": [
+				15,
+				68
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singUP",
+			"loop": false,
+			"name": "Mom Up Pose0",
+			"playerOffsets": [
+				-12,
+				67
+			]
+		},
+		{
+			"offsets": [
+				20,
+				-170
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singDOWN",
+			"loop": false,
+			"name": "MOM DOWN POSE0",
+			"playerOffsets": [
+				20,
+				-180
+			]
+		},
+		{
+			"offsets": [
+				180,
+				-31
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singLEFT",
+			"loop": false,
+			"name": "Mom Left Pose0",
+			"playerOffsets": [
+				150,
+				-66
+			]
+		},
+		{
+			"offsets": [
+				50,
+				-68
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singRIGHT",
+			"loop": false,
+			"name": "Mom Pose Left0",
+			"playerOffsets": [
+				51,
+				-32
+			]
+		},
+		{
+			"offsets": [
+				14,
+				57
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singUPmiss",
+			"loop": false,
+			"name": "Mom Up Pose MISS0",
+			"playerOffsets": [
+				-10,
+				58
+			]
+		},
+		{
+			"offsets": [
+				20,
+				-168
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singDOWNmiss",
+			"loop": false,
+			"name": "MOM DOWN POSE MISS0",
+			"playerOffsets": [
+				20,
+				-173
+			]
+		},
+		{
+			"offsets": [
+				175,
+				-32
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singLEFTmiss",
+			"loop": false,
+			"name": "Mom Left Pose MISS0",
+			"playerOffsets": [
+				150,
+				-70
+			]
+		},
+		{
+			"offsets": [
+				60,
+				-70
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singRIGHTmiss",
+			"loop": false,
+			"name": "Mom Pose Left MISS0",
+			"playerOffsets": [
+				50,
+				-33
+			]
+		}
+	],
+	"no_antialiasing": false,
+	"image": "characters/Mom_Assets",
+	"position": [
+		10,
+		-40
+	],
+	"playerposition": [
+		10,
+		-40
+	],
+	"healthicon": "mom",
+	"flip_x": false,
+	"healthbar_colors": [
+		216,
+		85,
+		142
+	],
+	"camera_position": [
+		0,
+		0
+	],
+	"noteSkin": null,
+	"sing_duration": 4,
+	"scale": 1
+}

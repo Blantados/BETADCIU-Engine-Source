@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="aloePort.png">
+	<!-- Created with MY OWN FUCKING HANDS -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="normal instance 10000" x="45" y="3" width="429" height="420"/>
+	<SubTexture name="sad instance 10000" x="495" y="3" width="429" height="420"/>
+	<SubTexture name="pissed instance 10000" x="945" y="3" width="429" height="420"/>
+	<SubTexture name="huh instance 10000" x="1395" y="3" width="429" height="420"/>
+	<SubTexture name="ugh instance 10000" x="1845" y="3" width="429" height="420"/>
+	<SubTexture name="nice instance 10000" x="2295" y="3" width="429" height="420"/>
+	<SubTexture name="angry instance 10000" x="2745" y="3" width="429" height="420"/>
+
+	<SubTexture name="serious instance 10000" x="45" y="453" width="429" height="420"/>
+	<SubTexture name="whodis instance 10000" x="495" y="453" width="429" height="420"/>
+	<SubTexture name="worried instance 10000" x="945" y="453" width="429" height="420"/>
+	<SubTexture name="concerneed instance 10000" x="1395" y="453" width="429" height="420"/>
+	<SubTexture name="speak instance 10000" x="1845" y="453" width="429" height="420"/>
+	<SubTexture name="angre instance 10000" x="2295" y="453" width="429" height="420"/>
+	<SubTexture name="blush instance 10000" x="2745" y="453" width="429" height="420"/>
+</TextureAtlas>

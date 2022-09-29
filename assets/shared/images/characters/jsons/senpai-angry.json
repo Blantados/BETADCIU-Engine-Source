@@ -1,0 +1,183 @@
+{
+	"animations": [
+		{
+			"offsets": [
+				6,
+				0
+			],
+			"loop": false,
+			"fps": 24,
+			"anim": "idle",
+			"indices": [],
+			"name": "Angry Senpai Idle",
+			"playerOffsets": [
+				0,
+				0
+			]
+		},
+		{
+			"offsets": [
+				12,
+				37
+			],
+			"loop": false,
+			"fps": 24,
+			"anim": "singUP",
+			"indices": [],
+			"name": "Angry Senpai UP NOTE",
+			"playerOffsets": [
+				-3,
+				37
+			]
+		},
+		{
+			"offsets": [
+				12,
+				6
+			],
+			"loop": false,
+			"fps": 24,
+			"anim": "singDOWN",
+			"indices": [],
+			"name": "Angry Senpai DOWN NOTE",
+			"playerOffsets": [
+				-4,
+				6
+			]
+		},
+		{
+			"offsets": [
+				27,
+				6
+			],
+			"loop": false,
+			"fps": 24,
+			"anim": "singLEFT",
+			"indices": [],
+			"name": "Angry Senpai LEFT NOTE",
+			"playerOffsets": [
+				0,
+				0
+			]
+		},
+		{
+			"offsets": [
+				7,
+				0
+			],
+			"loop": false,
+			"fps": 24,
+			"anim": "singRIGHT",
+			"indices": [],
+			"name": "Angry Senpai RIGHT NOTE",
+			"playerOffsets": [
+				-21,
+				6
+			]
+		},
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"loop": false,
+			"fps": 24,
+			"anim": "idle-alt",
+			"indices": [],
+			"name": "Senpai Idle",
+			"playerOffsets": [
+				0,
+				0
+			]
+		},
+		{
+			"offsets": [
+				12,
+				37
+			],
+			"loop": false,
+			"fps": 24,
+			"anim": "singUP-alt",
+			"indices": [],
+			"name": "SENPAI UP NOTE",
+			"playerOffsets": [
+				-3,
+				36
+			]
+		},
+		{
+			"offsets": [
+				12,
+				0
+			],
+			"loop": false,
+			"fps": 24,
+			"anim": "singDOWN-alt",
+			"indices": [],
+			"name": "SENPAI DOWN NOTE",
+			"playerOffsets": [
+				-3,
+				0
+			]
+		},
+		{
+			"offsets": [
+				26,
+				0
+			],
+			"loop": false,
+			"fps": 24,
+			"anim": "singLEFT-alt",
+			"indices": [],
+			"name": "SENPAI LEFT NOTE",
+			"playerOffsets": [
+				0,
+				0
+			]
+		},
+		{
+			"offsets": [
+				7,
+				0
+			],
+			"loop": false,
+			"fps": 24,
+			"anim": "singRIGHT-alt",
+			"indices": [],
+			"name": "SENPAI RIGHT NOTE",
+			"playerOffsets": [
+				-19,
+				0
+			]
+		}
+	],
+	"no_antialiasing": true,
+	"image": "characters/senpai",
+	"position": [
+		170,
+		270
+	],
+	"player_camera_position": [
+		400,
+		-330
+	],
+	"playerposition": [
+		140,
+		270
+	],
+	"healthicon": "senpai-angry",
+	"flip_x": false,
+	"healthbar_colors": [
+		255,
+		170,
+		111
+	],
+	"camera_position": [
+		-250,
+		-330
+	],
+	"noteSkin": "pixel",
+	"sing_duration": 4,
+	"isPlayerChar": false,
+	"scale": 6
+}

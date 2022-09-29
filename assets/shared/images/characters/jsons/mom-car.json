@@ -1,0 +1,103 @@
+{
+	"animations": [
+		{
+			"loop": false,
+			"offsets": [
+				0,
+				0
+			],
+			"anim": "idle",
+			"fps": 24,
+			"playerOffsets": [
+				0,
+				0
+			],
+			"name": "Mom Idle0",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [
+				15,
+				68
+			],
+			"anim": "singUP",
+			"fps": 24,
+			"playerOffsets": [
+				-42,
+				58
+			],
+			"name": "Mom Up Pose0",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [
+				20,
+				-170
+			],
+			"anim": "singDOWN",
+			"fps": 24,
+			"playerOffsets": [
+				-10,
+				-180
+			],
+			"name": "MOM DOWN POSE0",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [
+				180,
+				-31
+			],
+			"anim": "singLEFT",
+			"fps": 24,
+			"playerOffsets": [
+				150,
+				-59
+			],
+			"name": "Mom Left Pose0",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [
+				50,
+				-68
+			],
+			"anim": "singRIGHT",
+			"fps": 24,
+			"playerOffsets": [
+				-49,
+				-22
+			],
+			"name": "Mom Pose Left0",
+			"indices": []
+		}
+	],
+	"no_antialiasing": false,
+	"image": "characters/momCar",
+	"position": [
+		30,
+		-30
+	],
+	"playerposition": [
+		-80,
+		-30
+	],
+	"healthicon": "mom",
+	"flip_x": false,
+	"healthbar_colors": [
+		216,
+		85,
+		142
+	],
+	"camera_position": [
+		0,
+		0
+	],
+	"noteSkin": null,
+	"sing_duration": 4,
+	"scale": 1
+}

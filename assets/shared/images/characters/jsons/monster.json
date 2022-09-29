@@ -1,0 +1,180 @@
+{
+	"animations": [
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "idle",
+			"loop": false,
+			"name": "monster idle",
+			"playerOffsets": [
+				0,
+				0
+			]
+		},
+		{
+			"offsets": [
+				-22,
+				87
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singUP",
+			"loop": false,
+			"name": "monster up note",
+			"playerOffsets": [
+				-50,
+				80
+			]
+		},
+		{
+			"offsets": [
+				-43,
+				-89
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singDOWN",
+			"loop": false,
+			"name": "monster down",
+			"playerOffsets": [
+				-2,
+				-94
+			]
+		},
+		{
+			"offsets": [
+				-24,
+				4
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singLEFT",
+			"loop": false,
+			"name": "Monster left note",
+			"playerOffsets": [
+				10,
+				0
+			]
+		},
+		{
+			"offsets": [
+				-40,
+				10
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singRIGHT",
+			"loop": false,
+			"name": "Monster Right note",
+			"playerOffsets": [
+				-51,
+				20
+			]
+		}
+	],
+	"playerAnimations": [
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "idle",
+			"loop": false,
+			"name": "monster idle",
+			"playerOffsets": [
+				0,
+				0
+			]
+		},
+		{
+			"offsets": [
+				-22,
+				87
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singUP",
+			"loop": false,
+			"name": "monster up note",
+			"playerOffsets": [
+				-50,
+				80
+			]
+		},
+		{
+			"offsets": [
+				-43,
+				-89
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singDOWN",
+			"loop": false,
+			"name": "monster down",
+			"playerOffsets": [
+				-2,
+				-94
+			]
+		},
+		{
+			"offsets": [
+				-24,
+				4
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singLEFT",
+			"loop": false,
+			"name": "Monster Right note",
+			"playerOffsets": [
+				10,
+				0
+			]
+		},
+		{
+			"offsets": [
+				-40,
+				10
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singRIGHT",
+			"loop": false,
+			"name": "Monster left note",
+			"playerOffsets": [
+				-51,
+				20
+			]
+		}
+	],
+	"no_antialiasing": false,
+	"image": "characters/Monster_Assets",
+	"position": [
+		-70,
+		90
+	],
+	"playerposition": [
+		20,
+		90
+	],
+	"healthicon": "monster",
+	"flip_x": false,
+	"healthbar_colors": [
+		243,
+		255,
+		110
+	],
+	"camera_position": [
+		0,
+		0
+	],
+	"noteSkin": null,
+	"sing_duration": 4,
+	"scale": 1
+}

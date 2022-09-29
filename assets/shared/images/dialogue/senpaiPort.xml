@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="senpaiPort.png">
+	<!-- Created with Adobe Animate version 21.0.0.35450 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="normal0000" x="0" y="0" width="75" height="75"/>
+	<SubTexture name="hmm0000" x="75" y="0" width="75" height="75"/>
+	<SubTexture name="hyped0000" x="150" y="0" width="75" height="75"/>
+	<SubTexture name="sad0000" x="225" y="0" width="75" height="75"/>
+	<SubTexture name="angry0000" x="0" y="75" width="75" height="75"/>
+	<SubTexture name="giddy0000" x="75" y="75" width="75" height="75"/>
+	<SubTexture name="whodis0000" x="150" y="75" width="75" height="75"/>
+	<SubTexture name="idle0000" x="0" y="0" width="75" height="75"/>
+	<SubTexture name="speaking0000" x="0" y="0" width="75" height="75"/>
+	<SubTexture name="speaking0001" x="0" y="0" width="75" height="75"/>
+	<SubTexture name="speaking0002" x="225" y="75" width="75" height="75"/>
+	<SubTexture name="speaking0003" x="225" y="75" width="75" height="75"/>
+	<SubTexture name="speaking0004" x="0" y="0" width="75" height="75"/>
+	<SubTexture name="speaking0005" x="0" y="0" width="75" height="75"/>
+	<SubTexture name="speaking0006" x="225" y="75" width="75" height="75"/>
+	<SubTexture name="speaking0007" x="225" y="75" width="75" height="75"/>
+	<SubTexture name="speaking0008" x="0" y="0" width="75" height="75"/>
+	<SubTexture name="speaking0009" x="0" y="0" width="75" height="75"/>
+	<SubTexture name="speaking0010" x="225" y="75" width="75" height="75"/>
+	<SubTexture name="speaking0011" x="225" y="75" width="75" height="75"/>
+	<SubTexture name="speaking0012" x="0" y="0" width="75" height="75"/>
+	<SubTexture name="speaking0013" x="0" y="0" width="75" height="75"/>
+	<SubTexture name="speaking0014" x="225" y="75" width="75" height="75"/>
+	<SubTexture name="speaking0015" x="225" y="75" width="75" height="75"/>
+	<SubTexture name="speaking0016" x="0" y="0" width="75" height="75"/>
+	<SubTexture name="speaking0017" x="0" y="0" width="75" height="75"/>
+	<SubTexture name="speaking0018" x="225" y="75" width="75" height="75"/>
+	<SubTexture name="speaking0019" x="225" y="75" width="75" height="75"/>
+	<SubTexture name="speaking0020" x="0" y="0" width="75" height="75"/>
+	<SubTexture name="speaking0021" x="0" y="0" width="75" height="75"/>
+	<SubTexture name="speaking0022" x="225" y="75" width="75" height="75"/>
+	<SubTexture name="speaking0023" x="225" y="75" width="75" height="75"/>
+	<SubTexture name="speaking0024" x="0" y="0" width="75" height="75"/>
+	<SubTexture name="speaking0025" x="0" y="0" width="75" height="75"/>
+	<SubTexture name="speaking0026" x="225" y="75" width="75" height="75"/>
+	<SubTexture name="speaking0027" x="225" y="75" width="75" height="75"/>
+	<SubTexture name="speaking0028" x="0" y="0" width="75" height="75"/>
+	<SubTexture name="speaking0029" x="0" y="0" width="75" height="75"/>
+</TextureAtlas>

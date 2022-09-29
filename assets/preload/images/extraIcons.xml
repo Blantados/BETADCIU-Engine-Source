@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="extraIcons.png">
+	<!-- Created with Adobe Animate version 20.0.0.17400 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="snow0000" x="0" y="0" width="176" height="176"/>
+	<SubTexture name="spres0000" x="176" y="0" width="176" height="176"/>
+	<SubTexture name="aj0000" x="352" y="0" width="176" height="176"/>
+	<SubTexture name="lno0000" x="0" y="176" width="176" height="176"/>
+	<SubTexture name="lylace0000" x="176" y="176" width="176" height="176"/>
+	<SubTexture name="tc0000" x="352" y="176" width="176" height="176"/>
+	<SubTexture name="chxwy0000" x="0" y="352" width="176" height="176"/>
+	<SubTexture name="mewrk0000" x="176" y="352" width="176" height="176"/>
+	<SubTexture name="sharv0000" x="352" y="352" width="176" height="176"/>
+</TextureAtlas>

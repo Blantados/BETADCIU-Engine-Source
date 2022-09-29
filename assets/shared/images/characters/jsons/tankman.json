@@ -1,0 +1,193 @@
+{
+	"animations": [
+		{
+			"offsets": [
+				-5,
+				0
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "idle",
+			"loop": false,
+			"name": "Tankman Idle Dance",
+			"playerOffsets": [
+				-5,
+				0
+			]
+		},
+		{
+			"offsets": [
+				44,
+				46
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singUP",
+			"loop": false,
+			"name": "Tankman UP note",
+			"playerOffsets": [
+				18,
+				46
+			]
+		},
+		{
+			"offsets": [
+				68,
+				-104
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singDOWN",
+			"loop": false,
+			"name": "Tankman DOWN note",
+			"playerOffsets": [
+				68,
+				-104
+			]
+		},
+		{
+			"offsets": [
+				82,
+				-12
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singLEFT",
+			"loop": false,
+			"name": "Tankman Right Note",
+			"playerOffsets": [
+				86,
+				-29
+			]
+		},
+		{
+			"offsets": [
+				-25,
+				-30
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singRIGHT",
+			"loop": false,
+			"name": "Tankman Note Left",
+			"playerOffsets": [
+				-28,
+				-12
+			]
+		},
+		{
+			"offsets": [
+				-20,
+				-9
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singUP-alt",
+			"loop": false,
+			"name": "TANKMAN UGH",
+			"playerOffsets": [
+				-20,
+				-9
+			]
+		},
+		{
+			"offsets": [
+				-5,
+				15
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singDOWN-alt",
+			"loop": false,
+			"name": "PRETTY GOOD",
+			"playerOffsets": [
+				95,
+				15
+			]
+		},
+		{
+			"offsets": [
+				-5,
+				8
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singLEFT-alt",
+			"loop": false,
+			"name": "Lil Dude",
+			"playerOffsets": [
+				-20,
+				-9
+			]
+		},
+		{
+			"offsets": [
+				-20,
+				-9
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singRIGHT-alt",
+			"loop": false,
+			"name": "TANKMAN UGH",
+			"playerOffsets": [
+				4,
+				10
+			]
+		},
+		{
+			"offsets": [
+				-7,
+				15
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "huh",
+			"loop": false,
+			"name": "HUH",
+			"playerOffsets": [
+				97,
+				15
+			]
+		},
+		{
+			"offsets": [
+				-4,
+				16
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "good",
+			"loop": false,
+			"name": "GOOD",
+			"playerOffsets": [
+				96,
+				16
+			]
+		}
+	],
+	"no_antialiasing": false,
+	"image": "characters/tankmanCaptain",
+	"position": [
+		0,
+		200
+	],
+	"playerposition": [
+		0,
+		200
+	],
+	"healthicon": "tankman",
+	"flip_x": true,
+	"healthbar_colors": [
+		44,
+		45,
+		65
+	],
+	"camera_position": [
+		100,
+		0
+	],
+	"noteSkin": null,
+	"sing_duration": 4,
+	"scale": 1
+}

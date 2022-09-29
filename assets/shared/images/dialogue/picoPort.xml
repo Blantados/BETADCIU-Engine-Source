@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="picoPort.png">
+	<!-- Created with MY OWN FUCKING HANDS -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="normal instance 10000" x="45" y="3" width="400" height="344"/>
+	<SubTexture name="angry instance 10000" x="445" y="3" width="400" height="344"/>
+	<SubTexture name="dark instance 10000" x="845" y="3" width="400" height="344"/>
+	<SubTexture name="pissed instance 10000" x="1245" y="3" width="400" height="344"/>
+	<SubTexture name="menacing instance 10000" x="1245" y="3" width="400" height="344"/>
+	<SubTexture name="woah instance 10000" x="1645" y="3" width="400" height="344"/>
+	<SubTexture name="shout instance 10000" x="45" y="403" width="410" height="344"/>
+	<SubTexture name="threat instance 10000" x="545" y="403" width="410" height="344"/>
+	<SubTexture name="cool instance 10000" x="1045" y="403" width="400" height="344"/>
+	<SubTexture name="speak-gunless instance 10000" x="1445" y="403" width="400" height="344"/>
+	<SubTexture name="dark-gunless instance 10000" x="1845" y="403" width="400" height="344"/>
+	<SubTexture name="happy-gunless instance 10000" x="2245" y="403" width="400" height="344"/>
+</TextureAtlas>

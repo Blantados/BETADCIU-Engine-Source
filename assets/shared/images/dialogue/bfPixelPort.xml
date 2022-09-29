@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="bfPixelPort.png">
+	<!-- Created with Adobe Animate version 21.0.0.35450 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="cry0000" x="0" y="0" width="75" height="75"/>
+	<SubTexture name="normal0000" x="75" y="0" width="75" height="75"/>
+	<SubTexture name="angry0000" x="150" y="0" width="75" height="75"/>
+	<SubTexture name="ugh0000" x="225" y="0" width="75" height="75"/>
+	<SubTexture name="shaking0000" x="0" y="75" width="75" height="75"/>
+	<SubTexture name="uneasy0000" x="75" y="75" width="75" height="75"/>
+	<SubTexture name="what0000" x="150" y="75" width="75" height="75"/>
+</TextureAtlas>
