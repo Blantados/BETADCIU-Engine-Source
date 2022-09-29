@@ -110,7 +110,7 @@ class SecretState extends MusicBeatState
 
 		if (FlxG.keys.justPressed.ENTER)
 		{
-			FlxG.switchState(new MainMenuState());
+			MusicBeatState.switchState(new MainMenuState());
 		}
 	}
 
