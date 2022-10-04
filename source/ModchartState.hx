@@ -4322,6 +4322,7 @@ class ModchartState
 			case 'chromaticabberation' | 'ca': return new ChromaticAberrationEffect(val1);
 			case 'sketch': return new SketchEffect();
 			case 'desaturation': return new DesaturationEffect(val1);
+			case 'fisheye': return new FishEyeEffect(val1);
 		}
 		return new GreyscaleEffect();
 	}
