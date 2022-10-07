@@ -52,9 +52,7 @@ class SecretState extends MusicBeatState
 
 		lolText = new FlxText(0, 0, FlxG.width - 100, 32);
 		lolText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER);
-		lolText.text = "Alright! The first release of BETADCIU Engine. A combination of both Kade and Psych Engine with some extra customizable stuff that can be used for making BETADCIUs.
-		I doubt anyone's actually gonna use this as Psych is still a thing but I thought I might as well release this as its own thing as I wanted to separate the mod's songs into separate downloads. 
-		Speaking of the songs, you'll now have to download them as separate downloads. This is so you don't have to download nearly 3 GB just to play one song. Anyways, hope you enjoy this update!";
+		lolText.text = "A new update for BETADCIU Engine! Added some more lua functions from Psych as well as fixed some bugs with certain functions like setObjectCamera. Also added the Psych transitions to make transitioning between states look better. More BETADCIU Modpacks will be released soon! Anyways, hope you enjoy this update!";
 		lolText.borderColor = FlxColor.BLACK;
 		lolText.borderSize = 3;
 		lolText.borderStyle = FlxTextBorderStyle.OUTLINE;
