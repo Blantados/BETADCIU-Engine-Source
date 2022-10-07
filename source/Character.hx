@@ -64,6 +64,7 @@ class Character extends FlxSprite
 	public var animOffsets:Map<String, Array<Dynamic>>;
 	public var animPlayerOffsets:Map<String, Array<Dynamic>>; //for saving as jsons lol
 	public var debugMode:Bool = false;
+	public var idleSuffix:String = '';
 
 	public var isPlayer:Bool = false;
 	public var curCharacter:String = 'bf';
@@ -1663,16 +1664,16 @@ class Character extends FlxSprite
 							if (isPlayer)
 							{
 								if (danced)
-									playAnim('danceRight' + bfAltAnim);
+									playAnim('danceRight' + bfAltAnim + idleSuffix);
 								else
-									playAnim('danceLeft' + bfAltAnim);
+									playAnim('danceLeft' + bfAltAnim + idleSuffix);
 							}
 							else
 							{
 								if (danced)
-									playAnim('danceRight' + altAnim);
+									playAnim('danceRight' + altAnim + idleSuffix);
 								else
-									playAnim('danceLeft' + altAnim);
+									playAnim('danceLeft' + altAnim + idleSuffix);
 							}	
 						}
 					}
@@ -1681,9 +1682,9 @@ class Character extends FlxSprite
 						if (!stopIdle)
 						{
 							if (isPlayer)
-								playAnim('idle' + bfAltAnim);
+								playAnim('idle' + bfAltAnim + idleSuffix);
 							else
-								playAnim('idle' + altAnim);	
+								playAnim('idle' + altAnim + idleSuffix);	
 						}
 					}
 			}
@@ -1691,6 +1692,29 @@ class Character extends FlxSprite
 			if (color != curColor && doMissThing)
 				color = curColor;
 		}
+	}
+
+	public var danceEveryNumBeats:Int = 2;
+	private var settingCharacterUp:Bool = true;
+	public function recalculateDanceIdle() {
+		var lastDanceIdle:Bool = danceIdle;
+		danceIdle = (animation.getByName('danceLeft' + idleSuffix) != null && animation.getByName('danceRight' + idleSuffix) != null);
+
+		if(settingCharacterUp)
+		{
+			danceEveryNumBeats = (danceIdle ? 1 : 2);
+		}
+		else if(lastDanceIdle != danceIdle)
+		{
+			var calc:Float = danceEveryNumBeats;
+			if(danceIdle)
+				calc /= 2;
+			else
+				calc *= 2;
+
+			danceEveryNumBeats = Math.round(Math.max(calc, 1));
+		}
+		settingCharacterUp = false;
 	}
 
 	public function setZoom(?toChange:Float = 1, ?isPixel:Bool = false):Void

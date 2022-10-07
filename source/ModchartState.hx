@@ -683,7 +683,7 @@ class ModchartState
 	}
 
 	//trying to do some auto stuff so i don't have to set manual x and y values
-	public function changeBFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false)
+	public static function changeBFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false)
 	{	
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;						
@@ -776,7 +776,7 @@ class ModchartState
 		PlayState.instance.startCharacterLua(PlayState.instance.boyfriend.curCharacter);
 	}
 
-	public function changeDadAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false)
+	public static function changeDadAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false)
 	{	
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;						
@@ -870,7 +870,7 @@ class ModchartState
 		PlayState.instance.startCharacterLua(PlayState.instance.dad.curCharacter);
 	}
 
-	function changeGFAuto(id:String, ?dontDestroy:Bool = false)
+	public static function changeGFAuto(id:String, ?dontDestroy:Bool = false)
 	{		
 		PlayState.instance.removeObject(PlayState.instance.gf);
 		PlayState.instance.destroyObject(PlayState.instance.gf);

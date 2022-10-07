@@ -18,6 +18,13 @@ import Type.ValueType;
 
 using StringTools;
 
+typedef EventNote = {
+	strumTime:Float,
+	event:String,
+	value1:String,
+	value2:String
+}
+
 class Note extends FlxSprite
 {
 	public var strumTime:Float = 0;
@@ -63,6 +70,11 @@ class Note extends FlxSprite
 	public var biteNote:Bool = false;
 	public var earlyHitMult:Float = 1;
 	public var lateHitMult:Float = 1;
+
+	public var eventName:String = '';
+	public var eventLength:Int = 0;
+	public var eventVal1:String = '';
+	public var eventVal2:String = '';
 
 	public static var swagWidth:Float = 160 * 0.7;
 	public static var noteScale:Float;
@@ -204,10 +216,11 @@ class Note extends FlxSprite
 				frameN = ['purple', 'green', 'red', 'white', 'yellow', 'blue', 'dark'];
 		}
 
-		x += swidths[mania] * swagWidth * (noteData % Main.keyAmmo[mania]);
-
-		if (!isSustainNote)
-			animation.play(frameN[noteData] + 'Scroll');
+		if(_noteData > -1) {
+			x += swidths[mania] * swagWidth * (noteData % Main.keyAmmo[mania]);
+			if (!isSustainNote)
+				animation.play(frameN[noteData] + 'Scroll');
+		}
 
 		if (style == "guitar"){
 			offset.x = -15;
@@ -265,8 +278,9 @@ class Note extends FlxSprite
 		if (modifiedByLua)
 			angle = modAngle;
 
-		if (noteData == -1)
-			this.kill(); //removes psych event arrows when porting charts from psych.
+		//we added event arrows so this isn't needed.
+		//if (noteData == -1)
+			//this.kill(); //removes psych event arrows when porting charts from psych.
 
 		if(isSustainNote) 
 		{ 
