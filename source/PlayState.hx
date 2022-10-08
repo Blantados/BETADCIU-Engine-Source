@@ -3511,21 +3511,10 @@ class PlayState extends MusicBeatState
 				var swagNote:Note;
 
 				if (changeArrows)
-				{
-					if (gottaHitNote) {
-						swagNote = new Note(daStrumTime, daNoteData, oldNote, false, daType, SONG.bfNoteStyle);
-					} else {
-						swagNote = new Note(daStrumTime, daNoteData, oldNote, false, daType, SONG.dadNoteStyle);
-					}
-				}
+					swagNote = new Note(daStrumTime, daNoteData, oldNote, false, daType, (gottaHitNote ? SONG.bfNoteStyle : SONG.dadNoteStyle));
 				else
-				{
-					if (gottaHitNote) {
-						swagNote = new Note(daStrumTime, daNoteData, oldNote, false, daType, alt2);
-					} else {
-						swagNote = new Note(daStrumTime, daNoteData, oldNote, false, daType, alt);
-					}
-				}	
+					swagNote = new Note(daStrumTime, daNoteData, oldNote, false, daType, (gottaHitNote ? alt2 : alt));
+
 				swagNote.sustainLength = songNotes[2];
 				swagNote.noteType = songNotes[3];
 				swagNote.scrollFactor.set(0, 0);
@@ -3545,21 +3534,10 @@ class PlayState extends MusicBeatState
 
 					var sustainNote:Note;
 					if (changeArrows)
-					{
-						if (gottaHitNote) {
-							sustainNote = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + Conductor.stepCrochet, daNoteData, oldNote, true, daType, SONG.bfNoteStyle);
-						} else {
-							sustainNote = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + Conductor.stepCrochet, daNoteData, oldNote, true, daType, SONG.dadNoteStyle);
-						}
-					}
+						sustainNote = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + Conductor.stepCrochet, daNoteData, oldNote, true, daType, (gottaHitNote ? SONG.bfNoteStyle : SONG.dadNoteStyle));
 					else
-					{
-						if (gottaHitNote) {
-							sustainNote = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + Conductor.stepCrochet, daNoteData, oldNote, true, daType, alt2);
-						} else {
-							sustainNote = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + Conductor.stepCrochet, daNoteData, oldNote, true, daType, alt);
-						}
-					}	
+						sustainNote = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + Conductor.stepCrochet, daNoteData, oldNote, true, daType, (gottaHitNote ? alt2 : alt));
+					
 					sustainNote.scrollFactor.set();
 					sustainNote.dType = section.dType;
 					sustainNote.noteType = songNotes[3];

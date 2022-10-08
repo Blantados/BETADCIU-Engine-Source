@@ -220,8 +220,6 @@ class ChartingState extends MusicBeatState
 		loadAudioBuffer();
 		// sections = _song.notes;
 
-		updateGrid();
-
 		loadSong(_song.song);
 		Conductor.changeBPM(_song.bpm);
 		Conductor.mapBPMChanges(_song);
@@ -271,10 +269,34 @@ class ChartingState extends MusicBeatState
 		UI_box = new FlxUITabMenu(null, tabs, true);
 
 		UI_box.resize(300, 400);
-		UI_box.x = FlxG.width / 2;
-		UI_box.y = 20;
-		add(UI_box);
+		UI_box.x = 640 + GRID_SIZE / 2;
+		UI_box.y = 25;
+		UI_box.scrollFactor.set();
 
+		var text:String = 
+		"W/S or Mouse Wheel - Change Conductor's strum time
+		\nA/D - Go to the previous/next section
+		\nLeft/Right - Change Snap
+		\nUp/Down - Change Conductor's Strum Time with Snapping
+		\nHold Shift to move 4x faster. Hold Alt to move 32x faster.
+		\nHold Control and click on an arrow to select it
+		\n
+		\nEsc - Test your chart inside Chart Editor
+		\nEnter - Play your chart
+		\nQ/E - Decrease/Increase Note Sustain Length
+		\nSpace - Stop/Resume song";
+
+		var tipTextArray:Array<String> = text.split('\n');
+		for (i in 0...tipTextArray.length) {
+			var tipText:FlxText = new FlxText(UI_box.x, UI_box.y + UI_box.height + 8, 0, tipTextArray[i], 16);
+			tipText.y += i * 12;
+			tipText.setFormat(Paths.font("vcr.ttf"), 14, FlxColor.WHITE, LEFT/*, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK*/);
+			//tipText.borderSize = 2;
+			tipText.scrollFactor.set();
+			add(tipText);
+		}
+		add(UI_box);
+		
 		addChartingUI();
 		addSongUI();
 		addSectionUI();
@@ -286,6 +308,7 @@ class ChartingState extends MusicBeatState
 		add(curRenderedSustains);
 		add(curRenderedNoteType);
 
+		loadEvents(); // it doesn't load the events unless I do this
 		updateGrid();
 
 		super.create();
@@ -461,21 +484,7 @@ class ChartingState extends MusicBeatState
 
 		var loadEventJson:FlxButton = new FlxButton(loadAutosaveBtn.x, loadAutosaveBtn.y + 30, 'Load Events', function()
 		{
-
-			var songName:String = Paths.formatToSongPath(_song.song);
-			var file:String = Paths.json(songName + '/events');
-			#if sys
-			if (#if MODS_ALLOWED FileSystem.exists(Paths.modsJson(songName + '/events')) || #end FileSystem.exists(file))
-			#else
-			if (OpenFlAssets.exists(file))
-			#end
-			{
-				_song.events = [];
-				updateGrid();
-				var events:SwagSong = Song.loadFromJson('events', songName);
-				_song.events = events.events;
-				changeSection(curSection);
-			}
+			loadEvents();
 		});
 
 		var saveEvents:FlxButton = new FlxButton(110, reloadSongJson.y, 'Save Events', function ()
@@ -559,6 +568,7 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(reloadSong);
 		tab_group_song.add(reloadSongJson);
 		tab_group_song.add(loadAutosaveBtn);
+		tab_group_song.add(loadEventJson);
 		tab_group_song.add(stepperBPM);
 		tab_group_song.add(stepperSpeed);
 		tab_group_song.add(stepperMania);
@@ -630,25 +640,34 @@ class ChartingState extends MusicBeatState
 		stepperDType.value = 0;
 		stepperDType.name = 'section_dtype';
 
-		typeNameTxt = new FlxText(50, 370, 0, 'Normal Notes', 18);
-		typeNameTxt.scrollFactor.set();
-		typeNameTxt.color = 0xFFFFFFFF;
-		add(typeNameTxt);
-
 		var copyButton:FlxButton = new FlxButton(10, 150, "Copy Section", function()
+		{
+			notesCopied = [];
+			sectionToCopy = curSection;
+			for (i in 0..._song.notes[curSection].sectionNotes.length)
 			{
-				notesCopied = [];
-				sectionToCopy = curSection;
-				for (i in 0..._song.notes[curSection].sectionNotes.length)
+				var note:Array<Dynamic> = _song.notes[curSection].sectionNotes[i];
+				notesCopied.push(note);
+			}
+
+			var startThing:Float = sectionStartTime();
+			var endThing:Float = sectionStartTime(1);
+			for (event in _song.events)
+			{
+				var strumTime:Float = event[0];
+				if(endThing > event[0] && event[0] >= startThing)
 				{
-					var note:Array<Dynamic> = _song.notes[curSection].sectionNotes[i];
-					notesCopied.push(note);
+					var copiedEventArray:Array<Dynamic> = [];
+					for (i in 0...event[1].length)
+					{
+						var eventToPush:Array<Dynamic> = event[1][i];
+						copiedEventArray.push([eventToPush[0], eventToPush[1], eventToPush[2]]);
+					}
+					notesCopied.push([strumTime, -1, copiedEventArray]);
 				}
-				
-				var startThing:Float = sectionStartTime();
-				var endThing:Float = sectionStartTime(1);
-			});
-	
+			}
+		});
+
 			var pasteButton:FlxButton = new FlxButton(10, 180, "Paste Section", function()
 			{
 				if(notesCopied == null || notesCopied.length < 1)
@@ -665,13 +684,13 @@ class ChartingState extends MusicBeatState
 					var newStrumTime:Float = note[0] + addToTime;
 					if(note[1] < 0)
 					{
-						/*var copiedEventArray:Array<Dynamic> = [];
+						var copiedEventArray:Array<Dynamic> = [];
 						for (i in 0...note[2].length)
 						{
 							var eventToPush:Array<Dynamic> = note[2][i];
 							copiedEventArray.push([eventToPush[0], eventToPush[1], eventToPush[2]]);
 						}
-						_song.events.push([newStrumTime, copiedEventArray]);*/
+						_song.events.push([newStrumTime, copiedEventArray]);
 					}
 					else
 					{
@@ -1188,13 +1207,13 @@ class ChartingState extends MusicBeatState
 
 		if (_song.mania != 0)
 		{
-			UI_box.x = FlxG.width / 2 + 160;
-			UI_box.y = 100;
+			UI_box.x = 640 + GRID_SIZE / 2 + 160;
+			UI_box.y = 25;
 		}
 		else
 		{
-			UI_box.x = FlxG.width / 2;
-			UI_box.y = 20;
+			UI_box.x = 640 + GRID_SIZE / 2;
+			UI_box.y = 25;
 		}
 
 		if (FlxG.keys.justPressed.ESCAPE)
@@ -2263,7 +2282,7 @@ class ChartingState extends MusicBeatState
 			"song": _song
 		};
 
-		var data:String = Json.stringify(json);
+		var data:String = Json.stringify(json, "\t");
 
 		if ((data != null) && (data.length > 0))
 		{
@@ -2272,6 +2291,24 @@ class ChartingState extends MusicBeatState
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(data.trim(), _song.song.toLowerCase() + ".json");
+		}
+	}
+
+	private function loadEvents()
+	{
+		var songName:String = Paths.formatToSongPath(_song.song);
+		var file:String = Paths.json(songName + '/events');
+		#if sys
+		if (#if MODS_ALLOWED FileSystem.exists(Paths.modsJson(songName + '/events')) || #end FileSystem.exists(file))
+		#else
+		if (OpenFlAssets.exists(file))
+		#end
+		{
+			_song.events = [];
+			updateGrid();
+			var events:SwagSong = Song.loadFromJson('events', songName);
+			_song.events = events.events;
+			changeSection(curSection);
 		}
 	}
 

@@ -567,8 +567,6 @@ class Note extends FlxSprite
 
 						if (!FileSystem.exists(Paths.modsXml(style)))
 						{
-							trace('isPixel');
-
 							if (isSustainNote)
 							{
 								if (!Paths.currentTrackedAssets.exists(style+'ENDS'))

@@ -233,7 +233,21 @@ class PauseSubState extends MusicBeatSubstate
 					if (FlxG.save.data.fpsCap > 290)
 						(cast (Lib.current.getChildAt(0), Main)).setFPSCap(290);
 					
-					MusicBeatState.switchState(new MainMenuState());
+					if (PlayState.isBETADCIU)
+					{
+						if (PlayState.storyDifficulty == 5)
+							MusicBeatState.switchState(new GuestBETADCIUState());
+						else
+							MusicBeatState.switchState(new BETADCIUState());
+					}
+					else if (PlayState.isBonus)		
+						MusicBeatState.switchState(new BonusSongsState());
+					else if (PlayState.isNeonight)
+						MusicBeatState.switchState(new NeonightState());
+					else if (PlayState.isVitor)
+						MusicBeatState.switchState(new VitorState());
+					else
+						MusicBeatState.switchState(new FreeplayState());
 			}
 		}
 
