@@ -197,7 +197,7 @@ class BETADCIUSecretState extends MusicBeatState
 		if (controls.BACK)
 		{
 			FlxG.sound.music.stop();
-			FlxG.switchState(new MainMenuState());
+			MusicBeatState.switchState(new MainMenuState());
 		}
 
 		if (accepted)
@@ -222,7 +222,7 @@ class BETADCIUSecretState extends MusicBeatState
 					FlxTween.tween(e, {x: -6000}, llll / 1000,{onComplete:function(e:FlxTween){
 					
 						if (FlxG.keys.pressed.ALT){
-							FlxG.switchState(new ChartingState());
+							MusicBeatState.switchState(new ChartingState());
 						}else{
 							LoadingState.loadAndSwitchState(new PlayState());
 						}

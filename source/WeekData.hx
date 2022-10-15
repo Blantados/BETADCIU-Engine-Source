@@ -62,7 +62,7 @@ class WeekData {
 			startUnlocked: true,
 			hideStoryMode: false,
 			hideFreeplay: false,
-			ytInfo: ["Snow The Fox", "https://www.youtube.com/c/SnowTheFox", 'snow', 0xFFB94545],
+			ytInfo: ["Snow The Fox", "https://www.youtube.com/c/SnowTheFox", [185,69,69]],
 			difficulties: ''
 		};
 		return weekFile;
@@ -83,7 +83,7 @@ class WeekData {
 		difficulties = weekFile.difficulties;
 
 		if (weekFile.ytInfo == null)
-			weekFile.ytInfo = ["Snow The Fox", "https://www.youtube.com/c/SnowTheFox", 'snow', 0xFFB94545]; //template
+			weekFile.ytInfo = ["Snow The Fox", "https://www.youtube.com/c/SnowTheFox", [185,69,69]]; //template
 
 		ytInfo = weekFile.ytInfo;
 	}

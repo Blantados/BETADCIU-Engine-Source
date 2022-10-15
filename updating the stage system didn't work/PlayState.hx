@@ -2004,9 +2004,6 @@ class PlayState extends MusicBeatState
 				if(Math.isNaN(value)) value = 1;
 				gfSpeed = value;
 
-			case 'Change Stage':
-				ModchartState.changeStage(value1);
-				
 			case 'Add Camera Zoom':
 				if(FlxG.save.data.camzoom && FlxG.camera.zoom < 1.35) {
 					var camZoom:Float = Std.parseFloat(value1);
@@ -3678,10 +3675,6 @@ class PlayState extends MusicBeatState
 
 				var newCharacter:String = event.value2;
 				preloadChar = new Character(0, 0, newCharacter);
-				startCharacterLua(preloadChar.curCharacter);
-			case 'Change Stage':
-				PreloadStage = new PreloadStage(event.value1, true);
-				trace ('stages are ' + event.value1);
 
 			/*case 'Dadbattle Spotlight':
 				dadbattleBlack = new BGSprite(null, -800, -400, 0, 0);
@@ -5131,38 +5124,19 @@ class PlayState extends MusicBeatState
 				else
 					daNote.active = true;
 
-				var strumGroup:FlxTypedGroup<StrumNote> = playerStrums;
-				if(!daNote.mustPress) strumGroup = opponentStrums;
-
-				var strumX:Float = strumGroup.members[daNote.noteData].x;
-				var strumY:Float = strumGroup.members[daNote.noteData].y;
-				var strumAngle:Float = strumGroup.members[daNote.noteData].angle;
-				var strumDirection:Float = strumGroup.members[daNote.noteData].direction;
-			//	var strumAlpha:Float = strumGroup.members[daNote.noteData].alpha;
-			//	var strumScroll:Bool = strumGroup.members[daNote.noteData].downScroll;
-
-				if (FlxG.save.data.downscroll || daNote.downscroll) //Downscroll
-				{
-					//daNote.y = (strumY + 0.45 * (Conductor.songPosition - daNote.strumTime) * songSpeed);
-					daNote.distance = (0.45 * (Conductor.songPosition - daNote.strumTime) * PlayState.SONG.speed * daNote.multSpeed);
-				}
-				else //Upscroll
-				{
-					//daNote.y = (strumY - 0.45 * (Conductor.songPosition - daNote.strumTime) * songSpeed);
-					daNote.distance = (-0.45 * (Conductor.songPosition - daNote.strumTime) * PlayState.SONG.speed * daNote.multSpeed);
+				var strumX:Float = 0;
+				var strumY:Float = 0;
+				if(daNote.mustPress) {
+					strumX = playerStrums.members[daNote.noteData].x;
+					strumY = playerStrums.members[daNote.noteData].y;
+				} else {
+					strumX = opponentStrums.members[daNote.noteData].x;
+					strumY = opponentStrums.members[daNote.noteData].y;
 				}
 
 				strumX += daNote.offsetX;
 				strumY += daNote.offsetY;
-				//strumAngle += daNote.offsetAngle;
-				//strumAlpha *= daNote.multAlpha;
-
 				center = strumY + Note.swagWidth / 2;
-
-				var angleDir = strumDirection * Math.PI / 180;
-
-				if(daNote.copyX)
-					daNote.x = strumX + Math.cos(angleDir) * daNote.distance;
 
 				if (!daNote.modifiedByLua)
 				{
@@ -5468,6 +5442,7 @@ class PlayState extends MusicBeatState
 				if (daNote.mustPress && !daNote.modifiedByLua)
 				{
 					daNote.visible = playerStrums.members[Math.floor(Math.abs(daNote.noteData))].visible;
+					daNote.x = playerStrums.members[Math.floor(Math.abs(daNote.noteData))].x;
 					if (!daNote.isSustainNote)
 						daNote.angle = playerStrums.members[Math.floor(Math.abs(daNote.noteData))].angle;
 					daNote.alpha = playerStrums.members[Math.floor(Math.abs(daNote.noteData))].alpha;
@@ -5481,6 +5456,7 @@ class PlayState extends MusicBeatState
 				else if (!daNote.wasGoodHit && !daNote.modifiedByLua)
 				{
 					daNote.visible = opponentStrums.members[Math.floor(Math.abs(daNote.noteData))].visible;
+					daNote.x = opponentStrums.members[Math.floor(Math.abs(daNote.noteData))].x;
 					if (!daNote.isSustainNote)
 						daNote.angle = opponentStrums.members[Math.floor(Math.abs(daNote.noteData))].angle;
 					daNote.alpha = opponentStrums.members[Math.floor(Math.abs(daNote.noteData))].alpha;
@@ -5491,6 +5467,8 @@ class PlayState extends MusicBeatState
 					if (daNote.alpha < 0)
 						daNote.alpha = 0;
 				}
+				
+				daNote.x += daNote.offsetX;
 				
 				//trace(daNote.y);
 				// WIP interpolation shit? Need to fix the pause issue

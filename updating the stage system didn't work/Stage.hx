@@ -38,9 +38,9 @@ import sys.FileSystem;
 using StringTools;
 import Shaders;
 
-class PreloadStage extends MusicBeatState
+class Stage extends MusicBeatState
 {
-	public static var instance:PreloadStage = null;
+	public static var instance:Stage = null;
 
 	public var curStage:String = '';//
 	public var camZoom:Float; // The zoom of the camera to have at the start of the game
@@ -5980,10 +5980,23 @@ class PreloadStage extends MusicBeatState
 				if (stageData.countdownAssets != null)
 					introAssets = stageData.countdownAssets;
 
-				luaArray.push(new StageModchartState(curStage));
+				if (!preloading)
+				{
+					PlayState.instance.luaArray.push(new ModchartState(curStage, true));
 
-				if (luaArray.length >= 1)
-					callOnLuas('onCreate', []);	
+					var excludeThese:Array<String> = [];
+
+					for (script in luaArray)
+					{
+						if (!script.scriptName.contains('stages/'))
+							excludeThese.push(script.scriptName);
+
+						if (script.scriptName.contains('stages/'))
+							stageScriptName = script.scriptName;
+					}
+			
+					PlayState.instance.callOnLuas('onCreate', [], true, excludeThese);	
+				}			
 			}
 		}
 
@@ -6148,6 +6161,7 @@ class PreloadStage extends MusicBeatState
 	}
 
 	var yy:Float = 0.0;
+	public var stageScriptName:String = "";
 
 	var cloudTimer:Float = 0;
 	var cloudTimer2:Float = 0;
@@ -6991,7 +7005,7 @@ class PreloadStage extends MusicBeatState
 		
 		var returnVal:Dynamic = StageModchartState.Function_Continue;
 
-		#if windows
+		/*#if windows
 		for (i in 0...luaArray.length) {
 			var ret:Dynamic = luaArray[i].call(event, args);
 			if(ret != StageModchartState.Function_Continue) {
@@ -7003,16 +7017,16 @@ class PreloadStage extends MusicBeatState
 			luaArray.remove(closeLuas[i]);
 			closeLuas[i].die();
 		}
-		#end
+		#end*/
 
 		return returnVal;
 	}
 
 	public function setOnLuas(variable:String, arg:Dynamic) {
 		#if windows
-		for (i in 0...luaArray.length) {
+		/*for (i in 0...luaArray.length) {
 			luaArray[i].setVar(variable, arg);
-		}
+		}*/
 		#end
 	}
 
@@ -7258,7 +7272,7 @@ class PreloadStage extends MusicBeatState
 		}
 	}
 
-	public function setGraphicSize(name:String, val:Float = 1, ?val2:Float = 1)
+	public function setGraphicSize(name:String, val:Float = 1, updateHitbox:Bool = true)
 	{
 		//because this is different apparently
 
@@ -7267,7 +7281,7 @@ class PreloadStage extends MusicBeatState
 			var shit = swagBacks.get(name);
 
 			shit.setGraphicSize(Std.int(shit.width * val));
-			shit.updateHitbox(); 
+			if (updateHitbox) shit.updateHitbox(); 
 		}
 	}
 

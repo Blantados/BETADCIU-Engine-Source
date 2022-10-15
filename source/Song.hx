@@ -117,8 +117,13 @@ class Song
 		
 		trace('loading ' + folderLowercase + '/' + jsonInput.toLowerCase());
 
-		if (rawJson == null)
+		if(rawJson == null) {
+			#if sys
 			rawJson = sys.io.File.getContent(Paths.json(folderLowercase + '/' + jsonInput.toLowerCase())).trim();
+			#else
+			rawJson = Assets.getText(Paths.json(folderLowercase + '/' + jsonInput.toLowerCase())).trim();
+			#end
+		}
 
 		while (!rawJson.endsWith("}"))
 		{

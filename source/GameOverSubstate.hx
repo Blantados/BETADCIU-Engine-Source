@@ -187,20 +187,20 @@ class GameOverSubstate extends MusicBeatSubstate
 			}
 
 			if (PlayState.isStoryMode)
-				FlxG.switchState(new StoryMenuState());
+				MusicBeatState.switchState(new StoryMenuState());
 			else if (PlayState.isBETADCIU)
 				if (PlayState.storyDifficulty == 5)
-					FlxG.switchState(new GuestBETADCIUState());
+					MusicBeatState.switchState(new GuestBETADCIUState());
 				else
-					FlxG.switchState(new BETADCIUState());
+					MusicBeatState.switchState(new BETADCIUState());
 			else if (PlayState.isBonus)
-				FlxG.switchState(new BonusSongsState());
+				MusicBeatState.switchState(new BonusSongsState());
 			else if (PlayState.isNeonight)
-				FlxG.switchState(new NeonightState());
+				MusicBeatState.switchState(new NeonightState());
 			else if (PlayState.isVitor)
-				FlxG.switchState(new VitorState());
+				MusicBeatState.switchState(new VitorState());
 			else
-				FlxG.switchState(new FreeplayState());
+				MusicBeatState.switchState(new FreeplayState());
 			PlayState.loadRep = false;
 		}
 

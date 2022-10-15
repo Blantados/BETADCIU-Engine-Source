@@ -2,7 +2,6 @@ package;
 
 import flash.display.BitmapData;
 import lime.utils.Assets;
-import tjson.TJSON;
 import lime.app.Application;
 import openfl.display.BitmapData;
 #if sys
@@ -156,11 +155,5 @@ class CoolUtil
 			dumbArray.push(i);
 		}
 		return dumbArray;
-	}
-
-	public static function parseJson(json:String):Dynamic {
-		// the reason we do this is to make it easy to swap out json parsers
-
-		return TJSON.parse(json);
 	}
 }

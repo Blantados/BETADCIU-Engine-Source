@@ -6993,7 +6993,7 @@ class Stage extends MusicBeatState
 
 		#if windows
 		for (i in 0...luaArray.length) {
-			var ret:Dynamic = luaArray[i].callLua(event, args);
+			var ret:Dynamic = luaArray[i].call(event, args);
 			if(ret != StageModchartState.Function_Continue) {
 				returnVal = ret;
 			}
@@ -7269,6 +7269,22 @@ class Stage extends MusicBeatState
 			shit.setGraphicSize(Std.int(shit.width * val));
 			shit.updateHitbox(); 
 		}
+	}
+
+	public function getProperty(variable:String)
+	{
+		var killMe:Array<String> = variable.split('.');
+		if(killMe.length > 1) {
+			var coverMeInPiss:Dynamic = null;
+
+			coverMeInPiss = swagBacks.get(killMe[0]);
+
+			for (i in 1...killMe.length-1) {
+				coverMeInPiss = Reflect.getProperty(coverMeInPiss, killMe[i]);
+			}
+			return Reflect.getProperty(coverMeInPiss, killMe[killMe.length-1]);
+		}
+		return Reflect.getProperty(Stage.instance, variable);
 	}
 
 	public function setProperty(variable:String, value:Dynamic)

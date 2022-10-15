@@ -6991,6 +6991,9 @@ class PreloadStage extends MusicBeatState
 		
 		var returnVal:Dynamic = StageModchartState.Function_Continue;
 
+		if (event != 'onCreate')
+			return returnVal;
+		
 		#if windows
 		for (i in 0...luaArray.length) {
 			var ret:Dynamic = luaArray[i].call(event, args);
@@ -7010,9 +7013,9 @@ class PreloadStage extends MusicBeatState
 
 	public function setOnLuas(variable:String, arg:Dynamic) {
 		#if windows
-		for (i in 0...luaArray.length) {
+		/*for (i in 0...luaArray.length) {
 			luaArray[i].setVar(variable, arg);
-		}
+		}*/
 		#end
 	}
 

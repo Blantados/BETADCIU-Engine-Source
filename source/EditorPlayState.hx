@@ -481,6 +481,7 @@ class EditorPlayState extends MusicBeatState
 					if(daNote.isSustainNote && !daNote.animation.curAnim.name.endsWith('end')) {
 						time += 0.15;
 					}
+					
 					StrumPlayAnim(true, Std.int(Math.abs(daNote.noteData)) % 4, time);
 
 					if (!daNote.isSustainNote)
@@ -1014,13 +1015,21 @@ class EditorPlayState extends MusicBeatState
 				if(combo > 9999) combo = 9999;
 			}
 
-			playerStrums.forEach(function(spr:StrumNote)
-			{
-				if (Math.abs(note.noteData) == spr.ID)
-				{
-					spr.playAnim('confirm', true);
+			if(FlxG.save.data.botplay) { // if you're on botplay for some reason.
+				var time:Float = 0.15;
+				if(note.isSustainNote && !note.animation.curAnim.name.endsWith('end')) {
+					time += 0.15;
 				}
-			});
+				StrumPlayAnim(false, Std.int(Math.abs(note.noteData)), time);
+			} else {
+				playerStrums.forEach(function(spr:StrumNote)
+				{
+					if (Math.abs(note.noteData) == spr.ID)
+					{
+						spr.playAnim('confirm', true);
+					}
+				});
+			}
 
 			note.wasGoodHit = true;
 			vocals.volume = 1;

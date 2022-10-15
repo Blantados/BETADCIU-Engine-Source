@@ -30,7 +30,7 @@ class BonusSongsState extends MusicBeatState
 	var songs:Array<FreeplayState.SongMetadata> = [];
 
 	var selector:FlxText;
-	var curSelected:Int = 0;
+	public static var curSelected:Int = 0;
 	var curDifficulty:Int = 1;
 
 	var scoreText:FlxText;
@@ -63,6 +63,8 @@ class BonusSongsState extends MusicBeatState
 		Paths.clearStoredMemory();
 		Paths.clearUnusedMemory();
 		WeekData.reloadWeekFiles(false, 2);
+
+		persistentUpdate = true;
 
 		for (i in 0...WeekData.weeksList.length) {
 			var leWeek:WeekData = WeekData.weeksLoaded.get(WeekData.weeksList[i]);
@@ -384,6 +386,8 @@ class BonusSongsState extends MusicBeatState
 
 		if (accepted && canMove)
 		{
+			persistentUpdate = false;
+			
 			var daText:String = "";
 			switch (curDifficulty)
 			{

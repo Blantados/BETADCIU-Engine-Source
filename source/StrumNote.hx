@@ -193,10 +193,14 @@ class StrumNote extends FlxSprite
 			updateHitbox();
 	}
 
+	var isPixel:Bool = false;
+
 	public function addAnims(?pixel:Bool = false)
 	{
 		if (pixel)
 		{
+			isPixel = true;
+
 			animation.add('green', [6]);
 			animation.add('red', [7]);
 			animation.add('blue', [5]);
@@ -211,6 +215,8 @@ class StrumNote extends FlxSprite
 		}
 		else
 		{
+			isPixel = false;
+
 			antialiasing = true;
 			setGraphicSize(Std.int(width * Note.noteScale));
 	
@@ -225,9 +231,6 @@ class StrumNote extends FlxSprite
 					nSuf = ['LEFT', 'DOWN', 'UP', 'RIGHT', 'SPACE', 'LEFT', 'DOWN', 'UP', 'RIGHT'];
 					pPre = ['left', 'down', 'up', 'right', 'white', 'yel', 'violet', 'black', 'dark'];
 					x -= Note.tooMuch;
-	
-					if (PlayState.SONG.song.toLowerCase() == 'bonedoggle')
-						pPre = ['left', 'down', 'up', 'right', 'white', 'left', 'down', 'up', 'right'];
 				case 3:
 					nSuf = ['LEFT', 'DOWN', 'SPACE', 'UP', 'RIGHT'];
 					pPre = ['left', 'down', 'white', 'up', 'right'];
@@ -263,7 +266,7 @@ class StrumNote extends FlxSprite
 			}
 		}
 		//if(animation.curAnim != null){ //my bad i was upset
-		if(animation.curAnim.name == 'confirm' && !pixelNotes.contains(daStyle)) {
+		if(animation.curAnim.name == 'confirm' && !pixelNotes.contains(daStyle) && !isPixel) {
 			centerOrigin();
 		//}
 		}	
@@ -281,7 +284,7 @@ class StrumNote extends FlxSprite
 		} 
 		else 
 		{
-			if(animation.curAnim.name == 'confirm' && !pixelNotes.contains(daStyle))
+			if(animation.curAnim.name == 'confirm' && !pixelNotes.contains(daStyle) && !isPixel)
 				centerOrigin();
 		}
 	}

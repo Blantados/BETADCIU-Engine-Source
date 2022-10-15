@@ -34,7 +34,7 @@ class GuestBETADCIUState extends MusicBeatState
 	var songs:Array<SongMetadata2> = [];
 
 	var selector:FlxText;
-	var curSelected:Int = 0;
+	public static var curSelected:Int = 0;
 	var curDifficulty:Int = 5;
 
 	var scoreText:FlxText;
@@ -62,6 +62,8 @@ class GuestBETADCIUState extends MusicBeatState
 		Paths.clearUnusedMemory();
 		WeekData.reloadWeekFiles(false, 5);
 
+		persistentUpdate = true;
+
 		for (i in 0...WeekData.weeksList.length) {
 			var leWeek:WeekData = WeekData.weeksLoaded.get(WeekData.weeksList[i]);
 			var leSongs:Array<String> = [];
@@ -77,17 +79,20 @@ class GuestBETADCIUState extends MusicBeatState
 			{
 				var colors:Array<Int> = song[2];
 				if(colors == null || colors.length < 3)
-				{
 					colors = [146, 113, 253];
-				}
-				addSong(song[0], i, song[1], leWeek.ytInfo[0], leWeek.ytInfo[1], leWeek.ytInfo[2], leWeek.ytInfo[3]);
+
+				var textColors:Array<Int> = leWeek.ytInfo[2];
+				if(textColors == null || textColors.length < 3)
+					textColors = [146, 113, 253];
+
+				addSong(song[0], i, song[1], leWeek.ytInfo[0], leWeek.ytInfo[1], FlxColor.fromRGB(textColors[0], textColors[1], textColors[2]));
 			}
 		}
 		WeekData.setDirectoryFromWeek();
 
 		if (songs.length < 1)
 		{
-			addSong('Placeholder', 0, 'face', 'Snow The Fox', "https://www.youtube.com/c/SnowTheFox", 'snow', 0xFFB94545);
+			addSong('Placeholder', 0, 'face', 'Snow The Fox', "https://www.youtube.com/c/SnowTheFox", FlxColor.fromRGB(185, 69, 69));
 			warning = true;
 			trace('warn em bro!');
 		}
@@ -184,9 +189,10 @@ class GuestBETADCIUState extends MusicBeatState
 		ytIcon.animation.play('snow');
 		add(ytIcon);
 
-		var text1 = new FlxText(ytIcon.x - 150, ytIcon.y + 220, 0, "This BETADCIU was made by:", 32);
+		var text1 = new FlxText(0, ytIcon.y + 220, 0, "This BETADCIU was made by:", 32);
 		text1.setFormat(Paths.font("Aller_Rg.ttf"), 36, FlxColor.WHITE, CENTER);
 		text1.borderColor = FlxColor.BLACK;
+		text1.x = ytIcon.x - ((text1.width - ytIcon.width)/2);
 		text1.borderSize = 3;
 		text1.borderStyle = FlxTextBorderStyle.OUTLINE;
 		text1.bold = true;
@@ -200,11 +206,12 @@ class GuestBETADCIUState extends MusicBeatState
 		text2.bold = true;
 		add(text2);
 
-		text3 = new FlxText(ytIcon.x - 110, text2.y + 65, 0, "Link to their channel!", 40);
+		text3 = new FlxText(0, text2.y + 65, 0, "Link to their channel!", 40);
 		text3.setFormat(Paths.font("Aller_Rg.ttf"), 40, FlxColor.fromString('#FF0078D4'), CENTER);
 		text3.borderColor = FlxColor.BLACK;
 		text3.borderSize = 3;
 		text3.borderStyle = FlxTextBorderStyle.OUTLINE;
+		text3.x = ytIcon.x - ((text3.width - ytIcon.width)/2);
 		text3.bold = true;
 		add(text3);
 
@@ -263,9 +270,9 @@ class GuestBETADCIUState extends MusicBeatState
 
 	var daNames:Array<String> = [];
 
-	public function addSong(songName:String, weekNum:Int, songCharacter:String, ytName:String, link:String, iconName:String, textColor:Int)
+	public function addSong(songName:String, weekNum:Int, songCharacter:String, ytName:String, link:String, textColor:Int)
 	{
-		songs.push(new SongMetadata2(songName, weekNum, songCharacter, ytName, link, iconName, textColor));
+		songs.push(new SongMetadata2(songName, weekNum, songCharacter, ytName, link, textColor));
 	}
 
 	/*public function addWeek(songs:Array<String>, weekNum:Int, ?songCharacters:Array<String>)
@@ -351,6 +358,7 @@ class GuestBETADCIUState extends MusicBeatState
 
 		if (accepted && canMove)
 		{
+			persistentUpdate = false;
 			var poop:String = Highscore.formatSong(songs[curSelected].songName.toLowerCase(), curDifficulty);
 
 			trace(poop);
@@ -418,7 +426,11 @@ class GuestBETADCIUState extends MusicBeatState
 
 	public function changeIcon():Void
 	{
-		ytIcon.animation.play(songs[curSelected].iconName);
+		ytIcon.animation.play(songs[curSelected].ytName);
+		text2.text = (songs[curSelected].ytName);
+		text2.color = (songs[curSelected].textColor);
+		text2.x = ytIcon.x - ((text2.width - ytIcon.width)/2);
+
 		/*switch (songs[curSelected].songName.toLowerCase())
 		{
 			case 'epiphany' | 'bonedoggle':
@@ -475,7 +487,7 @@ class GuestBETADCIUState extends MusicBeatState
 				ytIcon.animation.play('mewrk');
 				text2.text = "Mewrk";
 				text2.color = 0xFF444561;
-				text2.x = 790;
+				text2.x = 910;
 			}		
 		}*/
 	}
@@ -542,10 +554,9 @@ class SongMetadata2
 
 	public var ytName:String = "";
 	public var link:String = "";
-	public var iconName:String = "";
 	public var textColor:Int = -7179779;
 
-	public function new(song:String, week:Int, songCharacter:String, ytName:String, link:String, iconName:String, textColor:Int)
+	public function new(song:String, week:Int, songCharacter:String, ytName:String, link:String, textColor:Int)
 	{
 		this.songName = song;
 		this.week = week;
@@ -553,7 +564,6 @@ class SongMetadata2
 		
 		this.ytName = ytName;
 		this.link = link;
-		this.iconName = iconName;
 		this.textColor = textColor;
 
 		this.folder = Paths.currentModDirectory;

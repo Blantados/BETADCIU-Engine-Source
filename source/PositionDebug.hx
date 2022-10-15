@@ -355,14 +355,14 @@ class PositionDebug extends FlxState
 		if (FlxG.keys.justPressed.TWO)
 		{
 			FlxG.mouse.visible = false;
-			FlxG.switchState(new AnimationDebug((isDad ? dad.curCharacter : bf.curCharacter)));
+			MusicBeatState.switchState(new AnimationDebug((isDad ? dad.curCharacter : bf.curCharacter)));
 			AnimationDebug.isDad = isDad;
 			AnimationDebug.isBF = isBF;
 		}
 
 		if (FlxG.keys.justPressed.THREE)
 		{
-			FlxG.switchState(new PositionDebug((isDad ? dad.curCharacter : bf.curCharacter)));
+			MusicBeatState.switchState(new PositionDebug((isDad ? dad.curCharacter : bf.curCharacter)));
 			PositionDebug.isBF = isDad;
 			PositionDebug.isDad = !isDad;	
 		}

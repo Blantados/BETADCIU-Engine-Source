@@ -25,7 +25,7 @@ class BETADCIUState extends MusicBeatState
 	var songs:Array<FreeplayState.SongMetadata> = [];
 
 	var selector:FlxText;
-	var curSelected:Int = 0;
+	public static var curSelected:Int = 0;
 	var curDifficulty:Int = 2;
 
 	var scoreText:FlxText;
@@ -411,6 +411,7 @@ class BETADCIUState extends MusicBeatState
 
 		if (accepted && inMain && canMove)
 		{
+			persistentUpdate = false;
 			if (FlxG.random.bool(20) && songs[curSelected].songName.toLowerCase() == 'hill-of-the-void')
 			{
 				curDifficulty = 1;
@@ -441,7 +442,7 @@ class BETADCIUState extends MusicBeatState
 				new FlxTimer().start(llll/1000, function(tmr:FlxTimer)
 				{
 					if (FlxG.keys.pressed.ALT){
-						FlxG.switchState(new ChartingState());
+						MusicBeatState.switchState(new ChartingState());
 					}else{
 						if (Main.hiddenSongs.contains(songs[curSelected].songName.toLowerCase()) && !Main.isHidden || PlayState.SONG.song == 'Restore' && !Main.restoreUnlocked || PlayState.SONG.song == 'Deathmatch-Holo' && !Main.deathHolo)
 							LoadingState.loadAndSwitchState(new GoFindTheSecretState());
@@ -456,7 +457,7 @@ class BETADCIUState extends MusicBeatState
 					FlxTween.tween(e, {x: -6000}, llll / 1000,{onComplete:function(e:FlxTween){
 					
 						if (FlxG.keys.pressed.ALT){
-							FlxG.switchState(new ChartingState());
+							MusicBeatState.switchState(new ChartingState());
 						}else{
 							if (Main.hiddenSongs.contains(songs[curSelected].songName.toLowerCase()) && !Main.isHidden || PlayState.SONG.song == 'Restore' && !Main.restoreUnlocked || PlayState.SONG.song == 'Deathmatch-Holo' && !Main.deathHolo)
 								LoadingState.loadAndSwitchState(new GoFindTheSecretState());

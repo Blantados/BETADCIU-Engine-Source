@@ -1,4 +1,4 @@
-// because my lazy ass doesn't wanna include a bunch of if(stageMode) stuff to the regular ModchartState
+// THIS IS NOW ONLY USED TO PRELOAD THE IMAGES AND STUFF!!
 
 // Lua
 import openfl.display3D.textures.VideoTexture;

@@ -1540,6 +1540,9 @@ class Character extends FlxSprite
 					}
 				}
 			}
+
+			if(animation.curAnim.finished && animation.getByName(animation.curAnim.name + '-loop') != null)
+				playAnim(animation.curAnim.name + '-loop');
 			
 			if (curCharacter.startsWith('gf') && animation.curAnim.name == 'hairFall' && animation.curAnim.finished)
 				playAnim('danceRight');
@@ -1960,6 +1963,13 @@ class Character extends FlxSprite
 			var oldAlt = animation.getByName('singRIGHT-alt').frames;
 			animation.getByName('singRIGHT-alt').frames = animation.getByName('singLEFT-alt').frames;
 			animation.getByName('singLEFT-alt').frames = oldAlt;
+		}
+
+		if (animation.getByName('singRIGHT-loop') != null && animation.getByName('singLEFT-loop') != null)
+		{
+			var oldLoop = animation.getByName('singRIGHT-loop').frames;
+			animation.getByName('singRIGHT-loop').frames = animation.getByName('singLEFT-loop').frames;
+			animation.getByName('singLEFT-loop').frames = oldLoop;
 		}
 
 		if (curCharacter.contains('9key'))

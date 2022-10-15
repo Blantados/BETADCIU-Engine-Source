@@ -104,11 +104,32 @@ class Note extends FlxSprite
 	public var ignoreNote:Bool = false;
 	public var canMiss:Bool = false;
 	public var noRating:Bool = false;
+	public var multSpeed(default, set):Float = 1;
+
+	public var copyX:Bool = true;
+	public var copyY:Bool = true;
+	public var distance:Float = 2000; //plan on doing scroll directions soon -bb
 
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
 		reloadNote(value);
 		return value;
+	}
+
+	private function set_multSpeed(value:Float):Float {
+		resizeByRatio(value / multSpeed);
+		multSpeed = value;
+		//trace('fuck cock');
+		return value;
+	}
+
+	public function resizeByRatio(ratio:Float) //haha funny twitter shit
+	{
+		if(isSustainNote && !animation.curAnim.name.endsWith('end'))
+		{
+			scale.y *= ratio;
+			updateHitbox();
+		}
 	}
 
 	private function set_noteType(value:String):String {
@@ -206,10 +227,7 @@ class Note extends FlxSprite
 			case 1:
 				frameN = ['purple', 'green', 'red', 'yellow', 'blue', 'dark'];
 			case 2:
-				if (PlayState.SONG.song.toLowerCase() == 'bonedoggle')
-					frameN = ['purple', 'blue', 'green', 'red', 'white', 'purple', 'blue', 'green', 'red'];	
-				else
-					frameN = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'black', 'dark'];
+				frameN = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'black', 'dark'];
 			case 3:
 				frameN = ['purple', 'blue', 'white', 'green', 'red'];
 			case 4:
@@ -241,7 +259,7 @@ class Note extends FlxSprite
 
 			updateHitbox();
 
-			offsetX -= width / 2 + 1;
+			offsetX -= width / 2;
 
 			if (style == "guitar")
 			{
@@ -249,7 +267,7 @@ class Note extends FlxSprite
 				offset.x = -15;
 			}
 
-			if (style.contains('pixel') || style == 'neon')
+			if (isPixel)
 				offsetX += 30;
 
 			if (prevNote.isSustainNote)
@@ -267,6 +285,8 @@ class Note extends FlxSprite
 
 		x += offsetX;
 	}
+
+	var isPixel:Bool = false;
 
 	override function update(elapsed:Float)
 	{
@@ -365,7 +385,7 @@ class Note extends FlxSprite
 		reloadedNote = true;
 
 		var lastScaleY:Float = scale.y;
-		var wasPixelNote:Bool = style.contains('pixel');
+		var wasPixelNote:Bool = isPixel;
 		var becomePixelNote:Bool = style2.contains('pixel');
 
 		var animName:String = null;
@@ -386,12 +406,16 @@ class Note extends FlxSprite
 			{
 				scale.y /= PlayState.daPixelZoom;
 				scale.y *= noteScale;
+
+				offsetX += 3;
 			}
 
 			if (becomePixelNote && !wasPixelNote) //fixes the scaling
 			{
 				scale.y /= noteScale;
 				scale.y *= PlayState.daPixelZoom;
+
+				offsetX -= 3;
 			}
 		}
 		updateHitbox();
@@ -407,6 +431,7 @@ class Note extends FlxSprite
 		{
 			case 'pixel': //| 'pixel-corrupted' | 'neon' | 'doki-pixel':
 				var suf:String = "";
+				isPixel = true;
 				switch (style)
 				{
 					case 'pixel-corrupted':
@@ -423,120 +448,26 @@ class Note extends FlxSprite
 					loadGraphic(Paths.image('notes/arrows-pixels'+suf), true, 17, 17);
 
 				addAnims(true);
-				
-			case 'pixel-combined':
-				loadGraphic(Paths.image('notes/arrows-pixelscombined'), true, 17, 17);
-
-				animation.add('greenScroll', [6]);
-				animation.add('redScroll', [7]);
-				animation.add('blueScroll', [5]);
-				animation.add('purpleScroll', [4]);
-				
-				animation.add('redScroll2', [27]);
-				animation.add('greenScroll2', [26]);
-				animation.add('blueScroll2', [25]);
-				animation.add('purpleScroll2', [24]);
-
-				if (isSustainNote)
-				{
-					loadGraphic(Paths.image('notes/arrowEndscombined'), true, 7, 6);
-
-					animation.add('purpleholdend', [4]);
-					animation.add('greenholdend', [6]);
-					animation.add('redholdend', [7]);
-					animation.add('blueholdend', [5]);
-
-					animation.add('purplehold', [0]);
-					animation.add('greenhold', [2]);
-					animation.add('redhold', [3]);
-					animation.add('bluehold', [1]);
-
-					animation.add('purpleholdend2', [12]);
-					animation.add('blueholdend2', [13]);
-					animation.add('greenholdend2', [14]);
-					animation.add('redholdend2', [15]);
-					
-					animation.add('purplehold2', [8]);
-					animation.add('bluehold2', [9]);
-					animation.add('greenhold2', [10]);
-					animation.add('redhold2', [11]);			
-				}
+		
+			case 'noStrums':
+				loadGraphic(Paths.image('notes/noStrums'), true, 17, 17);
+				animation.add('green', [0]);
+				animation.add('red', [0]);
+				animation.add('blue', [0]);
+				animation.add('purple', [0]);
 
 				setGraphicSize(Std.int(width * PlayState.daPixelZoom));
-				updateHitbox();
+				antialiasing = false;
 
-			case 'auditor':
-				frames = Paths.getSparrowAtlas('notes/NOTE_assets');
+				var colorScroll:Array<String> = ['purple', 'blue', 'green', 'red'];
+				var length:Int = 4;
 
-				animation.addByPrefix('greenScroll', 'green0');
-				animation.addByPrefix('redScroll', 'red0');
-				animation.addByPrefix('blueScroll', 'blue0');
-				animation.addByPrefix('purpleScroll', 'purple0');
-
-				animation.addByPrefix('purpleholdend', 'pruple end hold');
-				animation.addByPrefix('greenholdend', 'green hold end');
-				animation.addByPrefix('redholdend', 'red hold end');
-				animation.addByPrefix('blueholdend', 'blue hold end');
-
-				animation.addByPrefix('purplehold', 'purple hold piece');
-				animation.addByPrefix('greenhold', 'green hold piece');
-				animation.addByPrefix('redhold', 'red hold piece');
-				animation.addByPrefix('bluehold', 'blue hold piece');
-
-				if (burning)
+				for (i in 0...length)
 				{
-					frames = Paths.getSparrowAtlas('notes/ALL_deathnotes');
-					animation.addByPrefix('greenScroll', 'Green Arrow');
-					animation.addByPrefix('redScroll', 'Red Arrow');
-					animation.addByPrefix('blueScroll', 'Blue Arrow');
-					animation.addByPrefix('purpleScroll', 'Purple Arrow');
+					animation.add(colorScroll[i]+'Scroll', [0]);
+					animation.add(colorScroll[i]+'hold', [0], 12, false);
+					animation.add(colorScroll[i]+'holdend', [0], 24, false);
 				}
-
-				setGraphicSize(Std.int(width * 0.7));
-				updateHitbox();
-				antialiasing = true;	
-
-			case 'guitar':
-				frames = Paths.getSparrowAtlas('notes/GH_NOTES');
-
-				animation.addByPrefix('greenScroll', 'upNote0');
-				animation.addByPrefix('redScroll', 'rightNote0');
-				animation.addByPrefix('blueScroll', 'downNote0');
-				animation.addByPrefix('purpleScroll', 'leftNote0');
-
-				animation.addByPrefix('purpleholdend', 'leftHoldEnd');
-				animation.addByPrefix('greenholdend', 'upHoldEnd');
-				animation.addByPrefix('redholdend', 'rightHoldEnd');
-				animation.addByPrefix('blueholdend', 'downHoldEnd');
-
-				animation.addByPrefix('purplehold', 'leftHold0');
-				animation.addByPrefix('greenhold', 'upHold0');
-				animation.addByPrefix('redhold', 'rightHold0');
-				animation.addByPrefix('bluehold', 'downHold0');
-
-				antialiasing = true;
-
-			case 'empty':
-				frames = Paths.getSparrowAtlas('notes/Note_Assets_withPixel');
-
-				animation.addByPrefix('greenScroll', 'Up0');
-				animation.addByPrefix('redScroll', 'Right0');
-				animation.addByPrefix('blueScroll', 'Down0');
-				animation.addByPrefix('purpleScroll', 'Left0');
-
-				animation.addByPrefix('purpleholdend', 'LeftHoldEnd');
-				animation.addByPrefix('greenholdend', 'UpHoldEnd');
-				animation.addByPrefix('redholdend', 'RightHoldEnd');
-				animation.addByPrefix('blueholdend', 'DownHoldEnd');
-
-				animation.addByPrefix('purplehold', 'LeftHoldPiece');
-				animation.addByPrefix('greenhold', 'UpHoldPiece');
-				animation.addByPrefix('redhold', 'RightHoldPiece');
-				animation.addByPrefix('bluehold', 'DownHoldPiece');
-
-				setGraphicSize(Std.int(width * 0.7));
-				updateHitbox();
-				antialiasing = true;
 
 			default:
 				if (Assets.exists(Paths.image('notes/'+style)))
@@ -586,13 +517,26 @@ class Note extends FlxSprite
 						
 							frames = FlxAtlasFrames.fromSparrow(rawPic, rawXml);
 	
-							if (frames == null)
-							{
-								if (mania > 0)
-									frames = Paths.getSparrowAtlas('notes/shaggyNotes');
-								else
-									frames = Paths.getSparrowAtlas('notes/NOTE_assets');
-							}
+							addAnims();
+						}
+					}
+					if (frames == null)
+					{
+						if (isPixel)
+						{
+							if (isSustainNote)
+								loadGraphic(Paths.image('notes/arrowEnds'), true, 7, 6);
+							else
+								loadGraphic(Paths.image('notes/arrows-pixels'), true, 17, 17);
+			
+							addAnims(true);
+						}
+						else
+						{
+							if (mania > 0)
+								frames = Paths.getSparrowAtlas('notes/shaggyNotes');
+							else
+								frames = Paths.getSparrowAtlas('notes/NOTE_assets');
 
 							addAnims();
 						}
@@ -954,9 +898,12 @@ class Note extends FlxSprite
 			antialiasing = false;
 			setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 			updateHitbox();
+
+			isPixel = true;
 		}
 		else
 		{
+			isPixel = false;
 			var colorScroll:Array<String> = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'black', 'dark'];
 			var length:Int = 4;
 
@@ -969,8 +916,8 @@ class Note extends FlxSprite
 				animation.addByPrefix(colorScroll[i]+'hold', colorScroll[i]+' hold piece');
 				animation.addByPrefix(colorScroll[i]+'holdend', colorScroll[i]+' hold end');
 
-				if (colorScroll[i] == 'purple')
-					animation.addByPrefix(colorScroll[i]+'holdend', 'pruple end hold'); //purple
+				if (colorScroll[i] == 'purple' && animation.getByName('purpleholdend') == null)
+					animation.addByPrefix(colorScroll[i]+'holdend', 'pruple end hold'); //because purple naming
 			}
 
 			setGraphicSize(Std.int(width * noteScale));
