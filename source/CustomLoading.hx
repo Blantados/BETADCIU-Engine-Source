@@ -52,6 +52,7 @@ class CustomLoading extends MusicBeatState
     var bar:FlxBar;
 
     var bg:FlxSprite;
+    public var isABETADCIU:Bool = false;
 
 	override function create()
 	{
@@ -73,6 +74,9 @@ class CustomLoading extends MusicBeatState
 		}
 
         PlayState.customLoaded = true;
+
+        if (PlayState.isBETADCIU || PlayState.isNeonight || PlayState.isVitor)
+            isABETADCIU = true;
 
         // the suffixes. will add more later
         if (PlayState.isBETADCIU && FileSystem.exists(Paths.lua(songLowercase  + "/modchart-betadciu")))
@@ -97,7 +101,7 @@ class CustomLoading extends MusicBeatState
                 suf = '-guest';	
         }
 
-        text = new FlxText(25, FlxG.height / 2 + 275,0,"Loading "+ PlayState.SONG.song + " BETADCIU...");
+        text = new FlxText(25, FlxG.height / 2 + 275,0,"Loading "+ PlayState.SONG.song + (isABETADCIU ? " BETADCIU..." : " ..."));
         text.size = 48;
         text.alignment = FlxTextAlign.LEFT;
         text.borderColor = FlxColor.BLACK;

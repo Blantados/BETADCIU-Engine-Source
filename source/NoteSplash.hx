@@ -136,6 +136,16 @@ class NoteSplash extends FlxSprite
 			animation.addByPrefix("note0-" + i, "note impact " + i + " purple", 24, false);
 			animation.addByPrefix("note3-" + i, "note impact " + i + " red" , 24, false);
 		}
+
+		if (animation.getByName('note1-1') == null && animation.getByName('note2-2') == null) //psych notesplashes?
+		{
+			for (i in 1...3) {
+				animation.addByPrefix("note1-" + i, "note splash blue " + i, 24, false);
+				animation.addByPrefix("note2-" + i, "note splash green " + i, 24, false);
+				animation.addByPrefix("note0-" + i, "note splash purple " + i, 24, false);
+				animation.addByPrefix("note3-" + i, "note splash red " + i, 24, false);
+			}
+		}
 	}
 
 	override function update(elapsed:Float) {

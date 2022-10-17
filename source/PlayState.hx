@@ -789,7 +789,7 @@ class PlayState extends MusicBeatState
 		if (FileSystem.exists(Paths.txt(songLowercase  + "/arrowSwitches" + suf)) && !(isBETADCIU && storyDifficulty == 5))
 			changeArrows = true;
 
-		if (FileSystem.exists(Paths.txt(songLowercase  + "/preload-stage"+suf)) && !customLoaded)
+		/*if (FileSystem.exists(Paths.txt(songLowercase  + "/preload-stage"+suf)) && !customLoaded) // the loading screen should load this
 		{
 			var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(songLowercase  + "/preload-stage"+suf));
 
@@ -801,22 +801,16 @@ class PlayState extends MusicBeatState
 			}
 
 			curStage = SONG.stage;
-		}
+		}*/
 
 		if (FileSystem.exists(Paths.txt(songLowercase  + "/preload" + suf)))
 		{
 			var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(songLowercase  + "/preload" + suf));
 
-			for (i in 0...characters.length)
+			for (i in 0...characters.length) // whoops. still need to load the luas
 			{
 				var data:Array<String> = characters[i].split(' ');
 				startCharLuas.push(characters[i]);
-
-				if (!customLoaded)
-				{
-					dad = new Character (0, 0, data[0]);
-					trace ('found ' + data[0]);
-				}
 			}
 		}
 
@@ -1536,17 +1530,8 @@ class PlayState extends MusicBeatState
 
 		if (luaArray.length >= 1)
 		{
-			callOnLuas('start', []);	
-
-			var excludeThese:Array<String> = [];
-
-			for (script in luaArray)
-			{
-				if (script.scriptName.contains('stages/'))
-					excludeThese.push(script.scriptName);
-			}
-		
-			callOnLuas('onCreate', [], true, excludeThese); //psych	
+			callOnLuas('start', []);			
+			callOnLuas('onCreate', []); //psych	
 		}
 		
 		if (executeModchart && isDetected)
@@ -2006,7 +1991,7 @@ class PlayState extends MusicBeatState
 
 			case 'Change Stage':
 				ModchartState.changeStage(value1);
-				
+
 			case 'Add Camera Zoom':
 				if(FlxG.save.data.camzoom && FlxG.camera.zoom < 1.35) {
 					var camZoom:Float = Std.parseFloat(value1);
@@ -6395,7 +6380,7 @@ class PlayState extends MusicBeatState
 		return daThing;
 	}
 
-	public function existsInCTS(key:String, ?folder:String)
+	public static function existsInCTS(key:String, ?folder:String)
 	{
 		var daThing:Dynamic = null;
 
@@ -6406,7 +6391,7 @@ class PlayState extends MusicBeatState
 
 		if(daThing == null) //no good sound if sound not found
 		{
-			Paths.currentTrackedSounds.set(key, Sound.fromFile(Paths.sound('nogood')));
+			Paths.currentTrackedSounds.set(key, OpenFlAssets.getSound(Paths.sound('nogood')));
 			daThing = Paths.currentTrackedSounds.get(key);
 		}
 			
@@ -6512,13 +6497,6 @@ class PlayState extends MusicBeatState
 		}
 
 		callOnLuas("setControlsPost", []); // mainly for bonedoggle
-
-		if (SONG.song.toLowerCase() == 'bonedoggle' && mania == 2) //force only four pressable keys
-		{
-			//holdArray = [controls.LEFT, controls.DOWN, controls.UP, controls.RIGHT];
-			//pressArray = [controls.LEFT_P, controls.DOWN_P, controls.UP_P, controls.RIGHT_P];
-			//releaseArray = [controls.LEFT_R, controls.DOWN_R, controls.UP_R, controls.RIGHT_R];	
-		}
 		
 		#if windows
 		if (luaArray.length >= 1){
@@ -6812,7 +6790,7 @@ class PlayState extends MusicBeatState
 
 			songScore -= 10;
 
-			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
+			FlxG.sound.play(existsInCTS('missnote'+FlxG.random.int(1,3)), FlxG.random.float(0.1, 0.2));
 			// FlxG.sound.play(Paths.sound('missnote1'), 1, false);
 			// FlxG.log.add('played imss note');
 

@@ -405,7 +405,7 @@ class BETADCIUState extends MusicBeatState
 			}
 			
 			//unloadAssets();
-			FlxG.sound.play(Paths.sound('cancelMenu'));
+			FlxG.sound.play(PlayState.existsInCTS('cancelMenu'));
 			MusicBeatState.switchState(new MainMenuState());
 		}
 
@@ -435,7 +435,7 @@ class BETADCIUState extends MusicBeatState
 		
 			PlayState.storyWeek = songs[curSelected].week;
 			trace('CUR WEEK' + PlayState.storyWeek);
-			var llll = FlxG.sound.play(Paths.sound('confirmMenu')).length;
+			var llll = FlxG.sound.play(PlayState.existsInCTS('confirmMenu')).length;
 			
 			if (songs.length < 2) // the tween doesn't finish if it's just one song
 			{
@@ -509,7 +509,7 @@ class BETADCIUState extends MusicBeatState
 			
 		if (wrongPass && !inMain)
 		{
-			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3, 'shared'));
+			FlxG.sound.play(PlayState.existsInCTS('missnote'+FlxG.random.int(1,3)));
 			passwordText.text = '';
 			wrongPass = false;
 		}
@@ -533,7 +533,7 @@ class BETADCIUState extends MusicBeatState
 	function startSong(songName:String):Void
 	{
 		FlxG.sound.music.stop();
-		FlxG.sound.play(Paths.sound('ANGRY_TEXT_BOX', 'shared'));
+		FlxG.sound.play(PlayState.existsInCTS('ANGRY_TEXT_BOX', 'shared'));
 		Main.isHidden = true;
 
 		var songFormat = StringTools.replace(songName, " ", "-");
@@ -564,7 +564,7 @@ class BETADCIUState extends MusicBeatState
 		#end
 
 		// NGio.logEvent('Fresh');
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+		FlxG.sound.play(PlayState.existsInCTS('scrollMenu'), 0.4);
 
 		curSelected += change;
 

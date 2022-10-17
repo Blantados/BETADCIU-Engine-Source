@@ -282,7 +282,7 @@ class NeonightState extends MusicBeatState
 			
 			PlayState.storyWeek = songs[curSelected].week;
 			trace('CUR WEEK' + PlayState.storyWeek);
-			var llll = FlxG.sound.play(Paths.sound('confirmMenu')).length;
+			var llll = FlxG.sound.play(PlayState.existsInCTS('confirmMenu')).length;
 
 			if (songs.length < 2) // the tween doesn't finish if it's just one song
 			{
@@ -306,7 +306,7 @@ class NeonightState extends MusicBeatState
 						if (FlxG.keys.pressed.ALT){
 							MusicBeatState.switchState(new ChartingState());
 						}else{
-							LoadingState.loadAndSwitchState(new PlayState());
+							LoadingState.loadAndSwitchState(new CustomLoading());
 						}
 					}});
 				}else{
@@ -336,7 +336,7 @@ class NeonightState extends MusicBeatState
 		#end
 
 		// NGio.logEvent('Fresh');
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+		FlxG.sound.play(PlayState.existsInCTS('scrollMenu'), 0.4);
 
 		curSelected += change;
 

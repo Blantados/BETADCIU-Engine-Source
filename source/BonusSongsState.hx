@@ -105,7 +105,7 @@ class BonusSongsState extends MusicBeatState
 		inUnlockMenu = false;
 		canMove = true;
 			
-		FlxG.sound.cache(Paths.sound("unlock", 'shared'));
+		//FlxG.sound.cache(PlayState.existsInCTS("unlock"));
 
 		 #if desktop
 		 // Updating Discord Rich Presence
@@ -260,9 +260,9 @@ class BonusSongsState extends MusicBeatState
 
 		var swag:Alphabet = new Alphabet(1, 0, "swag");
 
-		if (FlxG.save.data.deathUnlocked && !FlxG.save.data.seenDeathPassword)
+		/*if (FlxG.save.data.deathUnlocked && !FlxG.save.data.seenDeathPassword)
 		{
-			FlxG.sound.play(Paths.sound('unlock', 'shared'));
+			FlxG.sound.play(PlayState.existsInCTS('unlock'));
 			blackScreen.visible = true;
 			enterText.visible = true;
 			otherText.visible = true;
@@ -272,13 +272,13 @@ class BonusSongsState extends MusicBeatState
 
 		if (FlxG.save.data.deathHoloUnlocked && !FlxG.save.data.seenDeathHoloPassword)
 		{
-			FlxG.sound.play(Paths.sound('unlock', 'shared'));
+			FlxG.sound.play(PlayState.existsInCTS('unlock'));
 			blackScreen.visible = true;
 			enterText.visible = true;
 			otherText.visible = true;
 			inUnlockMenu = true;
 			FlxG.save.data.seenDeathHoloPassword = true;
-		}
+		}*/
 			
 		if (warning)
 		{
@@ -417,7 +417,7 @@ class BonusSongsState extends MusicBeatState
 
 			PlayState.storyWeek = songs[curSelected].week;
 			trace('CUR WEEK' + PlayState.storyWeek);
-			var llll = FlxG.sound.play(Paths.sound('confirmMenu')).length;
+			var llll = FlxG.sound.play(PlayState.existsInCTS('confirmMenu')).length;
 
 			if (songs.length < 2) // the tween doesn't finish if it's just one song
 			{
@@ -444,7 +444,7 @@ class BonusSongsState extends MusicBeatState
 							if (Main.hiddenSongs.contains(songs[curSelected].songName.toLowerCase()) && !Main.isHidden || PlayState.SONG.song == 'Restore' && !Main.restoreUnlocked)
 								LoadingState.loadAndSwitchState(new GoFindTheSecretState());
 							else
-								LoadingState.loadAndSwitchState(new PlayState());
+								LoadingState.loadAndSwitchState(new CustomLoading());
 						}
 					}});
 				}else{
@@ -473,12 +473,12 @@ class BonusSongsState extends MusicBeatState
 			Main.noCopyright = !Main.noCopyright;
 			if (!Main.noCopyright) 
 			{
-				FlxG.sound.play(Paths.sound('cancelMenu'));
+				FlxG.sound.play(PlayState.existsInCTS('cancelMenu'));
 				copyrightText.text = '\nAlternate Inst: Off';
 			}
 			else 
 			{
-				FlxG.sound.play(Paths.sound('confirmMenu'));
+				FlxG.sound.play(PlayState.existsInCTS('confirmMenu'));
 				copyrightText.text = '\nAlternate Inst: On';
 			}
 		}
@@ -516,7 +516,7 @@ class BonusSongsState extends MusicBeatState
 		#end
 
 		// NGio.logEvent('Fresh');
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+		FlxG.sound.play(PlayState.existsInCTS('scrollMenu'), 0.4);
 
 		curSelected += change;
 

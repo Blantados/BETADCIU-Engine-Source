@@ -278,7 +278,7 @@ class FreeplayState extends MusicBeatState
 			if(colorTween != null) {
 				colorTween.cancel();
 			}
-			FlxG.sound.play(Paths.sound('cancelMenu'));
+			FlxG.sound.play(PlayState.existsInCTS('cancelMenu'));
 			MusicBeatState.switchState(new MainMenuState());
 		}
 
@@ -312,7 +312,7 @@ class FreeplayState extends MusicBeatState
 				colorTween.cancel();
 			}
 
-			var llll = FlxG.sound.play(Paths.sound('confirmMenu')).length;
+			var llll = FlxG.sound.play(PlayState.existsInCTS('confirmMenu')).length;
 			grpSongs.forEach(function(e:Alphabet){
 				if (e.text != songs[curSelected].songName){
 					FlxTween.tween(e, {x: -6000}, llll / 1000,{onComplete:function(e:FlxTween){
@@ -323,7 +323,7 @@ class FreeplayState extends MusicBeatState
 							if (Main.hiddenSongs.contains(songs[curSelected].songName.toLowerCase()) && !Main.isHidden || PlayState.SONG.song == 'Restore' && !Main.restoreUnlocked || PlayState.SONG.song == 'Deathmatch-Holo' && !Main.deathHolo)
 								LoadingState.loadAndSwitchState(new GoFindTheSecretState());
 							else
-								LoadingState.loadAndSwitchState(new PlayState());
+								LoadingState.loadAndSwitchState(new CustomLoading());
 						}
 					}});
 				}else{
@@ -370,7 +370,7 @@ class FreeplayState extends MusicBeatState
 		#end
 
 		// NGio.logEvent('Fresh');
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+		FlxG.sound.play(PlayState.existsInCTS('scrollMenu'), 0.4);
 
 		curSelected += change;
 

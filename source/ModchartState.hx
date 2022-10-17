@@ -2827,18 +2827,6 @@ class ModchartState
 
 		//idk if I wanna add events. alright I added the ones that are usable without that much tinkering.
 		Lua_helper.add_callback(lua, "triggerEvent", function(name:String, arg1:Dynamic, arg2:Dynamic) {
-			if (name == 'Change Character')
-			{
-				switch (arg1)
-				{
-					case 0: changeBFAuto(arg2);
-					case 1: changeDadAuto(arg2);
-					case 2: changeGFAuto(arg2);
-				}
-				
-				return;
-			}
-
 			var value1:String = arg1;
 			var value2:String = arg2;
 			PlayState.instance.triggerEventNote(name, value1, value2);
@@ -3221,6 +3209,7 @@ class ModchartState
 				case 'gf' | 'girlfriend': charType = 2;
 			}
 			PlayState.preloadChar = new Character(0, 0, name);
+			PlayState.instance.startCharacterLua(name);
 		});
 
 		Lua_helper.add_callback(lua, "precacheSound", function(name:String) {
@@ -4336,6 +4325,10 @@ class ModchartState
 
 	public static function getObjectDirectly(objectName:String, ?checkForTextsToo:Bool = true):Dynamic
 	{
+		if (objectName == 'dadGroup' || objectName == 'boyfriendGroup' || objectName == 'gfGroup'){
+			objectName = objectName.substring(0, objectName.length-5); //because we don't use character groups
+		}
+		
 		var coverMeInPiss:Dynamic = PlayState.instance.getLuaObject(objectName, checkForTextsToo);
 		if(coverMeInPiss==null)
 			coverMeInPiss = getVarInArray(getInstance(), objectName);

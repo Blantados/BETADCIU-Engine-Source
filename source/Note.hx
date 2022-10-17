@@ -172,7 +172,7 @@ class Note extends FlxSprite
 		swagWidth = swidths[mania] * 0.7; //factor not the same as noteScale
 		noteScale = scales[mania];
 
-		if (PlayState.SONG.song.toLowerCase() == 'bonedoggle')
+		/*if (PlayState.SONG.song.toLowerCase() == 'bonedoggle')
 		{
 			swagWidth = swidths[3] * 0.7; //factor not the same as noteScale
 			noteScale = scales[3];
@@ -182,7 +182,7 @@ class Note extends FlxSprite
 		{
 			swagWidth = swidths[0] * 0.7; //factor not the same as noteScale
 			noteScale = scales[0];
-		}
+		}*/
 		
 		x += 50 - posRest[mania];
 		

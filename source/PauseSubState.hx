@@ -268,7 +268,7 @@ class PauseSubState extends MusicBeatSubstate
 			FlxG.save.data.downScroll = !FlxG.save.data.downScroll;
 			PlayState.triggeredFlip = false;
 		}		
-		if (PlayState.isBETADCIU && !cutscene)
+		if (!cutscene)
 			LoadingState.loadAndSwitchState(new CustomLoading());
 		else
 		{	
