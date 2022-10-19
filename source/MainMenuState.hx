@@ -220,7 +220,7 @@ class MainMenuState extends MusicBeatState
 
 									case 'bonus songs':
 										MusicBeatState.switchState(new BonusSongsState());
-										trace("BETADCIU Menu Selected");
+										trace("Bonus Songs Menu Selected");
 
 									case 'neonight':
 										MusicBeatState.switchState(new NeonightState());
@@ -278,7 +278,7 @@ class MainMenuState extends MusicBeatState
 		});
 
 		var selectedX:Array<Float> = [40, 600, 60, 750, 100, 750, 110, 750];
-		var selectedY:Array<Float> = [50, 50, 230, 230, 410, 410, 590, 590];
+		var selectedY:Array<Float> = [50, 50, 230, 230, 410, 410, 590, 580];
 		var staticX:Array<Float> = [100, 680, 100, 800, 150, 800, 150, 800];
 		var staticY:Array<Float> = [60, 60, 240, 240, 420, 420, 600, 600];
 
