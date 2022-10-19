@@ -318,7 +318,7 @@ class ChartingState extends MusicBeatState
 		add(curRenderedSustains);
 		add(curRenderedNoteType);
 
-		loadEvents(); // it doesn't load the events unless I do this
+		//loadEvents(); // it doesn't load the events unless I do this
 		updateGrid();
 
 		super.create();
