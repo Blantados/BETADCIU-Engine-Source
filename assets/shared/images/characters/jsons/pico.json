@@ -172,8 +172,8 @@
 		0,
 		0
 	],
-	"playercamera_position": [
-		200,
+	"player_camera_position": [
+		300,
 		0
 	],
 	"noteSkin": null,

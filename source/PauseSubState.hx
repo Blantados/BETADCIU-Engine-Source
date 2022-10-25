@@ -285,11 +285,10 @@ class PauseSubState extends MusicBeatSubstate
 				case "Exit to menu":
 					PlayState.isPixel = false;
 					PlayState.showCutscene = false;
-					if (PlayState.triggeredFlip)
-					{
-						FlxG.save.data.downScroll = !FlxG.save.data.downScroll;
-						PlayState.triggeredFlip = false;
-					}		
+					PlayState.chartingMode = false;
+
+					PlayState.instance.callOnLuas('onExitSong', []);
+
 					if(PlayState.loadRep)
 					{
 						FlxG.save.data.botplay = false;
@@ -337,11 +336,8 @@ class PauseSubState extends MusicBeatSubstate
 		PlayState.instance.paused = true; // For lua
 		PlayState.showCutscene = cutscene;
 		PlayState.isPixel = false;
-		if (PlayState.triggeredFlip)
-		{
-			FlxG.save.data.downScroll = !FlxG.save.data.downScroll;
-			PlayState.triggeredFlip = false;
-		}		
+
+		PlayState.instance.callOnLuas('onExitSong', []); // so that it also affects when restarting
 
 		if (!cutscene && !noTrans)
 			LoadingState.loadAndSwitchState(new CustomLoading());

@@ -65,9 +65,9 @@ class Stage extends MusicBeatState
 	public var dadScrollFactor:Array<Float> = [1, 1];
 	public var gfScrollFactor:Array<Float> = [0.95, 0.95];
 
-	public var boyfriendCameraOffset:Array<Float> = null;
-	public var opponentCameraOffset:Array<Float> = null;
-	public var girlfriendCameraOffset:Array<Float> = null;
+	public var boyfriendCameraOffset:Array<Float> = [0, 0];
+	public var opponentCameraOffset:Array<Float> = [0, 0];
+	public var girlfriendCameraOffset:Array<Float> = [0, 0];
 
 	var pre:String = ""; //lol
 	var suf:String = ""; //lol2
@@ -6291,7 +6291,7 @@ class Stage extends MusicBeatState
 					}
 				}	
 			}*/
-			case 'auditorHell':
+			/*case 'auditorHell':
 			{
 				if (PlayState.instance.dad.curCharacter != 'exTricky' && swagBacks['hole'].alpha != 0 && PlayState.isVitor)
 				{
@@ -6310,7 +6310,7 @@ class Stage extends MusicBeatState
 					cloneOne.visible = true;
 					cloneTwo.visible = true;
 				}
-			}
+			}*/
 		}
 
 		if (isCustomStage && !preloading && luaArray.length >= 1)

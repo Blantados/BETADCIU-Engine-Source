@@ -62,6 +62,12 @@ class FreeplayState extends MusicBeatState
 
 		PlayState.isStoryMode = false;
 
+		if (FlxG.sound.music.volume == 0 || !FlxG.sound.music.playing)
+		{
+			FlxG.sound.music.volume = 1;
+			FlxG.sound.playMusic(Paths.music('freakyMenu'));
+		}
+
 		for (i in 0...WeekData.weeksList.length) {
 			var leWeek:WeekData = WeekData.weeksLoaded.get(WeekData.weeksList[i]);
 			var leSongs:Array<String> = [];

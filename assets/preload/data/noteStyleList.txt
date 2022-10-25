@@ -1,12 +1,2 @@
 normal
 pixel
-kapi
-pixel-corrupted
-empty
-bw
-bluskys
-1930
-holofunk
-exe
-shaggy
-smolpp

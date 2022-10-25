@@ -48,13 +48,7 @@ class GameOverSubstate extends MusicBeatSubstate
 
 		isCorrupt = false;
 		isSenpai = false;
-		startedMusic = false;
-
-		if (PlayState.triggeredFlip)
-		{
-			FlxG.save.data.downScroll = !FlxG.save.data.downScroll;
-			PlayState.triggeredFlip = false;
-		}			
+		startedMusic = false;	
 
 		switch (daCharacter)
 		{

@@ -56,26 +56,37 @@ class Paths
 
 	public static function returnGraphic(key:String, ?library:String = null) 
 	{
-		var path:String;
+		#if MODS_ALLOWED
+		var modKey:String = modsImages(key);
+		if(FileSystem.exists(modKey)) {
+			if(!currentTrackedAssets.exists(modKey)) {
+				var newBitmap:BitmapData = BitmapData.fromFile(modKey);
+				var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(newBitmap, false, modKey);
+				newGraphic.persist = true;
+				currentTrackedAssets.set(modKey, newGraphic);
+			}
+			localTrackedAssets.push(modKey);
+			return currentTrackedAssets.get(modKey);
+		}
+		#end
+
+		var path = getPath('images/$key.png', IMAGE, library);
 
 		if (Assets.exists(getPath('images/$key.png', IMAGE, 'shared')))
 			library = 'shared';
 
-		path = getPath('images/$key.png', IMAGE, library);
-	
-		if (Assets.exists(path)) 
-		{
-			if(!currentTrackedAssets.exists(key)) 
-			{
-				var newGraphic:FlxGraphic = FlxG.bitmap.add(path, false, key);
-				currentTrackedAssets.set(key, newGraphic);
+		//trace(path);
+		if (OpenFlAssets.exists(path, IMAGE)) {
+			if(!currentTrackedAssets.exists(path)) {
+				var newGraphic:FlxGraphic = FlxG.bitmap.add(path, false, path);
+				newGraphic.persist = true;
+				currentTrackedAssets.set(path, newGraphic);
 			}
-			localTrackedAssets.push(key);
-			return currentTrackedAssets.get(key);
+			localTrackedAssets.push(path);
+			return currentTrackedAssets.get(path);
 		}
-
 		trace('you failed dipshit');
-		return null;	
+		return null;
 	}
 
 	public static function getPath(file:String, type:AssetType, ?library:Null<String> = null)

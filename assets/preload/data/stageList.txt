@@ -6,5 +6,3 @@ mall
 mallEvil
 school
 tank
-papyrusstage
-fleet2

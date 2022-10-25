@@ -4,6 +4,3 @@ gf-car
 gf-pixel
 nogf
 emptygf
-gf-pelo-spooky
-nogf-bw
-gf-unwellis

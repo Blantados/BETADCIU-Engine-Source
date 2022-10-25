@@ -146,21 +146,24 @@ class CharacterEditorState extends MusicBeatState
 		camFollow.screenCenter();
 		add(camFollow);
 
-		var tipText:FlxText = new FlxText(FlxG.width - 20, FlxG.height, 0,
-			"E/Q - Camera Zoom In/Out
-			\nJKLI - Move Camera
-			\nW/S - Previous/Next Animation
-			\nSpace - Play Animation
-			\nArrow Keys - Move Character Offset
-			\nR - Reset Current Offset
-			\nHold Shift to Move 10x faster\n", 12);
-		tipText.cameras = [camHUD];
-		tipText.setFormat(null, 12, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		tipText.scrollFactor.set();
-		tipText.borderSize = 1;
-		tipText.x -= tipText.width;
-		tipText.y -= tipText.height - 10;
-		add(tipText);
+		var tipTextArray:Array<String> = "E/Q - Camera Zoom In/Out
+		\nR - Reset Camera Zoom
+		\nJKLI - Move Camera
+		\nW/S - Previous/Next Animation
+		\nSpace - Play Animation
+		\nArrow Keys - Move Character Offset
+		\nT - Reset Current Offset
+		\nHold Shift to Move 10x faster\n".split('\n');
+
+		for (i in 0...tipTextArray.length-1)
+		{
+			var tipText:FlxText = new FlxText(FlxG.width - 320, FlxG.height - 15 - 16 * (tipTextArray.length - i), 300, tipTextArray[i], 12);
+			tipText.cameras = [camHUD];
+			tipText.setFormat(null, 12, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
+			tipText.scrollFactor.set();
+			tipText.borderSize = 1;
+			add(tipText);
+		}
 
 		FlxG.camera.follow(camFollow);
 
@@ -551,8 +554,8 @@ class CharacterEditorState extends MusicBeatState
 	var positionCameraXStepper:FlxUINumericStepper;
 	var positionCameraYStepper:FlxUINumericStepper;
 
-	var positionPlayerCameraXStepper:FlxUINumericStepper;
-	var positionPlayerCameraYStepper:FlxUINumericStepper;
+	var playerPositionCameraXStepper:FlxUINumericStepper;
+	var playerPositionCameraYStepper:FlxUINumericStepper;
 
 	var flipXCheckBox:FlxUICheckBox;
 	var noAntialiasingCheckBox:FlxUICheckBox;
@@ -639,8 +642,8 @@ class CharacterEditorState extends MusicBeatState
 		playerPositionXStepper = new FlxUINumericStepper(positionXStepper.x, positionCameraXStepper.y + 40, 10, char.playerPositionArray[0], -9000, 9000, 0);
 		playerPositionYStepper = new FlxUINumericStepper(positionXStepper.x + 60, positionCameraYStepper.y + 40, 10, char.playerPositionArray[1], -9000, 9000, 0);
 
-		positionPlayerCameraXStepper = new FlxUINumericStepper(playerPositionXStepper.x, playerPositionXStepper.y + 40, 10, char.playerCameraPosition[0], -9000, 9000, 0);
-		positionPlayerCameraYStepper = new FlxUINumericStepper(playerPositionYStepper.x, playerPositionYStepper.y + 40, 10, char.playerCameraPosition[1], -9000, 9000, 0);
+		playerPositionCameraXStepper = new FlxUINumericStepper(playerPositionXStepper.x, playerPositionXStepper.y + 40, 10, char.playerCameraPosition[0], -9000, 9000, 0);
+		playerPositionCameraYStepper = new FlxUINumericStepper(playerPositionYStepper.x, playerPositionYStepper.y + 40, 10, char.playerCameraPosition[1], -9000, 9000, 0);
 
 		noteSkinInputText = new FlxUIInputText(15, playerPositionXStepper.y, 75, 'normal', 8);
 
@@ -660,7 +663,7 @@ class CharacterEditorState extends MusicBeatState
 		tab_group.add(new FlxText(positionXStepper.x, positionXStepper.y - 18, 0, 'Character X/Y:'));
 		tab_group.add(new FlxText(playerPositionXStepper.x, playerPositionXStepper.y - 18, 0, 'Character Player X/Y:'));
 		tab_group.add(new FlxText(positionCameraXStepper.x, positionCameraXStepper.y - 18, 0, 'Camera X/Y:'));
-		tab_group.add(new FlxText(positionPlayerCameraXStepper.x, positionPlayerCameraXStepper.y - 18, 0, 'Player Camera X/Y:'));
+		tab_group.add(new FlxText(playerPositionCameraXStepper.x, playerPositionCameraXStepper.y - 18, 0, 'Player Camera X/Y:'));
 		tab_group.add(new FlxText(healthColorStepperR.x, healthColorStepperR.y - 18, 0, 'Health bar R/G/B:'));
 		tab_group.add(imageInputText);
 		tab_group.add(reloadImage);
@@ -679,8 +682,8 @@ class CharacterEditorState extends MusicBeatState
 		tab_group.add(playerPositionYStepper);
 		tab_group.add(positionCameraXStepper);
 		tab_group.add(positionCameraYStepper);
-		tab_group.add(positionPlayerCameraXStepper);
-		tab_group.add(positionPlayerCameraYStepper);
+		tab_group.add(playerPositionCameraXStepper);
+		tab_group.add(playerPositionCameraYStepper);
 		tab_group.add(healthColorStepperR);
 		tab_group.add(healthColorStepperG);
 		tab_group.add(healthColorStepperB);
@@ -930,14 +933,14 @@ class CharacterEditorState extends MusicBeatState
 				char.cameraPosition[1] = positionCameraYStepper.value;
 				updatePointerPos();
 			}
-			else if(sender == positionPlayerCameraXStepper)
+			else if(sender == playerPositionCameraXStepper)
 			{
-				char.playerCameraPosition[0] = positionPlayerCameraXStepper.value;
+				char.playerCameraPosition[0] = playerPositionCameraXStepper.value;
 				updatePointerPos();
 			}
-			else if(sender == positionPlayerCameraYStepper)
+			else if(sender == playerPositionCameraYStepper)
 			{
-				char.playerCameraPosition[1] = positionPlayerCameraYStepper.value;
+				char.playerCameraPosition[1] = playerPositionCameraYStepper.value;
 				updatePointerPos();
 			}
 			else if(sender == healthColorStepperR)
@@ -1192,8 +1195,8 @@ class CharacterEditorState extends MusicBeatState
 			playerPositionYStepper.value = char.playerPositionArray[1];
 			positionCameraXStepper.value = char.cameraPosition[0];
 			positionCameraYStepper.value = char.cameraPosition[1];
-			positionPlayerCameraXStepper.value = char.playerCameraPosition[0];
-			positionPlayerCameraYStepper.value = char.playerCameraPosition[1];
+			playerPositionCameraXStepper.value = char.playerCameraPosition[0];
+			playerPositionCameraYStepper.value = char.playerCameraPosition[1];
 			reloadAnimationDropDown();
 			updatePresence();
 		}
@@ -1325,21 +1328,20 @@ class CharacterEditorState extends MusicBeatState
 			textAnim.text = '';
 		}
 
-		var inputTexts:Array<FlxUIInputText> = [animationInputText, imageInputText, healthIconInputText, noteSkinInputText, animationNameInputText, animationIndicesInputText];
+		var inputTexts:Array<FlxUIInputText> = [animationInputText, imageInputText, healthIconInputText, animationNameInputText, animationIndicesInputText];
 		for (i in 0...inputTexts.length) {
 			if(inputTexts[i].hasFocus) {
-				if(FlxG.keys.pressed.CONTROL && FlxG.keys.justPressed.V && Clipboard.text != null) { //Copy paste
-					inputTexts[i].text = ClipboardAdd(inputTexts[i].text);
-					inputTexts[i].caretIndex = inputTexts[i].text.length;
-					getEvent(FlxUIInputText.CHANGE_EVENT, inputTexts[i], null, []);
-				}
-				if(FlxG.keys.justPressed.ENTER) {
-					inputTexts[i].hasFocus = false;
-				}
+				FlxG.sound.muteKeys = [];
+				FlxG.sound.volumeDownKeys = [];
+				FlxG.sound.volumeUpKeys = [];
 				super.update(elapsed);
 				return;
 			}
 		}
+
+		FlxG.sound.muteKeys = TitleState.muteKeys;
+		FlxG.sound.volumeDownKeys = TitleState.volumeDownKeys;
+		FlxG.sound.volumeUpKeys = TitleState.volumeUpKeys;
 
 		if(!charDropDown.dropPanel.visible) {
 			if (FlxG.keys.justPressed.ESCAPE) {

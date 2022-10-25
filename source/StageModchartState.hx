@@ -36,6 +36,7 @@ import flixel.math.FlxMath;
 import openfl.display.BlendMode;
 import flixel.util.FlxAxes;
 import flixel.math.FlxRect;
+import animateatlas.AtlasFrameMaker;
 import ModchartState;
 
 #if desktop
@@ -59,11 +60,13 @@ class StageModchartState
 
 	public var blam:Dynamic = "";
 	public var scriptName:String = '';
-	var gonnaClose:Bool = false;
+	public var closed:Bool = false;
 
 	public function call(func_name : String, args : Array<Dynamic>, ?type : String) : Dynamic
 	{
-		#if desktop
+		#if LUA_ALLOWED
+		if(closed) return Function_Continue;
+
 		if(lua == null) {
 			return Function_Continue;
 		}
@@ -603,21 +606,13 @@ class StageModchartState
 					for (luaInstance in PlayState.instance.luaArray)
 					{
 						if(luaInstance.scriptName == cervix)
-						{
-							PlayState.instance.closeLuas.push(luaInstance);
-							return;
-						}
+							luaInstance.closed = true;
 					}
 
 					for (luaInstance in PlayState.instance.Stage.luaArray)
 					{
 						if(luaInstance.scriptName == cervix)
-						{
-							//luaTrace('The script "' + cervix + '" is already running!');
-							
-								PlayState.instance.Stage.closeLuas.push(luaInstance);
-							return;
-						}
+							luaInstance.closed = true;
 					}
 				}
 				return;
@@ -1782,7 +1777,7 @@ class StageModchartState
 			return daArray.length;
 		});
 
-		Lua_helper.add_callback(lua,"getMapKeys", function(obj:String) {
+		Lua_helper.add_callback(lua,"getMapKeys", function(obj:String, ?getValue:Bool = false) {
 			var killMe:Array<String> = obj.split('.');
 			var shit:Map<String, Dynamic> = Reflect.getProperty(getInstance(), obj);
 
@@ -1793,13 +1788,49 @@ class StageModchartState
 				if (shit == null)
 					shit = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 			}
-				
+
 			var daArray:Array<String> = [];
 
 			for (key in shit.keys())
 				daArray.push(key);
+
+			if (getValue)
+			{
+				for (i in 0...daArray.length)
+					daArray[i] = shit.get(daArray[i]);
+			}
 			
 			return daArray;
+		});
+
+		Lua_helper.add_callback(lua,"getMapKey", function(obj:String, valName:String) {
+			var killMe:Array<String> = obj.split('.');
+			var shit:Map<String, Dynamic> = Reflect.getProperty(getInstance(), obj);
+
+			if(killMe.length > 1)
+			{
+				shit = Reflect.getProperty(Type.resolveClass(killMe[0]), killMe[1]);
+
+				if (shit == null)
+					shit = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
+			}
+
+			return shit[valName];
+		});
+
+		Lua_helper.add_callback(lua,"setMapKey", function(obj:String, valName:String, val:Dynamic) {
+			var killMe:Array<String> = obj.split('.');
+			var shit:Map<String, Dynamic> = Reflect.getProperty(getInstance(), obj);
+
+			if(killMe.length > 1)
+			{
+				shit = Reflect.getProperty(Type.resolveClass(killMe[0]), killMe[1]);
+
+				if (shit == null)
+					shit = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
+			}
+
+			shit[valName] = val;
 		});
 
 		Lua_helper.add_callback(lua, "addCharacterToList", function(name:String, type:String) {
@@ -1821,6 +1852,35 @@ class StageModchartState
 
 		Lua_helper.add_callback(lua, "precacheImage", function(name:String) {
 			return name; //lol
+		});
+
+		Lua_helper.add_callback(lua, "loadGraphic", function(variable:String, image:String, ?gridX:Int, ?gridY:Int) {
+			var killMe:Array<String> = variable.split('.');
+			var spr:FlxSprite = getObjectDirectly(killMe[0]);
+			var gX = gridX==null?0:gridX;
+			var gY = gridY==null?0:gridY;
+			var animated = gX!=0 || gY!=0;
+
+			if(killMe.length > 1) {
+				spr = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
+			}
+
+			if(spr != null && image != null && image.length > 0)
+			{
+				spr.loadGraphic(Paths.image(image), animated, gX, gY);
+			}
+		});
+		Lua_helper.add_callback(lua, "loadFrames", function(variable:String, image:String, spriteType:String = "sparrow") {
+			var killMe:Array<String> = variable.split('.');
+			var spr:FlxSprite = getObjectDirectly(killMe[0]);
+			if(killMe.length > 1) {
+				spr = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
+			}
+
+			if(spr != null && image != null && image.length > 0)
+			{
+				loadFrames(spr, image, spriteType);
+			}
 		});
 
 		Lua_helper.add_callback(lua, "getProperty", function(variable:String) {
@@ -2113,59 +2173,7 @@ class StageModchartState
 			tag = tag.replace('.', '');
 			var leSprite:ModchartSprite = new ModchartSprite(x, y);
 			
-			switch(spriteType.toLowerCase()){
-			
-				case "texture" | "textureatlas"|"tex":
-					leSprite.frames = AtlasFrameMaker.construct(image);
-					
-				case "packer" |"packeratlas"|"pac":
-					leSprite.frames = Paths.getPackerAtlas(image);
-				case "xmlless":
-				{
-					/*var rawPic:Dynamic;
-
-					if (!Paths.currentTrackedAssets.exists(image))
-						Paths.cacheImage(image);
-
-					rawPic = Paths.currentTrackedAssets.get(image);
-					leSprite.loadGraphic(rawPic, true, width, height);*/
-				}
-				default:
-				{
-					var rawPic:Dynamic;
-					var rawXml:String;
-
-					if (!Paths.currentTrackedAssets.exists(image))
-						Paths.cacheImage(image);
-
-					rawPic = Paths.currentTrackedAssets.get(image);
-
-					if (FileSystem.exists(FileSystem.absolutePath("assets/shared/images/"+image+".xml")))
-						rawXml = File.getContent(FileSystem.absolutePath("assets/shared/images/"+image+".xml"));
-					else if (FileSystem.exists(Paths.modsXml(image)))
-						rawXml = File.getContent(Paths.modsXml(image));
-					else
-						rawXml = File.getContent(Paths.xmlNew('images/' + image));
-
-					leSprite.frames = FlxAtlasFrames.fromSparrow(rawPic,rawXml);
-				}
-			}
-			
-			Stage.instance.swagBacks.set(tag, leSprite);
-		});
-
-		Lua_helper.add_callback(lua, "makeAnimatedLuaSprite2", function(tag:String, image:String, x:Float, y:Float,width:Int, height:Int) {
-			tag = tag.replace('.', '');
-			var leSprite:ModchartSprite = new ModchartSprite(x, y);
-			
-			var rawPic:Dynamic;
-
-			if (!Paths.currentTrackedAssets.exists(image))
-				Paths.cacheImage(image);
-
-			rawPic = Paths.currentTrackedAssets.get(image);
-			leSprite.loadGraphic(rawPic, true, width, height);
-			
+			loadFrames(leSprite, image, spriteType);
 			Stage.instance.swagBacks.set(tag, leSprite);
 		});
 
@@ -2186,7 +2194,7 @@ class StageModchartState
 
 		Lua_helper.add_callback(lua, "addAnimationByPrefix", function(obj:String, name:String, prefix:String, framerate:Int = 24, loop:Bool = true) {
 			if(Stage.instance.swagBacks.exists(obj)) {
-				var cock:ModchartSprite = Stage.instance.swagBacks.get(obj);
+				var cock:FlxSprite = Stage.instance.swagBacks.get(obj);
 				cock.animation.addByPrefix(name, prefix, framerate, loop);
 				if(cock.animation.curAnim == null) {
 					cock.animation.play(name, true);
@@ -2194,15 +2202,15 @@ class StageModchartState
 				return;
 			}
 
-			if(PlayState.instance.modchartSprites.exists(obj)) {
-				var cock:ModchartSprite = PlayState.instance.modchartSprites.get(obj);
+			if(getObjectDirectly(obj)!=null) {
+				var cock:FlxSprite = getObjectDirectly(obj);
 				cock.animation.addByPrefix(name, prefix, framerate, loop);
 				if(cock.animation.curAnim == null) {
 					cock.animation.play(name, true);
 				}
 				return;
 			}
-			
+
 			var cock:FlxSprite = Reflect.getProperty(getInstance(), obj);
 			if(cock != null) {
 				cock.animation.addByPrefix(name, prefix, framerate, loop);
@@ -2212,28 +2220,10 @@ class StageModchartState
 			}
 		});
 		Lua_helper.add_callback(lua, "addAnimationByIndices", function(obj:String, name:String, prefix:String, indices:String, framerate:Int = 24) {
-			var strIndices:Array<String> = indices.trim().split(',');
-			var die:Array<Int> = [];
-			for (i in 0...strIndices.length) {
-				die.push(Std.parseInt(strIndices[i]));
-			}
-
-			if(Stage.instance.swagBacks.exists(obj)) {
-				var pussy:ModchartSprite = Stage.instance.swagBacks.get(obj);
-				pussy.animation.addByIndices(name, prefix, die, '', framerate, false);
-				if(pussy.animation.curAnim == null) {
-					pussy.animation.play(name, true);
-				}
-				return;
-			}
-			
-			var pussy:FlxSprite = Reflect.getProperty(getInstance(), obj);
-			if(pussy != null) {
-				pussy.animation.addByIndices(name, prefix, die, '', framerate, false);
-				if(pussy.animation.curAnim == null) {
-					pussy.animation.play(name, true);
-				}
-			}
+			return addAnimByIndices(obj, name, prefix, indices, framerate, false);
+		});
+		Lua_helper.add_callback(lua, "addAnimationByIndicesLoop", function(obj:String, name:String, prefix:String, indices:String, framerate:Int = 24) {
+			return addAnimByIndices(obj, name, prefix, indices, framerate, true);
 		});
 
 		Lua_helper.add_callback(lua, "addAnimation", function(obj:String, name:String, indices:String, framerate:Int = 24, loop:Bool = true) {
@@ -2845,7 +2835,7 @@ class StageModchartState
 				spr.dance();
 			}
 			else
-				getActorByName(character).dance();
+				getObjectDirectly(character).dance();
 		});
 		
 		Lua_helper.add_callback(lua, "setOffset", function(id:String, x:Float, y:Float) {
@@ -3169,6 +3159,50 @@ class StageModchartState
 		}
 	}
 
+	static function addAnimByIndices(obj:String, name:String, prefix:String, indices:String, framerate:Int = 24, loop:Bool = false)
+	{
+		var strIndices:Array<String> = indices.trim().split(',');
+		var die:Array<Int> = [];
+		for (i in 0...strIndices.length) {
+			die.push(Std.parseInt(strIndices[i]));
+		}
+
+		if (Stage.instance.swagBacks.exists(obj))
+		{
+			var bussy:Dynamic = Stage.instance.swagBacks.get(obj);
+			var pussy:FlxSprite = changeSpriteClass(bussy);
+
+			pussy.animation.addByIndices(name, prefix, die, '', framerate, false);
+			if(pussy.animation.curAnim == null) {
+				pussy.animation.play(name, true);
+			}
+			return true;
+		}
+
+		if(getObjectDirectly(obj) != null) {
+			var pussy:FlxSprite = getObjectDirectly(obj);
+			pussy.animation.addByIndices(name, prefix, die, '', framerate, loop);
+			if(pussy.animation.curAnim == null) {
+				pussy.animation.play(name, true);
+			}
+			return true;
+		}
+
+		var pussy:FlxSprite = Reflect.getProperty(getInstance(), obj);
+		if(pussy != null) {
+			pussy.animation.addByIndices(name, prefix, die, '', framerate, loop);
+			if(pussy.animation.curAnim == null) {
+				pussy.animation.play(name, true);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	static function changeSpriteClass(tag:Dynamic):FlxSprite {
+		return tag;
+	}
+
 	function blendModeFromString(blend:String):BlendMode {
 		switch(blend.toLowerCase().trim()) {
 			case 'add': return ADD;
@@ -3187,6 +3221,36 @@ class StageModchartState
 			case 'subtract': return SUBTRACT;
 		}
 		return NORMAL;
+	}
+
+	function loadFrames(spr:FlxSprite, image:String, spriteType:String)
+	{
+		switch(spriteType.toLowerCase().trim())
+		{
+			case "texture" | "textureatlas"|"tex":
+				spr.frames = AtlasFrameMaker.construct(image);
+			case "texture_noaa" | "textureatlas_noaa" | "tex_noaa":
+				spr.frames = AtlasFrameMaker.construct(image, null, true);
+			case "packer" |"packeratlas"|"pac":
+				spr.frames = Paths.getPackerAtlas(image);
+			default:
+			{
+				var rawPic:Dynamic;
+				var rawXml:String;
+
+				if (!Paths.currentTrackedAssets.exists(image))
+					Paths.cacheImage(image);
+
+				rawPic = Paths.currentTrackedAssets.get(image);
+
+				if (FileSystem.exists(FileSystem.absolutePath("assets/shared/images/"+image+".xml")))
+					rawXml = File.getContent(FileSystem.absolutePath("assets/shared/images/"+image+".xml"));
+				else
+					rawXml = File.getContent(Paths.xmlNew('images/' + image));
+
+				spr.frames = FlxAtlasFrames.fromSparrow(rawPic,rawXml);
+			}
+		}
 	}
 
 	public static inline function getInstance()
