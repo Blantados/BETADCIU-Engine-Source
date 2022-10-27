@@ -334,7 +334,7 @@ class ModchartState
 	}
 	#end
 
-	public function makeLuaCharacter(tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false)
+	public static function makeLuaCharacter(tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false)
 	{
 		tag = tag.replace('.', '');
 		resetCharacterTag(tag);
@@ -3431,6 +3431,26 @@ class ModchartState
 			return false;
 		});
 
+		Lua_helper.add_callback(lua, "setClipRectAngle", function(obj:String, degrees:Float) {
+			var daRect:FlxRect = getVarInArray(getPropertyLoopThingWhatever([obj, 'clipRect']), 'clipRect');
+
+			if(daRect != null) {
+				daRect.getRotatedBounds(degrees);
+
+				var killMe:Array<String> = obj.split('.');
+				var object:FlxSprite = getObjectDirectly(killMe[0]);
+				if(killMe.length > 1) {
+					object = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
+				}
+
+				object.clipRect = daRect;
+				return true;
+			}
+			luaTrace("setClipRectAngle: Object " + obj + " doesn't exist!", false, false, FlxColor.RED);
+			return false;
+		});
+
+
 		Lua_helper.add_callback(lua, "getColorFromHex", function(color:String) {
 			if(!color.startsWith('0x')) color = '0xff' + color;
 			return Std.parseInt(color);
@@ -3952,6 +3972,34 @@ class ModchartState
 			}
 		});
 
+		Lua_helper.add_callback(lua, "updateHitbox", function(obj:String) {
+			if(PlayState.instance.modchartSprites.exists(obj)) {
+				var shit:ModchartSprite = PlayState.instance.modchartSprites.get(obj);
+				shit.updateHitbox();
+				return;
+			}
+
+			if(PlayState.instance.modchartCharacters.exists(obj)) {
+				var shit:Character = PlayState.instance.modchartCharacters.get(obj);
+				shit.updateHitbox();
+				return;
+			}
+
+			var poop:FlxSprite = Reflect.getProperty(getInstance(), obj);
+			if(poop != null) {
+				poop.updateHitbox();
+				return;
+			}
+			luaTrace('updateHibox: Couldnt find object: ' + obj);
+		});
+		Lua_helper.add_callback(lua, "updateHitboxFromGroup", function(group:String, index:Int) {
+			if(Std.isOfType(Reflect.getProperty(getInstance(), group), FlxTypedGroup)) {
+				Reflect.getProperty(getInstance(), group).members[index].updateHitbox();
+				return;
+			}
+			Reflect.getProperty(getInstance(), group)[index].updateHitbox();
+		});
+
 		//SHADER SHIT
 
 		Lua_helper.add_callback(lua, "addChromaticAbberationEffect", function(camera:String,chromeOffset:Float = 0.005) {
@@ -4206,7 +4254,7 @@ class ModchartState
 		PlayState.instance.modchartIcons.remove(tag);
 	}
 
-	function resetCharacterTag(tag:String) {
+	public static function resetCharacterTag(tag:String) {
 		if(!PlayState.instance.modchartCharacters.exists(tag)) {
 			return;
 		}

@@ -2099,6 +2099,9 @@ class PlayState extends MusicBeatState
 							case 1: char = boyfriend;
 							case 2: char = gf;
 						}
+						
+						if (modchartCharacters != []) //so it supports modchart characters
+							char = modchartCharacters.get(value2);
 				}
 
 				if (char != null)
@@ -2140,12 +2143,21 @@ class PlayState extends MusicBeatState
 					default:
 						charType = Std.parseInt(value1);
 						if(Math.isNaN(charType)) charType = 0;
+
+						if(modchartCharacters != [])
+						{
+							var daChar = modchartCharacters.get(value2);
+							
+							if (daChar != null)
+								charType = 3;
+						}
 				}
 
 				switch (charType){
 					case 0: ModchartState.changeBFAuto(value2);	
 					case 1: ModchartState.changeDadAuto(value2);
 					case 2: ModchartState.changeGFAuto(value2);
+					case 3: ModchartState.makeLuaCharacter(value1, value2);
 				}
 		}
 		callOnLuas('onEvent', [eventName, value1, value2]);
@@ -6086,6 +6098,7 @@ class PlayState extends MusicBeatState
 	var timeShown = 0;
 	var currentTimingShown:FlxText = null;
 	public var ratingsAlpha:Float = 1.0;
+	public var showRating:Bool = true;
 
 	private function popUpScore(daNote:Note):Void
 		{
@@ -6093,6 +6106,8 @@ class PlayState extends MusicBeatState
 			var wife:Float = EtternaFunctions.wife3(noteDiff, Conductor.timeScale);
 			// boyfriend.playAnim('hey');
 			vocals.volume = 1;
+
+			if (!showRating)ratingsAlpha = 0;
 	
 			var placement:String = Std.string(combo);
 	

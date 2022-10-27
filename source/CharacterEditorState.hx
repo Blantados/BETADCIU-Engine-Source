@@ -751,9 +751,7 @@ class CharacterEditorState extends MusicBeatState
 			var lastOffsets:Array<Int> = [0, 0];
 			for (anim in char.animationsArray) {
 				if(animationInputText.text == anim.anim) {
-
 					lastOffsets = anim.offsets;
-
 					if(char.animation.getByName(animationInputText.text) != null) {
 						char.animation.remove(animationInputText.text);
 					}
