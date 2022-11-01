@@ -1784,8 +1784,8 @@ class InvertShader extends FlxShader
 	void main()
 	{
 		vec2 uv = openfl_TextureCoordv;
-		vec4 color = texture2D(bitmap, uv).rgba;
-		vec4 toUse = texture2D(bitmap, openfl_TextureCoordv).rgba;
+		vec4 color = texture2D(bitmap, uv);
+		vec4 toUse = texture2D(bitmap, openfl_TextureCoordv);
 		
 		toUse.r = 1.0 - color.r;
 		toUse.g = 1.0 - color.g;

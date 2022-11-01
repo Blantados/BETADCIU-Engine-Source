@@ -455,6 +455,7 @@ class PlayState extends MusicBeatState
 	public var modchartIcons:Map<String, ModchartIcon> = new Map<String, ModchartIcon>(); //should also help for cosmic
 	public var modchartTexts:Map<String, ModchartText> = new Map<String, ModchartText>();
 	public var modchartCharacters:Map<String, Character> = new Map<String, Character>(); //worth a shot
+	public var modchartTrails:Map<String, DeltaTrail> = new Map<String, DeltaTrail>(); // modchart  trails for real this time
 	public var variables:Map<String, Dynamic> = new Map();
 	public var modchartInputTexts:Map<String, ModchartInputText> = new Map<String, ModchartInputText>(); //because monochrome
 	public var noteTypeMap:Map<String, Bool> = new Map<String, Bool>();
@@ -1922,6 +1923,7 @@ class PlayState extends MusicBeatState
 		if(modchartInputTexts.exists(tag)) return modchartInputTexts.get(tag);
 		if(modchartIcons.exists(tag)) return modchartIcons.get(tag);
 		if(modchartCharacters.exists(tag)) return modchartCharacters.get(tag);
+		if(modchartTrails.exists(tag)) return modchartTrails.get(tag);
 		if(variables.exists(tag)) return variables.get(tag);
 		return null;
 	}
@@ -4293,6 +4295,7 @@ class PlayState extends MusicBeatState
 			setOnLuas('songPos',Conductor.songPosition);
 			setOnLuas('hudZoom', camHUD.zoom);
 			setOnLuas('cameraZoom',FlxG.camera.zoom);
+		//	setOnLuas('downscroll',FlxG.save.data.downscroll); // in case you change it mid game
 			callOnLuas('update', [elapsed]);
 
 			for (i in luaWiggles)
@@ -8348,7 +8351,7 @@ class PlayState extends MusicBeatState
 			}	
 		}
 
-		if (!dad.animation.curAnim.name.startsWith("sing") && !PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection && !dad.specialAnim)
+		if (!dad.animation.curAnim.name.startsWith("sing") && !PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection && !dad.specialAnim && dad.animation.curAnim != null)
 		{
 			switch (dad.curCharacter)
 			{

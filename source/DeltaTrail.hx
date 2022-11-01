@@ -20,13 +20,18 @@ class DeltaTrail extends FlxTrail
 
 	var _timer:Float = 0;
 	var timerMax:Float;
+
+	var graphicKey:String = "";
 	
 	public function new(Target:FlxSprite, ?Graphic:FlxGraphicAsset, Length:Int = 10, Delay:Float = 3 / 60, Alpha:Float = 0.4, Diff:Float = 0.05):Void
 	{
 			super(Target, Graphic, Length, 0, Alpha, Diff);
 			timerMax = Delay;
+			graphicKey = target.graphic.key;
 	}
 
+	var disabled:Bool = false;
+	
 	override public function update(elapsed:Float):Void
 	{
 		// Count the frames
@@ -36,6 +41,22 @@ class DeltaTrail extends FlxTrail
 		if (_timer >= timerMax && _trailLength >= 1)
 		{
 			_timer = 0;
+
+			if (disabled && target != null)
+			{
+				disabled = false;
+				cacheValue(_recentFrames, target.animation.frameIndex);
+				cacheValue(_recentFlipX, target.flipX);
+				cacheValue(_recentFlipY, target.flipY);
+				cacheValue(_recentAnimations, target.animation.curAnim);
+			}
+
+			if (target == null)
+			{
+				disabled = true;
+				return;
+			}
+				
 
 			// Push the current position into the positons array and drop one.
 			var spritePosition:FlxPoint = null;
@@ -48,7 +69,7 @@ class DeltaTrail extends FlxTrail
 				spritePosition = FlxPoint.get();
 			}
 
-			if (target.exists)
+			if (target.exists && target.animation.curAnim != null)
 			{
 				spritePosition.set(target.x - target.offset.x, target.y - target.offset.y);
 				_recentPositions.unshift(spritePosition);

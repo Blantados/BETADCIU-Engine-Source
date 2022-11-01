@@ -337,6 +337,17 @@ class ModchartState
 	public static function makeLuaCharacter(tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false)
 	{
 		tag = tag.replace('.', '');
+
+		var animationName:String = "no way anyone have an anim name this big";
+		var animationFrame:Int = 0;	
+							
+		if (PlayState.instance.modchartCharacters.get(tag) != null)
+		{
+			var daChar:Character = PlayState.instance.modchartCharacters.get(tag);
+			animationName = daChar.animation.curAnim.name;
+			animationFrame = daChar.animation.curAnim.curFrame;
+		}
+		
 		resetCharacterTag(tag);
 		var leSprite:Character = new Character(0, 0, character, isPlayer);
 		leSprite.flipMode = flipped;
@@ -424,6 +435,9 @@ class ModchartState
 			shit.x = PlayState.instance.Stage.bfXOffset + charX + 770;
 			shit.y = PlayState.instance.Stage.bfYOffset + charY + 450;
 		}
+
+		if (shit.animOffsets.exists(animationName))
+			shit.playAnim(animationName, true, false, animationFrame);
 
 		PlayState.instance.startCharacterLua(shit.curCharacter);
 	}
@@ -1116,7 +1130,7 @@ class ModchartState
 			cameraFromString(camera).filtersEnabled = bool;
 		});
 
-		Lua_helper.add_callback(lua, "addLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) { //would be dope asf. 
+		Lua_helper.add_callback(lua, "addLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false, ?traceMsg:Bool = true) { //would be dope asf. 
 			var cervix = luaFile + ".lua";
 			var doPush = false;
 			if(FileSystem.exists(FileSystem.absolutePath("assets/shared/"+cervix))) {
@@ -1143,7 +1157,9 @@ class ModchartState
 					{
 						if(luaInstance.scriptName == cervix)
 						{
-							luaTrace('The script "' + cervix + '" is already running!');
+							if(traceMsg)
+								luaTrace('The script "' + cervix + '" is already running!');
+
 							return;
 						}
 					}
@@ -1356,6 +1372,28 @@ class ModchartState
 		Lua_helper.add_callback(lua,"changeAnimOffset", function(id:String , x:Float, y:Float) {
 			getActorByName(id).addOffset(x, y); // it may say addoffset but it actually changes it instead of adding to the existing offset so this works.
 		});
+
+		//the better version
+		Lua_helper.add_callback(lua, "addOffset", function(obj:String, anim:String, x:Float, y:Float) {
+			if(PlayState.instance.modchartSprites.exists(obj)) {
+				PlayState.instance.modchartSprites.get(obj).animOffsets.set(anim, [x, y]);
+				return true;
+			}
+
+			var mChar:Character = PlayState.instance.modchartCharacters.get(obj);
+			if(mChar != null) {
+				mChar.addOffset(anim, x, y);
+				return true;
+			}
+
+			var char:Character = Reflect.getProperty(getInstance(), obj);
+			if(char != null) {
+				char.addOffset(anim, x, y);
+				return true;
+			}
+			return false;
+		});
+
 
 		Lua_helper.add_callback(lua,"checkDownscroll", function() {
 			return FlxG.save.data.downscroll;
@@ -1784,6 +1822,9 @@ class ModchartState
 
 		Lua_helper.add_callback(lua, "cameraShake", function(camera:String, intensity:Float, duration:Float) {
 			cameraFromString(camera).shake(intensity, duration);
+		});
+		Lua_helper.add_callback(lua, "objectShake", function(camera:String, intensity:Float, duration:Float) {
+			getObjectDirectly(camera).shake(intensity, duration);
 		});
 		
 		Lua_helper.add_callback(lua, "cameraFlash", function(camera:String, color:String, duration:Float,forced:Bool) {
@@ -3641,6 +3682,43 @@ class ModchartState
 			makeLuaCharacter(tag, character, shit.isPlayer, shit.flipMode);
 		});
 
+		Lua_helper.add_callback(lua, "makeLuaTrail", function(tag:String, character:String, color:String) {
+			resetTrailTag(tag);
+			if (getObjectDirectly(character) != null)
+			{
+				var leObj:Dynamic = getObjectDirectly(character);
+				var leSprite:DeltaTrail = new DeltaTrail(leObj, null, 4, 12 / 60, 0.25, 0.069);
+
+				var colorNum:Int = Std.parseInt(color);
+				if(!color.startsWith('0x')) colorNum = Std.parseInt('0xff' + color);
+				leSprite.color = colorNum;
+	
+				PlayState.instance.modchartTrails.set(tag, leSprite); //yes
+				var shit:DeltaTrail = PlayState.instance.modchartTrails.get(tag);
+				getInstance().remove(leSprite, true);
+				getInstance().insert(getInstance().members.indexOf(leObj)-1, leSprite);
+				return;
+			}
+			luaTrace("makeLuaTrail: Object " + character + " doesn't exist!", false, false, FlxColor.RED);
+		});
+		Lua_helper.add_callback(lua, "removeLuaTrail", function(tag:String, destroy:Bool = true) {
+			if(!PlayState.instance.modchartTrails.exists(tag)) {
+				return;
+			}
+			
+			var pee:DeltaTrail = PlayState.instance.modchartTrails.get(tag);
+			if(destroy) {
+				pee.kill();
+			}
+
+			getInstance().remove(pee, true);
+
+			if(destroy) {
+				pee.destroy();
+				PlayState.instance.modchartTrails.remove(tag);
+			}
+		});
+
 		Lua_helper.add_callback(lua, "animExists", function(tag:String, anim:String){
 			var shit:Dynamic = getThing(tag);
 			
@@ -4266,6 +4344,18 @@ class ModchartState
 		}
 		pee.destroy();
 		PlayState.instance.modchartCharacters.remove(tag);
+	}
+
+	public static function resetTrailTag(tag:String) {
+		if(!PlayState.instance.modchartTrails.exists(tag)) {
+			return;
+		}
+		
+		var pee:Dynamic = PlayState.instance.modchartTrails.get(tag);
+		pee.kill();
+
+		pee.destroy();
+		PlayState.instance.modchartTrails.remove(tag);
 	}
 
 	public static function getVarInArray(instance:Dynamic, variable:String):Any

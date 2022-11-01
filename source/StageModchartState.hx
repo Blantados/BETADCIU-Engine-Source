@@ -2258,6 +2258,78 @@ class StageModchartState
 			}
 		});
 
+		Lua_helper.add_callback(lua, "playAnim", function(obj:String, name:String, forced:Bool = false, ?reverse:Bool = false, ?startFrame:Int = 0)
+		{
+			if(getObjectDirectly(obj) != null) {
+				var luaObj:FlxSprite = getObjectDirectly(obj);
+				if(luaObj.animation.getByName(name) != null)
+				{
+					luaObj.animation.play(name, forced, reverse, startFrame);
+					if(Std.isOfType(luaObj, ModchartSprite))
+					{
+						//convert luaObj to ModchartSprite
+						var obj:Dynamic = luaObj;
+						var luaObj:ModchartSprite = obj;
+
+						var daOffset = luaObj.animOffsets.get(name);
+						if (luaObj.animOffsets.exists(name))
+						{
+							luaObj.offset.set(daOffset[0], daOffset[1]);
+						}
+						else
+							luaObj.offset.set(0, 0);
+					}
+					if(Std.isOfType(luaObj, Character))
+					{
+						//convert luaObj to Character
+						var obj:Dynamic = luaObj;
+						var luaObj:Character = obj;
+						luaObj.playAnim(name, forced, reverse, startFrame);
+					}
+				}
+				return true;
+			}
+
+			var spr:FlxSprite = Reflect.getProperty(getInstance(), obj);
+			if(spr != null) {
+				if(spr.animation.getByName(name) != null)
+				{
+					if(Std.isOfType(spr, Character))
+					{
+						//convert spr to Character
+						var obj:Dynamic = spr;
+						var spr:Character = obj;
+						spr.playAnim(name, forced, reverse, startFrame);
+					}
+					else
+						spr.animation.play(name, forced, reverse, startFrame);
+				}
+				return true;
+			}
+			return false;
+		});
+
+		//the better version
+		Lua_helper.add_callback(lua, "addOffset", function(obj:String, anim:String, x:Float, y:Float) {
+			if(PlayState.instance.modchartSprites.exists(obj)) {
+				PlayState.instance.modchartSprites.get(obj).animOffsets.set(anim, [x, y]);
+				return true;
+			}
+
+			var mChar:Character = PlayState.instance.modchartCharacters.get(obj);
+			if(mChar != null) {
+				mChar.addOffset(anim, x, y);
+				return true;
+			}
+
+			var char:Character = Reflect.getProperty(getInstance(), obj);
+			if(char != null) {
+				char.addOffset(anim, x, y);
+				return true;
+			}
+			return false;
+		});
+
 		Lua_helper.add_callback(lua, "addClipRect", function(obj:String, x:Float, y:Float, width:Float, height:Float) {
 			var swagRect = new FlxRect(x, y, width, height);
 

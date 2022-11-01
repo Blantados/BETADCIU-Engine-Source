@@ -187,8 +187,9 @@ class StageEditorState extends MusicBeatState
 			objects.push(key);
 		}
 		if(objects.length < 1) objects.push("NO OBJECTS"); //Prevents crash
+
 		currentObject = Stage.swagBacks[objects[0]];
-		reloadObjectInfo();
+		reloadObjectInfo(objects[0]);
 
 		objectDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(objects, true));
 	}
@@ -288,8 +289,11 @@ class StageEditorState extends MusicBeatState
 	var objectScaleYStepper:FlxUINumericStepper;
 	var objectScrollFactorXStepper:FlxUINumericStepper;
 	var objectScrollFactorYStepper:FlxUINumericStepper;
+	var objectOrderStepper:FlxUINumericStepper;
 	var currentObject:Dynamic;
 
+	var objectInputText:FlxUIInputText;
+	var objectNameInputText:FlxUIInputText;
 
 	function addStageObjectsUI() {
 		var tab_group = new FlxUI(null, UI_box);
@@ -303,17 +307,61 @@ class StageEditorState extends MusicBeatState
 			}
 			if(objects.length < 1) objects.push("NO OBJECTS"); //Prevents crash
 			currentObject = Stage.swagBacks[objects[selectedObject]];
-			reloadObjectInfo();
+			reloadObjectInfo(objects[selectedObject]);
 		});
 
-		objectXStepper = new FlxUINumericStepper(15, 75, 10, 0, -9000, 9000, 0);
+		objectInputText = new FlxUIInputText(15, 85, 80, '', 8);
+		objectNameInputText = new FlxUIInputText(objectInputText.x, objectInputText.y + 35, 150, '', 8);
+
+		objectXStepper = new FlxUINumericStepper(175, 30, 10, 0, -9000, 9000, 0);
 		objectYStepper = new FlxUINumericStepper(objectXStepper.x + 60, objectXStepper.y, 10, 0, -9000, 9000, 0);
 
-		objectScaleXStepper = new FlxUINumericStepper(objectXStepper.x, objectXStepper.y + 40, 10, 1, -9000, 9000, 0);
-		objectScaleYStepper = new FlxUINumericStepper(objectYStepper.x, objectYStepper.y + 40, 10, 1, -9000, 9000, 0);
+		objectScaleXStepper = new FlxUINumericStepper(objectXStepper.x, objectXStepper.y + 40, 0.1, 1, -9000, 9000, 1);
+		objectScaleYStepper = new FlxUINumericStepper(objectYStepper.x, objectYStepper.y + 40, 0.1, 1, -9000, 9000, 1);
 
-		objectScrollFactorXStepper = new FlxUINumericStepper(objectXStepper.x, objectScaleXStepper.y + 40, 10, 1, -9000, 9000, 0);
-		objectScrollFactorYStepper = new FlxUINumericStepper(objectXStepper.x + 60, objectScaleYStepper.y + 40, 10, 1, -9000, 9000, 0);
+		objectScrollFactorXStepper = new FlxUINumericStepper(objectXStepper.x, objectScaleXStepper.y + 40, 0.1, 1, -9000, 9000, 1);
+		objectScrollFactorYStepper = new FlxUINumericStepper(objectXStepper.x + 60, objectScaleYStepper.y + 40, 0.1, 1, -9000, 9000, 1);
+
+		objectOrderStepper = new FlxUINumericStepper(objectXStepper.x, objectScrollFactorXStepper.y + 40, 1, 1, -9000, 9000, 0);
+
+		var addUpdateButton:FlxButton = new FlxButton(70, 290, "Add/Update", function() {
+			if (objectInputText.text == null)
+				return;
+
+			var leSprite:FlxSprite = new FlxSprite(objectXStepper.value, objectYStepper.value);
+			var image:String = objectNameInputText.text;
+
+			if(image != null && image.length > 0) {
+				var rawPic:Dynamic;
+
+				if (!Paths.currentTrackedAssets.exists(image))
+					Paths.cacheImage(image);
+
+				rawPic = Paths.currentTrackedAssets.get(image);
+
+				leSprite.loadGraphic(rawPic);						
+			}
+
+			Stage.swagBacks.set(objectInputText.text, leSprite);
+			remove(leSprite);
+			insert(Std.int(objectOrderStepper.value), leSprite);
+
+			reloadObjectsDropDown();
+			//genBoyOffsets();
+			trace('Added/Updated Object: ' + objectInputText.text);
+		});
+
+		var removeButton:FlxButton = new FlxButton(180, 290, "Remove", function() {
+			if (Stage.swagBacks.exists(objectInputText.text))
+			{
+				var leSprite:Dynamic = Stage.swagBacks.get(objectInputText.text);
+				leSprite.destroy();
+
+				Stage.swagBacks.remove(objectInputText.text);
+
+				trace('Removed Object: ' + objectInputText.text);
+			}
+		});
 
 		/*playerPositionCameraXStepper = new FlxUINumericStepper(playerPositionXStepper.x, playerPositionXStepper.y + 40, 10, Stage.boyfriendCameraOffset[0], -9000, 9000, 0);
 		playerPositionCameraYStepper = new FlxUINumericStepper(playerPositionYStepper.x, playerPositionYStepper.y + 40, 10, Stage.boyfriendCameraOffset[1], -9000, 9000, 0);
@@ -346,29 +394,35 @@ class StageEditorState extends MusicBeatState
 		saveStageLuaButton.setGraphicSize(80, 30);
 		saveStageLuaButton.updateHitbox();*/
 
-		tab_group.add(new FlxText(objectXStepper.x, objectXStepper.y - 18, 0, "Object X/Y:"));
-
 		tab_group.add(objectXStepper);
 		tab_group.add(objectYStepper);
-
-		tab_group.add(new FlxText(objectScaleXStepper.x, objectScaleXStepper.y - 18, 0, "Object Scale X/Y:"));
-
 		tab_group.add(objectScaleXStepper);
 		tab_group.add(objectScaleYStepper);
-
-		tab_group.add(new FlxText(objectScrollFactorXStepper.x, objectScrollFactorYStepper.y - 18, 0, "Object ScrollFactor X/Y:"));
-
 		tab_group.add(objectScrollFactorXStepper);
 		tab_group.add(objectScrollFactorYStepper);
+		tab_group.add(objectOrderStepper);
+		tab_group.add(objectInputText);
+		tab_group.add(objectNameInputText);
+		tab_group.add(addUpdateButton);
+		tab_group.add(removeButton);
 
+		tab_group.add(new FlxText(objectInputText.x, objectInputText.y - 18, 0, 'Object name:'));
+		tab_group.add(new FlxText(objectNameInputText.x, objectNameInputText.y - 18, 0, "Object's image name:"));
+		tab_group.add(new FlxText(objectXStepper.x, objectXStepper.y - 18, 0, "Object X/Y:"));
+		tab_group.add(new FlxText(objectOrderStepper.x, objectOrderStepper.y - 18, 0, "Object Order:"));
+		tab_group.add(new FlxText(objectScaleXStepper.x, objectScaleXStepper.y - 18, 0, "Object Scale X/Y:"));
+		tab_group.add(new FlxText(objectScrollFactorXStepper.x, objectScrollFactorYStepper.y - 18, 0, "Object ScrollFactor X/Y:"));
 		tab_group.add(new FlxText(objectDropDown.x, objectDropDown.y - 18, 0, "Stage Objects:"));
 
 		tab_group.add(objectDropDown);
+
 		UI_stagebox.addGroup(tab_group);
 	}
 	
-	function reloadObjectInfo()
+	function reloadObjectInfo(objName:String)
 	{
+		objectNameInputText.text = currentObject.graphic.key;
+		objectInputText.text = objName;
 		objectXStepper.value = currentObject.x;
 		objectYStepper.value = currentObject.y;
 
@@ -377,6 +431,8 @@ class StageEditorState extends MusicBeatState
 
 		objectScrollFactorXStepper.value = currentObject.scrollFactor.x;
 		objectScrollFactorYStepper.value = currentObject.scrollFactor.y;
+
+		//objectOrderStepper.value = currentObject.position.
 	}
 
 	var focusPlayer:Bool = false;
@@ -420,8 +476,7 @@ class StageEditorState extends MusicBeatState
 	}
 
 	function reloadStageOptions() {
-		if(UI_stagebox != null) {
-			
+		if(UI_stagebox != null) {		
 			focusPlayerCheckBox.checked = focusPlayer;
 			camZoomStepper.value = Stage.camZoom;
 			positionXStepper.value = Stage.dadYOffset;
@@ -442,8 +497,7 @@ class StageEditorState extends MusicBeatState
 			{
 				currentObject = Stage.swagBacks[key];
 			}
-			
-			
+					
 			reloadObjectsDropDown();
 			updatePresence();
 		}
@@ -744,6 +798,11 @@ class StageEditorState extends MusicBeatState
 			{
 				currentObject.scrollFactor.y = objectScrollFactorYStepper.value;
 			}
+			else if(sender == objectOrderStepper)
+			{
+				remove(currentObject);
+				insert(Std.int(objectOrderStepper.value), currentObject);
+			}	
 		}
 	}
 
@@ -795,8 +854,31 @@ class StageEditorState extends MusicBeatState
 		}
 	}
 
+	override function stepHit()
+	{
+		super.stepHit();
+
+		Stage.stepHit();
+
+	}
+
 	override function update(elapsed:Float)
 	{
+		var inputTexts:Array<FlxUIInputText> = [objectInputText, objectNameInputText];
+		for (i in 0...inputTexts.length) {
+			if(inputTexts[i].hasFocus) {
+				FlxG.sound.muteKeys = [];
+				FlxG.sound.volumeDownKeys = [];
+				FlxG.sound.volumeUpKeys = [];
+				super.update(elapsed);
+				return;
+			}
+		}
+
+		FlxG.sound.muteKeys = TitleState.muteKeys;
+		FlxG.sound.volumeDownKeys = TitleState.volumeDownKeys;
+		FlxG.sound.volumeUpKeys = TitleState.volumeUpKeys;
+
 		if (!focusPlayer && camFollow.x != dad.getMidpoint().x + 150 + dad.cameraPosition[0] + (Stage.opponentCameraOffset != null ? Stage.opponentCameraOffset[0] : 0))
 		{
 			camFollow.setPosition(dad.getMidpoint().x + 150, dad.getMidpoint().y - 100);
@@ -842,6 +924,8 @@ class StageEditorState extends MusicBeatState
 
 		camMenu.zoom = FlxG.camera.zoom;
 		
+		Stage.update(elapsed);
+
 		super.update(elapsed);
 	}
 	

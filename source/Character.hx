@@ -1322,6 +1322,14 @@ class Character extends FlxSprite
 					
 					rawPic = Paths.currentTrackedAssets.get(json.image);
 
+					if (rawPic == null)
+					{
+						trace('image not found');
+						Paths.cacheImage('characters/BOYFRIEND', 'shared');
+
+						rawPic = Paths.currentTrackedAssets.get('characters/BOYFRIEND');
+					}
+
 					charPath = json.image + '.png'; //cuz we only use pngs anyway
 					imageFile = json.image; //psych
 	
@@ -1336,8 +1344,10 @@ class Character extends FlxSprite
 							rawXml = File.getContent(Paths.modsXml(json.image));
 						else if (FileSystem.exists(FileSystem.absolutePath("assets/shared/images/"+json.image+".xml")))
 							rawXml = File.getContent(FileSystem.absolutePath("assets/shared/images/"+json.image+".xml"));
-						else
+						else if (FileSystem.exists(Paths.xmlNew('images/' + json.image)))
 							rawXml = File.getContent(Paths.xmlNew('images/' + json.image));
+						else
+							rawXml  = Assets.getText(Paths.xmlNew('images/BOYFRIEND')); //so that it stops crashing.
 
 						//this took my dumbass 2 hours to figure out.
 						if(FlxG.save.data.poltatoPC && curCharacter != 'senpai-christmas' && json.scale != 6)
