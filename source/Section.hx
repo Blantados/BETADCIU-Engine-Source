@@ -34,8 +34,9 @@ class Section
 	 */
 	public static var COPYCAT:Int = 0;
 
-	public function new(lengthInSteps:Int = 16)
+	public function new(lengthInSteps:Int = 16, ?sectionBeats:Int = 4)
 	{
 		this.lengthInSteps = lengthInSteps;
+		this.sectionBeats = sectionBeats;
 	}
 }

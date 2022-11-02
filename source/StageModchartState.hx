@@ -3252,7 +3252,7 @@ class StageModchartState
 		}
 
 		if(getObjectDirectly(obj) != null) {
-			var pussy:FlxSprite = getObjectDirectly(obj);
+			var pussy:FlxSprite = changeSpriteClass(getObjectDirectly(obj));
 			pussy.animation.addByIndices(name, prefix, die, '', framerate, loop);
 			if(pussy.animation.curAnim == null) {
 				pussy.animation.play(name, true);

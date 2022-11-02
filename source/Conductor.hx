@@ -13,6 +13,7 @@ typedef BPMChangeEvent =
 	var stepTime:Int;
 	var songTime:Float;
 	var bpm:Float;
+	@:optional var stepCrochet:Float;
 }
 
 class Conductor
@@ -59,7 +60,7 @@ class Conductor
 					bpm: curBPM
 				};
 				bpmChangeMap.push(event);
-			}
+				}
 
 			var deltaSteps:Int = song.notes[i].lengthInSteps;
 			totalSteps += deltaSteps;
@@ -75,4 +76,48 @@ class Conductor
 		crochet = ((60 / bpm) * 1000);
 		stepCrochet = crochet / 4;
 	}
+
+	public static function getBPMFromSeconds(time:Float){
+		var lastChange:BPMChangeEvent = {
+			stepTime: 0,
+			songTime: 0,
+			bpm: bpm,
+			stepCrochet: stepCrochet
+		}
+		for (i in 0...Conductor.bpmChangeMap.length)
+		{
+			if (time >= Conductor.bpmChangeMap[i].songTime)
+				lastChange = Conductor.bpmChangeMap[i];
+		}
+
+		return lastChange;
+	}
+
+	public static function getBPMFromStep(step:Float){
+		var lastChange:BPMChangeEvent = {
+			stepTime: 0,
+			songTime: 0,
+			bpm: bpm,
+			stepCrochet: stepCrochet
+		}
+		for (i in 0...Conductor.bpmChangeMap.length)
+		{
+			if (Conductor.bpmChangeMap[i].stepTime<=step)
+				lastChange = Conductor.bpmChangeMap[i];
+		}
+
+		return lastChange;
+	}
+
+	public static function beatToSeconds(beat:Float): Float{
+		var step = beat * 4;
+		var lastChange = getBPMFromStep(step);
+		return lastChange.songTime + ((step - lastChange.stepTime) / (lastChange.bpm / 60)/4) * 1000; // TODO: make less shit and take BPM into account PROPERLY
+	}
+
+	public static function getStep(time:Float){
+		var lastChange = getBPMFromSeconds(time);
+		return lastChange.stepTime + (time - lastChange.songTime) / lastChange.stepCrochet;
+	}
+
 }

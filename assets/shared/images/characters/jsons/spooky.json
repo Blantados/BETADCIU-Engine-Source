@@ -5,10 +5,10 @@
 				-20,
 				25
 			],
-			"indices": [],
+			"loop": false,
 			"fps": 24,
 			"anim": "singUP",
-			"loop": false,
+			"indices": [],
 			"name": "spooky UP NOTE",
 			"playerOffsets": [
 				-64,
@@ -20,10 +20,10 @@
 				-20,
 				-145
 			],
-			"indices": [],
+			"loop": false,
 			"fps": 24,
 			"anim": "singDOWN",
-			"loop": false,
+			"indices": [],
 			"name": "spooky DOWN note",
 			"playerOffsets": [
 				-1,
@@ -35,10 +35,10 @@
 				130,
 				-20
 			],
-			"indices": [],
+			"loop": false,
 			"fps": 24,
 			"anim": "singLEFT",
-			"loop": false,
+			"indices": [],
 			"name": "note sing left",
 			"playerOffsets": [
 				80,
@@ -50,10 +50,10 @@
 				-130,
 				-15
 			],
-			"indices": [],
+			"loop": false,
 			"fps": 24,
 			"anim": "singRIGHT",
-			"loop": false,
+			"indices": [],
 			"name": "spooky sing right",
 			"playerOffsets": [
 				-51,
@@ -65,14 +65,14 @@
 				0,
 				0
 			],
+			"loop": false,
+			"fps": 12,
+			"anim": "danceLeft",
 			"indices": [
 				0,
 				2,
 				6
 			],
-			"fps": 12,
-			"anim": "danceLeft",
-			"loop": false,
 			"name": "spooky dance idle",
 			"playerOffsets": [
 				0,
@@ -84,15 +84,15 @@
 				0,
 				0
 			],
+			"loop": false,
+			"fps": 12,
+			"anim": "danceRight",
 			"indices": [
 				8,
 				10,
 				12,
 				14
 			],
-			"fps": 12,
-			"anim": "danceRight",
-			"loop": false,
 			"name": "spooky dance idle",
 			"playerOffsets": [
 				0,
@@ -106,6 +106,10 @@
 		-70,
 		200
 	],
+	"player_camera_position": [
+		140,
+		0
+	],
 	"playerposition": [
 		10,
 		200
@@ -118,10 +122,11 @@
 		0
 	],
 	"camera_position": [
-		0,
+		140,
 		0
 	],
 	"noteSkin": null,
 	"sing_duration": 4,
+	"isPlayerChar": false,
 	"scale": 1
 }
