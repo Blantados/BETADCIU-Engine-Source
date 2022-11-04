@@ -21,7 +21,7 @@ class Conductor
 	public static var bpm:Float = 100;
 	public static var crochet:Float = ((60 / bpm) * 1000); // beats in milliseconds
 	public static var stepCrochet:Float = crochet / 4; // steps in milliseconds
-	public static var songPosition:Float;
+	public static var songPosition:Float = 0;
 	public static var lastSongPos:Float;
 	public static var offset:Float = 0;
 
@@ -57,16 +57,33 @@ class Conductor
 				var event:BPMChangeEvent = {
 					stepTime: totalSteps,
 					songTime: totalPos,
-					bpm: curBPM
+					bpm: curBPM,
+					stepCrochet: calculateCrochet(curBPM)/4
 				};
 				bpmChangeMap.push(event);
-				}
+			}
 
-			var deltaSteps:Int = song.notes[i].lengthInSteps;
+			var deltaSteps:Int = Math.round(getSectionBeats(song, i) * 4);
 			totalSteps += deltaSteps;
 			totalPos += ((60 / curBPM) * 1000 / 4) * deltaSteps;
 		}
 		trace("new BPM map BUDDY " + bpmChangeMap);
+	}
+
+	public static function getCrotchetAtTime(time:Float){
+		var lastChange = getBPMFromSeconds(time);
+		return lastChange.stepCrochet*4;
+	}
+
+	static function getSectionBeats(song:SwagSong, section:Int)
+		{
+			var val:Null<Float> = null;
+			if(song.notes[section] != null) val = song.notes[section].sectionBeats;
+			return val != null ? val : 4;
+		}
+
+	inline public static function calculateCrochet(bpm:Float){
+		return (60/bpm)*1000;
 	}
 
 	public static function changeBPM(newBpm:Float)

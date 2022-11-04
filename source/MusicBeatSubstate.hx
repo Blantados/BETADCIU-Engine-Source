@@ -35,7 +35,7 @@ class MusicBeatSubstate extends FlxSubState
 		updateCurStep();
 		updateBeat();
 
-		if (oldStep != curStep && curStep > 0)
+		if (oldStep != curStep && curStep >= 0) //what could this possibly break? 
 			stepHit();
 
 

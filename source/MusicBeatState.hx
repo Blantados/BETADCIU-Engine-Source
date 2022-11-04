@@ -81,7 +81,7 @@ class MusicBeatState extends FlxUIState
 
 		if (oldStep != curStep)
 		{
-			if(curStep > 0)
+			if(curStep >= 0) //what could this possibly break?
 				stepHit();
 
 			if(PlayState.SONG != null)

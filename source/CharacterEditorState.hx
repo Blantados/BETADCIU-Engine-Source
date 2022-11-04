@@ -980,14 +980,25 @@ class CharacterEditorState extends MusicBeatState
 					Paths.cacheImage(daPath, 'preload');
 				
 				var rawPic = Paths.currentTrackedAssets.get(daPath);
+
+				if (rawPic == null)
+				{
+					trace('image not found');
+					Paths.cacheImage('characters/BOYFRIEND', 'shared');
+
+					rawPic = Paths.currentTrackedAssets.get('characters/BOYFRIEND');
+				}
+
 				var rawXml:String;
 
 				if (FileSystem.exists(FileSystem.absolutePath("assets/shared/images/"+daPath+".xml")))
 					rawXml = File.getContent(FileSystem.absolutePath("assets/shared/images/"+daPath+".xml"));
 				else if (FileSystem.exists(Paths.modsXml(daPath)))
 					rawXml = File.getContent(Paths.modsXml(daPath));
-				else
+				else if (FileSystem.exists(Paths.xmlNew('images/' + daPath)))
 					rawXml = File.getContent(Paths.xmlNew('images/' + daPath));
+				else
+					rawXml  = Assets.getText(Paths.xmlNew('images/characters/BOYFRIEND')); //so that it stops crashing.
 
 				char.frames = FlxAtlasFrames.fromSparrow(rawPic,rawXml);
 			}
@@ -1256,29 +1267,35 @@ class CharacterEditorState extends MusicBeatState
 
 		#if MODS_ALLOWED
 		characterList = [];
-		/* //I don't like this. It's good for everything that ISN'T BETADCIU.
-		var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Paths.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')];
-		for (i in 0...directories.length) {
-			var directory:String = directories[i];
-			if(FileSystem.exists(directory)) {
-				for (file in FileSystem.readDirectory(directory)) {
-					var path = haxe.io.Path.join([directory, file]);
-					if (!sys.FileSystem.isDirectory(path) && file.endsWith('.json')) {
-						var charToCheck:String = file.substr(0, file.length - 5);
-						if(!charsLoaded.exists(charToCheck)) {
-							characterList.push(charToCheck);
-							charsLoaded.set(charToCheck, true);
-						}
-					}
-				}
-			}
-		}*/ 
 
-		//so I'll use this instead
-		if (FileSystem.exists(Paths.modFolders('data/characterList.txt')))
-			characterList = CoolUtil.coolTextFile2(Paths.modFolders('data/characterList.txt'));
+		if (Paths.currentModDirectory != 'BETADCIU')
+		{
+			 //READDED
+			 var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Paths.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')];
+			 for (i in 0...directories.length) {
+				 var directory:String = directories[i];
+				 if(FileSystem.exists(directory)) {
+					 for (file in FileSystem.readDirectory(directory)) {
+						 var path = haxe.io.Path.join([directory, file]);
+						 if (!sys.FileSystem.isDirectory(path) && file.endsWith('.json')) {
+							 var charToCheck:String = file.substr(0, file.length - 5);
+							 if(!charsLoaded.exists(charToCheck)) {
+								 characterList.push(charToCheck);
+								 charsLoaded.set(charToCheck, true);
+							 }
+						 }
+					 }
+				 }
+			 }
+		}
 		else
-			characterList = CoolUtil.coolTextFile(Paths.txt('characterList'));
+		{
+			//FOR BETADCIU
+			if (FileSystem.exists(Paths.modFolders('data/characterList.txt')))
+				characterList = CoolUtil.coolTextFile2(Paths.modFolders('data/characterList.txt'));
+			else
+				characterList = CoolUtil.coolTextFile(Paths.txt('characterList'));
+		}
 		#else
 		characterList = CoolUtil.coolTextFile(Paths.txt('characterList'));
 		#end

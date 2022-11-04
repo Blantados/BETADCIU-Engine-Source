@@ -1347,7 +1347,7 @@ class Character extends FlxSprite
 						else if (FileSystem.exists(Paths.xmlNew('images/' + json.image)))
 							rawXml = File.getContent(Paths.xmlNew('images/' + json.image));
 						else
-							rawXml  = Assets.getText(Paths.xmlNew('images/BOYFRIEND')); //so that it stops crashing.
+							rawXml  = Assets.getText(Paths.xmlNew('images/characters/BOYFRIEND')); //so that it stops crashing.
 
 						//this took my dumbass 2 hours to figure out.
 						if(FlxG.save.data.poltatoPC && curCharacter != 'senpai-christmas' && json.scale != 6)
