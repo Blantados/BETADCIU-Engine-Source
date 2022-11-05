@@ -7284,7 +7284,7 @@ class Stage extends MusicBeatState
 			}
 			return Reflect.getProperty(coverMeInPiss, killMe[killMe.length-1]);
 		}
-		return Reflect.getProperty(Stage.instance, variable);
+		return Reflect.getProperty(Stage.instance, swagBacks.get(variable));
 	}
 
 	public function setProperty(variable:String, value:Dynamic)
@@ -7300,7 +7300,7 @@ class Stage extends MusicBeatState
 			}
 			return Reflect.setProperty(coverMeInPiss, killMe[killMe.length-1], value);
 		}
-		return Reflect.setProperty(Stage.instance, variable, value);
+		return Reflect.setProperty(Stage.instance, swagBacks.get(variable), value);
 	}
 
 	public function setObjectCamera(name:String, cam:String)// doesn't work when using lua so I'm just making it call a function instead

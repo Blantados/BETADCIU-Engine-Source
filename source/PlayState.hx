@@ -5416,10 +5416,16 @@ class PlayState extends MusicBeatState
 					#if desktop
 					if (luaArray.length >= 1)
 					{
-						if (luaArray[0].get("playDadSing",'bool'))
-							playDad = true;
-						else
-							playDad = false;
+						playDad = luaArray[0].get("playDadSing",'bool');
+
+						for (i in 0...luaArray.length)
+						{
+							if (luaArray[i].get("playDadSing", 'bool') == false)
+							{
+								playDad = luaArray[i].get("playDadSing",'bool');
+								break;
+							}
+						}
 					}
 					#end
 
@@ -6931,10 +6937,16 @@ class PlayState extends MusicBeatState
 			#if desktop
 			if (luaArray.length >= 1)
 			{
-				if (luaArray[0].get("playBFSing",'bool'))
-					playBF = true;
-				else
-					playBF = false;
+				playBF = luaArray[0].get("playBFSing",'bool');
+
+				for (i in 0...luaArray.length)
+				{
+					if (luaArray[i].get("playBFSing", 'bool') == false)
+					{
+						playBF = luaArray[i].get("playBFSing",'bool');
+						break;
+					}
+				}
 			}
 			#end
 			
@@ -7289,10 +7301,16 @@ class PlayState extends MusicBeatState
 			#if desktop
 			if (luaArray.length >= 1)
 			{
-				if (luaArray[0].get("playBFSing",'bool'))
-					playBF = true;
-				else
-					playBF = false;
+				playBF = luaArray[0].get("playBFSing",'bool');
+
+				for (i in 0...luaArray.length)
+				{
+					if (luaArray[i].get("playBFSing", 'bool') == false)
+					{
+						playBF = luaArray[i].get("playBFSing",'bool');
+						break;
+					}
+				}
 			}
 			#end
 

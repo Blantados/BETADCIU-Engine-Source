@@ -1262,7 +1262,7 @@ class ModchartState
 
 
 		Lua_helper.add_callback(lua,"animationSwap", function(char:String, anim1:String, anim2:String) {
-			var shit = getThing(char);
+			var shit = getObjectDirectly2(char);
 
 			if (shit.animation.getByName(anim1) != null)
 			{
@@ -1277,7 +1277,7 @@ class ModchartState
 				PlayState.instance.Stage.destroyObject(PlayState.instance.Stage.swagBacks[id]);
 			else
 			{
-				var shit:Dynamic = getThing(id);
+				var shit:Dynamic = getObjectDirectly2(id);
 				PlayState.instance.destroyObject(shit);
 			}
 		});
@@ -1362,7 +1362,7 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua,"getScrollFactor", function(id:String , x:String) {
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			if (x == 'x')
 				return shit.scrollFactor.x;
 			else
@@ -1424,7 +1424,7 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua,"returnDominantColor", function(sprite:String, ?remove0:Bool = false){
-			var shit:Dynamic = getThing(sprite);
+			var shit:Dynamic = getObjectDirectly2(sprite);
 
 			var coolColor = FlxColor.fromInt(CoolUtil.dominantColor(shit));
 			var daColor = coolColor.toHexString();
@@ -1669,12 +1669,12 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua,"removeObject", function(id:String) {
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			PlayState.instance.removeObject(shit);
 		});
 
 		Lua_helper.add_callback(lua,"addObject", function(id:String) {
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			PlayState.instance.addObject(shit);
 		});
 
@@ -2137,12 +2137,12 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua,"setActorX", function(x:Int,id:String, ?bg:Bool = false) {
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			shit.x = x;
 		});
 		
 		Lua_helper.add_callback(lua,"setActorScreenCenter", function(id:String, ?pos:String = 'xy') {
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			switch(pos.trim().toLowerCase())
 			{
 				case 'x': shit.screenCenter(X);	
@@ -2152,7 +2152,7 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua,"screenCenter", function(id:String, ?pos:String) { //same thing. just for psych
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			switch(pos.trim().toLowerCase())
 			{
 				case 'x': shit.screenCenter(X);	
@@ -2193,7 +2193,7 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua,"playBGAnimation", function(id:String,anim:String,force:Bool = false,reverse:Bool = false) {
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			shit.animation.play(anim, force, reverse);
 		});
 
@@ -2215,7 +2215,7 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua,"flickerSprite", function (id:String, duration:Float, interval:Float) {
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			FlxFlicker.flicker(shit, duration, interval);
 		});
 
@@ -2267,7 +2267,7 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua,"setActorScale", function(scale:Float,id:String, ?bg:Bool = false) {
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			shit.setGraphicSize(Std.int(shit.width * scale));
 			shit.updateHitbox();	
 		});
@@ -2353,7 +2353,7 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua,"getActorXMidpoint", function (id:String, ?graphic:Bool = false) {
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 
 			if (graphic)
 				return shit.getGraphicMidpoint().x;
@@ -2362,7 +2362,7 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua,"getActorYMidpoint", function (id:String, ?graphic:Bool = false) {
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 
 			if (graphic)
 				return shit.getGraphicMidpoint().y;
@@ -2591,7 +2591,7 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua,"tweenColor", function(id:String, time:Float, initColor:FlxColor, finalColor:FlxColor) {
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			FlxTween.color(shit, time, initColor, finalColor);
 		});
 
@@ -2632,21 +2632,21 @@ class ModchartState
 		//change individual values
 		Lua_helper.add_callback(lua,"changeHue", function(id:String, hue:Int) {
 			var newShader:ColorSwap = new ColorSwap();
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			shit.shader = newShader.shader;
 			newShader.hue = hue / 360;
 		});
 
 		Lua_helper.add_callback(lua,"changeSaturation", function(id:String, sat:Int) {
 			var newShader:ColorSwap = new ColorSwap();
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			shit.shader = newShader.shader;
 			newShader.saturation = sat / 100;
 		});
 
 		Lua_helper.add_callback(lua,"changeBrightness", function(id:String, bright:Int) {
 			var newShader:ColorSwap = new ColorSwap();
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			shit.shader = newShader.shader;
 			newShader.brightness = bright / 100;
 		});
@@ -2654,13 +2654,13 @@ class ModchartState
 		//change as a group. you should probably use this one
 		Lua_helper.add_callback(lua,"changeHSB", function(id:String, hue:Int, sat:Int, bright:Int) {
 			var newShader:ColorSwap = new ColorSwap();
-			var shit:Dynamic = getThing(id);
-			shit.shader = newShader.shader;
 			newShader.hue = hue / 360;
 			newShader.saturation = sat / 100;
 			newShader.brightness = bright / 100;
-		});
 
+			var shit:FlxSprite = changeSpriteClass(getObjectDirectly(id));
+			shit.shader = newShader.shader;
+		});
 
 		Lua_helper.add_callback(lua,"changeGroupHue", function(obj:String, hue:Int) {
 			var shit:Dynamic = Reflect.getProperty(getInstance(), obj);
@@ -2691,42 +2691,42 @@ class ModchartState
 
 		//a bunch of psych stuff
 		Lua_helper.add_callback(lua,"tweenAnglePsych", function(id:String, toAngle:Int, time:Float, ease:String, onComplete:String, ?bg:Bool = false) {
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			FlxTween.tween(shit, {angle: toAngle}, time, {ease: getFlxEaseByString(ease), onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {call(onComplete,[id]);}}});
 		});
 
 		Lua_helper.add_callback(lua,"tweenXPsych", function(id:String, toX:Int, time:Float, ease:String, onComplete:String, ?bg:Bool = false) {
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			FlxTween.tween(shit, {x: toX}, time, {ease: getFlxEaseByString(ease), onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {call(onComplete,[id]);}}});
 		});
 
 		Lua_helper.add_callback(lua,"tweenYPsych", function(id:String, toY:Int, time:Float, ease:String, onComplete:String, ?bg:Bool = false) {
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			FlxTween.tween(shit, {y: toY}, time, {ease: getFlxEaseByString(ease), onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {call(onComplete,[id]);}}});
 		});
 
 		Lua_helper.add_callback(lua,"tweenZoomPsych", function(id:String, toZoom:Int, time:Float, ease:String, onComplete:String, ?bg:Bool = false) {
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			FlxTween.tween(shit, {zoom: toZoom}, time, {ease: getFlxEaseByString(ease), onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {call(onComplete,[id]);}}});
 		});
 
 		Lua_helper.add_callback(lua,"tweenScale", function(id:String, scale:Float, time:Float, ease:String, onComplete:String, ?bg:Bool = false) {
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			FlxTween.tween(shit, {"scale.x": scale, "scale.y": scale}, time, {ease: getFlxEaseByString(ease), onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {call(onComplete,[id]);}}});			
 		});
 
 		Lua_helper.add_callback(lua,"tweenScaleXY", function(id:String, scaleX:Float, scaleY:Float, time:Float, ease:String, onComplete:String, ?bg:Bool = false) {
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			FlxTween.tween(shit, {"scale.x": scaleX, "scale.y": scaleY}, time, {ease: getFlxEaseByString(ease), onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {call(onComplete,[id]);}}});
 		});
 
 		Lua_helper.add_callback(lua,"tweenAlpha", function(id:String, toAlpha:Float, time:Float, ease:String, onComplete:String) {
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			FlxTween.tween(shit, {alpha: toAlpha}, time, {ease: getFlxEaseByString(ease), onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {call(onComplete,[id]);}}});
 		});
 
 		Lua_helper.add_callback(lua, "doTweenX", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
-			var penisExam:Dynamic = getThing(vars);
+			var penisExam:Dynamic = getObjectDirectly2(vars);
 			cancelTween(tag);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {x: value}, duration, {ease: getFlxEaseByString(ease),
@@ -2745,7 +2745,7 @@ class ModchartState
 		});
 		
 		Lua_helper.add_callback(lua, "doTweenY", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
-			var penisExam:Dynamic = getThing(vars);
+			var penisExam:Dynamic = getObjectDirectly2(vars);
 			cancelTween(tag);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {y: value}, duration, {ease: getFlxEaseByString(ease),
@@ -2763,7 +2763,7 @@ class ModchartState
 			}
 		});
 		Lua_helper.add_callback(lua, "doTweenAngle", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
-			var penisExam:Dynamic = getThing(vars);
+			var penisExam:Dynamic = getObjectDirectly2(vars);
 			cancelTween(tag);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {angle: value}, duration, {ease: getFlxEaseByString(ease),
@@ -2781,8 +2781,9 @@ class ModchartState
 			}
 		});
 
+		//over 6 vars so this doesn't work
 		Lua_helper.add_callback(lua, "doTweenScale", function(tag:String, vars:String, value:Dynamic, value2:Dynamic, duration:Float, ease:String) {
-			var penisExam:Dynamic = getThing(vars);
+			var penisExam:Dynamic = getObjectDirectly2(vars);
 			cancelTween(tag);
 			cancelTween(tag+'Y');
 			if(penisExam != null) {
@@ -2800,12 +2801,16 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua, "doTweenScaleX", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
-			var penisExam:Dynamic = getThing(vars);
+			var penisExam:Dynamic = getObjectDirectly2(vars);
 			cancelTween(tag);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {"scale.x": value}, duration, {ease: getFlxEaseByString(ease),
 					onComplete: function(twn:FlxTween) {
 						PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
+
+						if (PlayState.instance.Stage.isCustomStage && PlayState.instance.Stage.luaArray.length >= 1)
+							PlayState.instance.Stage.callOnLuas('onTweenCompleted', [tag]);
+
 						PlayState.instance.modchartTweens.remove(tag);
 					}
 				}));
@@ -2815,13 +2820,16 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua, "doTweenScaleY", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
-			var penisExam:Dynamic = getThing(vars);
+			var penisExam:Dynamic = getObjectDirectly2(vars);
 			cancelTween(tag);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {"scale.y": value}, duration, {ease: getFlxEaseByString(ease),
 					onComplete: function(twn:FlxTween) {
 						PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
 						PlayState.instance.modchartTweens.remove(tag);
+
+						if (PlayState.instance.Stage.isCustomStage && PlayState.instance.Stage.luaArray.length >= 1)
+							PlayState.instance.Stage.callOnLuas('onTweenCompleted', [tag]);
 					}
 				}));
 			} else {
@@ -2831,7 +2839,7 @@ class ModchartState
 
 
 		Lua_helper.add_callback(lua, "doTweenAlpha", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
-			var penisExam:Dynamic = getThing(vars);
+			var penisExam:Dynamic = getObjectDirectly2(vars);
 			cancelTween(tag);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {alpha: value}, duration, {ease: getFlxEaseByString(ease),
@@ -2845,7 +2853,7 @@ class ModchartState
 			}
 		});
 		Lua_helper.add_callback(lua, "doTweenZoom", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
-			var penisExam:Dynamic = getThing(vars);
+			var penisExam:Dynamic = getObjectDirectly2(vars);
 			cancelTween(tag);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {zoom: value}, duration, {ease: getFlxEaseByString(ease),
@@ -2859,7 +2867,7 @@ class ModchartState
 			}
 		});
 		Lua_helper.add_callback(lua, "doTweenColor", function(tag:String, vars:String, targetColor:String, duration:Float, ease:String) {
-			var penisExam:Dynamic = getThing(vars);
+			var penisExam:Dynamic = getObjectDirectly2(vars);
 			cancelTween(tag);
 			if(penisExam != null) {
 				var color:Int = Std.parseInt(targetColor);
@@ -3130,8 +3138,18 @@ class ModchartState
 				return true;
 			}
 
+			if (Stage.instance.swagBacks.exists(obj))
+			{
+				var real:FlxSprite = changeSpriteClass(Stage.instance.swagBacks.get(obj));
+
+				if(real!=null){
+					real.cameras = [cameraFromString(camera)];
+					return true;
+				}
+			}
+
 			var killMe:Array<String> = obj.split('.');
-			var object:FlxSprite = getObjectDirectly(killMe[0]);
+			var object:FlxSprite = changeSpriteClass(getObjectDirectly(killMe[0]));
 			if(killMe.length > 1) {
 				object = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 			}
@@ -3256,6 +3274,9 @@ class ModchartState
 					PlayState.instance.modchartTimers.remove(tag);
 				}
 				PlayState.instance.callOnLuas('onTimerCompleted', [tag, tmr.loops, tmr.loopsLeft]);
+
+				if (PlayState.instance.Stage.isCustomStage && PlayState.instance.Stage.luaArray.length >= 1)
+					PlayState.instance.Stage.callOnLuas('onTimerCompleted', [tag]);
 				//trace('Timer Completed: ' + tag);
 			}, loops));
 		});
@@ -3498,7 +3519,7 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua, "objectColorTransform", function(obj:String, r:Int, g:Int, b:Int, a:Int) {
-			var spr:Dynamic = getThing(obj);
+			var spr:Dynamic = getObjectDirectly2(obj);
 
 			if(spr != null) {
 				spr.useColorTransform = true;
@@ -3507,7 +3528,7 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua, "objectColorTween", function(obj:String, duration:Float, color:String, color2:String, ?ease:String = 'linear') {
-			var spr:Dynamic = getThing(obj);
+			var spr:Dynamic = getObjectDirectly2(obj);
 
 			if(spr != null) {
 				var colorNum:Int = Std.parseInt(color);
@@ -3720,7 +3741,7 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua, "animExists", function(tag:String, anim:String){
-			var shit:Dynamic = getThing(tag);
+			var shit:Dynamic = getObjectDirectly2(tag);
 			
 			return shit.animation.getByName(anim) != null;
 		});
@@ -3872,7 +3893,7 @@ class ModchartState
 		});
 		
 		Lua_helper.add_callback(lua, "setOffset", function(id:String, x:Float, y:Float) {
-			var shit:Dynamic = getThing(id);
+			var shit:Dynamic = getObjectDirectly2(id);
 			shit.offset.set(x, y);
 		});
 
@@ -4185,26 +4206,18 @@ class ModchartState
 		return tag;
 	}
 	
-	public function getThing(id:String)
+	public function getObjectDirectly2(id:String):Dynamic
 	{
 		var shit:Dynamic;
 
-		if(PlayState.instance.modchartSprites.exists(id))
-			shit = PlayState.instance.modchartSprites.get(id);
-		else if(PlayState.instance.modchartTexts.exists(id))
-			shit = PlayState.instance.modchartTexts.get(id);
-		else if(PlayState.instance.modchartInputTexts.exists(id))
-			shit = PlayState.instance.modchartInputTexts.get(id);
-		else if(PlayState.instance.modchartIcons.exists(id))
-			shit = PlayState.instance.modchartIcons.get(id);
-		else if(PlayState.instance.modchartCharacters.exists(id))
-			shit = PlayState.instance.modchartCharacters.get(id);
+		if(Stage.instance.swagBacks.exists(id))
+			shit = Stage.instance.swagBacks.get(id);
 		else if(PlayState.instance.Stage.swagBacks.exists(id))
 			shit = PlayState.instance.Stage.swagBacks.get(id);
-		else if(Stage.instance.swagBacks.exists(id))
-			shit = Stage.instance.swagBacks.get(id);
+		else if(PlayState.instance.getLuaObject(id) != null)
+			shit = PlayState.instance.getLuaObject(id);
 		else
-			shit =  getActorByName(id);
+			shit = getActorByName(id);
 
 		return shit;
 	}
