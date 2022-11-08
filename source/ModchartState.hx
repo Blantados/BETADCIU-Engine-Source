@@ -49,6 +49,7 @@ import animateatlas.AtlasFrameMaker;
 
 import Type.ValueType;
 import Shaders;
+import DialogueBoxPsych;
 
 //why is detected's modchart confusing!?
 import LuaClass.LuaGame;
@@ -80,6 +81,7 @@ class ModchartState
 	var lePlayState:PlayState = null;
 	
 	public var scriptName:String = '';
+	var gonnaClose:Bool = false;
 	public var closed:Bool = false;
 
 	public var accessedProps:Map<String, Dynamic> = null;
@@ -280,14 +282,11 @@ class ModchartState
 		//this is dumb but idk how else to do it and i don't wanna make multiple functions for different playstate functions so yeah.
 		switch (id)
 		{
-			case 'doP3Static': PlayState.instance.doP3Static();
-			case 'doP3Jump': PlayState.instance.doP3Jump(val1);
 			case 'funCountdown': PlayState.instance.funCountdown(val1);
 			case 'softCountdown': PlayState.instance.softCountdown();
 			case 'startCountdown': PlayState.instance.startCountdown();
 			case 'doJumpscare': PlayState.instance.doJumpscare();
 			case 'startWriting': PlayState.instance.startWriting(val1, val2);		
-			case 'doSonicIntro': PlayState.instance.doSonicIntro(val1, val2);	
 			case 'doSimpleJump': PlayState.instance.doSimpleJump(val1);		
 			case 'resyncVocals': PlayState.instance.resyncVocals();	
 			case 'doTimeTravel': PlayState.instance.doTimeTravel(val1, val2);		
@@ -1021,6 +1020,7 @@ class ModchartState
 
 		// get some fukin globals up in here bois
 
+		set('Function_StopLua', Function_StopLua);
 		set('Function_Stop', Function_Stop);
 		set('Function_Continue', Function_Continue); //i have no idea how this works
 		set('endDaSong', true);
@@ -1085,6 +1085,8 @@ class ModchartState
 	
 			set("hudZoom", PlayState.instance.camHUD.zoom);
 			set("camHudAngle", PlayState.instance.camHUD.angle);
+
+			set('playbackRate', PlayState.instance.playbackRate);
 		}
 	
 		// callbacks
@@ -1570,16 +1572,10 @@ class ModchartState
 			}
 		});
 
-		/*Lua_helper.add_callback(lua, "close", function(printMessage:Bool) {
-			//this always closes the first one for some reason!?
-			if(!gonnaClose) {
-				if(printMessage) {
-					luaTrace('Stopping lua script: ' + scriptName);
-				}
-				PlayState.instance.closeLuas.push(this);
-			}
-			gonnaClose = true;
-		});*/
+		Lua_helper.add_callback(lua, "close", function(printMessage:Bool = false) {
+			closed = true;
+			return closed;
+		});
 
 		Lua_helper.add_callback(lua,"changeDadIcon", function(id:String) {
 			PlayState.instance.iconP2.useOldSystem(id);
@@ -2726,6 +2722,7 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua, "doTweenX", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			var penisExam:Dynamic = getObjectDirectly2(vars);
 			cancelTween(tag);
 			if(penisExam != null) {
@@ -2745,6 +2742,7 @@ class ModchartState
 		});
 		
 		Lua_helper.add_callback(lua, "doTweenY", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			var penisExam:Dynamic = getObjectDirectly2(vars);
 			cancelTween(tag);
 			if(penisExam != null) {
@@ -2763,6 +2761,7 @@ class ModchartState
 			}
 		});
 		Lua_helper.add_callback(lua, "doTweenAngle", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			var penisExam:Dynamic = getObjectDirectly2(vars);
 			cancelTween(tag);
 			if(penisExam != null) {
@@ -2783,6 +2782,7 @@ class ModchartState
 
 		//over 6 vars so this doesn't work
 		Lua_helper.add_callback(lua, "doTweenScale", function(tag:String, vars:String, value:Dynamic, value2:Dynamic, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			var penisExam:Dynamic = getObjectDirectly2(vars);
 			cancelTween(tag);
 			cancelTween(tag+'Y');
@@ -2801,6 +2801,7 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua, "doTweenScaleX", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			var penisExam:Dynamic = getObjectDirectly2(vars);
 			cancelTween(tag);
 			if(penisExam != null) {
@@ -2820,6 +2821,7 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua, "doTweenScaleY", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			var penisExam:Dynamic = getObjectDirectly2(vars);
 			cancelTween(tag);
 			if(penisExam != null) {
@@ -2839,6 +2841,7 @@ class ModchartState
 
 
 		Lua_helper.add_callback(lua, "doTweenAlpha", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			var penisExam:Dynamic = getObjectDirectly2(vars);
 			cancelTween(tag);
 			if(penisExam != null) {
@@ -2853,6 +2856,7 @@ class ModchartState
 			}
 		});
 		Lua_helper.add_callback(lua, "doTweenZoom", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			var penisExam:Dynamic = getObjectDirectly2(vars);
 			cancelTween(tag);
 			if(penisExam != null) {
@@ -2866,8 +2870,9 @@ class ModchartState
 				luaTrace('doTweenZoom: Couldnt find object: ' + vars, false, false, FlxColor.RED);
 			}
 		});
-		Lua_helper.add_callback(lua, "doTweenColor", function(tag:String, vars:String, targetColor:String, duration:Float, ease:String) {
-			var penisExam:Dynamic = getObjectDirectly2(vars);
+		Lua_helper.add_callback(lua, "doTweenColor", function(tag:String, value:String, targetColor:String, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
+			var penisExam:Dynamic = getObjectDirectly2(value);
 			cancelTween(tag);
 			if(penisExam != null) {
 				var color:Int = Std.parseInt(targetColor);
@@ -2882,7 +2887,7 @@ class ModchartState
 					}
 				}));
 			} else {
-				luaTrace('doTweenColor: Couldnt find object: ' + vars, false, false, FlxColor.RED);
+				luaTrace('doTweenColor: Couldnt find object: ' + value, false, false, FlxColor.RED);
 			}
 		});
 
@@ -2898,8 +2903,59 @@ class ModchartState
 			PlayState.instance.startSong();
 		});
 
-		Lua_helper.add_callback(lua, "playCutscene", function(video:String, ?unskippable:Bool = false) {
-			PlayState.instance.playCutscene(video, unskippable);
+		Lua_helper.add_callback(lua, "startDialogue", function(dialogueFile:String, music:String = null) {
+			var path:String;
+			#if MODS_ALLOWED
+			path = Paths.modsJson(Paths.formatToSongPath(PlayState.SONG.song) + '/' + dialogueFile);
+			if(!FileSystem.exists(path))
+			#end
+				path = Paths.json(Paths.formatToSongPath(PlayState.SONG.song) + '/' + dialogueFile);
+
+			luaTrace('startDialogue: Trying to load dialogue: ' + path);
+
+			#if MODS_ALLOWED
+			if(FileSystem.exists(path))
+			#else
+			if(Assets.exists(path))
+			#end
+			{
+				var shit:DialogueFile = DialogueBoxPsych.parseDialogue(path);
+				if(shit.dialogue.length > 0) {
+					PlayState.instance.startDialogue(shit, music);
+					luaTrace('startDialogue: Successfully loaded dialogue', false, false, FlxColor.GREEN);
+					return true;
+				} else {
+					luaTrace('startDialogue: Your dialogue file is badly formatted!', false, false, FlxColor.RED);
+				}
+			} else {
+				luaTrace('startDialogue: Dialogue file not found', false, false, FlxColor.RED);
+				if(PlayState.instance.endingSong) {
+					PlayState.instance.endSong();
+				} else {
+					PlayState.instance.startCountdown();
+				}
+			}
+			return false;
+		});
+		
+		Lua_helper.add_callback(lua, "startVideo", function(videoFile:String) {
+			#if VIDEOS_ALLOWED
+			if(FileSystem.exists(Paths.video(videoFile))) {
+				PlayState.instance.startVideo(videoFile);
+				return true;
+			} else {
+				luaTrace('startVideo: Video file not found: ' + videoFile, false, false, FlxColor.RED);
+			}
+			return false;
+
+			#else
+			if(PlayState.instance.endingSong) {
+				PlayState.instance.endSong();
+			} else {
+				PlayState.instance.startCountdown();
+			}
+			return true;
+			#end
 		});
 
 		Lua_helper.add_callback(lua, "endSong", function(hmm:String) {
@@ -3268,6 +3324,7 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua, "runTimer", function(tag:String, time:Float = 1, loops:Int = 1) {
+			if (PlayState.instance != null){time = time / PlayState.instance.playbackRate;}
 			cancelTimer(tag);
 			PlayState.instance.modchartTimers.set(tag, new FlxTimer().start(time, function(tmr:FlxTimer) {
 				if(tmr.finished) {
@@ -4069,6 +4126,13 @@ class ModchartState
 				case 'sound': return Paths.sound(text);
 				default: return '';
 			}
+		});
+
+		Lua_helper.add_callback(lua,"setPlaybackRate", function(x:Float) {
+			PlayState.instance.set_playbackRate(x);
+
+			if (PlayState.instance != null)
+				FlxG.camera.follow(PlayState.instance.camFollow, LOCKON, (PlayState.instance.cameraSpeed*0.04) * x * (30 / (cast (Lib.current.getChildAt(0), Main)).getFPS()));
 		});
 
 		Lua_helper.add_callback(lua, "updateHitbox", function(obj:String) {

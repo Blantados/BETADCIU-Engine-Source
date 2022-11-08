@@ -72,7 +72,7 @@ class LoadReplayState extends MusicBeatState
 
 		for (i in 0...controlsStrings.length)
 		{
-				var controlLabel:Alphabet = new Alphabet(0, (70 * i) + 30, controlsStrings[i], true, false);
+				var controlLabel:Alphabet = new Alphabet(0, (70 * i) + 30, controlsStrings[i], true);
 				controlLabel.isMenuItem = true;
 				controlLabel.targetY = i;
 				grpControls.add(controlLabel);

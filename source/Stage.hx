@@ -853,10 +853,6 @@ class Stage extends MusicBeatState
 
 				var bgGirls = new BackgroundGirls(-100, 190);
 				bgGirls.scrollFactor.set(0.9, 0.9);
-
-				if (songLowercase.contains('roses') && songLowercase != 'roses-remix' || daStage == 'school-sad')
-					bgGirls.getScared();
-
 				bgGirls.setGraphicSize(Std.int(bgGirls.width * PlayState.daPixelZoom));
 				bgGirls.updateHitbox();
 				swagBacks['bgGirls'] = bgGirls;
@@ -6987,24 +6983,26 @@ class Stage extends MusicBeatState
 	public var closeLuas:Array<StageModchartState> = [];
 	public var luaArray:Array<StageModchartState> = [];
 
-	public function callOnLuas(event:String, args:Array<Dynamic>):Dynamic {
-		
+	public function callOnLuas(event:String, args:Array<Dynamic>, ignoreStops = true, exclusions:Array<String> = null):Dynamic {
 		var returnVal:Dynamic = StageModchartState.Function_Continue;
+		#if LUA_ALLOWED
+		if(exclusions == null) exclusions = [];
+		for (script in luaArray) {
+			if(exclusions.contains(script.scriptName))
+				continue;
 
-		#if windows
-		for (i in 0...luaArray.length) {
-			var ret:Dynamic = luaArray[i].call(event, args);
-			if(ret != StageModchartState.Function_Continue) {
-				returnVal = ret;
+			var ret:Dynamic = script.call(event, args);
+			if(ret == StageModchartState.Function_StopLua && !ignoreStops)
+				break;
+			
+			// had to do this because there is a bug in haxe where Stop != Continue doesnt work
+			var bool:Bool = ret == StageModchartState.Function_Continue;
+			if(!bool) {
+				returnVal = cast ret;
 			}
 		}
-
-		for (i in 0...closeLuas.length) {
-			luaArray.remove(closeLuas[i]);
-			closeLuas[i].die();
-		}
 		#end
-
+		//trace(event, returnVal);
 		return returnVal;
 	}
 

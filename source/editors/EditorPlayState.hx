@@ -1,4 +1,4 @@
-package;
+package editors;
 
 import Section.SwagSection;
 import Song.SwagSong;
@@ -159,7 +159,7 @@ class EditorPlayState extends MusicBeatState
 			vocals = new FlxSound();
 
 		generateSong(PlayState.SONG.song);
-		/*#if LUA_ALLOWED
+		#if (LUA_ALLOWED && MODS_ALLOWED)
 		for (notetype in noteTypeMap.keys()) {
 			var luaToLoad:String = Paths.modFolders('custom_notetypes/' + notetype + '.lua');
 			if(sys.FileSystem.exists(luaToLoad)) {
@@ -172,7 +172,7 @@ class EditorPlayState extends MusicBeatState
 		}
 		#end
 		noteTypeMap.clear();
-		noteTypeMap = null;*/
+		noteTypeMap = null;
 
 		scoreTxt = new FlxText(0, FlxG.height - 50, FlxG.width, "Hits: 0 | Misses: 0", 20);
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);

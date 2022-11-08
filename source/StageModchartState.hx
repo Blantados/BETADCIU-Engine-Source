@@ -57,9 +57,11 @@ class StageModchartState
 	public var lePlayState:PlayState = null;
 	public static var Function_Stop = 1;
 	public static var Function_Continue = 0;
+	public static var Function_StopLua = 2;
 
 	public var blam:Dynamic = "";
 	public var scriptName:String = '';
+	var gonnaClose:Bool = false;
 	public var closed:Bool = false;
 
 	public function call(func_name : String, args : Array<Dynamic>, ?type : String) : Dynamic
@@ -254,212 +256,6 @@ class StageModchartState
 		trace(text);
 	}
 
-	//trying to do some auto stuff so i don't have to set manual x and y values
-	public function changeBFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false)
-	{	
-		var animationName:String = "no way anyone have an anim name this big";
-		var animationFrame:Int = 0;						
-		if (PlayState.instance.boyfriend.animation.curAnim.name.startsWith('sing'))
-		{
-			animationName = PlayState.instance.boyfriend.animation.curAnim.name;
-			animationFrame = PlayState.instance.boyfriend.animation.curAnim.curFrame;
-		}
-
-		var bfPath:String = "";
-
-		if (FlxG.save.data.uncacheCharacterSwitch && !dontDestroy)
-			bfPath = 'shared:assets/shared/images/'+PlayState.instance.boyfriend.charPath;
-
-		PlayState.instance.removeObject(PlayState.instance.bfTrail);
-		PlayState.instance.removeObject(PlayState.instance.boyfriend);
-		PlayState.instance.destroyObject(PlayState.instance.boyfriend);
-		PlayState.instance.boyfriend = new Boyfriend(0, 0, id, !flipped);
-
-		PlayState.instance.boyfriend.flipMode = flipped;
-
-		var charOffset = new CharacterOffsets(id, !flipped);
-		var charX:Float = charOffset.daOffsetArray[0];
-		var charY:Float =  charOffset.daOffsetArray[1] - (!flipped ? 0 : 350);
-
-		if (!PlayState.instance.boyfriend.isCustom)
-		{
-			if (flipped)
-			{
-				if (charX == 0 && charOffset.daOffsetArray[1] == 0)
-				{
-					var charOffset2 = new CharacterOffsets(id, true);
-					charX = charOffset2.daOffsetArray[0];
-					charY =  charOffset2.daOffsetArray[1];
-				}
-			}
-			else
-			{
-				if (charX == 0 && charY == 0 && !PlayState.instance.boyfriend.curCharacter.startsWith('bf'))
-				{
-					var charOffset2 = new CharacterOffsets(id, false);
-					charX = charOffset2.daOffsetArray[0];
-					charY =  charOffset2.daOffsetArray[1] - 350;
-				}
-			}	
-		}
-
-		if (PlayState.instance.boyfriend.isCustom)
-		{
-			charX = PlayState.instance.boyfriend.positionArray[0];
-			charY = PlayState.instance.boyfriend.positionArray[1] - 350;
-		}
-
-		PlayState.instance.boyfriend.x = PlayState.instance.Stage.bfXOffset + charX + 770;
-		PlayState.instance.boyfriend.y = PlayState.instance.Stage.bfYOffset + charY + 450;
-
-		PlayState.instance.addObject(PlayState.instance.bfTrail);
-		PlayState.instance.bfTrail.resetTrail();
-		PlayState.instance.addObject(PlayState.instance.boyfriend);
-
-		if (PlayState.newIcons)
-		{
-			if (PlayState.swapIcons)
-				PlayState.instance.iconP1.changeIcon(PlayState.instance.boyfriend.healthIcon);
-		}
-		else
-			PlayState.instance.iconP1.useOldSystem(PlayState.instance.boyfriend.healthIcon);
-
-		if (PlayState.instance.defaultBar)
-		{
-			PlayState.instance.healthBar.createFilledBar(FlxColor.fromString('#' + PlayState.instance.dad.iconColor), FlxColor.fromString('#' + PlayState.instance.boyfriend.iconColor));
-			PlayState.instance.healthBar.updateBar();
-		}	
-
-		if (PlayState.instance.boyfriend.animOffsets.exists(animationName))
-			PlayState.instance.boyfriend.playAnim(animationName, true, false, animationFrame);
-
-		if (FlxG.save.data.uncacheCharacterSwitch && !dontDestroy)
-			Paths.clearStoredMemory2(bfPath);
-
-		if (PlayState.instance.changeArrows)
-		{
-			for (i in Main.keyAmmo[PlayState.SONG.mania]...Main.keyAmmo[PlayState.SONG.mania] * 2)
-			{
-				PlayState.instance.strumLineNotes.members[i].texture = PlayState.instance.boyfriend.noteSkin;
-				PlayState.instance.bfStrumStyle = PlayState.instance.boyfriend.noteSkin;
-			}
-		}
-	}
-
-	public function changeDadAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false)
-	{	
-		var animationName:String = "no way anyone have an anim name this big";
-		var animationFrame:Int = 0;						
-		if (PlayState.instance.dad.animation.curAnim.name.startsWith('sing'))
-		{
-			animationName = PlayState.instance.dad.animation.curAnim.name;
-			animationFrame = PlayState.instance.dad.animation.curAnim.curFrame;
-		}
-
-		var dadPath:String = '';
-		var daCurChar:String = PlayState.instance.dad.curCharacter;
-
-		if (FlxG.save.data.uncacheCharacterSwitch && !dontDestroy)
-			dadPath = 'shared:assets/shared/images/'+PlayState.instance.dad.charPath;
-
-		PlayState.instance.removeObject(PlayState.instance.dadTrail);
-		PlayState.instance.removeObject(PlayState.instance.dad);
-		PlayState.instance.destroyObject(PlayState.instance.dad);
-		PlayState.instance.dad = new Character(0, 0, id, flipped);
-
-		var charOffset = new CharacterOffsets(id, flipped);
-		var charX:Float = charOffset.daOffsetArray[0];
-		var charY:Float =  charOffset.daOffsetArray[1] + (flipped ? 350 : 0);
-
-		if (flipped)
-			PlayState.instance.dad.flipMode = true;
-
-		if (!PlayState.instance.dad.isCustom)
-		{
-			if (flipped)
-			{
-				if (charX == 0 && charOffset.daOffsetArray[1] == 0 && !charOffset.hasOffsets)
-				{
-					var charOffset2 = new CharacterOffsets(id, false);
-					charX = charOffset2.daOffsetArray[0];
-					charY = charOffset2.daOffsetArray[1];
-				}
-			}
-			else
-			{
-				if (charX == 0 && charY == 0 && !charOffset.hasOffsets)
-				{
-					var charOffset2 = new CharacterOffsets(id, true);
-					charX = charOffset2.daOffsetArray[0];
-					charY = charOffset2.daOffsetArray[1] + 350;
-				}
-			}
-		}
-
-		if (PlayState.instance.dad.isCustom)
-		{
-			charX = PlayState.instance.dad.positionArray[0];
-			charY = PlayState.instance.dad.positionArray[1];
-		}
-
-		PlayState.instance.dad.x = PlayState.instance.Stage.dadXOffset + charX + 100;
-		PlayState.instance.dad.y = PlayState.instance.Stage.dadYOffset + charY + 100;
-
-		PlayState.instance.addObject(PlayState.instance.dadTrail);
-		PlayState.instance.dadTrail.resetTrail();
-		PlayState.instance.addObject(PlayState.instance.dad);
-
-		if (PlayState.newIcons)
-		{
-			if (PlayState.swapIcons)
-				PlayState.instance.iconP2.changeIcon(PlayState.instance.dad.healthIcon);
-		}
-		else
-			PlayState.instance.iconP2.useOldSystem(PlayState.instance.dad.healthIcon);
-
-		if (PlayState.instance.defaultBar)
-		{
-			PlayState.instance.healthBar.createFilledBar(FlxColor.fromString('#' + PlayState.instance.dad.iconColor), FlxColor.fromString('#' + PlayState.instance.boyfriend.iconColor));
-			PlayState.instance.healthBar.updateBar();
-		}	
-
-		if (PlayState.instance.dad.animOffsets.exists(animationName))
-			PlayState.instance.dad.playAnim(animationName, true, false, animationFrame);
-
-		if (FlxG.save.data.uncacheCharacterSwitch && !dontDestroy && daCurChar != PlayState.instance.dad.curCharacter)
-			Paths.clearStoredMemory2(dadPath);
-
-		if (PlayState.instance.changeArrows)
-		{
-			for (i in 0...Main.keyAmmo[PlayState.SONG.mania])
-			{
-				PlayState.instance.opponentStrums.members[i].texture = PlayState.instance.dad.noteSkin;
-			}
-		}
-	}
-
-	function changeGFAuto(id:String, ?dontDestroy:Bool = false)
-	{		
-		PlayState.instance.removeObject(PlayState.instance.gf);
-		PlayState.instance.destroyObject(PlayState.instance.gf);
-		PlayState.instance.gf = new Character(0, 0, id);
-		PlayState.instance.gf.x = PlayState.instance.Stage.gfXOffset + 400;
-		PlayState.instance.gf.y = PlayState.instance.Stage.gfYOffset + 130;
-		PlayState.instance.gf.scrollFactor.set(0.95, 0.95);
-		PlayState.instance.addObject(PlayState.instance.gf);
-
-		if (FlxG.save.data.poltatoPC)
-			PlayState.instance.gf.setPosition(PlayState.instance.gf.x + 100, PlayState.instance.gf.y + 170);
-
-		var gfPath:String = '';
-
-		if (FlxG.save.data.uncacheCharacterSwitch && !dontDestroy)
-			gfPath = 'shared:assets/shared/images/'+PlayState.instance.gf.charPath;
-
-		if (FlxG.save.data.uncacheCharacterSwitch && !dontDestroy)
-			Paths.clearStoredMemory2(gfPath);
-	}
-
 	function getActorByName(id:String):Dynamic
 	{
 		// pre defined names
@@ -551,6 +347,7 @@ class StageModchartState
 
 		// get some fukin globals up in here bois
 
+		setVar('Function_StopLua', Function_StopLua);
 		setVar('Function_Stop', Function_Stop);
 		setVar('Function_Continue', Function_Continue);
 
@@ -565,8 +362,8 @@ class StageModchartState
 		setVar("curStep", 0);
 		setVar("daSection", 0);
 		setVar("curBeat", 0);
-		setVar("crochetReal", Conductor.crochet);
-		setVar("crochet", Conductor.stepCrochet);
+		setVar("crochet", Conductor.crochet);
+		setVar("stepCrochet", Conductor.stepCrochet);
 		setVar("safeZoneOffset", Conductor.safeZoneOffset);
 
 		setVar("screenWidth",FlxG.width);
@@ -2944,18 +2741,10 @@ class StageModchartState
 		});
 
 
-		/*Lua_helper.add_callback(lua, "close", function(printMessage:Bool) {
-			if(!gonnaClose) {
-				if(printMessage) {
-					luaTrace('Stopping lua script: ' + scriptName);
-				}
-				if (PlayState.instance != null)
-					PlayState.instance.Stage.closeLuas.push(this);
-				else
-					Stage.instance.closeLuas.push(this);
-			}
-			gonnaClose = true;
-		});*/
+		Lua_helper.add_callback(lua, "close", function(printMessage:Bool) {
+			closed = true;
+			return closed;
+		});
 
 		Lua_helper.add_callback(lua, "characterDance", function(character:String) {
 			if(PlayState.instance.modchartCharacters.exists(character)) {

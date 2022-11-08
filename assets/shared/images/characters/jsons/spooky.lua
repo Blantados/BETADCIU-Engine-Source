@@ -1,28 +1,8 @@
-function onCreate()
-	-- background shit
-	
-
---	close(true); --For performance reasons, close this script once the stage is fully loaded, as this script won't be used anymore after loading the stage
-end
-
-flipped = false
-
 function onUpdate(elapsed)
-    if getProperty('boyfriend.curCharacter') == 'spooky' and flipped == false then
+    if getProperty('iconP1.animation.name') == 'spooky' and getProperty('iconP1.flipX') == false and getProperty('boyfriend.curCharacter') == 'spooky' then
         setProperty('iconP1.flipX', true) -- my work here is done
-        flipped = true  
-    end
-
-    if flipped == true and getProperty('boyfriend.curCharacter') ~= 'spooky' then
+    elseif getProperty('iconP1.animation.name') ~= 'spooky' and getProperty('iconP1.flipX') == true then
         setProperty('iconP1.flipX', false)
-        flipped = false
+        close(true)
     end
-end
-
-function opponentNoteHit(id, direction)
-	
-end
-
-function onBeatHit(beat)
-	
 end

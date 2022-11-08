@@ -98,6 +98,21 @@
 				0,
 				0
 			]
+		},
+		{
+			"loop": false,
+			"offsets": [
+				52,
+				-16
+			],
+			"anim": "hey",
+			"fps": 24,
+			"playerOffsets": [
+				100,
+				-16
+			],
+			"name": "spooky kids YEAH!!",
+			"indices": []
 		}
 	],
 	"no_antialiasing": false,

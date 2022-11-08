@@ -208,7 +208,7 @@ class PauseSubState extends MusicBeatSubstate
 
 					for (i in 0...menuItems.length)
 					{
-						var songText:Alphabet = new Alphabet(0, (70 * i) + 30, menuItems[i], true, false);
+						var songText:Alphabet = new Alphabet(0, (70 * i) + 30, menuItems[i], true);
 						songText.isMenuItem = true;
 						songText.targetY = i;
 						grpMenuShit.add(songText);
@@ -233,7 +233,7 @@ class PauseSubState extends MusicBeatSubstate
 
 					for (i in 0...menuItems.length)
 					{
-						var songText:Alphabet = new Alphabet(0, (70 * i) + 30, menuItems[i], true, false);
+						var songText:Alphabet = new Alphabet(0, (70 * i) + 30, menuItems[i], true);
 						songText.isMenuItem = true;
 						songText.targetY = i;
 						grpMenuShit.add(songText);
@@ -416,14 +416,14 @@ class PauseSubState extends MusicBeatSubstate
 		}
 
 		for (i in 0...menuItems.length) {
-			var item = new Alphabet(0, (70 * i) + 30, menuItems[i], true, false);
+			var item = new Alphabet(90, 320, menuItems[i], true);
 			item.isMenuItem = true;
 			item.targetY = i;
 			grpMenuShit.add(item);
 
 			if(menuItems[i] == 'Skip Time')
 			{
-				skipTimeText = new FlxText(0, (70 * i) + 30, 0, '', 64);
+				skipTimeText = new FlxText(0, 0, 0, '', 64);
 				skipTimeText.setFormat(Paths.font("vcr.ttf"), 64, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 				skipTimeText.scrollFactor.set();
 				skipTimeText.borderSize = 2;

@@ -66,7 +66,11 @@ class HealthIcon extends FlxSprite
 		}
 		else
 		{
-			animation.add(char, [0, 1, 1], 0, false, isPlayer); //that way everyone technically has a winning icon
+			if (rawPic.width == 150)
+				animation.add(char, [0, 0, 0], 0, false, isPlayer); //that way everyone technically has a winning icon
+			else
+				animation.add(char, [0, 1, 1], 0, false, isPlayer); //that way everyone technically has a winning icon
+
 			hasWinning = false;
 		}
 		
@@ -112,9 +116,9 @@ class HealthIcon extends FlxSprite
 			else
 			{
 				if (fileSize.width == 150)
-					animation.add(char, [0], 0, false, isPlayer);
+					animation.add(char, [0, 0, 0], 0, false, isPlayer);
 				else
-					animation.add(char, [0, 1], 0, false, isPlayer);
+					animation.add(char, [0, 1, 1], 0, false, isPlayer);
 				
 				hasWinning = false;
 			}

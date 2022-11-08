@@ -288,6 +288,24 @@ class Note extends FlxSprite
 
 	var isPixel:Bool = false;
 
+	public function checkNoteXML(rawXml:String)
+	{
+		//based on the system used in GuestBETADCIUState
+		var daXml:Xml = Xml.parse(rawXml);
+		var fast = new haxe.xml.Access(daXml);
+		var users = fast.node.TextureAtlas;
+		for (SubTexture in users.nodes.SubTexture) {
+			var name = Std.string(SubTexture.att.name);
+			var nameCut = name.substr(0, name.length - 4);
+			
+			if (nameCut.contains('tail'))
+			{
+				noteAnimSuffixes = [' alone', ' hold', ' tail'];
+				return;
+			}
+		}
+	}
+
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
@@ -516,6 +534,7 @@ class Note extends FlxSprite
 							var rawXml = File.getContent(Paths.modsXml(style));
 						
 							frames = FlxAtlasFrames.fromSparrow(rawPic, rawXml);
+							checkNoteXML(rawXml);
 	
 							addAnims();
 						}
@@ -538,6 +557,7 @@ class Note extends FlxSprite
 							else
 								frames = Paths.getSparrowAtlas('notes/NOTE_assets');
 
+							
 							addAnims();
 						}
 					}
@@ -873,6 +893,8 @@ class Note extends FlxSprite
 			setGraphicSize(Std.int(width * 0.86));
 	}
 
+	public var noteAnimSuffixes:Array<String> = ['0', ' hold piece', ' hold end']; //accomodate for other namings
+
 	function addAnims(?pixel:Bool = false)
 	{
 		if (pixel)
@@ -912,9 +934,9 @@ class Note extends FlxSprite
 
 			for (i in 0...length)
 			{
-				animation.addByPrefix(colorScroll[i]+'Scroll', colorScroll[i]+'0');
-				animation.addByPrefix(colorScroll[i]+'hold', colorScroll[i]+' hold piece');
-				animation.addByPrefix(colorScroll[i]+'holdend', colorScroll[i]+' hold end');
+				animation.addByPrefix(colorScroll[i]+'Scroll', colorScroll[i]+noteAnimSuffixes[0]);
+				animation.addByPrefix(colorScroll[i]+'hold', colorScroll[i]+noteAnimSuffixes[1]);
+				animation.addByPrefix(colorScroll[i]+'holdend', colorScroll[i]+noteAnimSuffixes[2]);
 
 				if (colorScroll[i] == 'purple' && animation.getByName('purpleholdend') == null)
 					animation.addByPrefix(colorScroll[i]+'holdend', 'pruple end hold'); //because purple naming

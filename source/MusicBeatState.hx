@@ -101,7 +101,7 @@ class MusicBeatState extends FlxUIState
 			currentColor++;
 			skippedFrames = 0;
 		}
-		else
+		else if (FlxG.save.data.fpsRain)
 			skippedFrames++;
 
 		if ((cast (Lib.current.getChildAt(0), Main)).getFPSCap != FlxG.save.data.fpsCap && FlxG.save.data.fpsCap <= 290)

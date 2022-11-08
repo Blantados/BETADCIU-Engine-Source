@@ -9,7 +9,7 @@ import flixel.math.FlxMath;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import lime.utils.Assets;
-
+import editors.ChartingState;
 
 #if windows
 import Discord.DiscordClient;
@@ -141,7 +141,7 @@ class FreeplayState extends MusicBeatState
 
 		for (i in 0...songs.length)
 		{
-			var songText:Alphabet = new Alphabet(0, (70 * i) + 30, songs[i].songName, true);
+			var songText:Alphabet = new Alphabet(90, 320, songs[i].songName, true);
 			songText.isMenuItem = true;
 			songText.targetY = i;
 			grpSongs.add(songText);
@@ -174,7 +174,7 @@ class FreeplayState extends MusicBeatState
 		diffText.font = scoreText.font;
 		add(diffText);
 
-		comboText = new FlxText(diffText.x + 100, diffText.y, 0, "", 24);
+		comboText = new FlxText(diffText.x + 200, diffText.y, 0, "", 24);
 		comboText.font = diffText.font;
 		add(comboText);
 

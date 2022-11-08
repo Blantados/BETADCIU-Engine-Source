@@ -1,4 +1,4 @@
-package;
+package editors;
 
 #if desktop
 import Discord.DiscordClient;
@@ -41,6 +41,8 @@ import Sys;
 import sys.FileSystem;
 import sys.io.File;
 #end
+
+import ModchartState;
 
 using StringTools;
 
@@ -135,7 +137,7 @@ class StageEditorState extends MusicBeatState
 		for (i in 0...tipTextArray.length-1)
 		{
 			var tipText:FlxText = new FlxText(FlxG.width - 320, FlxG.height - 15 - 16 * (tipTextArray.length - i), 300, tipTextArray[i], 12);
-			tipText.cameras = [camHUD];
+			tipText.cameras = [camMenu];
 			tipText.setFormat(null, 12, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
 			tipText.scrollFactor.set();
 			tipText.borderSize = 1;
@@ -150,7 +152,7 @@ class StageEditorState extends MusicBeatState
 		];
 		
 		UI_box = new FlxUITabMenu(null, tabs, true);
-		UI_box.cameras = [camHUD];
+		UI_box.cameras = [camMenu];
 
 		UI_box.resize(250, 120);
 		UI_box.x = FlxG.width - 275;
@@ -162,9 +164,9 @@ class StageEditorState extends MusicBeatState
 			{name: "Stage Objects", label: "Stage Objects"},
 		];
 		UI_stagebox = new FlxUITabMenu(null, tabs, true);
-		UI_stagebox.cameras = [camHUD];
+		UI_stagebox.cameras = [camMenu];
 
-		UI_stagebox.resize(350, 350);
+		UI_stagebox.resize(350, 400);
 		UI_stagebox.x = UI_box.x - 100;
 		UI_stagebox.y = UI_box.y + UI_box.height;
 		UI_stagebox.scrollFactor.set();
@@ -188,7 +190,7 @@ class StageEditorState extends MusicBeatState
 		}
 		if(objects.length < 1) objects.push("NO OBJECTS"); //Prevents crash
 
-		currentObject = Stage.swagBacks[objects[0]];
+		currentObject = changeSpriteClass(Stage.swagBacks[objects[0]]);
 		reloadObjectInfo(objects[0]);
 
 		objectDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(objects, true));
@@ -290,10 +292,18 @@ class StageEditorState extends MusicBeatState
 	var objectScrollFactorXStepper:FlxUINumericStepper;
 	var objectScrollFactorYStepper:FlxUINumericStepper;
 	var objectOrderStepper:FlxUINumericStepper;
-	var currentObject:Dynamic;
+	var objectAlphaStepper:FlxUINumericStepper;
+	public var currentObject:FlxSprite; // we need to access curAnim
 
 	var objectInputText:FlxUIInputText;
 	var objectNameInputText:FlxUIInputText;
+
+	var animationDropDown:FlxUIDropDownMenuCustom;
+	var animationInputText:FlxUIInputText;
+	var animationNameInputText:FlxUIInputText;
+	var animationIndicesInputText:FlxUIInputText;
+	var animationNameFramerate:FlxUINumericStepper;
+	var animationLoopCheckBox:FlxUICheckBox;
 
 	function addStageObjectsUI() {
 		var tab_group = new FlxUI(null, UI_box);
@@ -306,11 +316,11 @@ class StageEditorState extends MusicBeatState
 				objects.push(key);
 			}
 			if(objects.length < 1) objects.push("NO OBJECTS"); //Prevents crash
-			currentObject = Stage.swagBacks[objects[selectedObject]];
+			currentObject = changeSpriteClass(Stage.swagBacks[objects[selectedObject]]);
 			reloadObjectInfo(objects[selectedObject]);
 		});
 
-		objectInputText = new FlxUIInputText(15, 85, 80, '', 8);
+		objectInputText = new FlxUIInputText(15, 70, 80, '', 8);
 		objectNameInputText = new FlxUIInputText(objectInputText.x, objectInputText.y + 35, 150, '', 8);
 
 		objectXStepper = new FlxUINumericStepper(175, 30, 10, 0, -9000, 9000, 0);
@@ -322,36 +332,97 @@ class StageEditorState extends MusicBeatState
 		objectScrollFactorXStepper = new FlxUINumericStepper(objectXStepper.x, objectScaleXStepper.y + 40, 0.1, 1, -9000, 9000, 1);
 		objectScrollFactorYStepper = new FlxUINumericStepper(objectXStepper.x + 60, objectScaleYStepper.y + 40, 0.1, 1, -9000, 9000, 1);
 
-		objectOrderStepper = new FlxUINumericStepper(objectXStepper.x, objectScrollFactorXStepper.y + 40, 1, 1, -9000, 9000, 0);
+		objectOrderStepper = new FlxUINumericStepper(objectXStepper.x, objectScrollFactorXStepper.y + 40, 1, 1, 0, 100, 0);
+		objectAlphaStepper = new FlxUINumericStepper(objectXStepper.x+80, objectScrollFactorXStepper.y + 40, 0.05, 1, 0, 1, 2);
 
-		var addUpdateButton:FlxButton = new FlxButton(70, 290, "Add/Update", function() {
+		animationInputText = new FlxUIInputText(15, objectNameInputText.y + 120, 80, '', 8);
+		animationNameInputText = new FlxUIInputText(animationInputText.x, animationInputText.y + 35, 150, '', 8);
+		animationIndicesInputText = new FlxUIInputText(animationNameInputText.x, animationNameInputText.y + 40, 250, '', 8);
+		animationNameFramerate = new FlxUINumericStepper(animationInputText.x + 170, animationInputText.y, 1, 24, 0, 240, 0);
+		animationLoopCheckBox = new FlxUICheckBox(animationNameInputText.x + 170, animationNameInputText.y - 1, null, null, "Should it Loop?", 100);
+
+		animationDropDown = new FlxUIDropDownMenuCustom(15, animationInputText.y - 55, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(pressed:String) {
+			if (currentObject.numFrames <= 1)
+				return;
+			
+			var selectedAnimation:Int = Std.parseInt(pressed);
+			var daAnim:String = currentObjectAnimationList[selectedAnimation].name;
+			trace('anim should be '+ daAnim);
+			
+			currentObject.animation.play(daAnim);
+
+			if (currentObject.animation.getByName(daAnim) != null)
+			{
+				var daFrameName:String = currentObject.animation.frameName;
+				animationInputText.text = currentObject.animation.curAnim.name;
+				animationNameInputText.text = daFrameName.substr(0, daFrameName.length-4);
+				animationLoopCheckBox.checked = currentObject.animation.curAnim.looped;
+				animationNameFramerate.value = currentObject.animation.curAnim.frameRate;
+	
+				if (currentObject.animation.curAnim.frames != null)
+				{
+					animationIndicesInputText.text = "";
+					
+					for (i in 0...currentObject.animation.curAnim.frames.length)
+						animationIndicesInputText.text += currentObject.animation.curAnim.frames[i]+(i != currentObject.animation.curAnim.frames.length-1 ? ',' : '');
+				}
+			}	
+			else
+				addTextToDebug("Animation doesn't exist!");			
+		});
+
+		var addUpdateButton:FlxButton = new FlxButton(70, 340, "Add/Update", function() {
 			if (objectInputText.text == null)
 				return;
 
-			var leSprite:FlxSprite = new FlxSprite(objectXStepper.value, objectYStepper.value);
+			var leSprite:FlxSprite;
 			var image:String = objectNameInputText.text;
+			var rawPic:Dynamic;
+			var rawXml:String;
 
-			if(image != null && image.length > 0) {
-				var rawPic:Dynamic;
-
+			if(image != null && image.length > 0) {	
 				if (!Paths.currentTrackedAssets.exists(image))
 					Paths.cacheImage(image);
-
+	
 				rawPic = Paths.currentTrackedAssets.get(image);
 
-				leSprite.loadGraphic(rawPic);						
+				if (rawPic == null)
+				{
+					addTextToDebug("Image doesn't exist!");
+					return;
+				}
 			}
+			else
+			{
+				addTextToDebug("No Image Input!");
+				return;
+			}
+
+			(Stage.swagBacks.exists(objectInputText.text) ? leSprite = Stage.swagBacks.get(objectInputText.text) : leSprite = new FlxSprite(objectXStepper.value, objectYStepper.value));
+
+			if (leSprite.numFrames > 1)
+			{
+				if (FileSystem.exists(FileSystem.absolutePath("assets/shared/images/"+image+".xml")))
+					rawXml = File.getContent(FileSystem.absolutePath("assets/shared/images/"+image+".xml"));
+				else
+					rawXml = File.getContent(Paths.xmlNew('images/' + image));
+
+				leSprite.frames = FlxAtlasFrames.fromSparrow(rawPic,rawXml);
+			}
+			else
+				leSprite.loadGraphic(rawPic);
 
 			Stage.swagBacks.set(objectInputText.text, leSprite);
 			remove(leSprite);
 			insert(Std.int(objectOrderStepper.value), leSprite);
-
-			reloadObjectsDropDown();
+			currentObject = leSprite;
+			reloadSwagBacks();
+			
 			//genBoyOffsets();
 			trace('Added/Updated Object: ' + objectInputText.text);
 		});
 
-		var removeButton:FlxButton = new FlxButton(180, 290, "Remove", function() {
+		var removeButton:FlxButton = new FlxButton(180, 340, "Remove", function() {
 			if (Stage.swagBacks.exists(objectInputText.text))
 			{
 				var leSprite:Dynamic = Stage.swagBacks.get(objectInputText.text);
@@ -401,24 +472,38 @@ class StageEditorState extends MusicBeatState
 		tab_group.add(objectScrollFactorXStepper);
 		tab_group.add(objectScrollFactorYStepper);
 		tab_group.add(objectOrderStepper);
+		tab_group.add(objectAlphaStepper);
 		tab_group.add(objectInputText);
 		tab_group.add(objectNameInputText);
+		tab_group.add(animationInputText);
+		tab_group.add(animationNameInputText);
+		tab_group.add(animationIndicesInputText);
+		tab_group.add(animationNameFramerate);
+		tab_group.add(animationLoopCheckBox);
 		tab_group.add(addUpdateButton);
 		tab_group.add(removeButton);
+		tab_group.add(animationDropDown);
 
 		tab_group.add(new FlxText(objectInputText.x, objectInputText.y - 18, 0, 'Object name:'));
 		tab_group.add(new FlxText(objectNameInputText.x, objectNameInputText.y - 18, 0, "Object's image name:"));
 		tab_group.add(new FlxText(objectXStepper.x, objectXStepper.y - 18, 0, "Object X/Y:"));
 		tab_group.add(new FlxText(objectOrderStepper.x, objectOrderStepper.y - 18, 0, "Object Order:"));
+		tab_group.add(new FlxText(objectAlphaStepper.x, objectAlphaStepper.y - 18, 0, "Object Alpha:"));
 		tab_group.add(new FlxText(objectScaleXStepper.x, objectScaleXStepper.y - 18, 0, "Object Scale X/Y:"));
 		tab_group.add(new FlxText(objectScrollFactorXStepper.x, objectScrollFactorYStepper.y - 18, 0, "Object ScrollFactor X/Y:"));
 		tab_group.add(new FlxText(objectDropDown.x, objectDropDown.y - 18, 0, "Stage Objects:"));
+
+		tab_group.add(new FlxText(animationDropDown.x, animationDropDown.y - 18, 0, 'Animations:'));
+		tab_group.add(new FlxText(animationInputText.x, animationInputText.y - 18, 0, 'Animation name:'));
+		tab_group.add(new FlxText(animationNameFramerate.x, animationNameFramerate.y - 18, 0, 'Framerate:'));
+		tab_group.add(new FlxText(animationNameInputText.x, animationNameInputText.y - 18, 0, 'Animation on .XML/.TXT file:'));
+		tab_group.add(new FlxText(animationIndicesInputText.x, animationIndicesInputText.y - 18, 0, 'ADVANCED - Animation Indices:'));
 
 		tab_group.add(objectDropDown);
 
 		UI_stagebox.addGroup(tab_group);
 	}
-	
+
 	function reloadObjectInfo(objName:String)
 	{
 		objectNameInputText.text = currentObject.graphic.key;
@@ -431,8 +516,73 @@ class StageEditorState extends MusicBeatState
 
 		objectScrollFactorXStepper.value = currentObject.scrollFactor.x;
 		objectScrollFactorYStepper.value = currentObject.scrollFactor.y;
+		objectAlphaStepper.value = currentObject.alpha;
+		objectOrderStepper.value = 0;
 
-		//objectOrderStepper.value = currentObject.position.
+		var swagArray:Array<String> = [];
+		for (key in Stage.swagBacks.keys())
+		{
+			swagArray.push(key);
+		}
+		for (i in 0...swagArray.length)
+		{
+			if (Stage.swagBacks.get(swagArray[i]) == currentObject)
+			{
+				objectOrderStepper.value = i;
+			}
+		}
+		reloadAnimationDropDown();
+	}
+
+	var currentObjectAnimationList:Array<FlxAnimation> = [];
+
+	public function checkXMLAnimLength(xmlPath:String, frameName:String)
+	{
+		//i swear this is gonna take me another five hours... wait it only took 10 minutes? neat.
+		var rawXml:String;
+
+		if (FileSystem.exists(FileSystem.absolutePath("assets/shared/images/"+xmlPath+".xml")))
+			rawXml = File.getContent(FileSystem.absolutePath("assets/shared/images/"+xmlPath+".xml"));
+		else
+			rawXml = File.getContent(Paths.xmlNew('images/' + xmlPath));
+
+		var daXml:Xml = Xml.parse(rawXml);
+		var fast = new haxe.xml.Access(daXml);
+		var users = fast.node.TextureAtlas;
+		var animNo:Int = 0;
+
+		for (SubTexture in users.nodes.SubTexture) {
+			var name = Std.string(SubTexture.att.name);
+			var nameCut = name.substr(0, name.length - 4);
+			
+			if (nameCut == frameName)
+			{
+				trace('found anim');
+				animNo++;
+			}
+		}
+
+		return animNo;
+	}
+
+	function reloadAnimationDropDown() {
+		var anims:Array<String> = [];
+		
+		var daObject:FlxSprite = currentObject; // convert or it won't read it right
+
+		if (daObject.numFrames > 1)
+		{
+			var daAnims:Array<FlxAnimation> = daObject.animation.getAnimationList();
+
+			currentObjectAnimationList = daAnims;
+		
+			for (i in 0...daAnims.length)
+				anims.push(daAnims[i].name);
+		}
+	
+		if(anims.length < 1) anims.push('NO ANIMATIONS'); //Prevents crash
+
+		animationDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(anims, true));
 	}
 
 	var focusPlayer:Bool = false;
@@ -495,7 +645,7 @@ class StageEditorState extends MusicBeatState
 
 			for (key in Stage.swagBacks.keys())
 			{
-				currentObject = Stage.swagBacks[key];
+				currentObject = changeSpriteClass(Stage.swagBacks[key]);
 			}
 					
 			reloadObjectsDropDown();
@@ -503,28 +653,36 @@ class StageEditorState extends MusicBeatState
 		}
 	}
 
+	function changeSpriteClass(spr:Dynamic):FlxSprite
+	{
+		return spr;
+	}
+
 	function reloadStageDropDown() {
 		var stagesLoaded:Map<String, Bool> = new Map();
 
 		#if MODS_ALLOWED
 		stageList = [];
-		/* //I don"t like this. It"s good for everything that ISN"T BETADCIU.
-		var directories:Array<String> = [Paths.mods("characters/"), Paths.mods(Paths.currentModDirectory + "/characters/"), Paths.getPreloadPath("characters/")];
-		for (i in 0...directories.length) {
-			var directory:String = directories[i];
-			if(FileSystem.exists(directory)) {
-				for (file in FileSystem.readDirectory(directory)) {
-					var path = haxe.io.Path.join([directory, file]);
-					if (!sys.FileSystem.isDirectory(path) && file.endsWith(".json")) {
-						var charToCheck:String = file.substr(0, file.length - 5);
-						if(!charsLoaded.exists(charToCheck)) {
-							stageList.push(charToCheck);
-							charsLoaded.set(charToCheck, true);
+		if (Paths.currentModDirectory != 'BETADCIU')
+		{
+				//READDED
+				var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.currentModDirectory + '/stages/'), Paths.getPreloadPath('stages/')];
+				for (i in 0...directories.length) {
+					var directory:String = directories[i];
+					if(FileSystem.exists(directory)) {
+						for (file in FileSystem.readDirectory(directory)) {
+							var path = haxe.io.Path.join([directory, file]);
+							if (!sys.FileSystem.isDirectory(path) && file.endsWith('.json')) {
+								var stageToCheck:String = file.substr(0, file.length - 5);
+								if(!stagesLoaded.exists(stageToCheck)) {
+									stageList.push(stageToCheck);
+									stagesLoaded.set(stageToCheck, true);
+								}
+							}
 						}
 					}
 				}
-			}
-		}*/ 
+		}
 
 		//so I"ll use this instead
 		if (FileSystem.exists(Paths.modFolders("data/stageList.txt")))
@@ -532,7 +690,7 @@ class StageEditorState extends MusicBeatState
 		else
 			stageList = CoolUtil.coolTextFile(Paths.txt("stageList"));
 		#else
-		stageList = CoolUtil.coolTextFile(Paths.txt("stageLists"));
+		stageList = CoolUtil.coolTextFile(Paths.txt("stageList"));
 		#end
 
 		stageDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(stageList, true));
@@ -613,7 +771,7 @@ class StageEditorState extends MusicBeatState
 		reloadStageOptions();
 	}
 
-	function addBGLine(bg:Dynamic, place:Dynamic = -1)
+	function addBGLine(bg:FlxSprite, place:Dynamic = -1)
 	{
 		indent = "\t";
 
@@ -642,7 +800,26 @@ class StageEditorState extends MusicBeatState
 
 			for (i in 0...anims.length)
 			{
-				scriptLine("addAnimationByPrefix('"+name+"', '"+anims[i].name+"', '"+anims[i].name+"', "+anims[i].frameRate+", "+anims[i].looped+")");
+				var curAnimName:String = bg.animation.curAnim.name;
+
+				bg.animation.play(anims[i].name);
+
+				var daFrameName:String = bg.animation.frameName;
+				var animIndices:String = "";
+
+				trace(checkXMLAnimLength(bg.graphic.key, daFrameName.substr(0,daFrameName.length-4)));
+
+				if (checkXMLAnimLength(bg.graphic.key, daFrameName.substr(0,daFrameName.length-4)) != bg.animation.curAnim.frames.length)
+				{
+					for (i in 0...bg.animation.curAnim.frames.length)
+						animIndices += bg.animation.curAnim.frames[i]+(i != bg.animation.curAnim.frames.length-1 ? ',' : '');
+				}
+				
+				if (animIndices != "")
+					scriptLine("addAnimationByIndices"+(anims[i].looped ? "Loop" : "")+"('"+name+"', '"+anims[i].name+"', '"+daFrameName.substr(0,daFrameName.length-4)+"', "+animIndices+", "+anims[i].frameRate+")");
+				else
+					scriptLine("addAnimationByPrefix('"+name+"', '"+anims[i].name+"', '"+daFrameName.substr(0,daFrameName.length-4)+"', "+anims[i].frameRate+", "+anims[i].looped+")");
+				bg.animation.play(curAnimName);
 			}
 		}	
 		else
@@ -800,10 +977,43 @@ class StageEditorState extends MusicBeatState
 			}
 			else if(sender == objectOrderStepper)
 			{
-				remove(currentObject);
-				insert(Std.int(objectOrderStepper.value), currentObject);
+				if (Stage.swagBacks.exists(objectInputText.text))
+				{
+					remove(currentObject, true);
+					insert(Std.int(objectOrderStepper.value), currentObject);
+
+					//modifies swagbacks
+					reloadSwagBacks();
+				}
 			}	
+			else if(sender == objectAlphaStepper)
+			{
+				currentObject.alpha = objectAlphaStepper.value;
+			}
 		}
+	}
+
+	function reloadSwagBacks()
+	{
+		var newSwagBacks: Map<String, Dynamic> = new Map();
+		var swagArray:Array<String> = [];
+		Stage.swagBacks.remove(objectInputText.text);
+
+		for (key in Stage.swagBacks.keys())
+		{
+			swagArray.push(key);
+		}
+
+		for (i in 0...swagArray.length)
+		{
+			if (i == Std.int(objectOrderStepper.value))
+				newSwagBacks.set(objectInputText.text, changeSpriteClass(currentObject));
+
+			newSwagBacks.set(swagArray[i], Stage.swagBacks.get(swagArray[i]));
+		}
+
+		Stage.swagBacks = newSwagBacks;
+		reloadObjectsDropDown();
 	}
 
 	function addCharacters()
@@ -922,7 +1132,7 @@ class StageEditorState extends MusicBeatState
 				camFollow.x += addToCam;
 		}
 
-		camMenu.zoom = FlxG.camera.zoom;
+		//camMenu.zoom = FlxG.camera.zoom;
 		
 		Stage.update(elapsed);
 
@@ -1068,5 +1278,20 @@ class StageEditorState extends MusicBeatState
 
 		var text:String = prefix + Clipboard.text.replace("\n", "");
 		return text;
+	}
+
+	public var luaDebugGroup:FlxTypedGroup<DebugLuaText>;
+
+	public function addTextToDebug(text:String, ?color:FlxColor = FlxColor.RED) {
+		luaDebugGroup.forEachAlive(function(spr:DebugLuaText) {
+			spr.y += 20;
+		});
+
+		if(luaDebugGroup.members.length > 34) {
+			var blah = luaDebugGroup.members[34];
+			blah.destroy();
+			luaDebugGroup.remove(blah);
+		}
+		luaDebugGroup.insert(0, new DebugLuaText(text, luaDebugGroup, color));
 	}
 }

@@ -29,9 +29,6 @@ class OptionsMenu extends MusicBeatState
 			new DownscrollOption("Change the layout of the strumline."),
 			new GhostTapOption("Ghost Tapping is when you tap a direction and it doesn't give you a miss."),
 			new Judgement("Customize your Hit Timings (LEFT or RIGHT)"),
-			#if desktop
-			new FPSCapOption("Cap your FPS"),
-			#end
 			new ScrollSpeedOption("Change your scroll speed (1 = Chart dependent)"),
 			new AccuracyDOption("Change how accuracy is calculated. (Accurate = Simple, Complex = Milisecond Based)"),
 			// new OffsetMenu("Get a note offset based off of your inputs!"),
@@ -43,6 +40,8 @@ class OptionsMenu extends MusicBeatState
 			new PoltatoPCOption("Reduces the size of almost all sprites for better performance."),
 			new PsychUIOption("Toggles between Kade and Psych UI."),
 			#if desktop
+			new FPSCapOption("Cap your FPS"),
+			new FPSOption("Toggle the FPS Counter"),
 			new RainbowFPSOption("Make the FPS Counter Rainbow"),
 			new AccuracyOption("Display accuracy information."),
 			new NPSDisplayOption("Shows your current Notes Per Second."),
@@ -59,7 +58,6 @@ class OptionsMenu extends MusicBeatState
 		
 		new OptionCategory("Misc", [
 			#if desktop
-			new FPSOption("Toggle the FPS Counter"),
 			new ReplayOption("View replays"),
 			#end
 			new WatermarkOption("Enable and disable all watermarks from the engine."),
@@ -93,7 +91,7 @@ class OptionsMenu extends MusicBeatState
 
 		for (i in 0...options.length)
 		{
-			var controlLabel:Alphabet = new Alphabet(0, (70 * i) + 30, options[i].getName(), true);
+			var controlLabel:Alphabet = new Alphabet(90, 320, options[i].getName(), true);
 			controlLabel.isMenuItem = true;
 			controlLabel.targetY = i;
 			grpControls.add(controlLabel);
@@ -136,7 +134,7 @@ class OptionsMenu extends MusicBeatState
 				grpControls.clear();
 				for (i in 0...options.length)
 				{
-					var controlLabel:Alphabet = new Alphabet(0, (70 * i) + 30, options[i].getName(), true, false);
+					var controlLabel:Alphabet = new Alphabet(90, 320, options[i].getName(), true);
 					controlLabel.isMenuItem = true;
 					controlLabel.targetY = i;
 					grpControls.add(controlLabel);
@@ -219,7 +217,7 @@ class OptionsMenu extends MusicBeatState
 				{
 					if (currentSelectedCat.getOptions()[curSelected].press()) {
 						grpControls.remove(grpControls.members[curSelected]);
-						var ctrl:Alphabet = new Alphabet(0, (70 * curSelected) + 30, currentSelectedCat.getOptions()[curSelected].getDisplay(), true, false);
+						var ctrl:Alphabet = new Alphabet(0, (70 * curSelected) + 30, currentSelectedCat.getOptions()[curSelected].getDisplay(), true);
 						ctrl.isMenuItem = true;
 						grpControls.add(ctrl);
 					}
@@ -231,7 +229,7 @@ class OptionsMenu extends MusicBeatState
 					grpControls.clear();
 					for (i in 0...currentSelectedCat.getOptions().length)
 						{
-							var controlLabel:Alphabet = new Alphabet(0, (70 * i) + 30, currentSelectedCat.getOptions()[i].getDisplay(), true, false);
+							var controlLabel:Alphabet = new Alphabet(90, 320, currentSelectedCat.getOptions()[i].getDisplay(), true);
 							controlLabel.isMenuItem = true;
 							controlLabel.targetY = i;
 							grpControls.add(controlLabel);
