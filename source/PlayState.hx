@@ -538,9 +538,6 @@ class PlayState extends MusicBeatState
 			case 'ghost-vip':
 				if (storyDifficulty == 5)
 					changeArrows = true;
-			case 'kaboom':
-				if (suf == '-betadciu')
-					SONG.player2 = 'demoman';
 			case 'omnipresent':
 				trioDad = true; //max dads on stage is 3. selever, me, and senpai.
 				duoBoyfriend = true; //max bfs on stage is 2 with sunday and rushia */
@@ -571,8 +568,6 @@ class PlayState extends MusicBeatState
 		switch (songLowercase) {
 			case 'dad-battle': songLowercase = 'dadbattle';
 			case 'philly-nice': songLowercase = 'philly';
-			case 'scary-swings': songLowercase = 'scary swings';
-			case 'my-sweets': songLowercase = 'my sweets';
 		}
 		
 		#if windows
@@ -1306,15 +1301,15 @@ class PlayState extends MusicBeatState
 		if (FlxG.save.data.songPosition)
 			objects = objects.concat(['songPosBG', 'songPosBar']);
 
+		if (loadRep)
+			objects.push('replayTxt');
+
 		for (i in 0... objects.length)
 		{
 			var obj:FlxSprite = Reflect.getProperty(PlayState.instance, objects[i]);
 
 			if (obj != null)
-			{
 				obj.cameras = [camHUD];
-				trace('added '+objects[i]+' to camHUD');
-			}
 		}
 
 		if (isDetected)
@@ -1327,9 +1322,6 @@ class PlayState extends MusicBeatState
 				camNotes.angle = camHUD.angle;
 			}
 		}
-
-		if (loadRep)
-			replayTxt.cameras = [camHUD];
 
 		startingSong = true;
 		
@@ -1612,26 +1604,7 @@ class PlayState extends MusicBeatState
 							else
 								tmr.reset(0.001);
 						});
-				}
-			case 'killer-scream':
-				toggleHealthShit(true);
-				startCountdown();
-			case 'endless' | 'triple-trouble' | 'you-cant-run' | 'four-way-fracture':
-				if (!(SONG.song.toLowerCase() == 'you-cant-run' && isBonus)) //so it doesn't play on my you can't run
-				{
-					var suf:String = "";
-					switch (song)
-					{
-						case 'endless': suf = 'Majin';
-						case 'triple-trouble' | 'four-way-fracture': suf = 'TripleTrouble';
-						case 'you-cant-run': suf = 'YouCantRun';
-					}
-					
-					doSonicIntro(suf, true);
-					startCountdown();
-				}	
-				if (SONG.song.toLowerCase() == 'you-cant-run' && isBonus)
-					startCountdown();*/		
+				}*/
 			default:
 				startCountdown();
 		}	
@@ -5866,8 +5839,6 @@ class PlayState extends MusicBeatState
 			switch (songHighscore) {
 				case 'Dad-Battle': songHighscore = 'Dadbattle';
 				case 'Philly-Nice': songHighscore = 'Philly';
-				case 'Scary-Swings': songHighscore = 'Scary Swings';
-				case 'My-Sweets': songHighscore = 'My Sweets';
 			}
 
 			#if !switch
@@ -5915,8 +5886,6 @@ class PlayState extends MusicBeatState
 				switch (songFormat) {
 					case 'Dad-Battle': songFormat = 'Dadbattle';
 					case 'Philly-Nice': songFormat = 'Philly';
-					case 'Scary-Swings': songFormat = 'Scary Swings';
-					case 'My-Sweets': songFormat = 'My Sweets';
 				}
 
 				var poop:String = Highscore.formatSong(songFormat, storyDifficulty);
@@ -6255,6 +6224,11 @@ class PlayState extends MusicBeatState
 			}
 
 			rating.loadGraphic(existsInCTA(pixelShitPart1 + daRating + pixelShitPart2));
+			if (FlxG.save.data.poltatoPC)
+			{
+				rating.scale.set(rating.scale.x*2, rating.scale.y*2);
+				rating.updateHitbox();
+			}
 			rating.screenCenter();
 			rating.y += 200 + offsetY;
 			rating.x = coolText.x - 40 + offsetX;
@@ -6268,6 +6242,11 @@ class PlayState extends MusicBeatState
 			if(FlxG.save.data.botplay) msTiming = 0;							   
 			
 			comboSpr = new FlxSprite().loadGraphic(existsInCTA(pixelShitPart1 + 'combo' + pixelShitPart2));
+			if (FlxG.save.data.poltatoPC)
+			{
+				comboSpr.scale.set(comboSpr.scale.x*2, comboSpr.scale.y*2);
+				comboSpr.updateHitbox();
+			}
 			comboSpr.screenCenter();
 			comboSpr.x = coolText.x;
 			comboSpr.y += 200;
@@ -6317,6 +6296,11 @@ class PlayState extends MusicBeatState
 			for (i in seperatedScore)
 			{
 				var numScore:FlxSprite = new FlxSprite().loadGraphic(existsInCTA(pixelShitPart1 + 'num' + Std.int(i) + pixelShitPart2));
+				if (FlxG.save.data.poltatoPC)
+				{
+					numScore.scale.set(numScore.scale.x*2, numScore.scale.y*2);
+					numScore.updateHitbox();
+				}
 				numScore.screenCenter();
 				numScore.x = coolText.x + (43 * daLoop) - 90 + offsetX;
 				numScore.y += 80 + 200 + offsetY;

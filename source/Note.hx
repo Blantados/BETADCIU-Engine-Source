@@ -531,11 +531,7 @@ class Note extends FlxSprite
 						}
 						else
 						{
-							var rawXml = File.getContent(Paths.modsXml(style));
-						
-							frames = FlxAtlasFrames.fromSparrow(rawPic, rawXml);
-							checkNoteXML(rawXml);
-	
+							frames = Paths.getSparrowAtlas(style);
 							addAnims();
 						}
 					}
@@ -891,6 +887,12 @@ class Note extends FlxSprite
 
 		if (burning && !pixelBurn && PlayState.curStage != 'auditorHell' && !isAuditorNote || bomb)
 			setGraphicSize(Std.int(width * 0.86));
+
+		if (FlxG.save.data.poltatoPC)
+		{
+			scale.set(scale.x*2, scale.y*2);
+			updateHitbox();
+		}
 	}
 
 	public var noteAnimSuffixes:Array<String> = ['0', ' hold piece', ' hold end']; //accomodate for other namings

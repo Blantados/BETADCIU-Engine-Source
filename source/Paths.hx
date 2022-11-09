@@ -56,35 +56,12 @@ class Paths
 
 	public static function returnGraphic(key:String, ?library:String = null) 
 	{
-		#if MODS_ALLOWED
-		var modKey:String = modsImages(key);
-		if(FileSystem.exists(modKey)) {
-			if(!currentTrackedAssets.exists(modKey)) {
-				var newBitmap:BitmapData = BitmapData.fromFile(modKey);
-				var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(newBitmap, false, modKey);
-				newGraphic.persist = true;
-				currentTrackedAssets.set(modKey, newGraphic);
-			}
-			localTrackedAssets.push(modKey);
-			return currentTrackedAssets.get(modKey);
+		if(!currentTrackedAssets.exists(key)) {
+			cacheImage(key, library);
 		}
-		#end
+		//localTrackedAssets.push(key);
+		return currentTrackedAssets.get(key);
 
-		var path = getPath('images/$key.png', IMAGE, library);
-
-		if (Assets.exists(getPath('images/$key.png', IMAGE, 'shared')))
-			library = 'shared';
-
-		//trace(path);
-		if (OpenFlAssets.exists(path, IMAGE)) {
-			if(!currentTrackedAssets.exists(path)) {
-				var newGraphic:FlxGraphic = FlxG.bitmap.add(path, false, path);
-				newGraphic.persist = true;
-				currentTrackedAssets.set(path, newGraphic);
-			}
-			localTrackedAssets.push(path);
-			return currentTrackedAssets.get(path);
-		}
 		trace('you failed dipshit');
 		return null;
 	}
@@ -231,8 +208,6 @@ class Paths
 		switch (songLowercase) {
 			case 'dad-battle': songLowercase = 'dadbattle';
 			case 'philly-nice': songLowercase = 'philly';
-			case 'scary-swings': songLowercase = 'scary swings';
-			case 'my-sweets': songLowercase = 'my sweets';
 		}
 
 		var pre:String = "";
@@ -246,6 +221,8 @@ class Paths
 			suf = 'V';
 		if (PlayState.isBETADCIU && PlayState.storyDifficulty == 5 && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Inst'+'Guest'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'InstGuest'))))		
 			suf = 'Guest';
+		if (PlayState.isBETADCIU && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Inst'+'BETADCIU'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'InstBETADCIU'))))
+			suf = 'BETADCIU';
 
 		if (FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'Inst'+suf)))
 		{
@@ -262,8 +239,6 @@ class Paths
 		switch (songLowercase) {
 			case 'dad-battle': songLowercase = 'dadbattle';
 			case 'philly-nice': songLowercase = 'philly';
-			case 'scary-swings': songLowercase = 'scary swings';
-			case 'my-sweets': songLowercase = 'my sweets';
 		}
 
 		var pre:String = "";
@@ -277,6 +252,8 @@ class Paths
 			suf = 'V';
 		if (PlayState.isBETADCIU && PlayState.storyDifficulty == 5 && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Voices'+'Guest'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'VoicesGuest'))))		
 			suf = 'Guest';
+		if (PlayState.isBETADCIU && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Voices'+'BETADCIU'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'VoicesBETADCIU'))))
+			suf = 'BETADCIU';
 
 		if (FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'Voices'+suf)))
 		{
@@ -319,8 +296,6 @@ class Paths
 			switch (songLowercase) {
 				case 'dad-battle': songLowercase = 'dadbattle';
 				case 'philly-nice': songLowercase = 'philly';
-				case 'scary-swings': songLowercase = 'scary swings';
-				case 'my-sweets': songLowercase = 'my sweets';
 			}
 
 		var pre:String = "";
@@ -340,15 +315,8 @@ class Paths
 
 	inline static public function image(key:String, ?library:String)
 	{
-		/*	var returnAsset:FlxGraphic = returnGraphic(key, library);
-
-		if (FileSystem.exists(Paths.modsImages(key)))	
-		{
-			if (!Paths.currentTrackedAssets.exists(key))
-				cacheImage(key);
-
+		if(FileSystem.exists(Paths.modsImages(key)))
 			return Paths.modsImages(key);
-		}*/
 			
 		return getPath('images/$key.png', IMAGE, library);
 	}
@@ -526,7 +494,7 @@ class Paths
 			if(!currentTrackedSounds.exists(file)) {
 				currentTrackedSounds.set(file, Sound.fromFile(file));
 			}
-			localTrackedAssets.push(key);
+			//localTrackedAssets.push(key);
 			return currentTrackedSounds.get(file);
 		}
 		#end
@@ -540,21 +508,53 @@ class Paths
 		#else
 			currentTrackedSounds.set(gottenPath, OpenFlAssets.getSound(getPath('$path/$key.$SOUND_EXT', SOUND, library)));
 		#end
-		localTrackedAssets.push(key);
+		//localTrackedAssets.push(key);
 		return currentTrackedSounds.get(gottenPath);
 	}
 
-	public static function cacheImage(key:String, ?library:String = null)
+	public static function checkImagePaths(key:String, ?library:String = null)
 	{
-		var path:String;
+		var path:String = "ksajdlahfjhadjfhdshfkjhd";
 
-		if (FileSystem.exists(modsImages(key)))
-			path = modsImages(key);
-		else if (FileSystem.exists(FileSystem.absolutePath('assets/shared/images/$key.png')))
-			path = FileSystem.absolutePath('assets/shared/images/$key.png');
-		else
-			path = getPath('images/$key.png', IMAGE, library);
-	
+		var pathsToCheck:Array<String> = [FileSystem.absolutePath("assets/shared/images/"+key+".png"), Paths.image(key)];
+
+		if (library != null)
+			pathsToCheck.push(FileSystem.absolutePath("assets/"+library+"/images/"+key+".png"));
+
+		#if MODS_ALLOWED
+			pathsToCheck.push(modsImages(key));
+		#end
+
+		for (i in 0...pathsToCheck.length)
+		{
+			if(FileSystem.exists(pathsToCheck[i])) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public static function cacheImage(key:String, ?library:String = null, ?antialiasing:Bool = true)
+	{
+		var path:String = "ksajdlahfjhadjfhdshfkjhd";
+
+		var pathsToCheck:Array<String> = [FileSystem.absolutePath("assets/shared/images/"+key+".png"), Paths.image(key)];
+
+		if (library != null)
+			pathsToCheck.push(FileSystem.absolutePath("assets/"+library+"/images/"+key+".png"));
+
+		#if MODS_ALLOWED
+			pathsToCheck.push(modsImages(key));
+		#end
+
+		for (i in 0...pathsToCheck.length)
+		{
+			if(FileSystem.exists(pathsToCheck[i])) {
+				path = pathsToCheck[i];
+			}
+		}
+		
 		if (FileSystem.exists(path) || Assets.exists(path)) 
 		{
 			if(!currentTrackedAssets.exists(key)) 
@@ -573,12 +573,17 @@ class Paths
 					else
 						bigBMP = BitmapData.fromFile(path);
 
-					newBitmap = new BitmapData(Std.int(bigBMP.width * 0.5), Std.int(bigBMP.height * 0.5), true, 0x000000);
-					newBitmap.draw(bigBMP, matrix, null, null, null, true);
-
-					bigBMP.dispose();
-					bigBMP.disposeImage();
-					bigBMP = null;
+					if (bigBMP.width <= 1) //prevents having 0 width for cases like empty gf and empty strums
+						newBitmap = bigBMP;
+					else
+					{
+						newBitmap = new BitmapData(Std.int(bigBMP.width * 0.5), Std.int(bigBMP.height * 0.5), true, 0x000000);
+						newBitmap.draw(bigBMP, matrix, null, null, null, antialiasing);
+	
+						bigBMP.dispose();
+						bigBMP.disposeImage();
+						bigBMP = null;
+					}
 				}
 				else	
 					newBitmap = BitmapData.fromFile(path);
@@ -593,39 +598,6 @@ class Paths
 
 		trace('you failed dipshit');
 		return null;		
-	}
-	public static function uncacheChars()
-	{
-		trace (charPath);
-		
-		for (i in 0... charPath.length)
-			clearStoredMemory2('shared:assets/shared/images/'+ charPath[i]+ '.png');
-
-		trace (charPath);
-	}
-	
-
-	// currently not usin this
-	public static function clearUnusedMemory2() 
-	{
-		// clear non local assets in the tracked assets list
-		for (key in currentTrackedAssets.keys()) {
-			// if it is not currently contained within the used local assets
-			if (!localTrackedAssets.contains(key) 
-				&& !dumpExclusions.contains(key)) {
-				// get rid of it
-				var obj = currentTrackedAssets.get(key);
-				@:privateAccess
-				if (obj != null) {
-					openfl.Assets.cache.removeBitmapData(key);
-					FlxG.bitmap._cache.remove(key);
-					obj.destroy();
-					currentTrackedAssets.remove(key);
-				}
-			}
-		}
-		// run the garbage collector for good measure lmfao
-		System.gc(); //cuz this
 	}
 
 	static public function getTextFromFile(key:String, ?ignoreMods:Bool = false):String
@@ -656,21 +628,99 @@ class Paths
 		return Assets.getText(getPath(key, TEXT));
 	}
 
+	public static var poltatoAlphabetXml:String = null;
+
 	inline static public function getSparrowAtlas(key:String, ?library:String)
 	{
+		#if MODS_ALLOWED
+		var imageLoaded:FlxGraphic = returnGraphic(key, library);
+		var rawXml:String = "";
+
+		var pathsToCheck:Array<String> = [modsXml(key), FileSystem.absolutePath("assets/shared/images/"+key+".xml"), Paths.xmlNew('images/' + key)];
+
+		if (library != null)
+			pathsToCheck.push(FileSystem.absolutePath("assets/"+library+"/images/"+key+".xml"));
+
+		for (i in 0...pathsToCheck.length)
+		{
+			if(FileSystem.exists(pathsToCheck[i])) {
+				rawXml = File.getContent(pathsToCheck[i]);
+			}
+		}
+		
+		if (imageLoaded == null)
+		{
+			trace('image is null!');
+			Paths.cacheImage('bruhtf', 'shared');
+			imageLoaded = Paths.currentTrackedAssets.get('bruhtf');
+		}
+		if (rawXml == "")
+			rawXml = Assets.getText(Paths.xmlNew('images/bruhtf')); //load something
+
+		if (FlxG.save.data.poltatoPC && imageLoaded.width != 1)
+		{
+			if (key == 'alphabet' && poltatoAlphabetXml != null) //decrease the alphabet load time
+				rawXml = poltatoAlphabetXml;
+			else
+			{
+				rawXml = CoolUtil.resizeXML(rawXml, 0.5);
+				
+				if (key == 'alphabet')
+					poltatoAlphabetXml = rawXml;
+			}
+		}
+			
+
+		return FlxAtlasFrames.fromSparrow(imageLoaded, rawXml);
+		#else
 		return FlxAtlasFrames.fromSparrow(image(key, library), file('images/$key.xml', library));
+		#end
 	}
 
 	inline static public function getPackerAtlas(key:String, ?library:String)
 	{
+		#if MODS_ALLOWED
+		var imageLoaded:FlxGraphic = returnGraphic(key, library);
+		var rawTxt:String = "";
+
+		var pathsToCheck:Array<String> = [modsTxt(key), FileSystem.absolutePath("assets/shared/images/"+key+".xml"), Paths.xmlNew('images/' + key)];
+
+		if (library != null)
+			pathsToCheck.push(FileSystem.absolutePath("assets/"+library+"/images/"+key+".txt"));
+
+		for (i in 0...pathsToCheck.length)
+		{
+			if(FileSystem.exists(pathsToCheck[i])) {
+				rawTxt = File.getContent(pathsToCheck[i]);
+			}
+		}
+
+		if (imageLoaded == null)
+		{
+			Paths.cacheImage('characters/spirit', 'shared');
+			imageLoaded = Paths.currentTrackedAssets.get('characters/spirit');
+		}
+		if (rawTxt == "")
+			rawTxt = Assets.getText(Paths.txtNew('images/characters/spirit')); //load something
+
+		if (FlxG.save.data.poltatoPC)
+			rawTxt = CoolUtil.resizeTxt(rawTxt, 0.5);
+
+		return FlxAtlasFrames.fromSpriteSheetPacker(imageLoaded, rawTxt);
+		#else
 		return FlxAtlasFrames.fromSpriteSheetPacker(image(key, library), file('images/$key.txt', library));
+		#end
 	}
 
-	inline static public function getTextureAtlas(key:String, ?library:String) //idk what to call this one
+	inline static public function getXMLAtlas(key:String, ?library:String) //idk what to call this one
 	{
 		return FlxAtlasFrames.fromTexturePackerXml(image(key, library), file('images/$key.xml', library));
 	}
 
+	inline static public function getJSONAtlas(key:String, ?library:String)
+	{
+		return FlxAtlasFrames.fromTexturePackerJson(image(key, library), file('images/$key.json', library));
+	}
 
 	inline static public function fileExists(key:String, type:AssetType, ?ignoreMods:Bool = false, ?library:String)
 	{		

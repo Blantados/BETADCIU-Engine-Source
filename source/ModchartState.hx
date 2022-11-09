@@ -1039,6 +1039,7 @@ class ModchartState
 		set('songLength', FlxG.sound.music.length);
 		set('songName', PlayState.SONG.song);
 		set('seenCutscene', PlayState.seenCutscene);
+		set('scriptName', scriptName);
 
 		set("curStep", 0);
 		set("daSection", 0);
@@ -1262,6 +1263,195 @@ class ModchartState
 			luaTrace("Script doesn't exist!");
 		});
 
+		Lua_helper.add_callback(lua, "getRunningScripts", function(){
+			var runningScripts:Array<String> = [];
+			for (idx in 0...PlayState.instance.luaArray.length)
+				runningScripts.push(PlayState.instance.luaArray[idx].scriptName);
+
+
+			return runningScripts;
+		});
+
+		Lua_helper.add_callback(lua, "callOnLuas", function(?funcName:String, ?args:Array<Dynamic>, ignoreStops=false, ignoreSelf=true, ?exclusions:Array<String>){
+			if(funcName==null){
+				#if (linc_luajit >= "0.0.6")
+				LuaL.error(lua, "bad argument #1 to 'callOnLuas' (string expected, got nil)");
+				#end
+				return;
+			}
+			if(args==null)args = [];
+
+			if(exclusions==null)exclusions=[];
+
+			Lua.getglobal(lua, 'scriptName');
+			var daScriptName = Lua.tostring(lua, -1);
+			Lua.pop(lua, 1);
+			if(ignoreSelf && !exclusions.contains(daScriptName))exclusions.push(daScriptName);
+			PlayState.instance.callOnLuas(funcName, args, ignoreStops, exclusions);
+		});
+
+		Lua_helper.add_callback(lua, "callScript", function(?luaFile:String, ?funcName:String, ?args:Array<Dynamic>){
+			if(luaFile==null){
+				#if (linc_luajit >= "0.0.6")
+				LuaL.error(lua, "bad argument #1 to 'callScript' (string expected, got nil)");
+				#end
+				return;
+			}
+			if(funcName==null){
+				#if (linc_luajit >= "0.0.6")
+				LuaL.error(lua, "bad argument #2 to 'callScript' (string expected, got nil)");
+				#end
+				return;
+			}
+			if(args==null){
+				args = [];
+			}
+			var cervix = luaFile + ".lua";
+			if(luaFile.endsWith(".lua"))cervix=luaFile;
+			var doPush = false;
+			#if MODS_ALLOWED
+			if(FileSystem.exists(Paths.modFolders(cervix)))
+			{
+				cervix = Paths.modFolders(cervix);
+				doPush = true;
+			}
+			else if(FileSystem.exists(cervix))
+			{
+				doPush = true;
+			}
+			else {
+				cervix = Paths.getPreloadPath(cervix);
+				if(FileSystem.exists(cervix)) {
+					doPush = true;
+				}
+			}
+			#else
+			cervix = Paths.getPreloadPath(cervix);
+			if(Assets.exists(cervix)) {
+				doPush = true;
+			}
+			#end
+			if(doPush)
+			{
+				for (luaInstance in PlayState.instance.luaArray)
+				{
+					if(luaInstance.scriptName == cervix)
+					{
+						luaInstance.call(funcName, args);
+
+						return;
+					}
+
+				}
+			}
+			Lua.pushnil(lua);
+
+		});
+
+		Lua_helper.add_callback(lua, "getGlobalFromScript", function(?luaFile:String, ?global:String){ // returns the global from a script
+			if(luaFile==null){
+				#if (linc_luajit >= "0.0.6")
+				LuaL.error(lua, "bad argument #1 to 'getGlobalFromScript' (string expected, got nil)");
+				#end
+				return;
+			}
+			if(global==null){
+				#if (linc_luajit >= "0.0.6")
+				LuaL.error(lua, "bad argument #2 to 'getGlobalFromScript' (string expected, got nil)");
+				#end
+				return;
+			}
+			var cervix = luaFile + ".lua";
+			if(luaFile.endsWith(".lua"))cervix=luaFile;
+			var doPush = false;
+			#if MODS_ALLOWED
+			if(FileSystem.exists(Paths.modFolders(cervix)))
+			{
+				cervix = Paths.modFolders(cervix);
+				doPush = true;
+			}
+			else if(FileSystem.exists(cervix))
+			{
+				doPush = true;
+			}
+			else {
+				cervix = Paths.getPreloadPath(cervix);
+				if(FileSystem.exists(cervix)) {
+					doPush = true;
+				}
+			}
+			#else
+			cervix = Paths.getPreloadPath(cervix);
+			if(Assets.exists(cervix)) {
+				doPush = true;
+			}
+			#end
+			if(doPush)
+			{
+				for (luaInstance in PlayState.instance.luaArray)
+				{
+					if(luaInstance.scriptName == cervix)
+					{
+						Lua.getglobal(luaInstance.lua, global);
+						if(Lua.isnumber(luaInstance.lua,-1)){
+							Lua.pushnumber(lua, Lua.tonumber(luaInstance.lua, -1));
+						}else if(Lua.isstring(luaInstance.lua,-1)){
+							Lua.pushstring(lua, Lua.tostring(luaInstance.lua, -1));
+						}else if(Lua.isboolean(luaInstance.lua,-1)){
+							Lua.pushboolean(lua, Lua.toboolean(luaInstance.lua, -1));
+						}else{
+							Lua.pushnil(lua);
+						}
+						// TODO: table
+
+						Lua.pop(luaInstance.lua,1); // remove the global
+
+						return;
+					}
+
+				}
+			}
+			Lua.pushnil(lua);
+		});
+		Lua_helper.add_callback(lua, "setGlobalFromScript", function(luaFile:String, global:String, val:Dynamic){ // returns the global from a script
+			var cervix = luaFile + ".lua";
+			if(luaFile.endsWith(".lua"))cervix=luaFile;
+			var doPush = false;
+			#if MODS_ALLOWED
+			if(FileSystem.exists(Paths.modFolders(cervix)))
+			{
+				cervix = Paths.modFolders(cervix);
+				doPush = true;
+			}
+			else if(FileSystem.exists(cervix))
+			{
+				doPush = true;
+			}
+			else {
+				cervix = Paths.getPreloadPath(cervix);
+				if(FileSystem.exists(cervix)) {
+					doPush = true;
+				}
+			}
+			#else
+			cervix = Paths.getPreloadPath(cervix);
+			if(Assets.exists(cervix)) {
+				doPush = true;
+			}
+			#end
+			if(doPush)
+			{
+				for (luaInstance in PlayState.instance.luaArray)
+				{
+					if(luaInstance.scriptName == cervix)
+					{
+						luaInstance.set(global, val);
+					}
+
+				}
+			}
+			Lua.pushnil(lua);
+		});
 
 		Lua_helper.add_callback(lua,"animationSwap", function(char:String, anim1:String, anim2:String) {
 			var shit = getObjectDirectly2(char);
@@ -3364,6 +3554,10 @@ class ModchartState
 			PlayState.instance.startCharacterLua(name);
 		});
 
+		Lua_helper.add_callback(lua, "startCharLua", function(name:String) {
+			PlayState.instance.startCharacterLua(name);
+		});
+
 		Lua_helper.add_callback(lua, "precacheSound", function(name:String) {
 			return name; //lol
 		});
@@ -3413,7 +3607,13 @@ class ModchartState
 
 				rawPic = Paths.currentTrackedAssets.get(image);
 
-				leSprite.loadGraphic(rawPic);						
+				leSprite.loadGraphic(rawPic);
+				
+				if (FlxG.save.data.poltatoPC)
+				{
+					leSprite.scale.set(2, 2);
+					leSprite.updateHitbox();
+				}
 			}
 			leSprite.antialiasing = antialiasing;
 
@@ -3438,6 +3638,7 @@ class ModchartState
 			else{
 				PlayState.instance.modchartSprites.set(tag, leSprite);
 			}
+			leSprite.antialiasing = true;
 		});
 
 		Lua_helper.add_callback(lua, "makeLuaBackdrop", function(tag:String, image:String, x:Float, y:Float, ?antialiasing:Bool = true) {
@@ -3916,21 +4117,21 @@ class ModchartState
 		Lua_helper.add_callback(lua, "scaleObject", function(obj:String, x:Float, y:Float, ?updateHitbox:Bool = true) {
 			if(Stage.instance.swagBacks.exists(obj)) {
 				var shit:ModchartSprite = Stage.instance.swagBacks.get(obj);
-				shit.scale.set(x, y);
+				shit.scale.set(x * (FlxG.save.data.poltatoPC ? 2 : 1), y * (FlxG.save.data.poltatoPC ? 2 : 1));
 				if(updateHitbox)shit.updateHitbox();
 				return;
 			}
 			
 			if(PlayState.instance.Stage.swagBacks.exists(obj)) {
 				var shit:ModchartSprite = Stage.instance.swagBacks.get(obj);
-				shit.scale.set(x, y);
+				shit.scale.set(x * (FlxG.save.data.poltatoPC ? 2 : 1), y * (FlxG.save.data.poltatoPC ? 2 : 1));
 				if(updateHitbox)shit.updateHitbox();
 				return;
 			}
 
 			if(PlayState.instance.getLuaObject(obj)!=null) {
 				var shit:FlxSprite = PlayState.instance.getLuaObject(obj);
-				shit.scale.set(x, y);
+				shit.scale.set(x * (FlxG.save.data.poltatoPC ? 2 : 1), y * (FlxG.save.data.poltatoPC ? 2 : 1));
 				if(updateHitbox) shit.updateHitbox();
 				return;
 			}
@@ -3942,7 +4143,7 @@ class ModchartState
 			}
 
 			if(poop != null) {
-				poop.scale.set(x, y);
+				poop.scale.set(x * (FlxG.save.data.poltatoPC ? 2 : 1), y * (FlxG.save.data.poltatoPC ? 2 : 1));
 				if(updateHitbox) poop.updateHitbox();
 				return;
 			}
@@ -4677,20 +4878,16 @@ class ModchartState
 				spr.frames = Paths.getPackerAtlas(image);
 			default:
 			{
-				var rawPic:Dynamic;
-				var rawXml:String;
-
 				if (!Paths.currentTrackedAssets.exists(image))
 					Paths.cacheImage(image);
 
-				rawPic = Paths.currentTrackedAssets.get(image);
+				spr.frames = Paths.getSparrowAtlas(image);
 
-				if (FileSystem.exists(FileSystem.absolutePath("assets/shared/images/"+image+".xml")))
-					rawXml = File.getContent(FileSystem.absolutePath("assets/shared/images/"+image+".xml"));
-				else
-					rawXml = File.getContent(Paths.xmlNew('images/' + image));
-
-				spr.frames = FlxAtlasFrames.fromSparrow(rawPic,rawXml);
+				if (FlxG.save.data.poltatoPC)
+				{
+					spr.scale.set(2, 2);
+					spr.updateHitbox();
+				}
 			}
 		}
 	}

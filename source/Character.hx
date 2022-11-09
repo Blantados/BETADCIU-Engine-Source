@@ -439,7 +439,7 @@ class Character extends FlxSprite
 				antialiasing = false;*/
 
 			case 'sarvente-transform': //this one's gotta stay for now since it uses textureatlas
-				frames = Paths.getTextureAtlas('sacredmass/churchgospel/pegMePlease');
+				frames = Paths.getXMLAtlas('sacredmass/churchgospel/pegMePlease');
 				healthIcon = 'sarvente-lucifer';
 				iconColor = 'FFDA317D';
 				
@@ -1237,9 +1237,6 @@ class Character extends FlxSprite
 				if (curCharacter.contains('hd-senpai'))
 					curCharacter = StringTools.replace(curCharacter, 'hd', '2vplus');
 
-				if (curCharacter == 'twinstwo' || curCharacter == 'twinsone')
-					alpha = 0.78;
-				
 				var characterPath:String = 'images/characters/jsons/' + curCharacter;
 
 				var path:String = Paths.jsonNew(characterPath);
@@ -1258,148 +1255,65 @@ class Character extends FlxSprite
 
 				var rawJson:Dynamic;
 
-				if (FileSystem.exists(path))
-					rawJson = File.getContent(path);
-				else
-					rawJson = Assets.getText(path);
+				(FileSystem.exists(path) ? rawJson = File.getContent(path) : rawJson = Assets.getText(path));
 				
 				var json:CharacterFile = cast Json.parse(rawJson);
 
-				if (json.noteSkin != null)
-					noteSkin = json.noteSkin;
-
-				if (json.isPlayerChar)
-					isPsychPlayer = json.isPlayerChar;
-
+				if (json.noteSkin != null){noteSkin = json.noteSkin;}
+				if (json.isPlayerChar){isPsychPlayer = json.isPlayerChar;}
+					
 				if (noteSkin == "" || noteSkin == 'normal' || noteSkin == 'default')
 					noteSkin = PlayState.SONG.noteStyle;	
 
+				if(json.no_antialiasing) {
+					antialiasing = false;
+					noAntialiasing = true;
+				}
+
 				var imagePath = Paths.image(json.image);
 
-				if (Assets.exists(imagePath) && !FileSystem.exists(imagePath) && !FileSystem.exists(Paths.modsImages(imagePath)))
+				if (!Paths.currentTrackedAssets.exists(json.image))
 				{
-					txtToFind = Paths.txtNew('images/' + json.image);
-				
-					if (!Paths.currentTrackedAssets.exists(json.image))
+					if (Assets.exists(imagePath) && !FileSystem.exists(imagePath) && !FileSystem.exists(Paths.modsImages(imagePath)))
 						Paths.cacheImage(json.image, 'shared');
-					
-					rawPic = Paths.currentTrackedAssets.get(json.image);
-
-					charPath = json.image + '.png'; //cuz we only use pngs anyway
-					imageFile = json.image; //psych
-
-					if(Assets.exists(txtToFind))
-						frames = Paths.getPackerAtlas(json.image);
-					else 
-					{
-						rawXml = Assets.getText(Paths.xmlNew('images/' + json.image));
-
-						if(FlxG.save.data.poltatoPC && curCharacter != 'senpai-christmas' && json.scale != 6)
-						{	
-							rawXml = resizeXML(rawXml, 0.5);
-	
-							json.scale *= 2;
-							
-							if (isPlayer && json.playerposition != null)
-								json.playerposition = [json.playerposition[0] + 100, json.playerposition[1] + 170];
-							else
-								json.position = [json.position[0] + 100, json.position[1] + 170];
-
-							if (height < 410)
-								json.position[1] -= 100;
-						}
-		
-						frames = FlxAtlasFrames.fromSparrow(rawPic,rawXml);	
-					}	
-				}
-				else //if it's a character added after compiling
-				{
-					txtToFind= Paths.txtNew('images/' + json.image);
-					var modTxtToFind:String = Paths.modsTxt(json.image);
-
-					if (!Paths.currentTrackedAssets.exists(json.image))
+					else
 						Paths.cacheImage(json.image, 'preload');
-					
-					rawPic = Paths.currentTrackedAssets.get(json.image);
-
-					if (rawPic == null)
-					{
-						trace('image not found');
-						Paths.cacheImage('characters/BOYFRIEND', 'shared');
-
-						rawPic = Paths.currentTrackedAssets.get('characters/BOYFRIEND');
-					}
-
-					charPath = json.image + '.png'; //cuz we only use pngs anyway
-					imageFile = json.image; //psych
-	
-					if(FileSystem.exists(txtToFind))
-					{
-						rawXml = File.getContent(txtToFind);
-						frames = FlxAtlasFrames.fromSpriteSheetPacker(rawPic,rawXml);
-					}
-					else 
-					{
-						if (FileSystem.exists(Paths.modsXml(json.image)))
-							rawXml = File.getContent(Paths.modsXml(json.image));
-						else if (FileSystem.exists(FileSystem.absolutePath("assets/shared/images/"+json.image+".xml")))
-							rawXml = File.getContent(FileSystem.absolutePath("assets/shared/images/"+json.image+".xml"));
-						else if (FileSystem.exists(Paths.xmlNew('images/' + json.image)))
-							rawXml = File.getContent(Paths.xmlNew('images/' + json.image));
-						else
-							rawXml  = Assets.getText(Paths.xmlNew('images/characters/BOYFRIEND')); //so that it stops crashing.
-
-						//this took my dumbass 2 hours to figure out.
-						if(FlxG.save.data.poltatoPC && curCharacter != 'senpai-christmas' && json.scale != 6)
-						{	
-							rawXml = resizeXML(rawXml, 0.5);
-
-							json.scale *= 2;
-							
-							if (isPlayer && json.playerposition != null)
-								json.playerposition = [json.playerposition[0] + 230, json.playerposition[1] + 230];
-							else
-								json.position = [json.position[0] + 230, json.position[1] + 230];
-						}
-
-						frames = FlxAtlasFrames.fromSparrow(rawPic,rawXml);
-					}		
 				}
-				
+
+				charPath = json.image + '.png'; //cuz we only use pngs anyway
+				imageFile = json.image; //psych
+
+				if(FileSystem.exists(Paths.txtNew('images/' + json.image)))
+					frames = Paths.getPackerAtlas(json.image);
+				else 
+					frames = Paths.getSparrowAtlas(json.image);
+
+				if(FlxG.save.data.poltatoPC)
+				{	
+					json.scale *= 2;
+					
+					if (isPlayer && json.playerposition != null)
+						json.playerposition = [json.playerposition[0] + 100, json.playerposition[1] + 170];
+					else
+						json.position = [json.position[0] + 100, json.position[1] + 170];
+				}
+
 				if(json.scale != 1) {
 					jsonScale = json.scale;
-					setGraphicSize(Std.int(width * jsonScale));
+
+					(FlxG.save.data.poltatoPC ? scale.set(jsonScale, jsonScale) : setGraphicSize(Std.int(width * jsonScale))); // is this different?
 					updateHitbox();
 				}
 
 				healthIcon = json.healthicon;
 				
-				if (isPlayer && json.playerposition != null)
-					positionArray = json.playerposition;
-				else
-					positionArray = json.position;
-
-				if (json.playerposition != null)
-					playerPositionArray = json.playerposition;
-				else
-					playerPositionArray = json.position;
-
-				if (isPlayer && json.player_camera_position != null)
-					cameraPosition = json.player_camera_position;
-				else
-					cameraPosition = json.camera_position;
-
-				if (json.player_camera_position != null)
-					playerCameraPosition = json.player_camera_position;
-				else
-					playerCameraPosition = json.camera_position;
+				(isPlayer && json.playerposition != null ? positionArray = json.playerposition : positionArray = json.position);
+				(json.playerposition != null ? playerPositionArray = json.playerposition : playerPositionArray = json.position);
+				(isPlayer && json.player_camera_position != null ? cameraPosition = json.player_camera_position : cameraPosition = json.camera_position);
+				(json.player_camera_position != null ? playerCameraPosition = json.player_camera_position : playerCameraPosition = json.camera_position);
 				
 				singDuration = json.sing_duration;
 				flipX = !!json.flip_x;
-				if(json.no_antialiasing) {
-					antialiasing = false;
-					noAntialiasing = true;
-				}
 
 				if(json.healthbar_colors != null && json.healthbar_colors.length > 2)
 					healthColorArray = json.healthbar_colors;
@@ -1472,10 +1386,6 @@ class Character extends FlxSprite
 			doMissThing = true; //if for some reason you only have an up miss, why?
 
 		originalFlipX = flipX;
-
-		//nah
-		//if (curCharacter.contains('dad'))
-			//singDuration = 6.1; 
 
 		dance();
 
@@ -1736,6 +1646,8 @@ class Character extends FlxSprite
 
 		var daMulti:Float = 1;
 
+		(FlxG.save.data.poltatoPC ? daMulti *= 2 : daMulti *= 1);
+
 		if (isPixel && !isCustom)
 			daMulti = 6;
 
@@ -1928,28 +1840,6 @@ class Character extends FlxSprite
 
 		animation.addByIndices(name, prefix, indices, "", framerate, loop);
 		animationsArray.push(newAnim);
-	}
-
-	public function resizeXML(rawXml:String, factor:Float)
-	{
-		var daXml:Xml = Xml.parse(rawXml);
-		var fast = new haxe.xml.Access(daXml);
-		var users = fast.node.TextureAtlas;
-		for (SubTexture in users.nodes.SubTexture) {
-			SubTexture.att.x = Std.string(Std.parseInt(SubTexture.att.x) * factor);
-			SubTexture.att.y = Std.string(Std.parseInt(SubTexture.att.y) * factor);
-			SubTexture.att.width = Std.string(Std.parseInt(SubTexture.att.width) * factor);
-			SubTexture.att.height = Std.string(Std.parseInt(SubTexture.att.height) * factor);
-
-			if (SubTexture.has.frameX)
-			{
-				SubTexture.att.frameX = Std.string(Std.parseInt(SubTexture.att.frameX) * factor);
-				SubTexture.att.frameY = Std.string(Std.parseInt(SubTexture.att.frameY) * factor);
-				SubTexture.att.frameWidth = Std.string(Std.parseInt(SubTexture.att.frameWidth) * factor);
-				SubTexture.att.frameHeight = Std.string(Std.parseInt(SubTexture.att.frameHeight) * factor);
-			}
-		}
-		return Std.string(daXml);
 	}
 
 	public function flipAnims()

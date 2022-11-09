@@ -188,6 +188,16 @@ class TitleState extends MusicBeatState
 		// titleText.screenCenter(X);
 		add(titleText);
 
+		if (FlxG.save.data.poltatoPC)
+		{
+			logoBl.scale.set(logoBl.scale.x*2, logoBl.scale.y*2);
+			logoBl.updateHitbox();
+			gfDance.scale.set(gfDance.scale.x*2, gfDance.scale.y*2);
+			gfDance.updateHitbox();
+			titleText.scale.set(titleText.scale.x*2, titleText.scale.y*2);
+			titleText.updateHitbox();
+		}
+
 		var logo:FlxSprite = new FlxSprite().loadGraphic(Paths.image('logo'));
 		logo.screenCenter();
 		logo.antialiasing = true;

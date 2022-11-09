@@ -168,18 +168,13 @@ class Stage extends MusicBeatState
 
 		switch (daStage)
 		{
-			case 'halloween' | 'halloweenmanor' | 'halloween-pelo':
+			case 'halloween':
 			{	
 				var halloweenBG = new FlxSprite(-200, -80);
 				switch (daStage)
 				{
 					case 'halloween':
 						halloweenBG.frames = Paths.getSparrowAtlas('halloween_bg', 'week2');
-					case 'halloweenmanor':
-						halloweenBG.frames = Paths.getSparrowAtlas('manor_bg', 'week2');
-					case 'halloween-pelo':
-						halloweenBG.frames = Paths.getSparrowAtlas('halloween_bg_pelo', 'week2');
-						camZoom = 0.9;
 				}
 				
 				halloweenBG.animation.addByPrefix('idle', 'halloweem bg0');
@@ -189,12 +184,11 @@ class Stage extends MusicBeatState
 				swagBacks['halloweenBG'] = halloweenBG;
 				toAdd.push(halloweenBG);
 			}
-			case 'philly' | 'phillyannie':
+			case 'philly':
 			{
 				switch (daStage)
 				{
 					case 'philly': pre = 'philly';
-					case 'phillyannie': pre = 'annie';
 				}
 
 				var bg:FlxSprite = new FlxSprite(-100).loadGraphic(Paths.image(pre+'/sky', 'week3'));
@@ -247,7 +241,7 @@ class Stage extends MusicBeatState
 				var pre2:String = 'wire';
 
 				var bg:FlxSprite = new FlxSprite(-100).loadGraphic(Paths.image(pre+'/sky', 'week3'));
-				bg.scrollFactor.set(0.1, 0.1);
+				bg.scrollFactor.set(0.1, 0.1);	
 				swagBacks['bg'] = bg;
 				toAdd.push(bg);
 

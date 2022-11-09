@@ -103,7 +103,7 @@ class MainMenuState extends MusicBeatState
 			menuItem.frames = tex;
 			menuItem.animation.addByPrefix('idle', optionShit[i] + " basic", 24);
 			menuItem.animation.addByPrefix('selected', optionShit[i] + " white", 24);
-			menuItem.setGraphicSize(Std.int(menuItem.width * menuItemSize[i]));
+			menuItem.setGraphicSize(Std.int(menuItem.width * menuItemSize[i]) * (FlxG.save.data.poltatoPC ? 2 : 1));
 			menuItem.updateHitbox();
 			menuItem.animation.play('idle');
 			menuItem.ID = i;

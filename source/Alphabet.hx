@@ -398,6 +398,11 @@ class AlphaCharacter extends FlxSprite
 		frames = Paths.getSparrowAtlas(name);
 		this.scale.x = parent.scaleX;
 		this.scale.y = parent.scaleY;
+		if (FlxG.save.data.poltatoPC)
+		{
+			this.scale.set(this.scale.x*2, this.scale.y*2);
+			this.updateHitbox();
+		}
 		alignOffset = 0;
 		
 		if (lastAnim != null)

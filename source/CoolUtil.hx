@@ -52,6 +52,59 @@ class CoolUtil
 		return difficulties[PlayState.storyDifficulty].toUpperCase();
 	}
 
+	public static function resizeXML(rawXml:String, factor:Float)
+	{
+		var daXml:Xml = Xml.parse(rawXml);
+		var fast = new haxe.xml.Access(daXml);
+		var users = fast.node.TextureAtlas;
+		for (SubTexture in users.nodes.SubTexture) {
+			SubTexture.att.x = Std.string(Std.parseInt(SubTexture.att.x) * factor);
+			SubTexture.att.y = Std.string(Std.parseInt(SubTexture.att.y) * factor);
+			SubTexture.att.width = Std.string(Std.parseInt(SubTexture.att.width) * factor);
+			SubTexture.att.height = Std.string(Std.parseInt(SubTexture.att.height) * factor);
+
+			if (SubTexture.has.frameX)
+			{
+				SubTexture.att.frameX = Std.string(Std.parseInt(SubTexture.att.frameX) * factor);
+				SubTexture.att.frameY = Std.string(Std.parseInt(SubTexture.att.frameY) * factor);
+				SubTexture.att.frameWidth = Std.string(Std.parseInt(SubTexture.att.frameWidth) * factor);
+				SubTexture.att.frameHeight = Std.string(Std.parseInt(SubTexture.att.frameHeight) * factor);
+			}
+		}
+		return Std.string(daXml);
+	}
+
+	public static function resizeTxt(rawTxt:String, factor:Float)
+	{
+		var daTxt:String = "";
+		var pack = StringTools.trim(rawTxt);
+		var lines:Array<String> = pack.split("\n");
+
+		for (i in 0...lines.length)
+		{
+			var currImageData = lines[i].split("=");
+			var name = StringTools.trim(currImageData[0]);
+			var currImageRegion = StringTools.trim(currImageData[1]).split(" ");
+			var newCurrImageRegion:Array<String> = [];
+
+			for (i in 0...currImageRegion.length)
+			{
+				var daNo:Int = Std.parseInt(currImageRegion[i]);
+				var newNo:Int = Std.int(daNo*factor);
+
+				newCurrImageRegion.push(Std.string(newNo));
+			}
+
+			daTxt += name + " = ";
+
+			for (i in 0...newCurrImageRegion.length){
+				daTxt += newCurrImageRegion[i] + (i != newCurrImageRegion.length-1 ? ' ' : "");
+			}
+		}
+
+		return Std.string(daTxt);
+	}
+
 	public static function difficultyString():String
 	{
 		var guestNumber:Int = 0;

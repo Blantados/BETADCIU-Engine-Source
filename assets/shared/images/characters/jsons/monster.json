@@ -1,156 +1,79 @@
 {
 	"animations": [
 		{
+			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"indices": [],
-			"fps": 24,
 			"anim": "idle",
-			"loop": false,
-			"name": "monster idle",
+			"fps": 24,
 			"playerOffsets": [
 				0,
 				0
-			]
+			],
+			"name": "monster idle",
+			"indices": []
 		},
 		{
+			"loop": false,
 			"offsets": [
 				-22,
 				87
 			],
-			"indices": [],
-			"fps": 24,
 			"anim": "singUP",
-			"loop": false,
-			"name": "monster up note",
+			"fps": 24,
 			"playerOffsets": [
 				-50,
 				80
-			]
+			],
+			"name": "monster up note",
+			"indices": []
 		},
 		{
+			"loop": false,
 			"offsets": [
 				-43,
 				-89
 			],
-			"indices": [],
-			"fps": 24,
 			"anim": "singDOWN",
-			"loop": false,
-			"name": "monster down",
+			"fps": 24,
 			"playerOffsets": [
 				-2,
 				-94
-			]
+			],
+			"name": "monster down",
+			"indices": []
 		},
 		{
+			"loop": false,
 			"offsets": [
 				-24,
 				4
 			],
-			"indices": [],
-			"fps": 24,
 			"anim": "singLEFT",
-			"loop": false,
-			"name": "Monster left note",
+			"fps": 24,
 			"playerOffsets": [
 				10,
 				0
-			]
+			],
+			"name": "Monster left note",
+			"indices": []
 		},
 		{
+			"loop": false,
 			"offsets": [
 				-40,
 				10
 			],
-			"indices": [],
-			"fps": 24,
 			"anim": "singRIGHT",
-			"loop": false,
-			"name": "Monster Right note",
+			"fps": 24,
 			"playerOffsets": [
 				-51,
 				20
-			]
-		}
-	],
-	"playerAnimations": [
-		{
-			"offsets": [
-				0,
-				0
 			],
-			"indices": [],
-			"fps": 24,
-			"anim": "idle",
-			"loop": false,
-			"name": "monster idle",
-			"playerOffsets": [
-				0,
-				0
-			]
-		},
-		{
-			"offsets": [
-				-22,
-				87
-			],
-			"indices": [],
-			"fps": 24,
-			"anim": "singUP",
-			"loop": false,
-			"name": "monster up note",
-			"playerOffsets": [
-				-50,
-				80
-			]
-		},
-		{
-			"offsets": [
-				-43,
-				-89
-			],
-			"indices": [],
-			"fps": 24,
-			"anim": "singDOWN",
-			"loop": false,
-			"name": "monster down",
-			"playerOffsets": [
-				-2,
-				-94
-			]
-		},
-		{
-			"offsets": [
-				-24,
-				4
-			],
-			"indices": [],
-			"fps": 24,
-			"anim": "singLEFT",
-			"loop": false,
 			"name": "Monster Right note",
-			"playerOffsets": [
-				10,
-				0
-			]
-		},
-		{
-			"offsets": [
-				-40,
-				10
-			],
-			"indices": [],
-			"fps": 24,
-			"anim": "singRIGHT",
-			"loop": false,
-			"name": "Monster left note",
-			"playerOffsets": [
-				-51,
-				20
-			]
+			"indices": []
 		}
 	],
 	"no_antialiasing": false,
@@ -158,6 +81,10 @@
 	"position": [
 		-70,
 		90
+	],
+	"player_camera_position": [
+		140,
+		0
 	],
 	"playerposition": [
 		20,
@@ -171,10 +98,11 @@
 		110
 	],
 	"camera_position": [
-		0,
+		140,
 		0
 	],
 	"noteSkin": null,
 	"sing_duration": 4,
+	"isPlayerChar": false,
 	"scale": 1
 }

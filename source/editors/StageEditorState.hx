@@ -190,9 +190,14 @@ class StageEditorState extends MusicBeatState
 		}
 		if(objects.length < 1) objects.push("NO OBJECTS"); //Prevents crash
 
-		currentObject = changeSpriteClass(Stage.swagBacks[objects[0]]);
-		reloadObjectInfo(objects[0]);
+		if (currentObject == null)
+			currentObject = changeSpriteClass(Stage.swagBacks[objects[0]]);
 
+		for (key in Stage.swagBacks.keys()) {
+			if (Stage.swagBacks.get(key) == currentObject)
+				reloadObjectInfo(key);
+		}
+		
 		objectDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(objects, true));
 	}
 
@@ -362,9 +367,18 @@ class StageEditorState extends MusicBeatState
 				if (currentObject.animation.curAnim.frames != null)
 				{
 					animationIndicesInputText.text = "";
+
+					var animIndices:String = "";
 					
-					for (i in 0...currentObject.animation.curAnim.frames.length)
-						animationIndicesInputText.text += currentObject.animation.curAnim.frames[i]+(i != currentObject.animation.curAnim.frames.length-1 ? ',' : '');
+					if (checkXMLAnimLength(currentObject.graphic.key, animationNameInputText.text) != currentObject.animation.curAnim.frames.length)
+					{
+						var framesBefore:Int = checkXMLAnimLength(currentObject.graphic.key, animationNameInputText.text, true);
+
+						for (i in 0...currentObject.animation.curAnim.frames.length)
+							animIndices += (currentObject.animation.curAnim.frames[i]-framesBefore)+(i != currentObject.animation.curAnim.frames.length-1 ? ',' : "");
+					}
+					
+					animationIndicesInputText.text = animIndices;
 				}
 			}	
 			else
@@ -482,8 +496,7 @@ class StageEditorState extends MusicBeatState
 		tab_group.add(animationLoopCheckBox);
 		tab_group.add(addUpdateButton);
 		tab_group.add(removeButton);
-		tab_group.add(animationDropDown);
-
+		
 		tab_group.add(new FlxText(objectInputText.x, objectInputText.y - 18, 0, 'Object name:'));
 		tab_group.add(new FlxText(objectNameInputText.x, objectNameInputText.y - 18, 0, "Object's image name:"));
 		tab_group.add(new FlxText(objectXStepper.x, objectXStepper.y - 18, 0, "Object X/Y:"));
@@ -499,6 +512,7 @@ class StageEditorState extends MusicBeatState
 		tab_group.add(new FlxText(animationNameInputText.x, animationNameInputText.y - 18, 0, 'Animation on .XML/.TXT file:'));
 		tab_group.add(new FlxText(animationIndicesInputText.x, animationIndicesInputText.y - 18, 0, 'ADVANCED - Animation Indices:'));
 
+		tab_group.add(animationDropDown);
 		tab_group.add(objectDropDown);
 
 		UI_stagebox.addGroup(tab_group);
@@ -536,7 +550,7 @@ class StageEditorState extends MusicBeatState
 
 	var currentObjectAnimationList:Array<FlxAnimation> = [];
 
-	public function checkXMLAnimLength(xmlPath:String, frameName:String)
+	public function checkXMLAnimLength(xmlPath:String, frameName:String, ?framesBefore:Bool = false)
 	{
 		//i swear this is gonna take me another five hours... wait it only took 10 minutes? neat.
 		var rawXml:String;
@@ -550,17 +564,21 @@ class StageEditorState extends MusicBeatState
 		var fast = new haxe.xml.Access(daXml);
 		var users = fast.node.TextureAtlas;
 		var animNo:Int = 0;
+		var framesBeforeAnim:Int = 0;
 
 		for (SubTexture in users.nodes.SubTexture) {
 			var name = Std.string(SubTexture.att.name);
 			var nameCut = name.substr(0, name.length - 4);
 			
+			if (animNo == 0)
+				framesBeforeAnim++;
+
 			if (nameCut == frameName)
-			{
-				trace('found anim');
 				animNo++;
-			}
 		}
+
+		if (framesBefore)
+			return framesBeforeAnim;
 
 		return animNo;
 	}
@@ -805,20 +823,21 @@ class StageEditorState extends MusicBeatState
 				bg.animation.play(anims[i].name);
 
 				var daFrameName:String = bg.animation.frameName;
+				var daFrameNameCut:String = daFrameName.substr(0,daFrameName.length-4);
 				var animIndices:String = "";
 
-				trace(checkXMLAnimLength(bg.graphic.key, daFrameName.substr(0,daFrameName.length-4)));
-
-				if (checkXMLAnimLength(bg.graphic.key, daFrameName.substr(0,daFrameName.length-4)) != bg.animation.curAnim.frames.length)
+				if (checkXMLAnimLength(bg.graphic.key, daFrameNameCut) != bg.animation.curAnim.frames.length)
 				{
+					var framesBefore:Int = checkXMLAnimLength(bg.graphic.key, daFrameNameCut, true);
+
 					for (i in 0...bg.animation.curAnim.frames.length)
-						animIndices += bg.animation.curAnim.frames[i]+(i != bg.animation.curAnim.frames.length-1 ? ',' : '');
+						animIndices += (bg.animation.curAnim.frames[i]-framesBefore)+(i != bg.animation.curAnim.frames.length-1 ? ',' : "");
 				}
 				
 				if (animIndices != "")
-					scriptLine("addAnimationByIndices"+(anims[i].looped ? "Loop" : "")+"('"+name+"', '"+anims[i].name+"', '"+daFrameName.substr(0,daFrameName.length-4)+"', "+animIndices+", "+anims[i].frameRate+")");
+					scriptLine("addAnimationByIndices"+(anims[i].looped ? "Loop" : "")+"('"+name+"', '"+anims[i].name+"', '"+daFrameNameCut+"', '"+animIndices+"', "+anims[i].frameRate+")");
 				else
-					scriptLine("addAnimationByPrefix('"+name+"', '"+anims[i].name+"', '"+daFrameName.substr(0,daFrameName.length-4)+"', "+anims[i].frameRate+", "+anims[i].looped+")");
+					scriptLine("addAnimationByPrefix('"+name+"', '"+anims[i].name+"', '"+daFrameNameCut+"', "+anims[i].frameRate+", "+anims[i].looped+")");
 				bg.animation.play(curAnimName);
 			}
 		}	
