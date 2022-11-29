@@ -1180,11 +1180,15 @@ class PlayState extends MusicBeatState
 				songPosBG.y = FlxG.height * 0.9 + 45; 
 			songPosBG.screenCenter(X);
 			songPosBG.scrollFactor.set();
+			if (FlxG.save.data.psychUI)
+				songPosBG.visible = false;
 			add(songPosBG);
 			
 			songPosBar = new FlxBar(songPosBG.x + 4, songPosBG.y + 4, LEFT_TO_RIGHT, Std.int(songPosBG.width - 8), Std.int(songPosBG.height - 8), this,
 				'songPositionBar', 0, 90000);
 			songPosBar.scrollFactor.set();
+			if (FlxG.save.data.psychUI)
+				songPosBar.visible = false;
 			songPosBar.createFilledBar(FlxColor.GRAY, FlxColor.LIME);
 			add(songPosBar);
 
@@ -1193,6 +1197,8 @@ class PlayState extends MusicBeatState
 				songName.y -= 3;
 			songName.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
 			songName.scrollFactor.set();
+			if (FlxG.save.data.psychUI)
+				songName.visible = false;
 			add(songName);
 			songName.cameras = [camHUD];
 		}
