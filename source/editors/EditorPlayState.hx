@@ -1223,8 +1223,7 @@ class EditorPlayState extends MusicBeatState
 			var babyArrow:StrumNote = new StrumNote(42, strumLine.y, i, player, PlayState.SONG.noteStyle);
 			babyArrow.alpha = targetAlpha;
 
-			if (babyArrow.pixelNotes.contains(babyArrow.daStyle))
-				isPixel = false;
+			isPixel = babyArrow.isPixel;	
 
 			if (player == 1)
 			{

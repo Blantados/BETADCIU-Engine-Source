@@ -396,7 +396,8 @@ class BonusSongsState extends MusicBeatState
 				case 2: daText = "-HARD";
 			}
 
-			if (!FileSystem.exists(Paths.json(songs[curSelected].songName.toLowerCase()+'/'+songs[curSelected].songName.toLowerCase()+daText.toLowerCase())) && !FileSystem.exists(Paths.modFolders('data/'+songs[curSelected].songName.toLowerCase()+'/'+songs[curSelected].songName.toLowerCase()+daText.toLowerCase() + '.json')))
+			var daSongName:String = songs[curSelected].songName.toLowerCase();
+			if (!FileSystem.exists(Paths.json(daSongName+'/'+daSongName+daText.toLowerCase())) && !FileSystem.exists(Paths.modFolders('data/'+daSongName+'/'+daSongName+daText.toLowerCase() + '.json')))
 			{
 				trace('no ' + daText.toLowerCase() + ' mode');
 				curDifficulty = 2;

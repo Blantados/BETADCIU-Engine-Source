@@ -967,41 +967,13 @@ class CharacterEditorState extends MusicBeatState
 
 		var daPath:String = char.imageFile;
 
+		Paths.cacheImage(daPath);
+
 		var anims:Array<AnimArray> = char.animationsArray.copy();
 		if(Paths.fileExists('images/' + daPath  + '.txt', TEXT)) {
 			char.frames = Paths.getPackerAtlas(daPath);
 		} else {
-
-			if (Assets.exists(Paths.image(daPath)))
-				char.frames = Paths.getSparrowAtlas(daPath);
-			else
-			{
-				if (!Paths.currentTrackedAssets.exists(daPath))
-					Paths.cacheImage(daPath, 'preload');
-				
-				var rawPic = Paths.currentTrackedAssets.get(daPath);
-
-				if (rawPic == null)
-				{
-					trace('image not found');
-					Paths.cacheImage('characters/BOYFRIEND', 'shared');
-
-					rawPic = Paths.currentTrackedAssets.get('characters/BOYFRIEND');
-				}
-
-				var rawXml:String;
-
-				if (FileSystem.exists(FileSystem.absolutePath("assets/shared/images/"+daPath+".xml")))
-					rawXml = File.getContent(FileSystem.absolutePath("assets/shared/images/"+daPath+".xml"));
-				else if (FileSystem.exists(Paths.modsXml(daPath)))
-					rawXml = File.getContent(Paths.modsXml(daPath));
-				else if (FileSystem.exists(Paths.xmlNew('images/' + daPath)))
-					rawXml = File.getContent(Paths.xmlNew('images/' + daPath));
-				else
-					rawXml  = Assets.getText(Paths.xmlNew('images/characters/BOYFRIEND')); //so that it stops crashing.
-
-				char.frames = FlxAtlasFrames.fromSparrow(rawPic,rawXml);
-			}
+			char.frames = Paths.getSparrowAtlas(daPath);
 		}
 	
 		if(char.animationsArray != null && char.animationsArray.length > 0) {

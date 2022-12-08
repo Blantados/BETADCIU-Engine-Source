@@ -1,9 +1,5 @@
 THIS README FILE CAME WITH KE AND I'M TOO LAZY TO UPDATE IT. I'll just update a few things.
 
-Ah but now there are a few things that I need to mention here. For building you will need to install TJSON as well. Just run this command in your command
-prompt.
-- haxelib install tjson
-
 ![Kade Engine logo](assets/preload/images/KadeEngineLogo.png)
 
 # Friday Night Funkin': But Every Turn A Different Cover is Used
@@ -18,8 +14,8 @@ Links: **[itch.io page](https://ninja-muffin24.itch.io/funkin) ⋅ [Newgrounds](
 
 Links: **[GameBanana mod page](https://gamebanana.com/gamefiles/16761) ⋅ [play in browser](https://funkin.puyo.xyz) ⋅ [latest stable release](https://github.com/KadeDev/Kade-Engine/releases/latest) ⋅ [latest development build (windows)](https://ci.appveyor.com/project/KadeDev/kade-engine-windows/branch/master/artifacts) ⋅ [latest development build (macOS)](https://ci.appveyor.com/project/KadeDev/kade-engine-macos/branch/master/artifacts) ⋅ [latest development build (linux)](https://ci.appveyor.com/project/KadeDev/kade-engine-linux/branch/master/artifacts)**
 
-## BETADCIU
-**FNF BETADCIU** is a mod for Friday Night Funkin' which includes different songs being covered by multiple characters! Also contains a few bonus songs and covers as well!
+## BETADCIU ENGINE
+**FNF BETADCIU ENGINE** is an engine designed for making playable BETADCIUs! Includes features such as stage switching, proper character flipping as well as compatibility with most Psych Engine mods for easier porting!
 
 Link to my Channel: https://www.youtube.com/channel/UC4rwJYVeDHxGKnFDhHz88ZQ
 
@@ -53,19 +49,26 @@ This game was made with love to Newgrounds and its community. Extra love to Tom 
 - [KadeDeveloper](https://twitter.com/KadeDeveloper) - Maintainer and lead programmer
 - [The contributors](https://github.com/KadeDev/Kade-Engine/graphs/contributors)
 
+### Psych Engine
+- Shadow Mario - Programmer
+- RiverOaken - Artist
+- Yoshubs - Assistant Programmer
+
+#### Special Thanks
+- bbpanzu - Ex-Programmer
+- shubs - New Input System
+- SqirraRNG - Crash Handler and Base code for Chart Editor's Waveform
+- KadeDev - Fixed some cool stuff on Chart Editor and other PRs
+- iFlicky - Composer of Psync and Tea Time, also made the Dialogue Sounds
+- PolybiusProxy - .MP4 Video Loader Library (hxCodec)
+- Keoiki - Note Splash Animations
+- Smokey - Sprite Atlas Support
+- Nebula the Zorua - LUA JIT Fork and some Lua reworks
+
 ### BETADCIU
 - [Blantados](https://twitter.com/Blantados) - Lol me
 
 ### Shoutouts
 - [GWebDev](https://github.com/GrowtopiaFli) - Video Code
 - [Rozebud](https://github.com/ThatRozebudDude) - Ideas (that I stole)
-- [Puyo](https://github.com/daniel11420) - Setting up appveyor and a lot of other help"# Kade-Engine" 
-"# BETADCIU-PRIVATE-SOURCE" 
-"# BETADCIU-PRIVATE-SOURCE" 
-"# BETADCIU-PRIVATE-SOURCE" 
-"# BETADCIU-PRIVATE-SOURCE" 
-"# BETADCIU-Engine-Source" 
-"# BETADCIU-Engine-Source" 
-"# BETADCIU-Engine-Source" 
-"# BETADCIU-Engine-Source" 
-"# BETADCIU-Engine-Source" 
+- [Puyo](https://github.com/daniel11420) - Setting up appveyor and a lot of other help

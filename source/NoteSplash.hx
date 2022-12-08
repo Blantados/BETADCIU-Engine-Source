@@ -9,6 +9,10 @@ import sys.io.File;
 import sys.FileSystem;
 #end
 
+import lime.utils.Assets;
+
+using StringTools;
+
 class NoteSplash extends FlxSprite
 {
 	private var idleAnim:String;
@@ -19,10 +23,10 @@ class NoteSplash extends FlxSprite
 
 		var skin:String = '';
 
-		if (Paths.currentModDirectory == 'BETADCIU' || FileSystem.exists(Paths.modsImages("notes/noteSplashes-" + PlayState.instance.bfStrumStyle)))
-			skin = '-'+ PlayState.instance.bfStrumStyle;
-		else if (FileSystem.exists(Paths.modsImages("noteSplashes-" + PlayState.instance.bfStrumStyle)))
-			skin = '-'+ PlayState.instance.bfStrumStyle;
+		if (FileSystem.exists(Paths.modsImages("noteSplashes-" + PlayState.instance.bfStrumStyle)))
+			skin = "noteSplashes-"+ PlayState.instance.bfStrumStyle;
+		else if (FileSystem.exists(Paths.modsImages("notes/noteSplashes-" + PlayState.instance.bfStrumStyle)))
+			skin = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
 		else
 			skin = PlayState.instance.splashSkin;
 
@@ -60,21 +64,20 @@ class NoteSplash extends FlxSprite
 			default:
 				alpha = 0.6;
 				scale.set(1 * (FlxG.save.data.poltatoPC ? 2 : 1) , 1 * (FlxG.save.data.poltatoPC ? 2 : 1));
-				offset.set(0, 0);
-				
+				offset.set(0, 0);		
 		}
 		
 		if(texture == null) {
-			texture = "";
+			texture = PlayState.instance.splashSkin;
 		}
 		else 
 		{
-			if (Paths.currentModDirectory == 'BETADCIU' || FileSystem.exists(Paths.modsImages("notes/noteSplashes-" + PlayState.instance.bfStrumStyle)))
-				texture = '-'+ PlayState.instance.bfStrumStyle;
-			else if (FileSystem.exists(Paths.modsImages("noteSplashes-" + PlayState.instance.bfStrumStyle)))
-				texture = '-'+ PlayState.instance.bfStrumStyle;
-			else
-				texture = PlayState.instance.splashSkin;
+			if (Assets.exists(Paths.image("noteSplashes-" + PlayState.instance.bfStrumStyle)) || FileSystem.exists(Paths.modsImages("noteSplashes-" + PlayState.instance.bfStrumStyle)))
+				texture = "noteSplashes-"+ PlayState.instance.bfStrumStyle;
+			else if (Assets.exists(Paths.image("notes/noteSplashes" + PlayState.instance.bfStrumStyle)) || FileSystem.exists(Paths.modsImages("notes/noteSplashes-" + PlayState.instance.bfStrumStyle)))
+				texture = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
+			else if (Assets.exists(Paths.image("notes/"+texture)) || FileSystem.exists(Paths.modsImages("notes/"+texture)))
+				texture = "notes/"+texture;
 		}
 
 		if(textureLoaded != texture) {
@@ -87,16 +90,8 @@ class NoteSplash extends FlxSprite
 	}
 
 	function loadAnims(skin:String) {
-
-		var rawPic:Dynamic;
-		var rawXml:String = "";
-		var daPath:String = "noteSplashes" + skin;
-
-		if (Paths.currentModDirectory == 'BETADCIU' || FileSystem.exists(Paths.modsImages("notes/noteSplashes" + skin)))
-			daPath = "notes/noteSplashes" + skin;
-
-		if (Paths.checkImagePaths(daPath))
-			frames = Paths.getSparrowAtlas(daPath);
+		if (Paths.imageExists(skin))
+			frames = Paths.getSparrowAtlas(skin);
 		else
 			frames = Paths.getSparrowAtlas("notes/noteSplashes");
 			

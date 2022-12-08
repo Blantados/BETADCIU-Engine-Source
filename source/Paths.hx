@@ -213,8 +213,8 @@ class Paths
 		var pre:String = "";
 		var suf:String = "";
 
-		if (Main.noCopyright && songLowercase == "sharkventure")
-			pre = 'Alt_';		
+		if (Main.noCopyright && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Inst'+'Alt'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'InstAlt'))))
+			suf = 'Alt';	
 		if (PlayState.isNeonight)
 			suf = 'NN';
 		if (PlayState.isVitor)		
@@ -244,8 +244,8 @@ class Paths
 		var pre:String = "";
 		var suf:String = "";
 
-		if (Main.noCopyright && songLowercase == "sharkventure")
-			pre = 'Alt_';		
+		if (Main.noCopyright && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Voices'+'Alt'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'VoicesAlt'))))
+			suf = 'Alt';		
 		if (PlayState.isNeonight)
 			suf = 'NN';
 		if (PlayState.isVitor)		
@@ -376,11 +376,13 @@ class Paths
 		
 		// flags everything to be cleared out next unused memory clear
 		localTrackedAssets = [];
-		openfl.Assets.cache.clear("songs");
-		openfl.Assets.cache.clear("shared:assets/shared/images/characters/jsons");
-		openfl.Assets.cache.clear("assets/images/characters/jsons");
-		openfl.Assets.cache.clear("mods");
-		openfl.Assets.cache.clear("assets/stages");
+
+		var pathsToCheck:Array<String> = ['songs', "shared:assets/shared/images/characters/jsons", "assets/images/characters/jsons", "mods", "assets/stages"];
+
+		for (i in 0...pathsToCheck.length){
+			openfl.Assets.cache.clear(pathsToCheck[i]);
+		}
+
 		trace ('cleared');
 	}
 
@@ -512,7 +514,7 @@ class Paths
 		return currentTrackedSounds.get(gottenPath);
 	}
 
-	public static function checkImagePaths(key:String, ?library:String = null)
+	public static function imageExists(key:String, ?library:String = null)
 	{
 		var path:String = "ksajdlahfjhadjfhdshfkjhd";
 

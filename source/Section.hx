@@ -7,11 +7,11 @@ typedef SwagSection =
 	var lengthInSteps:Int;
 	var typeOfSection:Int;
 	var mustHitSection:Bool;
+	var gfSection:Bool;
 	var bpm:Float;
 	var changeBPM:Bool;
 	var altAnim:Bool;
 	var bfAltAnim:Bool;
-	var isPixel:Bool;
 	var dType:Int;
 	var dadCrossfade:Bool;
 	var bfCrossfade:Bool;
@@ -23,6 +23,7 @@ class Section
 
 	public var sectionBeats:Float = 4;
 	public var lengthInSteps:Int = 16;
+	public var gfSection:Bool = false;
 	public var typeOfSection:Int = 0;
 	public var mustHitSection:Bool = true;
 	public var dadCrossfade:Bool = false;

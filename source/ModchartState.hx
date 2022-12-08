@@ -65,6 +65,12 @@ import sys.io.File;
 import sys.FileSystem;
 #end
 
+#if hscript
+import hscript.Parser;
+import hscript.Interp;
+import hscript.Expr;
+#end
+
 using StringTools;
 
 class ModchartState 
@@ -75,20 +81,20 @@ class ModchartState
 	public static var Function_StopLua:Dynamic = 2;
 
 	#if desktop
-		public var lua:State = null;
+	public var lua:State = null;
 	#end
-
-	var lePlayState:PlayState = null;
 	
 	public var scriptName:String = '';
 	var gonnaClose:Bool = false;
 	public var closed:Bool = false;
 
-	public var accessedProps:Map<String, Dynamic> = null;
-
 	public static var shownNotes:Array<LuaNote> = [];
 
 	public var blam:Dynamic = "";
+
+	#if hscript
+	public static var hscript:HScript = null;
+	#end
 
 	public function call(func_name : String, args : Array<Dynamic>, ?type : String) : Dynamic
 	{
@@ -292,15 +298,10 @@ class ModchartState
 			case 'doTimeTravel': PlayState.instance.doTimeTravel(val1, val2);		
 			case 'uncacheImage': Paths.clearStoredMemory2(val1, 'image');	
 			case 'uncacheSound': Paths.clearStoredMemory2(val1, 'sound');			
-			case 'cacheImage': Paths.cacheImage(val1, val2); 
-			case 'toggleHealthShit': PlayState.instance.toggleHealthShit(val1);
+			case 'cacheImage': Paths.cacheImage(val1, val2);
 			case 'spawnStartingNoteSplash': PlayState.instance.spawnStartingNoteSplash(0, 0, 0);	
 			case 'doStopSign': PlayState.instance.doStopSign(val1, val2);	
 			case 'doGremlin': PlayState.instance.doGremlin(val1, val2, val3);			
-			case 'bgFlash': PlayState.instance.bgFlash();
-			case 'createBFSpookyText': PlayState.instance.createBFSpookyText(val1);
-			case 'createSpookyText': PlayState.instance.createSpookyText(val1);
-			case 'createAuditorText': PlayState.instance.createAuditorText(val1, val2, val3, val4);
 		}
 	}
 
@@ -339,12 +340,14 @@ class ModchartState
 
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;	
+		var position:Int = -1;
 							
 		if (PlayState.instance.modchartCharacters.get(tag) != null)
 		{
 			var daChar:Character = PlayState.instance.modchartCharacters.get(tag);
 			animationName = daChar.animation.curAnim.name;
 			animationFrame = daChar.animation.curAnim.curFrame;
+			position = getInstance().members.indexOf(daChar);
 		}
 		
 		resetCharacterTag(tag);
@@ -352,7 +355,13 @@ class ModchartState
 		leSprite.flipMode = flipped;
 		PlayState.instance.modchartCharacters.set(tag, leSprite); //yes
 		var shit:Character = PlayState.instance.modchartCharacters.get(tag);
-		PlayState.instance.add(shit);
+		getInstance().add(shit);
+
+		if (position >= 0) //this should keep them in the same spot if they switch
+		{
+			getInstance().remove(shit, true);
+			getInstance().insert(position, shit);
+		}
 
 		var charOffset = new CharacterOffsets(character, flipped);
 		var charX:Float = charOffset.daOffsetArray[0];
@@ -671,6 +680,8 @@ class ModchartState
 			}
 		}	
 
+		PlayState.instance.setCameraOffsets();
+
 		//trace(PlayState.instance.Stage.luaArray.length);
 	}
 
@@ -949,14 +960,10 @@ class ModchartState
 		Reflect.setProperty(leArray, variable, value);
 	}
 
-    public function die() {	
+    public function stop() {	
 		#if desktop
 		if(lua == null) {
 			return;
-		}
-
-		if(accessedProps != null) {
-			accessedProps.clear();
 		}
 
 		Lua.close(lua);
@@ -972,6 +979,10 @@ class ModchartState
 		// for detected
 		//instance = this;
 
+		lua = LuaL.newstate();
+		LuaL.openlibs(lua);
+		Lua.init_callbacks(lua);
+
 		if (isStageLua){path = Paths.stageLua(path);}
 
 		var ogPath:String = "";
@@ -985,24 +996,21 @@ class ModchartState
 		if (PlayState.instance.isDetected && PlayState.instance != null)
 			shownNotes = [];
 
-		lua = LuaL.newstate();
-		LuaL.openlibs(lua);
-		Lua.init_callbacks(lua);
-
-		//trace("Lua version: " + Lua.version());
-		//trace("LuaJIT version: " + Lua.versionJIT());
-
-		var result = LuaL.dofile(lua, path); // execute le file
-		var resultStr:String = Lua.tostring(lua, result);
-
-		if (resultStr != null && result != 0)
-		{
-			Application.current.window.alert("LUA COMPILE ERROR:\n" + resultStr,"Kade Engine Modcharts");//kep this
-			trace('oops you screwed up');
-			Lua.close(lua);
-			lua = null;
-			PlayState.instance.luaArray.remove(this);
-			PlayState.instance.luaArray = [];
+		try{
+			var result:Dynamic = LuaL.dofile(lua, path);
+			var resultStr:String = Lua.tostring(lua, result);
+			if(resultStr != null && result != 0) {
+				trace('Error on lua script! ' + resultStr);
+				#if windows
+				lime.app.Application.current.window.alert(resultStr, 'Error on lua script!');
+				#else
+				luaTrace('Error loading lua script: "$script"\n' + resultStr, true, false, FlxColor.RED);
+				#end
+				lua = null;
+				return;
+			}
+		} catch(e:Dynamic) {
+			trace(e);
 			return;
 		}
 
@@ -1014,9 +1022,6 @@ class ModchartState
 		trace('lua file loaded succesfully:' + path);
 			
 		//shaders = new Array<LuaShader>();	
-
-		var curState:Dynamic = FlxG.state;
-		lePlayState = curState;
 
 		// get some fukin globals up in here bois
 
@@ -1555,14 +1560,12 @@ class ModchartState
 
 		Lua_helper.add_callback(lua,"getScrollFactor", function(id:String , x:String) {
 			var shit:Dynamic = getObjectDirectly2(id);
-			if (x == 'x')
-				return shit.scrollFactor.x;
-			else
-				return shit.scrollFactor.y;
+			(x == 'x' ? return shit.scrollFactor.x : return shit.scrollFactor.y);
 		});
 
 		Lua_helper.add_callback(lua,"changeAnimOffset", function(id:String , x:Float, y:Float) {
-			getActorByName(id).addOffset(x, y); // it may say addoffset but it actually changes it instead of adding to the existing offset so this works.
+			var shit:Dynamic = getObjectDirectly2(id);
+			shit.addOffset(x, y); // it may say addoffset but it actually changes it instead of adding to the existing offset so this works.
 		});
 
 		//the better version
@@ -1818,15 +1821,12 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua,"resetTrail", function(id:String) {
-			getActorByName(id).resetTrail();
+			var shit:Dynamic = getObjectDirectly2(id);
+			shit.resetTrail();
 		});
 
 		Lua_helper.add_callback(lua,"generateNumberFromRange", function(min:Float, max:Float) {
 			return FlxG.random.float(min, max);
-		});
-
-		Lua_helper.add_callback(lua,"zoomingFunctionThing", function(?camSpeed:Float = 0.55, ?camZoomMult:Float = 1) {
-			PlayState.instance.Stage.zoomingFunctionThing(camSpeed, camZoomMult); //only works on concert stage. don't use anywhere else
 		});
 
 		Lua_helper.add_callback(lua,"exeStatic", function(?id:String, color:Int = 0) {
@@ -2014,11 +2014,13 @@ class ModchartState
 		});
 		
 		Lua_helper.add_callback(lua, "cameraFlash", function(camera:String, color:String, duration:Float,forced:Bool) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			var colorNum:Int = Std.parseInt(color);
 			if(!color.startsWith('0x')) colorNum = Std.parseInt('0xff' + color);
 			cameraFromString(camera).flash(colorNum, duration,null,forced);
 		});
 		Lua_helper.add_callback(lua, "cameraFade", function(camera:String, color:String, duration:Float,forced:Bool) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			var colorNum:Int = Std.parseInt(color);
 			if(!color.startsWith('0x')) colorNum = Std.parseInt('0xff' + color);
 			cameraFromString(camera).fade(colorNum, duration,false,null,forced);
@@ -2596,6 +2598,16 @@ class ModchartState
 
 			return 0;
 		});
+
+		Lua_helper.add_callback(lua, "getMouseX", function(camera:String) {
+			var cam:FlxCamera = cameraFromString(camera);
+			return FlxG.mouse.getScreenPosition(cam).x;
+		});
+		Lua_helper.add_callback(lua, "getMouseY", function(camera:String) {
+			var cam:FlxCamera = cameraFromString(camera);
+			return FlxG.mouse.getScreenPosition(cam).y;
+		});
+
 		Lua_helper.add_callback(lua,"setWindowPos",function(x:Int,y:Int) {
 			Application.current.window.x = x;
 			Application.current.window.y = y;
@@ -2777,6 +2789,7 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua,"tweenColor", function(id:String, time:Float, initColor:FlxColor, finalColor:FlxColor) {
+			if (PlayState.instance != null){time = time / PlayState.instance.playbackRate;}
 			var shit:Dynamic = getObjectDirectly2(id);
 			FlxTween.color(shit, time, initColor, finalColor);
 		});
@@ -2838,7 +2851,7 @@ class ModchartState
 		});
 
 		//change as a group. you should probably use this one
-		Lua_helper.add_callback(lua,"changeHSB", function(id:String, hue:Int, sat:Int, bright:Int) {
+		Lua_helper.add_callback(lua,"changeHSB", function(id:String, hue:Int = 0, sat:Int = 0, bright:Int = 0) {
 			var newShader:ColorSwap = new ColorSwap();
 			newShader.hue = hue / 360;
 			newShader.saturation = sat / 100;
@@ -3065,6 +3078,19 @@ class ModchartState
 			var penisExam:Dynamic = getObjectDirectly2(value);
 			cancelTween(tag);
 			if(penisExam != null) {
+
+				if (Std.isOfType(penisExam, Character))
+				{
+					var killMe:Array<String> = [value, 'doMissThing'];
+					if(killMe.length > 1) {
+						var coverMeInPiss:Dynamic = Reflect.getProperty(getInstance(), killMe[0]);
+						for (i in 1...killMe.length-1) {
+							coverMeInPiss = Reflect.getProperty(coverMeInPiss, killMe[i]);
+						}
+						Reflect.setProperty(coverMeInPiss, killMe[killMe.length-1], 'false');
+					}
+				}
+
 				var color:Int = Std.parseInt(targetColor);
 				if(!targetColor.startsWith('0x')) color = Std.parseInt('0xff' + targetColor);
 
@@ -3239,6 +3265,19 @@ class ModchartState
 			}
 
 			if(killMe.length > 1) {
+
+				if (Std.isOfType(getObjectDirectly2(killMe[0]), Character) && killMe[killMe.length-1] == 'color')
+				{
+					var killMeh:Array<String> = [killMe[0], 'doMissThing'];
+					if(killMeh.length > 1) {
+						var coverMeInPiss:Dynamic = Reflect.getProperty(getInstance(), killMeh[0]);
+						for (i in 1...killMeh.length-1) {
+							coverMeInPiss = Reflect.getProperty(coverMeInPiss, killMeh[i]);
+						}
+						Reflect.setProperty(coverMeInPiss, killMeh[killMeh.length-1], 'false');
+					}
+				}
+	
 				setVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1], value);
 				return true;
 			}
@@ -3579,7 +3618,7 @@ class ModchartState
 
 			if(spr != null && image != null && image.length > 0)
 			{
-				spr.loadGraphic(Paths.image(image), animated, gX, gY);
+				spr.loadGraphic(Paths.returnGraphic(image), animated, gX, gY);
 			}
 		});
 		Lua_helper.add_callback(lua, "loadFrames", function(variable:String, image:String, spriteType:String = "sparrow") {
@@ -3860,6 +3899,7 @@ class ModchartState
 
 				//Tween shit, but for strums
 		Lua_helper.add_callback(lua, "noteTweenX", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String, ?player:Bool = false) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			cancelTween(tag);
 			if(note < 0) note = 0;
 			var testicle:StrumNote = PlayState.instance.strumLineNotes.members[note % PlayState.instance.strumLineNotes.length];
@@ -3877,6 +3917,7 @@ class ModchartState
 			}
 		});
 		Lua_helper.add_callback(lua, "noteTweenY", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String, ?player:Bool = false) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			cancelTween(tag);
 			if(note < 0) note = 0;
 			var testicle:StrumNote = PlayState.instance.strumLineNotes.members[note % PlayState.instance.strumLineNotes.length];
@@ -3894,6 +3935,7 @@ class ModchartState
 			}
 		});
 		Lua_helper.add_callback(lua, "noteTweenAngle", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			cancelTween(tag);
 			if(note < 0) note = 0;
 			var testicle:StrumNote = PlayState.instance.strumLineNotes.members[note % PlayState.instance.strumLineNotes.length];
@@ -3908,6 +3950,7 @@ class ModchartState
 			}
 		});
 		Lua_helper.add_callback(lua, "noteTweenDirection", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			cancelTween(tag);
 			if(note < 0) note = 0;
 			var testicle:StrumNote = PlayState.instance.strumLineNotes.members[note % PlayState.instance.strumLineNotes.length];
@@ -3922,6 +3965,7 @@ class ModchartState
 			}
 		});
 		Lua_helper.add_callback(lua, "noteTweenAlpha", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			cancelTween(tag);
 			if(note < 0) note = 0;
 			var testicle:StrumNote = PlayState.instance.strumLineNotes.members[note % PlayState.instance.strumLineNotes.length];
@@ -4381,6 +4425,39 @@ class ModchartState
 			PlayState.instance.clearShaderFromCamera(camera);
 		});
 
+		Lua_helper.add_callback(lua, "mouseClicked", function(button:String) {
+			var boobs = FlxG.mouse.justPressed;
+			switch(button){
+				case 'middle':
+					boobs = FlxG.mouse.justPressedMiddle;
+				case 'right':
+					boobs = FlxG.mouse.justPressedRight;
+			}
+
+
+			return boobs;
+		});
+		Lua_helper.add_callback(lua, "mousePressed", function(button:String) {
+			var boobs = FlxG.mouse.pressed;
+			switch(button){
+				case 'middle':
+					boobs = FlxG.mouse.pressedMiddle;
+				case 'right':
+					boobs = FlxG.mouse.pressedRight;
+			}
+			return boobs;
+		});
+		Lua_helper.add_callback(lua, "mouseReleased", function(button:String) {
+			var boobs = FlxG.mouse.justReleased;
+			switch(button){
+				case 'middle':
+					boobs = FlxG.mouse.justReleasedMiddle;
+				case 'right':
+					boobs = FlxG.mouse.justReleasedRight;
+			}
+			return boobs;
+		});
+
 		
 
 		// default strums
@@ -4617,9 +4694,7 @@ class ModchartState
 		
 		var pee:Dynamic = PlayState.instance.modchartCharacters.get(tag);
 		pee.kill();
-		if(pee.wasAdded) {
-			PlayState.instance.remove(pee, true);
-		}
+		PlayState.instance.remove(pee, true);
 		pee.destroy();
 		PlayState.instance.modchartCharacters.remove(tag);
 	}
@@ -4868,6 +4943,9 @@ class ModchartState
 
 	function loadFrames(spr:FlxSprite, image:String, spriteType:String)
 	{
+		if (!Paths.currentTrackedAssets.exists(image))
+			Paths.cacheImage(image);
+
 		switch(spriteType.toLowerCase().trim())
 		{
 			case "texture" | "textureatlas"|"tex":
@@ -4877,18 +4955,13 @@ class ModchartState
 			case "packer" |"packeratlas"|"pac":
 				spr.frames = Paths.getPackerAtlas(image);
 			default:
-			{
-				if (!Paths.currentTrackedAssets.exists(image))
-					Paths.cacheImage(image);
-
 				spr.frames = Paths.getSparrowAtlas(image);
+		}
 
-				if (FlxG.save.data.poltatoPC)
-				{
-					spr.scale.set(2, 2);
-					spr.updateHitbox();
-				}
-			}
+		if (FlxG.save.data.poltatoPC)
+		{
+			spr.scale.set(2, 2);
+			spr.updateHitbox();
 		}
 	}
 
@@ -4961,3 +5034,66 @@ class DebugLuaText extends FlxText
 		else if(disableTime < 1) alpha = disableTime;
 	}
 }
+
+#if hscript
+class HScript
+{
+	public static var parser:Parser = new Parser();
+	public var interp:Interp;
+
+	public var variables(get, never):Map<String, Dynamic>;
+
+	public function get_variables()
+	{
+		return interp.variables;
+	}
+
+	public function new()
+	{
+		interp = new Interp();
+		interp.variables.set('FlxG', FlxG);
+		interp.variables.set('FlxSprite', FlxSprite);
+		interp.variables.set('FlxCamera', FlxCamera);
+		interp.variables.set('FlxTimer', FlxTimer);
+		interp.variables.set('FlxTween', FlxTween);
+		interp.variables.set('FlxEase', FlxEase);
+		interp.variables.set('PlayState', PlayState);
+		interp.variables.set('game', PlayState.instance);
+		interp.variables.set('Paths', Paths);
+		interp.variables.set('Conductor', Conductor);
+		interp.variables.set('Character', Character);
+		interp.variables.set('Alphabet', Alphabet);
+		//interp.variables.set('CustomSubstate', CustomSubstate);
+		interp.variables.set('ShaderFilter', openfl.filters.ShaderFilter);
+		interp.variables.set('StringTools', StringTools);
+
+		interp.variables.set('setVar', function(name:String, value:Dynamic)
+		{
+			PlayState.instance.variables.set(name, value);
+		});
+		interp.variables.set('getVar', function(name:String)
+		{
+			var result:Dynamic = null;
+			if(PlayState.instance.variables.exists(name)) result = PlayState.instance.variables.get(name);
+			return result;
+		});
+		interp.variables.set('removeVar', function(name:String)
+		{
+			if(PlayState.instance.variables.exists(name))
+			{
+				PlayState.instance.variables.remove(name);
+				return true;
+			}
+			return false;
+		});
+	}
+
+	public function execute(codeToRun:String):Dynamic
+	{
+		@:privateAccess
+		HScript.parser.line = 1;
+		HScript.parser.allowTypes = true;
+		return interp.execute(HScript.parser.parseString(codeToRun));
+	}
+}
+#end

@@ -20,7 +20,7 @@ class StrumNote extends FlxSprite
 	public var isMania:Bool = false;
 	public var mania:Int = 0;
 	public var daStyle = 'style';
-	public var pixelNotes:Array<String> = ['pixel', 'neon', 'pixel-corrupted', 'pixel-combined', 'guitar']; //guitar notes also have zero offsets
+	public var sustainReduce:Bool = true;
 	
 	private var player:Int;
 
@@ -197,7 +197,7 @@ class StrumNote extends FlxSprite
 			updateHitbox();
 	}
 
-	var isPixel:Bool = false;
+	public var isPixel:Bool = false;
 
 	public function addAnims(?pixel:Bool = false)
 	{
@@ -270,7 +270,7 @@ class StrumNote extends FlxSprite
 			}
 		}
 		//if(animation.curAnim != null){ //my bad i was upset
-		if(animation.curAnim.name == 'confirm' && !pixelNotes.contains(daStyle) && !isPixel) {
+		if(animation.curAnim.name == 'confirm' && !isPixel) {
 			centerOrigin();
 		//}
 		}	
@@ -288,7 +288,7 @@ class StrumNote extends FlxSprite
 		} 
 		else 
 		{
-			if(animation.curAnim.name == 'confirm' && !pixelNotes.contains(daStyle) && !isPixel)
+			if(animation.curAnim.name == 'confirm' && !isPixel)
 				centerOrigin();
 		}
 	}

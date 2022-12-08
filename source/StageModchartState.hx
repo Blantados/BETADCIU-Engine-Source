@@ -54,7 +54,6 @@ class StageModchartState
 	//public static var shaders:Array<LuaShader> = null;
 
 	public var lua:State = null;
-	public var lePlayState:PlayState = null;
 	public static var Function_Stop = 1;
 	public static var Function_Continue = 0;
 	public static var Function_StopLua = 2;
@@ -252,9 +251,36 @@ class StageModchartState
 	}
 
 	public function luaTrace(text:String, ignoreCheck:Bool = false, deprecated:Bool = false, ?color:FlxColor = FlxColor.WHITE) {
-		PlayState.instance.addTextToDebug(text, color);
-		trace(text);
+		#if desktop
+		if (preloading) //otherwise it'll warn a lot for objects with scales
+			return;
+
+		if(ignoreCheck || getBool('luaDebugMode')) {
+			if(deprecated && !getBool('luaDeprecatedWarnings')) {
+				return;
+			}
+			PlayState.instance.addTextToDebug(text, color);
+			trace(text);
+		}
+		#end
 	}
+
+	#if desktop
+	public function getBool(variable:String) {
+		var result:String = null;
+		Lua.getglobal(lua, variable);
+		result = Convert.fromLua(lua, -1);
+		Lua.pop(lua, 1);
+
+		if(result == null) {
+			return false;
+		}
+
+		// YES! FINALLY IT WORKS
+		//trace('variable: ' + variable + ', ' + result);
+		return (result == 'true');
+	}
+	#end
 
 	function getActorByName(id:String):Dynamic
 	{
@@ -303,19 +329,22 @@ class StageModchartState
 	}
 
     public function die() {	
+		if(lua == null) {
+			return;
+		}
+		
 		Lua.close(lua);
 		lua = null;
 	}
     // LUA SHIT
 
-    public function new(path:String)
+	public var preloading:Bool = false;
+
+    public function new(path:String, ?preloading:Bool = false)
     {
 		lua = LuaL.newstate();
 		LuaL.openlibs(lua);
 		Lua.init_callbacks(lua);
-
-		var curState:Dynamic = FlxG.state;
-		lePlayState = curState;
 
 		// pre lowercasing the song name (new)
 		var songLowercase = StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase();
@@ -342,6 +371,8 @@ class StageModchartState
 		scriptName = Paths.stageLua(path);
 
 		trace('lua file loaded succesfully:' + path);
+
+		this.preloading = preloading;
 		
 		//shaders = new Array<LuaShader>();	
 
@@ -376,6 +407,7 @@ class StageModchartState
 		setVar("curStep", 0);
 		setVar("curBeat", 0);
 		
+		setVar('luaDebugMode', true);
 		// callbacks
 
 		// sprites
@@ -626,10 +658,8 @@ class StageModchartState
 		});
 
 		Lua_helper.add_callback(lua,"getScrollFactor", function(id:String , x:String) {
-			if (x == 'x')
-				return getActorByName(id).scrollFactor.x;
-			else
-				return getActorByName(id).scrollFactor.y;
+			var shit:Dynamic = getObjectDirectly2(id);
+			(x == 'x' ? return shit.scrollFactor.x : return shit.scrollFactor.y);
 		});
 
 		Lua_helper.add_callback(lua,"changeAnimOffset", function(id:String , x:Float, y:Float) {
@@ -1153,6 +1183,15 @@ class StageModchartState
 			return 0;
 		});
 
+		Lua_helper.add_callback(lua, "getMouseX", function(camera:String) {
+			var cam:FlxCamera = cameraFromString(camera);
+			return FlxG.mouse.getScreenPosition(cam).x;
+		});
+		Lua_helper.add_callback(lua, "getMouseY", function(camera:String) {
+			var cam:FlxCamera = cameraFromString(camera);
+			return FlxG.mouse.getScreenPosition(cam).y;
+		});
+
 		Lua_helper.add_callback(lua,"setWindowPos",function(x:Int,y:Int) {
 			Application.current.window.x = x;
 			Application.current.window.y = y;
@@ -1334,6 +1373,7 @@ class StageModchartState
 		});
 
 		Lua_helper.add_callback(lua,"tweenColor", function(id:String, time:Float, initColor:FlxColor, finalColor:FlxColor) {
+			if (PlayState.instance != null){time = time / PlayState.instance.playbackRate;}
 			FlxTween.color(getObjectDirectly2(id), time, initColor, finalColor);
 		});
 
@@ -1497,6 +1537,7 @@ class StageModchartState
 
 		//tweenShit works here so go with it.
 		Lua_helper.add_callback(lua, "doTweenX", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			var penisExam:Dynamic = tweenShit(tag, vars);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {x: value}, duration, {ease: getFlxEaseByString(ease),
@@ -1514,6 +1555,7 @@ class StageModchartState
 			}
 		});
 		Lua_helper.add_callback(lua, "doTweenY", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			var penisExam:Dynamic = tweenShit(tag, vars);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {y: value}, duration, {ease: getFlxEaseByString(ease),
@@ -1531,6 +1573,7 @@ class StageModchartState
 			}
 		});
 		Lua_helper.add_callback(lua, "doTweenAngle", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			var penisExam:Dynamic = tweenShit(tag, vars);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {angle: value}, duration, {ease: getFlxEaseByString(ease),
@@ -1549,6 +1592,7 @@ class StageModchartState
 		});
 
 		Lua_helper.add_callback(lua, "doTweenAlpha", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			var penisExam:Dynamic = tweenShit(tag, vars);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {alpha: value}, duration, {ease: getFlxEaseByString(ease),
@@ -1562,6 +1606,7 @@ class StageModchartState
 			}
 		});
 		Lua_helper.add_callback(lua, "doTweenZoom", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			var penisExam:Dynamic = tweenShit(tag, vars);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {zoom: value}, duration, {ease: getFlxEaseByString(ease),
@@ -1575,8 +1620,21 @@ class StageModchartState
 			}
 		});
 		Lua_helper.add_callback(lua, "doTweenColor", function(tag:String, vars:String, targetColor:String, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			var penisExam:Dynamic = tweenShit(tag, vars);
 			if(penisExam != null) {
+				if (Std.isOfType(penisExam, Character))
+				{
+					var killMe:Array<String> = [vars, 'doMissThing'];
+					if(killMe.length > 1) {
+						var coverMeInPiss:Dynamic = Reflect.getProperty(getInstance(), killMe[0]);
+						for (i in 1...killMe.length-1) {
+							coverMeInPiss = Reflect.getProperty(coverMeInPiss, killMe[i]);
+						}
+						Reflect.setProperty(coverMeInPiss, killMe[killMe.length-1], 'false');
+					}
+				}
+
 				var color:Int = Std.parseInt(targetColor);
 				if(!targetColor.startsWith('0x')) color = Std.parseInt('0xff' + targetColor);
 
@@ -1593,25 +1651,8 @@ class StageModchartState
 			}
 		});
 
-		Lua_helper.add_callback(lua, "doTweenScale", function(tag:String, vars:String, value:Dynamic, value2:Dynamic, duration:Float, ease:String) {
-			var penisExam:Dynamic = getObjectDirectly2(vars);
-			cancelTween(tag);
-			cancelTween(tag+'Y');
-			if(penisExam != null) {
-				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {"scale.x": value}, duration, {ease: getFlxEaseByString(ease),
-					onComplete: function(twn:FlxTween) {
-						PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
-						PlayState.instance.modchartTweens.remove(tag);
-					}
-				}));
-
-				PlayState.instance.modchartTweens.set(tag+'Y', FlxTween.tween(penisExam, {"scale.y": value2}, duration, {ease: getFlxEaseByString(ease)}));
-			} else {
-				luaTrace('doTweenScale: Couldnt find object: ' + vars, false, false, FlxColor.RED);
-			}
-		});
-
 		Lua_helper.add_callback(lua, "doTweenScaleX", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			var penisExam:Dynamic = getObjectDirectly2(vars);
 			cancelTween(tag);
 			if(penisExam != null) {
@@ -1631,6 +1672,7 @@ class StageModchartState
 		});
 
 		Lua_helper.add_callback(lua, "doTweenScaleY", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			var penisExam:Dynamic = getObjectDirectly2(vars);
 			cancelTween(tag);
 			if(penisExam != null) {
@@ -1784,6 +1826,7 @@ class StageModchartState
 		});
 
 		Lua_helper.add_callback(lua, "runTimer", function(tag:String, time:Float = 1, loops:Int = 1) {
+			if (PlayState.instance != null){time = time / PlayState.instance.playbackRate;}
 			cancelTimer(tag);
 			PlayState.instance.modchartTimers.set(tag, new FlxTimer().start(time, function(tmr:FlxTimer) {
 				if(tmr.finished) {
@@ -2221,7 +2264,9 @@ class StageModchartState
 				}
 			}
 			leSprite.antialiasing = antialiasing;
-			Stage.instance.swagBacks.set(tag, leSprite);
+
+			if (!preloading)
+				Stage.instance.swagBacks.set(tag, leSprite);
 		});
 
 		Lua_helper.add_callback(lua, "makeAnimatedLuaSprite", function(tag:String, image:String, x:Float, y:Float,spriteType:String="sparrow") {
@@ -2229,8 +2274,10 @@ class StageModchartState
 			var leSprite:ModchartSprite = new ModchartSprite(x, y);
 			
 			loadFrames(leSprite, image, spriteType);
-			Stage.instance.swagBacks.set(tag, leSprite);
 			leSprite.antialiasing = true;
+
+			if (!preloading)
+				Stage.instance.swagBacks.set(tag, leSprite);
 		});
 
 		Lua_helper.add_callback(lua, "makeGraphic", function(obj:String, width:Int, height:Int, color:String) {
@@ -2676,6 +2723,7 @@ class StageModchartState
 
 				//Tween shit, but for strums
 		Lua_helper.add_callback(lua, "noteTweenX", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String, ?player:Bool = false) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			cancelTween(tag);
 			if(note < 0) note = 0;
 			var testicle:StrumNote = PlayState.instance.strumLineNotes.members[note % PlayState.instance.strumLineNotes.length];
@@ -2693,6 +2741,7 @@ class StageModchartState
 			}
 		});
 		Lua_helper.add_callback(lua, "noteTweenY", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String, ?player:Bool = false) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			cancelTween(tag);
 			if(note < 0) note = 0;
 			var testicle:StrumNote = PlayState.instance.strumLineNotes.members[note % PlayState.instance.strumLineNotes.length];
@@ -2710,6 +2759,7 @@ class StageModchartState
 			}
 		});
 		Lua_helper.add_callback(lua, "noteTweenAngle", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			cancelTween(tag);
 			if(note < 0) note = 0;
 			var testicle:StrumNote = PlayState.instance.strumLineNotes.members[note % PlayState.instance.strumLineNotes.length];
@@ -2724,6 +2774,7 @@ class StageModchartState
 			}
 		});
 		Lua_helper.add_callback(lua, "noteTweenDirection", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			cancelTween(tag);
 			if(note < 0) note = 0;
 			var testicle:StrumNote = PlayState.instance.strumLineNotes.members[note % PlayState.instance.strumLineNotes.length];
@@ -2840,6 +2891,7 @@ class StageModchartState
 			}
 		});
 		Lua_helper.add_callback(lua, "soundFadeIn", function(tag:String, duration:Float, fromValue:Float = 0, toValue:Float = 1) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			if(tag == null || tag.length < 1) {
 				FlxG.sound.music.fadeIn(duration, fromValue, toValue);
 			} else if(PlayState.instance.modchartSounds.exists(tag)) {
@@ -2848,6 +2900,7 @@ class StageModchartState
 			
 		});
 		Lua_helper.add_callback(lua, "soundFadeOut", function(tag:String, duration:Float, toValue:Float = 0) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			if(tag == null || tag.length < 1) {
 				FlxG.sound.music.fadeOut(duration, toValue);
 			} else if(PlayState.instance.modchartSounds.exists(tag)) {
@@ -2960,6 +3013,39 @@ class StageModchartState
 		
 		Lua_helper.add_callback(lua, "setOffset", function(id:String, x:Float, y:Float) {
 			getActorByName(id).offset.set(x, y);
+		});
+
+		Lua_helper.add_callback(lua, "mouseClicked", function(button:String) {
+			var boobs = FlxG.mouse.justPressed;
+			switch(button){
+				case 'middle':
+					boobs = FlxG.mouse.justPressedMiddle;
+				case 'right':
+					boobs = FlxG.mouse.justPressedRight;
+			}
+
+
+			return boobs;
+		});
+		Lua_helper.add_callback(lua, "mousePressed", function(button:String) {
+			var boobs = FlxG.mouse.pressed;
+			switch(button){
+				case 'middle':
+					boobs = FlxG.mouse.pressedMiddle;
+				case 'right':
+					boobs = FlxG.mouse.pressedRight;
+			}
+			return boobs;
+		});
+		Lua_helper.add_callback(lua, "mouseReleased", function(button:String) {
+			var boobs = FlxG.mouse.justReleased;
+			switch(button){
+				case 'middle':
+					boobs = FlxG.mouse.justReleasedMiddle;
+				case 'right':
+					boobs = FlxG.mouse.justReleasedRight;
+			}
+			return boobs;
 		});
     }
 
