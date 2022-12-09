@@ -100,25 +100,7 @@ class Highscore
 
 	public static function formatSong(song:String, diff:Int):String
 	{
-		var daSong:String = song;
-
-		if (diff == 0)
-			daSong += '-easy';
-		else if (diff == 2)
-		{
-			if (PlayState.isBETADCIU && song == 'triple-trouble')
-				daSong += '-betadciu';
-			else
-				daSong += '-hard';
-		}
-		else if (diff == 3)
-			daSong += '-neo';
-		else if (diff == 4)
-			daSong += '-vitor';
-		else if (diff == 5)
-			daSong += '-guest';
-
-		return daSong;
+		return song + CoolUtil.getDifficultyFilePath(diff);
 	}
 
 	static function getComboInt(combo:String):Int

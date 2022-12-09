@@ -483,12 +483,8 @@ class ModchartState
 
 		if (Std.parseInt(id) == null)
 			return Reflect.getProperty(getInstance(),id);
-		return PlayState.instance.strumLineNotes.members[Std.parseInt(id)];
-	}
 
-	function getCurCharacter(id:String)
-	{
-		return getActorByName(id).curCharacter;
+		return PlayState.instance.strumLineNotes.members[Std.parseInt(id)];
 	}
 
 	//Kade why tf is it not like in PlayState???
@@ -2926,8 +2922,7 @@ class ModchartState
 
 		Lua_helper.add_callback(lua, "doTweenX", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
 			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
-			var penisExam:Dynamic = getObjectDirectly2(vars);
-			cancelTween(tag);
+			var penisExam:Dynamic = tweenShit(tag, vars);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {x: value}, duration, {ease: getFlxEaseByString(ease),
 					onComplete: function(twn:FlxTween) {
@@ -2946,8 +2941,7 @@ class ModchartState
 		
 		Lua_helper.add_callback(lua, "doTweenY", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
 			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
-			var penisExam:Dynamic = getObjectDirectly2(vars);
-			cancelTween(tag);
+			var penisExam:Dynamic = tweenShit(tag, vars);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {y: value}, duration, {ease: getFlxEaseByString(ease),
 					onComplete: function(twn:FlxTween) {
@@ -2965,8 +2959,7 @@ class ModchartState
 		});
 		Lua_helper.add_callback(lua, "doTweenAngle", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
 			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
-			var penisExam:Dynamic = getObjectDirectly2(vars);
-			cancelTween(tag);
+			var penisExam:Dynamic = tweenShit(tag, vars);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {angle: value}, duration, {ease: getFlxEaseByString(ease),
 					onComplete: function(twn:FlxTween) {
@@ -2983,30 +2976,9 @@ class ModchartState
 			}
 		});
 
-		//over 6 vars so this doesn't work
-		Lua_helper.add_callback(lua, "doTweenScale", function(tag:String, vars:String, value:Dynamic, value2:Dynamic, duration:Float, ease:String) {
-			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
-			var penisExam:Dynamic = getObjectDirectly2(vars);
-			cancelTween(tag);
-			cancelTween(tag+'Y');
-			if(penisExam != null) {
-				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {"scale.x": value}, duration, {ease: getFlxEaseByString(ease),
-					onComplete: function(twn:FlxTween) {
-						PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
-						PlayState.instance.modchartTweens.remove(tag);
-					}
-				}));
-
-				PlayState.instance.modchartTweens.set(tag+'Y', FlxTween.tween(penisExam, {"scale.y": value2}, duration, {ease: getFlxEaseByString(ease)}));
-			} else {
-				luaTrace('doTweenScale: Couldnt find object: ' + vars, false, false, FlxColor.RED);
-			}
-		});
-
 		Lua_helper.add_callback(lua, "doTweenScaleX", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
 			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
-			var penisExam:Dynamic = getObjectDirectly2(vars);
-			cancelTween(tag);
+			var penisExam:Dynamic = tweenShit(tag, vars);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {"scale.x": value}, duration, {ease: getFlxEaseByString(ease),
 					onComplete: function(twn:FlxTween) {
@@ -3025,8 +2997,7 @@ class ModchartState
 
 		Lua_helper.add_callback(lua, "doTweenScaleY", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
 			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
-			var penisExam:Dynamic = getObjectDirectly2(vars);
-			cancelTween(tag);
+			var penisExam:Dynamic = tweenShit(tag, vars);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {"scale.y": value}, duration, {ease: getFlxEaseByString(ease),
 					onComplete: function(twn:FlxTween) {
@@ -3045,8 +3016,7 @@ class ModchartState
 
 		Lua_helper.add_callback(lua, "doTweenAlpha", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
 			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
-			var penisExam:Dynamic = getObjectDirectly2(vars);
-			cancelTween(tag);
+			var penisExam:Dynamic = tweenShit(tag, vars);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {alpha: value}, duration, {ease: getFlxEaseByString(ease),
 					onComplete: function(twn:FlxTween) {
@@ -3060,8 +3030,7 @@ class ModchartState
 		});
 		Lua_helper.add_callback(lua, "doTweenZoom", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
 			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
-			var penisExam:Dynamic = getObjectDirectly2(vars);
-			cancelTween(tag);
+			var penisExam:Dynamic = tweenShit(tag, vars);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(penisExam, {zoom: value}, duration, {ease: getFlxEaseByString(ease),
 					onComplete: function(twn:FlxTween) {
@@ -3073,15 +3042,14 @@ class ModchartState
 				luaTrace('doTweenZoom: Couldnt find object: ' + vars, false, false, FlxColor.RED);
 			}
 		});
-		Lua_helper.add_callback(lua, "doTweenColor", function(tag:String, value:String, targetColor:String, duration:Float, ease:String) {
+		Lua_helper.add_callback(lua, "doTweenColor", function(tag:String, vars:String, targetColor:String, duration:Float, ease:String) {
 			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
-			var penisExam:Dynamic = getObjectDirectly2(value);
-			cancelTween(tag);
+			var penisExam:Dynamic = tweenShit(tag, vars);
 			if(penisExam != null) {
 
 				if (Std.isOfType(penisExam, Character))
 				{
-					var killMe:Array<String> = [value, 'doMissThing'];
+					var killMe:Array<String> = [vars, 'doMissThing'];
 					if(killMe.length > 1) {
 						var coverMeInPiss:Dynamic = Reflect.getProperty(getInstance(), killMe[0]);
 						for (i in 1...killMe.length-1) {
@@ -3103,7 +3071,7 @@ class ModchartState
 					}
 				}));
 			} else {
-				luaTrace('doTweenColor: Couldnt find object: ' + value, false, false, FlxColor.RED);
+				luaTrace('doTweenColor: Couldnt find object: ' + vars, false, false, FlxColor.RED);
 			}
 		});
 
@@ -4613,7 +4581,7 @@ class ModchartState
 	function tweenShit(tag:String, vars:String) {
 		cancelTween(tag);
 		var variables:Array<String> = vars.split('.');
-		var sexyProp:Dynamic = getObjectDirectly(variables[0]);
+		var sexyProp:Dynamic = getObjectDirectly2(variables[0]);
 		if(variables.length > 1) {
 			sexyProp = getVarInArray(getPropertyLoopThingWhatever(variables), variables[variables.length-1]);
 		}

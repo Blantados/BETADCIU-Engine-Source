@@ -756,20 +756,6 @@ class PlayState extends MusicBeatState
 		dad = new Character(100, 100, SONG.player2);
 		//trace('found dad character');
 
-		/*if (duoDad)
-		{
-			switch (SONG.song.toLowerCase())
-			{
-				case 'epiphany':
-					if (storyDifficulty == 5) 
-						dad1 = new Character(16, -140, 'bigmonika');
-				case 'haachama-ex':
-					dad1 = new Character(16, -140, 'amor-ex');
-				case 'spectral-spat':
-					dad1 = new Character(-100, 100, 'garcellodead');
-			}				
-		}*/
-
 		var camPos:FlxPoint;
 
 		if (gf.getGraphicMidpoint().x <= -1000 || gf.getGraphicMidpoint().x >= 1500)
@@ -779,7 +765,7 @@ class PlayState extends MusicBeatState
 			
 		switch (SONG.player2)
 		{
-			case 'gf' | 'gf-crucified' | 'gf1' | 'gf2' | 'gf3' | 'gf4' | 'gf5':
+			case 'gf':
 				dad.setPosition(gf.x, gf.y);
 				gf.visible = false;
 				if (isStoryMode)
@@ -787,10 +773,6 @@ class PlayState extends MusicBeatState
 					camPos.x += 600;
 					tweenCamIn();
 				}
-			case 'tordbot':
-				dad.x += 330;
-				dad.y -= 1524.75;
-				camPos.set(391.2, -1094.15);
 			default:
 				if (dad.isCustom)
 				{
@@ -832,56 +814,6 @@ class PlayState extends MusicBeatState
 		// REPOSITIONING PER STAGE
 		switch (curStage)
 		{
-			case 'neon':
-				dad.scale.set(0.85, 0.85);
-				boyfriend.scale.set(0.86, 0.86);
-				gf.scale.set(0.86, 0.86);
-				dad.x += 250;
-				dad.y += 150;
-				boyfriend.x += 100;
-			
-			case 'schoolEvil' | 'schoolEvild4':
-				evilTrail = new FlxTrail(dad, null, 4, 24, 0.3, 0.069);
-				add(evilTrail);
-
-				boyfriend.x += 200;
-				boyfriend.y += 220;
-				gf.x += 180;
-				gf.y += 300;
-
-			case 'curse':
-				boyfriend.setZoom(1.1);
-				if (!dad.curCharacter.contains('tabi'))
-					dad.setZoom(1.1);
-				if (curSong == 'Their-Battle')
-					gf.setZoom(1.2);
-				else
-					gf.setZoom(1.1);
-
-				boyfriend.x += 300;
-				dad.x -= 400;
-				gf.y -= 110;
-				gf.x -= 50;
-
-			case 'day':
-				boyfriend.x += Stage.bfXOffset;
-				boyfriend.y += Stage.bfYOffset;
-				dad.x += Stage.dadXOffset;
-				dad.y += Stage.dadYOffset;
-				gf.x += Stage.gfXOffset;
-				gf.y += Stage.gfYOffset;
-				camPos.x = 536.63;
-				camPos.y = 449.94;
-			case 'hallway':
-				camPos.x = 1176.3;
-				camPos.y = 515.87;
-				boyfriend.x += 585;
-				boyfriend.y += 65;
-				gf.x += 180;
-				gf.y -= 20;
-				dad.x += 17;
-				dad.y += 63;
-				gf.color = FlxColor.fromHSL(gf.color.hue, gf.color.saturation, 0.5, 1);
 			default:
 				if (usesStageHx)
 				{
@@ -925,18 +857,6 @@ class PlayState extends MusicBeatState
 
 		add(gf);
 
-		/*if (SONG.song.toLowerCase() == 'casanova' && dad.curCharacter == 'selever'){
-			blackScreen = new FlxSprite(-100, -100).makeGraphic(Std.int(FlxG.width * 100), Std.int(FlxG.height * 100), FlxColor.BLACK);
-			blackScreen.scrollFactor.set();
-			blackScreen.alpha = 0;
-			add(blackScreen);
-
-			circ1 = new FlxSprite(dad.x-200,dad.y - 150).loadGraphic(Paths.image('sacredmass/churchselever/circ'));
-			circ1.setGraphicSize(Std.int(circ1.width * 0.5));
-			circ1.alpha = 0;
-			add(circ1);
-		}*/
-
 		if (usesStageHx)
 		{
 			for (index => array in Stage.layInFront)
@@ -964,9 +884,6 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
-
-		if (SONG.player2 == 'exTricky')
-			add(dad.exSpikes);
 
 		add(boyfriend);
 
@@ -2005,6 +1922,18 @@ class PlayState extends MusicBeatState
 			case 'Set Property':
 				var killMe:Array<String> = value1.split('.');
 				if(killMe.length > 1) {
+					if (Std.isOfType(getObjectDirectly2(killMe[0]), Character) && killMe[killMe.length-1] == 'color')
+					{
+						var killMeh:Array<String> = [killMe[0], 'doMissThing'];
+						if(killMeh.length > 1) {
+							var coverMeInPiss:Dynamic = Reflect.getProperty(this, killMeh[0]);
+							for (i in 1...killMeh.length-1) {
+								coverMeInPiss = Reflect.getProperty(coverMeInPiss, killMeh[i]);
+							}
+							Reflect.setProperty(coverMeInPiss, killMeh[killMeh.length-1], 'false');
+						}
+					}
+
 					ModchartState.setVarInArray(ModchartState.getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1], value2);
 				} else {
 					ModchartState.setVarInArray(this, value1, value2);
@@ -2077,6 +2006,20 @@ class PlayState extends MusicBeatState
 
 		if (Stage.isCustomStage && Stage.luaArray.length >= 1)
 			Stage.callOnLuas('onEvent', [eventName, value1, value2]);	
+	}
+
+	public function getObjectDirectly2(id:String):Dynamic //but dynamic;
+	{
+		var shit:Dynamic;
+
+		if(PlayState.instance.Stage.swagBacks.exists(id))
+			shit = PlayState.instance.Stage.swagBacks.get(id);
+		else if(PlayState.instance.getLuaObject(id) != null)
+			shit = PlayState.instance.getLuaObject(id);
+		else
+			shit = Reflect.getProperty(PlayState.instance, id);
+			
+		return shit;
 	}
 
 	public function getControl(key:String) {
@@ -3260,21 +3203,21 @@ class PlayState extends MusicBeatState
 				songPosBG.y = FlxG.height * 0.9 + 45; 
 			songPosBG.screenCenter(X);
 			songPosBG.scrollFactor.set();
-			add(songPosBG);
+			if (!FlxG.save.data.psychUI) add(songPosBG);
 
 			songPosBar = new FlxBar(songPosBG.x + 4, songPosBG.y + 4, LEFT_TO_RIGHT, Std.int(songPosBG.width - 8), Std.int(songPosBG.height - 8), this,
 				'songPositionBar', 0, songLength - 1000);
 			songPosBar.numDivisions = 1000;
 			songPosBar.scrollFactor.set();
 			songPosBar.createFilledBar(FlxColor.GRAY, FlxColor.LIME);
-			add(songPosBar);
+			if (!FlxG.save.data.psychUI) add(songPosBar);
 
 			var songName = new FlxText(songPosBG.x + (songPosBG.width / 2) - 20,songPosBG.y,0,SONG.song, 16);
 			if (FlxG.save.data.downscroll)
 				songName.y -= 3;
 			songName.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
 			songName.scrollFactor.set();
-			add(songName);
+			if (!FlxG.save.data.psychUI) add(songName);
 
 			songPosBG.cameras = [camHUD];
 			songPosBar.cameras = [camHUD];
@@ -3483,6 +3426,7 @@ class PlayState extends MusicBeatState
 				swagNote = new Note(daStrumTime, daNoteData, oldNote, false, daType, (gottaHitNote ? (changeArrows ? SONG.bfNoteStyle : alt2) : (changeArrows ? SONG.dadNoteStyle : alt)));
 				swagNote.sustainLength = songNotes[2];
 				swagNote.mustPress = gottaHitNote;
+				swagNote.gfNote = (section.gfSection && (songNotes[1] < Main.keyAmmo[mania]));
 				swagNote.scrollFactor.set(0, 0);
 				swagNote.dType = section.dType;
 				swagNote.noteType = songNotes[3];
@@ -3502,7 +3446,7 @@ class PlayState extends MusicBeatState
 
 						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + (Conductor.stepCrochet / FlxMath.roundDecimal(songSpeed, 2)), daNoteData, oldNote, true, daType, (gottaHitNote ? (changeArrows ? SONG.bfNoteStyle : alt2) : (changeArrows ? SONG.dadNoteStyle : alt)));
 						sustainNote.mustPress = gottaHitNote;
-						sustainNote.gfNote = (section.gfSection && (songNotes[1]<mania));
+						sustainNote.gfNote = (section.gfSection && (songNotes[1] < Main.keyAmmo[mania]));
 						sustainNote.noteType = swagNote.noteType;
 						sustainNote.dType = swagNote.dType;
 						sustainNote.scrollFactor.set();
@@ -3949,120 +3893,6 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		//it's here now. I think I can turn this into a lua? I'll do it 
-		var coolTankmen:Array<String> = ['tankman', 'tankman-bw'];
-		var noSwapSenpais:Array<String> = ['hd-senpai-dark', 'bf-hd-senpai-dark', 'bf-hd-senpai-worried', 'hd-senpai-happy'];
-
-		/*if (!disableSenTanIcons)
-		{
-			if (coolTankmen.contains(boyfriend.curCharacter))
-			{
-				var bwShit:String = "";
-	
-				switch (boyfriend.curCharacter)
-				{
-					case 'tankman': bwShit = "";		
-					case 'tankman-bw': bwShit = '-bw';		
-				}
-	
-				if (dad.curCharacter.contains('senpai') && !dad.curCharacter.contains('angry') && !dad.curCharacter.contains('ghosty'))
-				{
-					if (iconP1.animation.name != 'tankman-happy' + bwShit)
-						iconP1.useOldSystem('tankman-happy' + bwShit);
-				}			
-				else
-				{
-					if (iconP1.animation.name != 'tankman' + bwShit)
-						iconP1.useOldSystem('tankman' + bwShit);			
-				}							
-			}
-		
-			if (coolTankmen.contains(dad.curCharacter))
-			{
-				var bwShit:String = "";
-	
-				switch (dad.curCharacter)
-				{
-					case 'tankman': bwShit = "";		
-					case 'tankman-bw': bwShit = '-bw';		
-				}
-	
-				if (boyfriend.curCharacter.contains('senpai') && !boyfriend.curCharacter.contains('angry') && !boyfriend.curCharacter.contains('ghosty'))
-				{
-					if (iconP2.animation.name != 'tankman-happy' + bwShit)
-						iconP2.useOldSystem('tankman-happy' + bwShit);
-				}		
-				else 
-				{
-					if (iconP2.animation.name != 'tankman' + bwShit)
-						iconP2.useOldSystem('tankman' + bwShit);	
-				}
-			}
-	
-			if (dad.curCharacter.contains('2vplus-senpai') && !noSwapSenpais.contains(dad.curCharacter))
-			{
-				var bwShit:String = "";
-	
-				switch (dad.curCharacter)
-				{
-					case '2vplus-senpai-giddy-bw': bwShit = '-bw';	
-					case '2vplus-senpai-giddy-b3' | '2vplus-senpai-angry-b3': bwShit = '-b3';
-					case 'hd-senpai-old' | 'hd-senpai-giddy-old': bwShit = '-old';
-				}
-	
-				//if senpai is dad
-				if ((boyfriend.curCharacter.contains('tankman') || boyfriend.curCharacter.contains('monika') || boyfriend.curCharacter.contains('aloe') || boyfriend.curCharacter.contains('bf-nene')))
-				{
-					if (iconP2.animation.name != '2vplus-senpai-giddy' + bwShit)
-						iconP2.useOldSystem('2vplus-senpai-giddy' + bwShit);
-				}		
-				else
-				{
-					if (iconP2.animation.name != '2vplus-senpai' + bwShit)
-						iconP2.useOldSystem('2vplus-senpai' + bwShit);		
-				}	
-			}
-	
-			if (boyfriend.curCharacter.contains('2vplus-senpai') && !noSwapSenpais.contains(boyfriend.curCharacter))
-			{
-				var bwShit:String = "";
-	
-				switch (boyfriend.curCharacter)
-				{
-					case '2vplus-senpai-giddy-bw': bwShit = '-bw';	
-					case '2vplus-senpai-giddy-b3' | '2vplus-senpai-angry-b3': bwShit = '-b3';
-				}
-				
-				if ((dad.curCharacter.contains('tankman') || dad.curCharacter.contains('monika') || dad.curCharacter.contains('aloe') || dad.curCharacter.contains('bf-nene')))
-				{
-					if (iconP1.animation.name != '2vplus-senpai-giddy' + bwShit)
-						iconP1.useOldSystem('2vplus-senpai-giddy' + bwShit);
-				}
-					
-				else
-				{
-					if (iconP1.animation.name != '2vplus-senpai' + bwShit)
-						iconP1.useOldSystem('2vplus-senpai' + bwShit);	
-				}	
-			}
-		}
-	
-
-		if (curStage == 'genocide')
-		{
-			Stage.vignette.alpha = 1 - (health / 2);
-
-			if (!addedShit)
-			{
-				filters.push(ShadersHandler.chromaticAberration);
-				filters.push(ShadersHandler.brightShader);
-				addedShit = true;
-			}
-		
-			ShadersHandler.setBrightness(((health / 2) - 1 < 0) ? 0 : (((health / 2) - 1) * 2) / 32);
-			ShadersHandler.setContrast(((health / 2) - 1 < 0) ? 1 : 1 + ((health / 2) - 1) / 8);
-		}*/
-
 		if (shakeCam2)
 			FlxG.camera.shake(0.0025, 0.10);
 
@@ -4426,170 +4256,17 @@ class PlayState extends MusicBeatState
 						offsetY = luaArray[0].get("followDadYOffset", "float");
 					}
 					#end
-					if(SONG.player2 != "tordbot")
-					{
-						camFollow.setPosition(dad.getMidpoint().x + 150 + offsetX, dad.getMidpoint().y - 100 + offsetY);
+
+					camFollow.setPosition(dad.getMidpoint().x + 150 + offsetX, dad.getMidpoint().y - 100 + offsetY);
 	
-						if (!lockedCamera)
-						{
-							if (dad.isCustom)
-							{
-								camFollow.x += dad.cameraPosition[0] + opponentCameraOffset[0];
-								camFollow.y += dad.cameraPosition[1] + opponentCameraOffset[1];
-							}
-						}
-					}		
-	
-					/*switch (curStage)
+					if (dad.isCustom && !lockedCamera)
 					{
-						case 'day':
-							camFollow.x = 536.63 + offsetX;
-							camFollow.y = 449.94 + offsetY;
-						case 'mind':
-							camFollow.x = dad.getMidpoint().x + 350 + offsetX;
-						case 'prologue':
-							camFollow.x = dad.getMidpoint().x + 200 + offsetX;
-						case 'night':
-							camFollow.x = FlxMath.lerp(295.92, camFollow.x, 0.1) + offsetX;
-							camFollow.y = FlxMath.lerp(447.52, camFollow.y, 0.1) + offsetY;
-						case 'stadium':
-							camFollow.x = 530 + offsetX;
-							camFollow.y = 610 + offsetY;
-							lockedCamera = true;
-						case 'ripdiner':
-							camFollow.x = 736 + offsetX;
-							camFollow.y = 544.5 + offsetY;
-							lockedCamera = true;
-						case 'ITB':
-							camFollow.x = FlxMath.lerp(272.46, camFollow.x, 0.1) + offsetX;
-							camFollow.y = FlxMath.lerp(420.96, camFollow.y, 0.1) + offsetY;
-						case 'clubroomevil':
-							if (storyDifficulty == 5 && dad.curCharacter != 'bigmonika' && curStep < 2344)
-							{
-								camFollow.y = dad1.getMidpoint().y + 50 + offsetY;
-								camFollow.x = dad1.getMidpoint().x - 250 + offsetX;
-							}	
-							else if (storyDifficulty == 5)
-							{
-								camFollow.y = dad1.getMidpoint().y - 75 + offsetY;
-								camFollow.x = dad1.getMidpoint().x + offsetX;
-							}
-						case 'motherland':
-							if (defaultCamZoom >= 1.7)
-							{
-								camFollow.y = gf.getGraphicMidpoint().y + 110 + offsetY;
-								camFollow.x = gf.getGraphicMidpoint().x - 480 + offsetX;
-							}
-							else if (defaultCamZoom == 0.80)
-							{
-								camFollow.y = gf.getGraphicMidpoint().y + 90 + offsetY;
-								camFollow.x = gf.getGraphicMidpoint().x - 250 + offsetX;
-							}
-							else
-							{
-								camFollow.y = gf.getGraphicMidpoint().y - 60 + offsetY;
-								camFollow.x = gf.getGraphicMidpoint().x - 200 + offsetX;
-							}
-						case 'hallway':
-							camFollow.x = 657.81 + offsetX;
-							switch (dad.curCharacter) {
-								case 'austin':
-									camFollow.y = 400.56 + offsetY;
-								default:
-									camFollow.y = 501.56 + offsetY;
-							}
-						case 'concert':
-							camFollow.y = gf.getMidpoint().y - 25 + offsetY;
-							camFollow.x = gf.getMidpoint().x - 25 + offsetX;
-					}*/
-	
-					if (!lockedCamera && !dad.isCustom)
-					{
-						switch (dad.curCharacter)
-						{
-							case 'mom' | 'b3-mom-sad' | 'b3-mom-mad' | 'mom-sad-blue':
-								camFollow.y = dad.getMidpoint().y - 50 + offsetY;
-							case 'duet-sm':
-								camFollow.y = dad.getMidpoint().y - 400 + offsetY;
-								camFollow.x = dad.getMidpoint().x + 0 + offsetX;
-							case 'yukichi-police':  
-								camFollow.x = dad.getMidpoint().x + 423 + offsetX;
-								camFollow.y = dad.getMidpoint().y - 280 + offsetY;
-							case 'bf-annie':
-								camFollow.x = dad.getMidpoint().x + 250 + offsetX;
-								camFollow.y = dad.getMidpoint().y - 150 + offsetY;
-							case 'annie-bw':
-								camFollow.x = dad.getMidpoint().x + 200;	
-								camFollow.y = dad.getMidpoint().y - 200;	
-							case 'bf-whitty-pixel':
-								camFollow.y = dad.getMidpoint().y - 300;
-								camFollow.x = dad.getMidpoint().x + 60;
-							case 'bitdad' | 'bitdadBSide':
-								camFollow.y = dad.getMidpoint().y - 75;
-								camFollow.x = dad.getMidpoint().x + 200;
-							case 'bitdadcrazy':
-								camFollow.y = dad.getMidpoint().y - 75;
-								camFollow.x = dad.getMidpoint().x + 230;
-							case 'senpai' | 'senpai-angry' | 'senpai-giddy' | 'glitch' | 'glitch-angry' | 'monika' | 'monster-pixel' | 'monika-angry' | 'green-monika' | 'neon' 
-							| 'baldi-angry-pixel' | 'matt-angry' | 'mario-angry' | 'colt-angry' | 'kristoph-angry' | 'chara-pixel' | 'colt-angryd2' | 'colt-angryd2corrupted' 
-							| 'jackson' | 'miku-pixel' | 'josuke':
-								camFollow.y = dad.getMidpoint().y - 430 + offsetY;
-								camFollow.x = dad.getMidpoint().x - 100 + offsetX;
-							case 'neon-bigger':
-								camFollow.y = dad.getMidpoint().y - 380 + offsetY;
-								camFollow.x = dad.getMidpoint().x - 100 + offsetX;
-							case 'cassandra' | 'cassandra-bw':
-								camFollow.y = dad.getMidpoint().y + 75 + offsetY;
-							case 'bf-gf-pixel' | 'bf-botan-pixel' | 'bf-sky-pixel' | 'bf-glitch-pixel':
-								camFollow.x = dad.getMidpoint().x + 125;
-								camFollow.y = dad.getMidpoint().y - 225;
-							case 'lane-pixel':
-								camFollow.x = dad.getMidpoint().x + 110;
-								camFollow.y = dad.getMidpoint().y - 325;
-							case 'monika-finale':
-								camFollow.y = dad.getMidpoint().y - 390;
-								camFollow.x = dad.getMidpoint().x - 250;
-							case 'gf-crucified':
-								camFollow.y = dad.getMidpoint().y + offsetY;
-							case 'anchor-bowl':
-								camFollow.y = dad.getMidpoint().y + 50 + offsetY;
-							case 'eteled2':
-								camFollow.y = dad.getMidpoint().y - 200 + offsetY;
-							case 'bigmonika':
-								camFollow.y = dad.getMidpoint().y - 75 + offsetY;
-								camFollow.x = dad.getMidpoint().x + offsetX;
-							case 'crazygf' | 'sunky':
-								camFollow.y = dad.getMidpoint().y - 100 + offsetY;
-								camFollow.x = dad.getMidpoint().x + 149 + offsetX;	
-							case 'shadowbonnie-pixel':
-								camFollow.y = dad.getMidpoint().y + 100 + offsetY;		
-							case 'TDoll' | 'TDollAlt':
-								camFollow.y = dad.getMidpoint().y - 200 + offsetY;
-								camFollow.x = dad.getMidpoint().x + 130 + offsetX;	
-							case 'mel':
-								camFollow.y = dad.getMidpoint().y - 50 + offsetY;
-							case 'richard2':
-								camFollow.x = dad.getMidpoint().x + 100 + offsetX;
-							case 'baldi-angry':
-								camFollow.y = dad.getMidpoint().y + 50 + offsetY;
-								camFollow.x = dad.getMidpoint().x + 100 + offsetX;	
-						}
+						camFollow.x += dad.cameraPosition[0] + opponentCameraOffset[0];
+						camFollow.y += dad.cameraPosition[1] + opponentCameraOffset[1];
 					}		
 	
 					if (dad.curCharacter == 'mom')
 						vocals.volume = 1;
-	
-					//if (SONG.song.toLowerCase() == 'tutorial-remix' || SONG.player2 == 'tordbot')
-					//	tweenCamIn();
-	
-					if (curStage == 'curse')
-						FlxTween.tween(FlxG.camera, {zoom: 0.6}, (Conductor.stepCrochet * 4 / 1000), {ease: FlxEase.elasticInOut});
-	
-					/*if (SONG.song.toLowerCase() == 'endless' || SONG.song.toLowerCase() == 'you-cant-run' || SONG.song.toLowerCase() == 'omnipresent' || SONG.song.toLowerCase() == 'four-way-fracture')
-					{
-						camFollow.x += dadCamX;
-						camFollow.y += dadCamY;
-					}*/
 				}
 			}
 
@@ -4620,227 +4297,6 @@ class PlayState extends MusicBeatState
 					{
 						camFollow.x -= boyfriend.cameraPosition[0] - boyfriendCameraOffset[0];
 						camFollow.y += boyfriend.cameraPosition[1] + boyfriendCameraOffset[1];
-					}
-					
-					switch (curStage)
-					{
-						/*case 'hungryhippo':
-							camFollow.x = boyfriend.getMidpoint().x - 200 + offsetX;
-						case 'cgstage':
-							camFollow.y = boyfriend.getMidpoint().y - 230 + offsetY;
-						case 'mall' | 'mallSoft' | 'sofdeez':
-							camFollow.y = boyfriend.getMidpoint().y - 200 + offsetY;
-						case 'school' | 'grillbys' | 'school-baldi' | 'mushroom-kingdom' | 'eddhouse-pixel':
-							camFollow.x = boyfriend.getMidpoint().x - 200 + offsetX;
-							camFollow.y = boyfriend.getMidpoint().y - 200 + offsetY;
-						case 'school-switch':
-							camFollow.x = boyfriend.getMidpoint().x - 200 + offsetX;
-							camFollow.y = boyfriend.getMidpoint().y - 200 + offsetY;
-						case 'school-monika':
-							switch (curSong.toLowerCase())
-							{
-								case 'shinkyoku':
-									camFollow.x = boyfriend.getMidpoint().x - 300 + offsetX;
-									camFollow.y = boyfriend.getMidpoint().y - 200 + offsetY;
-								default:
-									camFollow.x = boyfriend.getMidpoint().x - 200 + offsetX;
-									camFollow.y = boyfriend.getMidpoint().y - 200 + offsetY;
-							}
-						case 'schoolnoon':
-							camFollow.x = boyfriend.getMidpoint().x - 200 + offsetX;
-							camFollow.y = boyfriend.getMidpoint().y - 200 + offsetY;
-						case 'schoolEvil' | 'schoolEvild4' | 'school-monika-finale':
-							camFollow.x = boyfriend.getMidpoint().x - 200 + offsetX;
-							camFollow.y = boyfriend.getMidpoint().y - 200 + offsetY;
-						case 'day' | 'sunset':
-							camFollow.x = 818.96 + offsetX;
-							camFollow.y = 475.95 + offsetY;
-						case 'garage':
-							camFollow.x = boyfriend.getMidpoint().x - 200 + offsetX;
-						case 'night':
-							camFollow.x = FlxMath.lerp(790.36, camFollow.x, 0.1) + offsetX;
-							camFollow.y = FlxMath.lerp(480.91, camFollow.y, 0.1) + offsetY;
-						case 'ITB':
-							camFollow.x = FlxMath.lerp(626.31, camFollow.x, 0.1) + offsetX;
-							camFollow.y = FlxMath.lerp(420.96, camFollow.y, 0.1) + offsetY;
-						case 'stadium':
-							camFollow.x = 844.5 + offsetX;
-							camFollow.y = 610 + offsetY;
-						case 'ripdiner':
-							camFollow.x = 736 + offsetX;
-							camFollow.y = 544.5 + offsetY;
-							lockedCamera = true;
-						case 'motherland':
-							if (defaultCamZoom >= 1.7)
-							{
-								camFollow.y = gf.getGraphicMidpoint().y + 110 + offsetY;
-								camFollow.x = gf.getGraphicMidpoint().x + 480 + offsetX;
-							}
-							else if (defaultCamZoom == 0.80)
-							{
-								camFollow.y = gf.getGraphicMidpoint().y + 90 + offsetY;
-								camFollow.x = gf.getGraphicMidpoint().x + 250 + offsetX;
-							}
-							else
-							{
-								camFollow.y = gf.getGraphicMidpoint().y - 60 + offsetY;
-								camFollow.x = gf.getGraphicMidpoint().x + 200 + offsetX;
-							}
-						case 'clubroomevil':
-							if (storyDifficulty == 5)
-							{
-								camFollow.y = dad1.getMidpoint().y + 50 + offsetY;
-								camFollow.x = dad1.getMidpoint().x + 250 + offsetX;
-							}		
-						case 'airplane':
-							camFollow.setPosition(boyfriend.getMidpoint().x - 300 + offsetX, boyfriend.getMidpoint().y - 300 + offsetY);
-						case 'hallway':
-							camFollow.x = 1176.3 + offsetX;
-							switch (boyfriend.curCharacter) {
-								case 'austin':
-									camFollow.y = 400.87 + offsetY;
-								default:
-									camFollow.y = 515.87 + offsetY;
-							}
-						case 'concert':
-							camFollow.y = gf.getMidpoint().y - 25 + offsetY;
-							camFollow.x = gf.getMidpoint().x - 25 + offsetX;
-						case 'dokiclubroom-sayori' | 'dokiclubroom-natsuki' | 'dokiclubroom-yuri' | 'dokiclubroom-monika':
-							camFollow.y = boyfriend.getMidpoint().y - 200 + offsetY;
-						case 'exestage2':
-							camFollow.x = boyfriend.getMidpoint().x - 170;
-						case 'trollgestage':
-							camFollow.x = boyfriend.getMidpoint().x - 200;
-							camFollow.y = boyfriend.getMidpoint().y - 250;*/
-					}
-	
-					if (SONG.song.toLowerCase() == 'tutorial-remix')
-					//	FlxTween.tween(FlxG.camera, {zoom: 1}, (Conductor.stepCrochet * 4 / 1000), {ease: FlxEase.elasticInOut});
-	
-					if (!lockedCamera && !boyfriend.isCustom)
-					{
-						switch (boyfriend.curCharacter)
-						{
-							case 'sky-mad' | 'sky-pissed':
-								camFollow.y = boyfriend.getMidpoint().y - 70 + offsetY;
-								camFollow.x = boyfriend.getMidpoint().x - 220 + offsetX;
-							case 'baldi-angry':
-								camFollow.y = boyfriend.getMidpoint().y + 50 + offsetY;
-								camFollow.x = boyfriend.getMidpoint().x + 50 + offsetX;
-							case 'parents-christmas':
-								camFollow.y = boyfriend.getMidpoint().y - 50 + offsetY;
-								camFollow.x = boyfriend.getMidpoint().x - 200 + offsetX;
-							case 'mokey':
-								camFollow.y = boyfriend.getMidpoint().y + 200 + offsetY;
-								camFollow.x = boyfriend.getMidpoint().x - 100 + offsetX;
-							case 'daidem':
-								camFollow.y = boyfriend.getMidpoint().y + offsetY;
-								camFollow.x = boyfriend.getMidpoint().x - 250 + offsetX;
-							case 'peri':
-								camFollow.y = boyfriend.getMidpoint().y - 50 + offsetY;
-							case 'piconjo':
-								camFollow.y = boyfriend.getMidpoint().y - 300 + offsetY;
-								camFollow.x = boyfriend.getMidpoint().x - 250 + offsetX;
-							case 'bf-dad':
-								camFollow.x = boyfriend.getMidpoint().x - 250 + offsetX;
-							case 'mia' | 'mia-lookstraight':
-								camFollow.x = boyfriend.getMidpoint().x - 150 + offsetX;
-							case 'myra':
-								camFollow.y = boyfriend.getMidpoint().y - 80 + offsetY;
-								camFollow.x = boyfriend.getMidpoint().x - 150 + offsetX;
-							case 'mom' | 'mom-shaded':
-								camFollow.y = boyfriend.getMidpoint().y - 50 + offsetY;
-								camFollow.x = boyfriend.getMidpoint().x - 250 + offsetX;
-							case 'austin':
-								camFollow.x = boyfriend.getMidpoint().x - 90;
-								camFollow.y = boyfriend.getMidpoint().y - 30;
-							case 'bf-mom' | 'bf-mom-car':
-								camFollow.x = boyfriend.getMidpoint().x - 250 + offsetX;
-							case 'cassandra':
-								camFollow.y = boyfriend.getMidpoint().y + 100 + offsetY;
-								camFollow.x = boyfriend.getMidpoint().x - 200 + offsetX;
-							case 'bana' | 'bana-wire':
-								camFollow.y = boyfriend.getMidpoint().y + offsetY;
-								camFollow.x = boyfriend.getMidpoint().x - 150 + offsetX;
-							case 'henry-angry':
-								camFollow.x = boyfriend.getMidpoint().x - 250;
-							case 'bf-annie':
-								camFollow.x = boyfriend.getMidpoint().x - 200 + offsetX;	
-							case 'annie-bw' | 'phil' | 'nene' | 'picoCrazy' | 'nene-bw':
-								camFollow.x = boyfriend.getMidpoint().x - 300 + offsetX;	
-							case 'senpai' | 'blantad-pixel' | 'glitch' | 'glitch-angry' | 'senpai-angry' | 'senpai-giddy' | 'miku-pixel' 
-							| 'mangle-angry' | 'monster-pixel' | 'jackson' | 'matt-angry' | 'mario-angry' | 'colt-angry' | 'colt-angryd2' 
-							| 'colt-angryd2corrupted' | 'bf-senpai-tankman' | 'neon-bigger' | 'josuke' | 'tricky-pixel':
-								camFollow.x = boyfriend.getMidpoint().x - 400 + offsetX;
-								camFollow.y = boyfriend.getMidpoint().y - 400 + offsetY;
-							case 'monika' | 'monika-angry':
-								if (curStage.contains('school') || pixelStages.contains(curStage))
-								{
-									camFollow.x = boyfriend.getMidpoint().x - 400 + offsetX;
-									camFollow.y = boyfriend.getMidpoint().y - 430 + offsetY;
-								}
-								else
-								{
-									camFollow.x = boyfriend.getMidpoint().x - 450 + offsetX;
-									camFollow.y = boyfriend.getMidpoint().y - 480 + offsetY;
-								}	
-							case 'neon':
-								camFollow.x = boyfriend.getMidpoint().x - 450 + offsetX;
-								camFollow.y = boyfriend.getMidpoint().y - 400 + offsetY;
-							case 'brother':
-								camFollow.y = boyfriend.getMidpoint().y + 25;
-							case 'spooky-pixel':
-								camFollow.x = boyfriend.getMidpoint().x - 250;
-								camFollow.y = boyfriend.getMidpoint().y - 100;
-							case 'spooky':
-								camFollow.x = boyfriend.getMidpoint().x - 200 + offsetX;
-								camFollow.y = boyfriend.getMidpoint().y + offsetY;
-							case 'bf-pico-pixel':
-								camFollow.x = boyfriend.getMidpoint().x - 300;
-								camFollow.y = boyfriend.getMidpoint().y - 250;
-							case 'bf-botan-pixel':
-								camFollow.x = boyfriend.getMidpoint().x - 300;
-								camFollow.y = boyfriend.getMidpoint().y - 150;
-							case 'bf-whitty-pixel':
-								camFollow.x = boyfriend.getMidpoint().x - 350;
-								camFollow.y = boyfriend.getMidpoint().y - 300;
-							case 'whitty':
-								camFollow.x = boyfriend.getMidpoint().x - 200 + offsetX;	
-							case 'bf-gf' | 'ruv' | 'tabi' | 'garcellodead':
-								camFollow.x = boyfriend.getMidpoint().x - 200 + offsetX;
-							case 'bf-senpai-worried':
-								camFollow.x = boyfriend.getMidpoint().x - 300 + offsetX;	
-							case 'henry':
-								camFollow.x = boyfriend.getMidpoint().x - 200;
-							case 'tabi-glitcher' | 'tabi-wire':
-								camFollow.x = boyfriend.getMidpoint().x - 300 + offsetX;
-							case 'bf-senpai-pixel-angry':
-								camFollow.x = boyfriend.getMidpoint().x - 200;
-								camFollow.y = boyfriend.getMidpoint().y - 200;
-							case 'gura-amelia' | 'gura-amelia-walfie' | 'gura-amelia-corrupt' | 'gura-amelia-bw':
-								camFollow.x = boyfriend.getMidpoint().x - 200;
-							case 'gold-side' | 'gold-side-blue':
-								camFollow.x = boyfriend.getMidpoint().x - 50 + offsetX;
-								camFollow.y = boyfriend.getMidpoint().y - 50 + offsetY;
-							case 'dust-sans':
-								camFollow.x = boyfriend.getMidpoint().x - 101 + offsetX;
-								camFollow.y = boyfriend.getMidpoint().y - 100 + offsetY;
-							case 'auditor':
-								camFollow.x = boyfriend.getMidpoint().x - 200 + offsetX;
-							case 'bf-demoncesar-pixel':
-								camFollow.x = boyfriend.getMidpoint().x - 300 + offsetX;
-								camFollow.y = boyfriend.getMidpoint().y - 250 + offsetY;
-						}
-		
-						/*if (!curStage.contains('school'))
-						{
-							switch (boyfriend.curCharacter)
-							{
-								case 'bf-pixel' | 'bf-pixeld3' | 'bf-pixeld3BSide' | 'bf-pixel-neon' | 'bf-tankman-pixel' | 'bf-demoncesar-pixel' | 'bf-tankman-pixel-happy' | 'bf-sonic-pixel':
-									camFollow.x = boyfriend.getMidpoint().x - 310 + offsetX;
-									camFollow.y = boyfriend.getMidpoint().y - 190 + offsetY;
-							}	
-						}*/
 					}
 				}
 			}

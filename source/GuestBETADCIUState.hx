@@ -48,6 +48,7 @@ class GuestBETADCIUState extends MusicBeatState
 	var combo:String = '';
 	var canMove:Bool = true;
 	public var warning:Bool = false;
+	private static var lastDifficultyName:String = '';
 
 	private var grpSongs:FlxTypedGroup<Alphabet>;
 	private var curPlaying:Bool = false;
@@ -166,7 +167,7 @@ class GuestBETADCIUState extends MusicBeatState
 		diffText.font = scoreText.font;
 		add(diffText);
 
-		comboText = new FlxText(diffText.x + 100, diffText.y, 0, "", 24);
+		comboText = new FlxText(diffText.x + 200, diffText.y, 0, "", 24);
 		comboText.font = diffText.font;
 		add(comboText);
 
@@ -216,7 +217,14 @@ class GuestBETADCIUState extends MusicBeatState
 		text3.bold = true;
 		add(text3);
 
+		if(lastDifficultyName == '')
+		{
+			lastDifficultyName = CoolUtil.defaultDifficulty;
+		}
+		curDifficulty = Math.round(Math.max(0, CoolUtil.defaultDifficulties.indexOf(lastDifficultyName)));
+
 		changeSelection();
+		changeDiff();
 
 		// FlxG.sound.playMusic(Paths.music('title'), 0);
 		// FlxG.sound.music.fadeIn(2, 0, 0.8);
@@ -493,14 +501,37 @@ class GuestBETADCIUState extends MusicBeatState
 		}*/
 	}
 
-	function changeSelection(change:Int = 0)
+	function changeDiff(change:Int = 0)
 	{
+		//curDifficulty += change;
+
+		if (curDifficulty < 0)
+			curDifficulty = CoolUtil.difficulties.length-1;
+		if (curDifficulty >= CoolUtil.difficulties.length)
+			curDifficulty = 0;
+
+		lastDifficultyName = CoolUtil.difficulties[curDifficulty];
+
+		// adjusting the highscore song name to be compatible (changeDiff)
+		var songHighscore = StringTools.replace(songs[curSelected].songName, " ", "-");
+		switch (songHighscore) {
+			case 'Dad-Battle': songHighscore = 'Dadbattle';
+			case 'Philly-Nice': songHighscore = 'Philly';
+		}
+		
+			
 		#if !switch
-		// NGio.logEvent('Fresh');
+		intendedScore = Highscore.getScore(songHighscore, curDifficulty);
+		combo = Highscore.getCombo(songHighscore, curDifficulty);
 		#end
 
-		// NGio.logEvent('Fresh');
-		FlxG.sound.play(PlayState.existsInCTS('scrollMenu'), 0.4);
+		PlayState.storyDifficulty = curDifficulty;
+		diffText.text = '< ' + CoolUtil.difficultyString2() + ' >';
+	}
+
+	function changeSelection(change:Int = 0, playSound:Bool = true)
+	{
+		if(playSound) FlxG.sound.play(PlayState.existsInCTS('scrollMenu'), 0.4);
 
 		curSelected += change;
 
@@ -508,18 +539,17 @@ class GuestBETADCIUState extends MusicBeatState
 			curSelected = songs.length - 1;
 		if (curSelected >= songs.length)
 			curSelected = 0;
-
+			
 		changeIcon();
-
 		// selector.y = (70 * curSelected) + 30;
 
 		#if !switch
 		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
-		combo = Highscore.getCombo(songs[curSelected].songName, curDifficulty);
-		// lerpScore = 0;
+		//intendedRating = Highscore.getRating(songs[curSelected].songName, curDifficulty);
 		#end
 
-		var bullShit:Int = 0;
+		var bullShitX:Int = 0;
+		var bullShitY:Int = 0;
 
 		for (i in 0...iconArray.length)
 		{
@@ -527,12 +557,11 @@ class GuestBETADCIUState extends MusicBeatState
 		}
 
 		iconArray[curSelected].alpha = 1;
-		Paths.currentModDirectory = songs[curSelected].folder;
 
 		for (item in grpSongs.members)
 		{
-			item.targetY = bullShit - curSelected;
-			bullShit++;
+			item.targetY = bullShitY - curSelected;
+			bullShitY++;
 
 			item.alpha = 0.6;
 			// item.setGraphicSize(Std.int(item.width * 0.8));
@@ -542,6 +571,49 @@ class GuestBETADCIUState extends MusicBeatState
 				item.alpha = 1;
 				// item.setGraphicSize(Std.int(item.width));
 			}
+		}
+		
+		Paths.currentModDirectory = songs[curSelected].folder;
+		PlayState.storyWeek = songs[curSelected].week;
+
+		CoolUtil.difficulties = CoolUtil.defaultDifficulties.copy();
+		var diffStr:String = WeekData.getCurrentWeek().difficulties;
+		if(diffStr != null) diffStr = diffStr.trim(); //Fuck you HTML5
+
+		if(diffStr != null && diffStr.length > 0)
+		{
+			var diffs:Array<String> = diffStr.split(',');
+			var i:Int = diffs.length - 1;
+			while (i > 0)
+			{
+				if(diffs[i] != null)
+				{
+					diffs[i] = diffs[i].trim();
+					if(diffs[i].length < 1) diffs.remove(diffs[i]);
+				}
+				--i;
+			}
+
+			if(diffs.length > 0 && diffs[0].length > 0)
+			{
+				CoolUtil.difficulties = diffs;
+			}
+		}
+		
+		if(CoolUtil.difficulties.contains(CoolUtil.defaultDifficulty))
+		{
+			curDifficulty = Math.round(Math.max(0, CoolUtil.defaultDifficulties.indexOf(CoolUtil.defaultDifficulty)));
+		}
+		else
+		{
+			curDifficulty = 0;
+		}
+
+		var newPos:Int = CoolUtil.difficulties.indexOf(lastDifficultyName);
+		//trace('Pos of ' + lastDifficultyName + ' is ' + newPos);
+		if(newPos > -1)
+		{
+			curDifficulty = newPos;
 		}
 	}
 }

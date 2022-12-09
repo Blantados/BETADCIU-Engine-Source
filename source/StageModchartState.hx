@@ -293,8 +293,10 @@ class StageModchartState
 		}
 
 		if (Std.parseInt(id) == null)
-			return Reflect.getProperty(PlayState.instance,id);
-		return PlayState.instance.strumLineNotes.members[Std.parseInt(id)];
+			return Reflect.getProperty(getInstance(),id);
+		
+		return false;
+		//return PlayState.instance.strumLineNotes.members[Std.parseInt(id)];
 	}
 
 
@@ -1998,6 +2000,18 @@ class StageModchartState
 			}
 				
 			if(killMe.length > 1) {
+				if (Std.isOfType(getObjectDirectly2(killMe[0]), Character) && killMe[killMe.length-1] == 'color')
+				{
+					var killMeh:Array<String> = [killMe[0], 'doMissThing'];
+					if(killMeh.length > 1) {
+						var coverMeInPiss:Dynamic = Reflect.getProperty(getInstance(), killMeh[0]);
+						for (i in 1...killMeh.length-1) {
+							coverMeInPiss = Reflect.getProperty(coverMeInPiss, killMeh[i]);
+						}
+						Reflect.setProperty(coverMeInPiss, killMeh[killMeh.length-1], 'false');
+					}
+				}
+
 				setVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1], value);
 				return true;
 			}
@@ -3143,7 +3157,7 @@ class StageModchartState
 	function tweenShit(tag:String, vars:String) {
 		cancelTween(tag);
 		var variables:Array<String> = vars.split('.');
-		var sexyProp:Dynamic = getObjectDirectly(variables[0]);
+		var sexyProp:Dynamic = getObjectDirectly2(variables[0]);
 		if(variables.length > 1) {
 			sexyProp = getVarInArray(getPropertyLoopThingWhatever(variables), variables[variables.length-1]);
 		}
