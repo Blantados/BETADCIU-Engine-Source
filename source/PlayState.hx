@@ -390,9 +390,6 @@ class PlayState extends MusicBeatState
 	public var defaultBar:Bool = true;
 	public var skipCountdown:Bool = false;
 
-	//neonight stuff
-	//yeah no i found a vastly superior way of doin the damn arrow switches.
-	public var changeArrows:Bool = false;
 	public var splashSkin:String = '';
 
 	public var Stage:Stage;
@@ -505,9 +502,6 @@ class PlayState extends MusicBeatState
 			else
 			{
 				suf = '-guest';	
-
-				if(FileSystem.exists(Paths.lua(SONG.song.toLowerCase()  + "/modchart-guest-noStage")))
-					changeArrows = true;
 			}
 		}
 
@@ -517,7 +511,6 @@ class PlayState extends MusicBeatState
 		switch (SONG.song.toLowerCase())
 		{
 			case 'hill-of-the-void':
-				changeArrows = true;
 				if (!FlxG.save.data.stageChange)
 					suf = '-noStage';	
 
@@ -538,9 +531,6 @@ class PlayState extends MusicBeatState
 			case 'four-way-fracture':
 				trioDad = true;
 				trioBoyfriend = true;
-			case 'ghost-vip':
-				if (storyDifficulty == 5)
-					changeArrows = true;
 			case 'omnipresent':
 				trioDad = true; //max dads on stage is 3. selever, me, and senpai.
 				duoBoyfriend = true; //max bfs on stage is 2 with sunday and rushia */
@@ -719,9 +709,6 @@ class PlayState extends MusicBeatState
 		var gfVersion:String = 'gf';
 
 		gfVersion = gfCheck;
-
-		if (FileSystem.exists(Paths.txt(songLowercase  + "/arrowSwitches" + suf)) && !(isBETADCIU && storyDifficulty == 5))
-			changeArrows = true;
 
 		if (FileSystem.exists(Paths.txt(songLowercase  + "/preload" + suf)))
 		{
@@ -3239,9 +3226,15 @@ class PlayState extends MusicBeatState
 
 	var debugNum:Int = 0;
 
+	var opponentSectionNoteStyle:String = "";
+	var playerSectionNoteStyle:String = "";
+
 	private function generateSong(dataPath:String):Void
 	{
 		// FlxG.log.add(ChartParser.parse());
+
+		opponentSectionNoteStyle = "";
+		playerSectionNoteStyle = "";
 
 		songSpeed = (FlxG.save.data.scrollSpeed != 1 ? FlxG.save.data.scrollSpeed : PlayState.SONG.speed);
 
@@ -3352,18 +3345,6 @@ class PlayState extends MusicBeatState
 					suf = '-guest';
 			}
 
-			/*if (isBETADCIU && storyDifficulty == 5)
-			{
-				switch (SONG.song.toLowerCase())
-				{
-					case 'you-cant-run': //setting the different notes and shit
-						if (daSection == 17)Note.mickeyNotes = true;
-						if (daSection == 25)Note.mickeyNotes = false;
-						if (daSection == 73)Note.auditorNotes = true;
-						if (daSection == 81)Note.auditorNotes = false;
-				}
-			}*/
-			
 			if (FileSystem.exists(Paths.txt(songLowercase  + "/arrowSwitches" + suf)))
 			{
 				var stuff:Array<String> = CoolUtil.coolTextFile2(Paths.txt(songLowercase  + "/arrowSwitches" + suf));
@@ -3375,9 +3356,9 @@ class PlayState extends MusicBeatState
 					if (daSection == Std.parseInt(data[0]))
 					{
 						if (data[2] == 'dad')
-							SONG.dadNoteStyle = data[1];
+							opponentSectionNoteStyle = data[1];
 						if (data[2] == 'bf')
-							SONG.bfNoteStyle = data[1];
+							playerSectionNoteStyle = data[1];
 					}
 				}
 			}
@@ -3389,16 +3370,11 @@ class PlayState extends MusicBeatState
 			//trying to use old system with the new mania stuff
 			switch (mania)
 			{
-				case 0:
-					playerNotes = [0, 1, 2, 3, 8, 9, 10, 11];
-				case 1:
-					playerNotes = [0, 1, 2, 3, 4, 5, 12, 13, 14, 15, 16, 17];
-				case 2:
-					playerNotes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 18, 19, 20, 21, 22, 23, 24, 25, 26];
-				case 3:
-					playerNotes = [0, 1, 2, 3, 4, 10, 11, 12, 13, 14];
-				case 4:
-					playerNotes = [0, 1, 2, 3, 4, 5, 6, 14, 15, 16, 17, 18, 19, 20];
+				case 0: playerNotes = [0, 1, 2, 3, 8, 9, 10, 11];
+				case 1: playerNotes = [0, 1, 2, 3, 4, 5, 12, 13, 14, 15, 16, 17];
+				case 2: playerNotes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 18, 19, 20, 21, 22, 23, 24, 25, 26];
+				case 3: playerNotes = [0, 1, 2, 3, 4, 10, 11, 12, 13, 14];
+				case 4: playerNotes = [0, 1, 2, 3, 4, 5, 6, 14, 15, 16, 17, 18, 19, 20];
 			}
 
 			for (songNotes in section.sectionNotes)
@@ -3423,13 +3399,14 @@ class PlayState extends MusicBeatState
 				var daType = songNotes[3];
 				var swagNote:Note;
 
-				swagNote = new Note(daStrumTime, daNoteData, oldNote, false, daType, (gottaHitNote ? (changeArrows ? SONG.bfNoteStyle : alt2) : (changeArrows ? SONG.dadNoteStyle : alt)));
+				swagNote = new Note(daStrumTime, daNoteData, oldNote, false, daType, (gottaHitNote ? (playerSectionNoteStyle != "" ? playerSectionNoteStyle : alt2) : (opponentSectionNoteStyle != "" ? opponentSectionNoteStyle : alt)));
 				swagNote.sustainLength = songNotes[2];
 				swagNote.mustPress = gottaHitNote;
 				swagNote.gfNote = (section.gfSection && (songNotes[1] < Main.keyAmmo[mania]));
 				swagNote.scrollFactor.set(0, 0);
 				swagNote.dType = section.dType;
 				swagNote.noteType = songNotes[3];
+				swagNote.noteSection = daSection;
 				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
 
 				var susLength:Float = swagNote.sustainLength;
@@ -3444,11 +3421,12 @@ class PlayState extends MusicBeatState
 					{
 						oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 
-						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + (Conductor.stepCrochet / FlxMath.roundDecimal(songSpeed, 2)), daNoteData, oldNote, true, daType, (gottaHitNote ? (changeArrows ? SONG.bfNoteStyle : alt2) : (changeArrows ? SONG.dadNoteStyle : alt)));
+						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + (Conductor.stepCrochet / FlxMath.roundDecimal(songSpeed, 2)), daNoteData, oldNote, true, daType, (gottaHitNote ? (playerSectionNoteStyle != "" ? playerSectionNoteStyle : alt2) : (opponentSectionNoteStyle != "" ? opponentSectionNoteStyle : alt)));
 						sustainNote.mustPress = gottaHitNote;
 						sustainNote.gfNote = (section.gfSection && (songNotes[1] < Main.keyAmmo[mania]));
 						sustainNote.noteType = swagNote.noteType;
 						sustainNote.dType = swagNote.dType;
+						sustainNote.noteSection = daSection;
 						sustainNote.scrollFactor.set();
 						swagNote.tail.push(sustainNote);
 						sustainNote.parent = swagNote;
@@ -3503,6 +3481,9 @@ class PlayState extends MusicBeatState
 		checkEventNote();
 
 		generatedMusic = true;
+
+		opponentSectionNoteStyle = "";
+		playerSectionNoteStyle = "";
 	}
 
 	public function checkEventNote() {
@@ -3668,7 +3649,7 @@ class PlayState extends MusicBeatState
 			{
 				babyArrow.y -= 10;
 				babyArrow.alpha = 0;
-				FlxTween.tween(babyArrow, {y: babyArrow.y + 10, alpha: daAlpha}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * i)});
+				FlxTween.tween(babyArrow, {y: babyArrow.y + 10, alpha: daAlpha}, 1, {ease: FlxEase.circOut, startDelay: (0.5 + (0.2 * i) / playbackRate)});
 			}
 
 			if (player == 1)

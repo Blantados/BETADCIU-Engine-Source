@@ -581,7 +581,6 @@ class ChartingState extends MusicBeatState
 		stepperMania.name = 'song_mania';
 
 		var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt('characterList'));
-		var gfVersions:Array<String> = CoolUtil.coolTextFile(Paths.txt('gfVersionList'));
 		var stages:Array<String> = CoolUtil.coolTextFile(Paths.txt('stageList'));
 		var noteStyles:Array<String> = CoolUtil.coolTextFile(Paths.txt('noteStyleList'));
 
@@ -592,9 +591,9 @@ class ChartingState extends MusicBeatState
 		});
 		player1DropDown.selectedLabel = _song.player1;
 
-		var gfVersionDropDown = new FlxUIDropDownMenuCustom(player1DropDown.x, player1DropDown.y + 40, FlxUIDropDownMenuCustom.makeStrIdLabelArray(gfVersions, true), function(gfVersion:String)
+		var gfVersionDropDown = new FlxUIDropDownMenuCustom(player1DropDown.x, player1DropDown.y + 40, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
 		{
-			_song.gfVersion = gfVersions[Std.parseInt(gfVersion)];
+			_song.gfVersion = characters[Std.parseInt(character)];
 		});
 		gfVersionDropDown.selectedLabel = _song.gfVersion;
 		
@@ -616,6 +615,15 @@ class ChartingState extends MusicBeatState
 			_song.noteStyle = noteStyles[Std.parseInt(noteStyle)];
 		});
 		noteStyleDropDown.selectedLabel = _song.noteStyle;
+
+		var reloadDropDowns:FlxButton = new FlxButton(player1DropDown.x + 140, player2DropDown.y, "Reload Dropdowns", function()
+		{
+			var dropDowns:Array<FlxUIDropDownMenuCustom> = [player1DropDown, player2DropDown, gfVersionDropDown, stageDropDown, noteStyleDropDown];
+			var dropDownsData:Array<Array<String>> = [characters, characters, characters, stages, noteStyles];
+			
+			for (i in 0...dropDowns.length)
+				dropDowns[i].setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(dropDownsData[i], true));
+		});
 
 		var tab_group_song = new FlxUI(null, UI_box);
 		tab_group_song.name = "Song";

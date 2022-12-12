@@ -125,6 +125,8 @@ class Note extends FlxSprite
 
 	public var originalHeightForCalcs:Float = 6;
 
+	public var noteSection:Int = 0;
+
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
 		reloadNote(value);

@@ -537,7 +537,7 @@ class Paths
 		return false;
 	}
 
-	public static function cacheImage(key:String, ?library:String = null, ?antialiasing:Bool = true)
+	public static function cacheImage(key:String, ?library:String = null, ?forced:Bool = false, ?antialiasing:Bool = true)
 	{
 		var path:String = "ksajdlahfjhadjfhdshfkjhd";
 
@@ -559,7 +559,7 @@ class Paths
 		
 		if (FileSystem.exists(path) || Assets.exists(path)) 
 		{
-			if(!currentTrackedAssets.exists(key)) 
+			if(!currentTrackedAssets.exists(key) || forced) 
 			{
 				var newBitmap:BitmapData;
 
@@ -568,12 +568,7 @@ class Paths
 					var matrix:Matrix = new Matrix();
 					matrix.scale(0.5, 0.5);
 
-					var bigBMP:BitmapData;
-
-					if (Assets.exists(path))
-						bigBMP = BitmapData.fromFile(path);
-					else
-						bigBMP = BitmapData.fromFile(path);
+					var bigBMP:BitmapData = BitmapData.fromFile(path);
 
 					if (bigBMP.width <= 1) //prevents having 0 width for cases like empty gf and empty strums
 						newBitmap = bigBMP;

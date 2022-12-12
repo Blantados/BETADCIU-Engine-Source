@@ -38,6 +38,7 @@ import flixel.util.FlxAxes;
 import flixel.math.FlxRect;
 import animateatlas.AtlasFrameMaker;
 import ModchartState;
+import flixel.addons.display.FlxBackdrop;
 
 #if desktop
 import Sys;
@@ -654,6 +655,9 @@ class StageModchartState
 		});
 
 		Lua_helper.add_callback(lua,"setScrollFactor", function(id:String , x:Float, y:Float) {
+			if (preloading)
+				return;
+			
 			var shit:Dynamic = getObjectDirectly2(id);
 			
 			shit.scrollFactor.set(x, y);
@@ -1991,6 +1995,9 @@ class StageModchartState
 		});
 
 		Lua_helper.add_callback(lua, "setProperty", function(variable:String, value:Dynamic) {
+			if (preloading)
+				return false;
+			
 			var killMe:Array<String> = variable.split('.');
 		
 			if (Stage.instance.swagBacks.exists(killMe[0]))
@@ -2293,6 +2300,34 @@ class StageModchartState
 			if (!preloading)
 				Stage.instance.swagBacks.set(tag, leSprite);
 		});
+
+		Lua_helper.add_callback(lua, "makeLuaBackdrop", function(tag:String, image:String, x:Float, y:Float, ?antialiasing:Bool = true) {
+			tag = tag.replace('.', '');
+
+			var leSprite:FlxBackdrop = null;
+			
+			if(image != null && image.length > 0) {
+
+				var rawPic:Dynamic;
+
+				if (!Paths.currentTrackedAssets.exists(image))
+					Paths.cacheImage(image);
+
+				rawPic = Paths.currentTrackedAssets.get(image);	
+				
+				leSprite = new FlxBackdrop(rawPic, x, y);
+			}
+
+			if (leSprite == null)
+				return;
+
+			leSprite.antialiasing = antialiasing;
+			leSprite.active = true;
+
+			if (!preloading)
+				Stage.instance.swagBacks.set(tag, leSprite);
+		});
+
 
 		Lua_helper.add_callback(lua, "makeGraphic", function(obj:String, width:Int, height:Int, color:String) {
 			var colorNum:Int = Std.parseInt(color);
@@ -3086,7 +3121,10 @@ class StageModchartState
 
 	public function getObjectDirectly2(id:String):Dynamic //but dynamic;
 	{
-		var shit:Dynamic;
+		var shit:Dynamic = "long string of text so there's no way someone names it this";
+
+		if (preloading)
+			return shit;
 
 		if(Stage.instance.swagBacks.exists(id))
 			shit = Stage.instance.swagBacks.get(id);
@@ -3094,7 +3132,7 @@ class StageModchartState
 			shit = PlayState.instance.Stage.swagBacks.get(id);
 		else if(PlayState.instance.getLuaObject(id) != null)
 			shit = PlayState.instance.getLuaObject(id);
-		else
+		else if (PlayState.instance != null)
 			shit = Reflect.getProperty(PlayState.instance, id);
 			
 		return shit;

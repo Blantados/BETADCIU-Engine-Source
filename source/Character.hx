@@ -178,9 +178,9 @@ class Character extends FlxSprite
 				if (!Paths.currentTrackedAssets.exists(json.image))
 				{
 					if (Assets.exists(imagePath) && !FileSystem.exists(imagePath) && !FileSystem.exists(Paths.modsImages(imagePath)))
-						Paths.cacheImage(json.image, 'shared');
+						Paths.cacheImage(json.image, 'shared', false, !noAntialiasing);
 					else
-						Paths.cacheImage(json.image, 'preload');
+						Paths.cacheImage(json.image, 'preload', false, !noAntialiasing);	
 				}
 
 				charPath = json.image + '.png'; //cuz we only use pngs anyway
@@ -386,100 +386,6 @@ class Character extends FlxSprite
 		{
 			switch (curCharacter)
 			{
-				/*case 'bf-bigmonika-dead':
-					if (animation.curAnim.name != 'crashDeath2')
-					{
-						if (isPlayer)
-							playAnim('idle' + bfAltAnim);
-						else
-							playAnim('idle' + altAnim);	
-					}
-				case 'tankman':
-					if (animation.curAnim.name != 'singDOWN-alt' && animation.curAnim.name != 'singLEFT-alt' && !stopIdle)
-					{
-						if (isPlayer)
-							playAnim('idle' + bfAltAnim);
-						else
-							playAnim('idle' + altAnim);	
-					}
-				case 'oswald-happy':
-					if (animation.curAnim.name != 'oldtimey' && animation.curAnim.name != 'lucky')
-					{
-						danced = !danced;
-		
-						if (isPlayer)
-						{
-							if (danced)
-								playAnim('danceRight' + bfAltAnim);
-							else
-								playAnim('danceLeft' + bfAltAnim);
-						}
-						else
-						{
-							if (danced)
-								playAnim('danceRight' + altAnim);
-							else
-								playAnim('danceLeft' + altAnim);
-						}	
-					}
-				case 'oswald-angry':
-					if (animation.curAnim.name != 'hah' && animation.curAnim.name != 'notold')
-					{
-						danced = !danced;
-		
-						if (isPlayer)
-						{
-							if (danced)
-								playAnim('danceRight' + bfAltAnim);
-							else
-								playAnim('danceLeft' + bfAltAnim);
-						}
-						else
-						{
-							if (danced)
-								playAnim('danceRight' + altAnim);
-							else
-								playAnim('danceLeft' + altAnim);
-						}	
-					}
-				case 'gf-judgev2':
-					if (animation.curAnim.name != 'spooked')
-					{
-						danced = !danced;
-		
-						if (isPlayer)
-						{
-							if (danced)
-								playAnim('danceRight' + bfAltAnim);
-							else
-								playAnim('danceLeft' + bfAltAnim);
-						}
-						else
-						{
-							if (danced)
-								playAnim('danceRight' + altAnim);
-							else
-								playAnim('danceLeft' + altAnim);
-						}	
-					}
-				case 'bigmonika':
-					if (animation.curAnim.name != 'lastNOTE')
-					{
-						if (isPlayer)
-							playAnim('idle' + bfAltAnim);
-						else
-							playAnim('idle' + altAnim);	
-					}
-				case 'amor-ex':
-					if (animation.curAnim.name != 'drop')
-					{
-						if (isPlayer)
-							playAnim('idle' + bfAltAnim);
-						else
-							playAnim('idle' + altAnim);	
-					}
-				case 'sarvente-transform':
-					//she dont' dance bro*/
 				default:
 					if (danceIdle)
 					{

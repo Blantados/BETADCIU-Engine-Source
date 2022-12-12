@@ -542,14 +542,6 @@ class ModchartState
 		else
 			PlayState.instance.iconP2.useOldSystem(PlayState.instance.dad.healthIcon);
 
-		if (PlayState.instance.changeArrows)
-		{
-			for (i in 0...Main.keyAmmo[PlayState.SONG.mania])
-			{
-				PlayState.instance.strumLineNotes.members[i].texture = PlayState.instance.dad.noteSkin;
-			}
-		}
-
 		if (PlayState.instance.defaultBar)
 		{
 			PlayState.instance.healthBar.createFilledBar(FlxColor.fromString('#' + PlayState.instance.dad.iconColor), FlxColor.fromString('#' + PlayState.instance.boyfriend.iconColor));
@@ -587,15 +579,6 @@ class ModchartState
 		}
 		else
 			PlayState.instance.iconP1.useOldSystem(PlayState.instance.boyfriend.healthIcon);
-
-		if (PlayState.instance.changeArrows)
-		{
-			for (i in Main.keyAmmo[PlayState.SONG.mania]...Main.keyAmmo[PlayState.SONG.mania] * 2)
-			{
-				PlayState.instance.strumLineNotes.members[i].texture = PlayState.instance.boyfriend.noteSkin;
-				PlayState.instance.bfStrumStyle = PlayState.instance.boyfriend.noteSkin;
-			}
-		}
 
 		if (PlayState.instance.defaultBar)
 		{
@@ -779,15 +762,6 @@ class ModchartState
 		if (FlxG.save.data.uncacheCharacterSwitch && !dontDestroy)
 			Paths.clearStoredMemory2(bfPath);
 
-		if (PlayState.instance.changeArrows)
-		{
-			for (i in Main.keyAmmo[PlayState.SONG.mania]...Main.keyAmmo[PlayState.SONG.mania] * 2)
-			{
-				PlayState.instance.strumLineNotes.members[i].texture = PlayState.instance.boyfriend.noteSkin;
-				PlayState.instance.bfStrumStyle = PlayState.instance.boyfriend.noteSkin;
-			}
-		}
-
 		PlayState.instance.startCharacterLua(PlayState.instance.boyfriend.curCharacter);
 	}
 
@@ -873,14 +847,6 @@ class ModchartState
 
 		if (FlxG.save.data.uncacheCharacterSwitch && !dontDestroy && daCurChar != PlayState.instance.dad.curCharacter)
 			Paths.clearStoredMemory2(dadPath);
-
-		if (PlayState.instance.changeArrows)
-		{
-			for (i in 0...Main.keyAmmo[PlayState.SONG.mania])
-			{
-				PlayState.instance.opponentStrums.members[i].texture = PlayState.instance.dad.noteSkin;
-			}
-		}
 
 		PlayState.instance.startCharacterLua(PlayState.instance.dad.curCharacter);
 	}
@@ -992,6 +958,11 @@ class ModchartState
 		if (PlayState.instance.isDetected && PlayState.instance != null)
 			shownNotes = [];
 
+		scriptName = path;
+
+		if (ogPath.contains('assets/shared'))
+			scriptName = ogPath;
+
 		try{
 			var result:Dynamic = LuaL.dofile(lua, path);
 			var resultStr:String = Lua.tostring(lua, result);
@@ -1002,18 +973,18 @@ class ModchartState
 				#else
 				luaTrace('Error loading lua script: "$script"\n' + resultStr, true, false, FlxColor.RED);
 				#end
+				Lua.close(lua);
 				lua = null;
+
+				PlayState.instance.luaArray.remove(this);
+				PlayState.instance.luaArray = [];
+
 				return;
 			}
 		} catch(e:Dynamic) {
 			trace(e);
 			return;
 		}
-
-		scriptName = path;
-
-		if (ogPath.contains('assets/shared'))
-			scriptName = ogPath;
 
 		trace('lua file loaded succesfully:' + path);
 			
@@ -4518,7 +4489,7 @@ class ModchartState
 	
 	public function getObjectDirectly2(id:String):Dynamic
 	{
-		var shit:Dynamic;
+		var shit:Dynamic = "long string of text so there's no way someone names it this";
 
 		if(Stage.instance.swagBacks.exists(id))
 			shit = Stage.instance.swagBacks.get(id);
@@ -4526,7 +4497,7 @@ class ModchartState
 			shit = PlayState.instance.Stage.swagBacks.get(id);
 		else if(PlayState.instance.getLuaObject(id) != null)
 			shit = PlayState.instance.getLuaObject(id);
-		else
+		else if (PlayState.instance != null)
 			shit = getActorByName(id);
 
 		return shit;
