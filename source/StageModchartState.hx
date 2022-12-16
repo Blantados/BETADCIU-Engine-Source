@@ -1378,9 +1378,46 @@ class StageModchartState
 			FlxTween.tween(getActorByName(id), {alpha: toAlpha}, time, {type: FlxTweenType.ONESHOT});
 		});
 
-		Lua_helper.add_callback(lua,"tweenColor", function(id:String, time:Float, initColor:FlxColor, finalColor:FlxColor) {
-			if (PlayState.instance != null){time = time / PlayState.instance.playbackRate;}
-			FlxTween.color(getObjectDirectly2(id), time, initColor, finalColor);
+		//I actually use this one so I'll give it the extra psych stuff 
+		Lua_helper.add_callback(lua,"tweenColor", function(vars:String, duration:Float, initColor:FlxColor, finalColor:FlxColor, ?tag:String) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
+
+			if (tag == null){tag = vars+'TweenCol';}
+			var penisExam:Dynamic = tweenShit(tag, vars);
+			if(penisExam != null) {
+				PlayState.instance.modchartTweens.set(tag, FlxTween.color(penisExam, duration, initColor, finalColor, {
+					onComplete: function(twn:FlxTween) {
+						PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
+
+						if (PlayState.instance.Stage.isCustomStage && PlayState.instance.Stage.luaArray.length >= 1)
+							PlayState.instance.Stage.callOnLuas('onTweenCompleted', [tag]);
+
+						PlayState.instance.modchartTweens.remove(tag);
+					}
+				}));
+			} else {
+				luaTrace('tweenColor: Couldnt find object: ' + vars, false, false, FlxColor.RED);
+			}
+		});
+
+		//and then one that's more akin to psych which has tags first as to not mess up the original
+		Lua_helper.add_callback(lua,"doTweenColor2", function(tag:String, vars:String, duration:Float, initColor:FlxColor, finalColor:FlxColor) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
+			var penisExam:Dynamic = tweenShit(tag, vars);
+			if(penisExam != null) {
+				PlayState.instance.modchartTweens.set(tag, FlxTween.color(penisExam, duration, initColor, finalColor, {
+					onComplete: function(twn:FlxTween) {
+						PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
+
+						if (PlayState.instance.Stage.isCustomStage && PlayState.instance.Stage.luaArray.length >= 1)
+							PlayState.instance.Stage.callOnLuas('onTweenCompleted', [tag]);
+
+						PlayState.instance.modchartTweens.remove(tag);
+					}
+				}));
+			} else {
+				luaTrace('doTweenColor2: Couldnt find object: ' + vars, false, false, FlxColor.RED);
+			}
 		});
 
 		Lua_helper.add_callback(lua, "RGBColor", function (r:Int,g:Int,b:Int, alpha:Int = 255) {

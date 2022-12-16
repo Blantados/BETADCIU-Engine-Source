@@ -965,11 +965,12 @@ class CharacterEditorState extends MusicBeatState
 			lastAnim = char.animation.curAnim.name;
 		}
 
+		var anims:Array<AnimArray> = char.animationsArray.copy();
+
 		var daPath:String = char.imageFile;
 
-		Paths.cacheImage(daPath, null, true, !char.noAntialiasing);
-
-		var anims:Array<AnimArray> = char.animationsArray.copy();
+		Paths.currentTrackedAssets.remove(char.imageFile);
+		Paths.clearStoredMemory2(char.imageFile, 'image');
 
 		if(Paths.fileExists('images/' + daPath  + '.txt', TEXT)) {
 			char.frames = Paths.getPackerAtlas(daPath);

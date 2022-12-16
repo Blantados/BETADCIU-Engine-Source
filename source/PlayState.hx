@@ -71,6 +71,9 @@ import lime.media.AudioManager;
 import flixel.addons.display.FlxBackdrop;
 import flixel.addons.display.FlxTiledSprite;
 
+#if !flash 
+import flixel.addons.display.FlxRuntimeShader;
+#end
 
 import Note.EventNote;
 import openfl.events.KeyboardEvent;
@@ -78,6 +81,7 @@ import openfl.events.KeyboardEvent;
 #if sys
 import Sys;
 import sys.FileSystem;
+import sys.io.File;
 import lime.media.AudioBuffer;
 import flash.media.Sound;
 #end
@@ -985,7 +989,7 @@ class PlayState extends MusicBeatState
 			timeTxt.borderSize = 2;
 			if(FlxG.save.data.downscroll) timeTxt.y = FlxG.height - 44;
 	
-			/*if(ClientPrefs.timeBarType == 'Song Name')
+			/*if(FlxG.save.data.timeBarType == 'Song Name')
 			{
 				timeTxt.text = SONG.song;
 			}*/
@@ -1668,35 +1672,37 @@ class PlayState extends MusicBeatState
 		}
 		if(!stopDeath)
 		{
-			boyfriend.stunned = true;
+			var ret:Dynamic = callOnLuas2('onGameOver', [], false);
+		
+			if(ret != ModchartState.Function_Stop) {
+				boyfriend.stunned = true;
 
-			persistentUpdate = false;
-			persistentDraw = false;
-			paused = true;
+				persistentUpdate = false;
+				persistentDraw = false;
+				paused = true;
 
-			vocals.stop();
-			FlxG.sound.music.stop();
+				vocals.stop();
+				FlxG.sound.music.stop();
 
-			var daX = boyfriend.getScreenPosition().x;
-			var daY = boyfriend.getScreenPosition().y;
+				var daX = boyfriend.getScreenPosition().x;
+				var daY = boyfriend.getScreenPosition().y;
 
-			/*if (SONG.song.toLowerCase() == 'epiphany')
-			{
-				daX = dad1.getScreenPosition().x;
-				daY = dad1.getScreenPosition().y;
-			}*/
+				/*if (SONG.song.toLowerCase() == 'epiphany')
+				{
+					daX = dad1.getScreenPosition().x;
+					daY = dad1.getScreenPosition().y;
+				}*/
 
-			isDead = true;
+				isDead = true;
 
-			if (luaArray.length >= 1)
-				callOnLuas('onGameOver', []); //psych	
+				
+				openSubState(new GameOverSubstate(daX, daY));
 
-			openSubState(new GameOverSubstate(daX, daY));
-
-			#if windows
-			// Game Over doesn't get his own variable because it's only used here
-			DiscordClient.changePresence("GAME OVER -- " + SONG.song + " (" + storyDifficultyText + ") " + Ratings.GenerateLetterRank(accuracy),"\nAcc: " + HelperFunctions.truncateFloat(accuracy, 2) + "% | Score: " + songScore + " | Misses: " + misses  , iconRPC);
-			#end
+				#if windows
+				// Game Over doesn't get his own variable because it's only used here
+				DiscordClient.changePresence("GAME OVER -- " + SONG.song + " (" + storyDifficultyText + ") " + Ratings.GenerateLetterRank(accuracy),"\nAcc: " + HelperFunctions.truncateFloat(accuracy, 2) + "% | Score: " + songScore + " | Misses: " + misses  , iconRPC);
+				#end
+			}
 		}		
 	}
 
@@ -1749,6 +1755,30 @@ class PlayState extends MusicBeatState
 				continue;
 
 			var ret:Dynamic = script.call(event, args);
+			if(ret == ModchartState.Function_StopLua && !ignoreStops)
+				break;
+			
+			// had to do this because there is a bug in haxe where Stop != Continue doesnt work
+			var bool:Bool = ret == ModchartState.Function_Continue;
+			if(!bool) {
+				returnVal = cast ret;
+			}
+		}
+		#end
+		//trace(event, returnVal);
+		return returnVal;
+	}
+
+	//idk something with the way the kade call function works doesn't allow Function_Stop to work
+	public function callOnLuas2(event:String, args:Array<Dynamic>, ignoreStops = true, exclusions:Array<String> = null):Dynamic {
+		var returnVal:Dynamic = ModchartState.Function_Continue;
+		#if LUA_ALLOWED
+		if(exclusions == null) exclusions = [];
+		for (script in luaArray) {
+			if(exclusions.contains(script.scriptName))
+				continue;
+
+			var ret:Dynamic = script.callPsych(event, args);
 			if(ret == ModchartState.Function_StopLua && !ignoreStops)
 				break;
 			
@@ -3579,7 +3609,7 @@ class PlayState extends MusicBeatState
 				phillyGlowGradient = new PhillyGlow.PhillyGlowGradient(-400, 225); //This shit was refusing to properly load FlxGradient so fuck it
 				phillyGlowGradient.visible = false;
 				insert(members.indexOf(blammedLightsBlack) + 1, phillyGlowGradient);
-				if(!ClientPrefs.flashing) phillyGlowGradient.intendedAlpha = 0.7;
+				if(!FlxG.save.data.flashing) phillyGlowGradient.intendedAlpha = 0.7;
 
 				precacheList.set('philly/particle', 'image'); //precache particle image
 				phillyGlowParticles = new FlxTypedGroup<PhillyGlow.PhillyGlowParticle>();
@@ -3978,9 +4008,7 @@ class PlayState extends MusicBeatState
 
 		if (FlxG.keys.justPressed.ENTER && startedCountdown && canPause)
 		{
-			var ret:Dynamic = callOnLuas('onPause', [], false);
-
-			var ret:Dynamic = callOnLuas('onPause', [], false);
+			var ret:Dynamic = callOnLuas2('onPause', [], false);
 			if(ret != ModchartState.Function_Stop) {
 				openPauseMenu();
 			}
@@ -4667,12 +4695,12 @@ class PlayState extends MusicBeatState
 					if (luaArray.length >= 1)
 					{
 						#if desktop
-						var ret:Dynamic = callOnLuas('onEndSong', []);
+						var ret:Dynamic = callOnLuas2('onEndSong', [], false);
 						#else
 						var ret:Dynamic = ModchartState.Function_Continue;
 						#end
-	
-						if(luaArray[0].get('endDaSong','bool') != false)
+		
+						if(luaArray[0].get('endDaSong','bool') != false && ret != ModchartState.Function_Stop)
 							endSong();		
 					}
 					else
@@ -4689,12 +4717,12 @@ class PlayState extends MusicBeatState
 					if (luaArray.length >= 1)
 					{
 						#if desktop
-						var ret:Dynamic = callOnLuas('onEndSong', []);
+						var ret:Dynamic = callOnLuas2('onEndSong', [], false);
 						#else
 						var ret:Dynamic = ModchartState.Function_Continue;
 						#end
-	
-						if(luaArray[0].get('endDaSong','bool') != false)
+		
+						if(luaArray[0].get('endDaSong','bool') != false && ret != ModchartState.Function_Stop)
 							endSong();		
 					}
 					else
@@ -6565,6 +6593,78 @@ class PlayState extends MusicBeatState
 		#end
 	}
 
+	#if (!flash && sys)
+	public var runtimeShaders:Map<String, Array<String>> = new Map<String, Array<String>>();
+	public function createRuntimeShader(name:String):FlxRuntimeShader
+	{
+		if(!FlxG.save.data.shaders) return new FlxRuntimeShader();
+
+		#if (!flash && MODS_ALLOWED && sys)
+		if(!runtimeShaders.exists(name) && !initLuaShader(name))
+		{
+			FlxG.log.warn('Shader $name is missing!');
+			return new FlxRuntimeShader();
+		}
+
+		var arr:Array<String> = runtimeShaders.get(name);
+		return new FlxRuntimeShader(arr[0], arr[1]);
+		#else
+		FlxG.log.warn("Platform unsupported for Runtime Shaders!");
+		return null;
+		#end
+	}
+
+	public function initLuaShader(name:String, ?glslVersion:Int = 120)
+	{
+		if(!FlxG.save.data.shaders) return false;
+
+		if(runtimeShaders.exists(name))
+		{
+			FlxG.log.warn('Shader $name was already initialized!');
+			return true;
+		}
+
+		var foldersToCheck:Array<String> = [Paths.mods('shaders/')];
+		if(Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
+			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/shaders/'));
+
+		for(mod in Paths.getGlobalMods())
+			foldersToCheck.insert(0, Paths.mods(mod + '/shaders/'));
+		
+		for (folder in foldersToCheck)
+		{
+			if(FileSystem.exists(folder))
+			{
+				var frag:String = folder + name + '.frag';
+				var vert:String = folder + name + '.vert';
+				var found:Bool = false;
+				if(FileSystem.exists(frag))
+				{
+					frag = File.getContent(frag);
+					found = true;
+				}
+				else frag = null;
+
+				if (FileSystem.exists(vert))
+				{
+					vert = File.getContent(vert);
+					found = true;
+				}
+				else vert = null;
+
+				if(found)
+				{
+					runtimeShaders.set(name, [frag, vert]);
+					//trace('Found shader $name!');
+					return true;
+				}
+			}
+		}
+		FlxG.log.warn('Missing shader $name .frag AND .vert files!');
+		return false;
+	}
+	#end
+
 	function set_songSpeed(value:Float):Float
 	{
 		if(generatedMusic)
@@ -6587,7 +6687,7 @@ class PlayState extends MusicBeatState
 		}
 		playbackRate = value;
 		FlxAnimationController.globalSpeed = value;
-		//Conductor.safeZoneOffset = (ClientPrefs.safeFrames / 60) * 1000 * value;
+		//Conductor.safeZoneOffset = (FlxG.save.data.safeFrames / 60) * 1000 * value;
 		setOnLuas('playbackRate', playbackRate);
 		return value;
 	}

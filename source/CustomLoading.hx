@@ -101,7 +101,7 @@ class CustomLoading extends MusicBeatState
                 suf = '-guest';	
         }
 
-        text = new FlxText(25, FlxG.height / 2 + 275,0,"Loading "+ PlayState.SONG.song + (isABETADCIU ? " BETADCIU..." : " ..."));
+        text = new FlxText(25, FlxG.height / 2 + 275,0,"Loading "+ PlayState.SONG.song + (isABETADCIU ? " BETADCIU..." : "..."));
         text.size = 48;
         text.alignment = FlxTextAlign.LEFT;
         text.borderColor = FlxColor.BLACK;
