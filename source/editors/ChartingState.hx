@@ -191,6 +191,11 @@ class ChartingState extends MusicBeatState
 
 		ignoreWarnings = FlxG.save.data.ignoreWarnings;
 
+		if(_song.notes[curSec].lengthInSteps != 16){
+			trace('haha we found no lengthInSteps');
+			_song.notes[curSec].lengthInSteps = 16;
+		}
+		
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.scrollFactor.set();
 		bg.color = 0xFF222222;
@@ -473,12 +478,6 @@ class ChartingState extends MusicBeatState
 		voicesVolume.value = vocals.volume;
 		voicesVolume.name = 'song_vocalvol';
 
-		#if !html5
-		sliderRate = new FlxUISlider(this, 'playbackSpeed', 120, 120, 0.5, 3, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
-		sliderRate.nameLabel.text = 'Playback Rate';
-		tab_group_chart.add(sliderRate);
-		#end
-
 		check_warnings = new FlxUICheckBox(10, 120, null, null, "Ignore Progress Warnings", 100);
 		if (FlxG.save.data.ignoreWarnings == null) FlxG.save.data.ignoreWarnings = false;
 		check_warnings.checked = FlxG.save.data.ignoreWarnings;
@@ -491,6 +490,12 @@ class ChartingState extends MusicBeatState
 
 		oldBpmInputText = new FlxUIInputText(130, 160, 90, Std.string(tempBpm));
 		blockPressWhileTypingOn.push(oldBpmInputText);
+
+		#if !html5
+		sliderRate = new FlxUISlider(this, 'playbackSpeed', 120, 240, 0.5, 3, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
+		sliderRate.nameLabel.text = 'Playback Rate';
+		tab_group_chart.add(sliderRate);
+		#end
 
 		tab_group_chart.add(new FlxText(130, 130, 0, 'Old BPM (Fits chart from this \nBPM to Song BPM)'));
 		tab_group_chart.add(oldBpmInputText);
@@ -1000,6 +1005,7 @@ class ChartingState extends MusicBeatState
 		blockPressWhileTypingOnStepper.push(stepperSusLength);
 
 		strumTimeInputText = new FlxUIInputText(10, 65, 180, "0");
+		blockPressWhileTypingOn.push(strumTimeInputText);
 
 			var key:Int = 0;
 		var displayNameList:Array<String> = [];
@@ -2546,12 +2552,10 @@ class ChartingState extends MusicBeatState
 
 	function loadJson(song:String):Void
 	{
-		if (CoolUtil.difficultyArray[PlayState.storyDifficulty] != "Normal"){
-		PlayState.SONG = Song.loadFromJson(song.toLowerCase()+"-"+CoolUtil.difficultyArray[PlayState.storyDifficulty], song.toLowerCase());
-			
-		}else{
-		PlayState.SONG = Song.loadFromJson(song.toLowerCase(), song.toLowerCase());
-		}
+		if (CoolUtil.difficulties[PlayState.storyDifficulty] != "Normal")
+			PlayState.SONG = Song.loadFromJson(song.toLowerCase()+"-"+CoolUtil.difficulties[PlayState.storyDifficulty], song.toLowerCase());		
+		else
+			PlayState.SONG = Song.loadFromJson(song.toLowerCase(), song.toLowerCase());
 
 		if (Main.hiddenSongs.contains(song.toLowerCase()) && !Main.isHidden || song.toLowerCase() == 'restore' && !Main.restoreUnlocked || song.toLowerCase() == 'deathmatch-holo' && !Main.deathHolo)
 			LoadingState.loadAndSwitchState(new GoFindTheSecretState());

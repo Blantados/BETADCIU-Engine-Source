@@ -664,7 +664,9 @@ class Stage extends MusicBeatState
 				luaArray.push(new StageModchartState(curStage, preloading));
 
 				if (luaArray.length >= 1)
+				{
 					callOnLuas('onCreate', []);	
+				}
 			}
 		}
 	}

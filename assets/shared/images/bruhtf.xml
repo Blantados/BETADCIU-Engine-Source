@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TextureAtlas imagePath="backspace.png">
+<TextureAtlas imagePath="bruhtf.png">
 	<!-- Created with Adobe Animate version 20.0.0.17400 -->
 	<!-- http://www.adobe.com/products/animate.html -->
-	<SubTexture name="bruhtf0000" x="0" y="0" width="600" height="600"/>
+	<SubTexture name="bruhtf0000" x="0" y="0" width="600" height="600" frameX="0" frameY="0" frameWidth="600" frameHeight="600"/>
+	<SubTexture name="bruhtf0001" x="0" y="0" width="600" height="600" frameX="0" frameY="0" frameWidth="600" frameHeight="600"/>
 </TextureAtlas>

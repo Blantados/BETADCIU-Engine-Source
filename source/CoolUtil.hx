@@ -74,6 +74,26 @@ class CoolUtil
 		return Std.string(daXml);
 	}
 
+
+	public static function findFirstAnim(rawXml:String)
+		{
+			var daXml:Xml = Xml.parse(rawXml);
+			var fast = new haxe.xml.Access(daXml);
+			var users = fast.node.TextureAtlas;
+
+			var placeholder:String = "bruhtf";
+
+			for (SubTexture in users.nodes.SubTexture) {
+				var name = Std.string(SubTexture.att.name);
+				var nameCut = name.substr(0, name.length - 4);
+
+				trace ("returned anim is " + nameCut);
+				return nameCut;
+			}
+
+			return placeholder;
+		}
+	
 	public static function resizeTxt(rawTxt:String, factor:Float)
 	{
 		var daTxt:String = "";

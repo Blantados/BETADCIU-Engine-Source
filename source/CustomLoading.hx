@@ -47,7 +47,7 @@ class CustomLoading extends MusicBeatState
     var charts = [];
     var character:Character;
     var iconP1:HealthIcon;
-    var stage:Stage;
+    var Stage:Stage;
     var suf:String = '';
     var bar:FlxBar;
 
@@ -203,7 +203,7 @@ class CustomLoading extends MusicBeatState
             for (i in 0...characters.length)
             {
                 var data:Array<String> = characters[i].split(' ');
-                stage = new Stage(data[0], true);
+                Stage = new Stage(data[0], true);
                 trace ('stages are ' + data[0]);
             }
 

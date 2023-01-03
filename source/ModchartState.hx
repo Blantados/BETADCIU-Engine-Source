@@ -375,17 +375,12 @@ class ModchartState
 			case 'funCountdown': PlayState.instance.funCountdown(val1);
 			case 'softCountdown': PlayState.instance.softCountdown();
 			case 'startCountdown': PlayState.instance.startCountdown();
-			case 'doJumpscare': PlayState.instance.doJumpscare();
-			case 'startWriting': PlayState.instance.startWriting(val1, val2);		
-			case 'doSimpleJump': PlayState.instance.doSimpleJump(val1);		
 			case 'resyncVocals': PlayState.instance.resyncVocals();	
 			case 'doTimeTravel': PlayState.instance.doTimeTravel(val1, val2);		
 			case 'uncacheImage': Paths.clearStoredMemory2(val1, 'image');	
 			case 'uncacheSound': Paths.clearStoredMemory2(val1, 'sound');			
 			case 'cacheImage': Paths.cacheImage(val1, val2);
 			case 'spawnStartingNoteSplash': PlayState.instance.spawnStartingNoteSplash(0, 0, 0);	
-			case 'doStopSign': PlayState.instance.doStopSign(val1, val2);	
-			case 'doGremlin': PlayState.instance.doGremlin(val1, val2, val3);			
 		}
 	}
 
@@ -742,6 +737,9 @@ class ModchartState
 						PlayState.instance.addObject(bg);
 			}
 		}	
+
+		if (PlayState.instance.Stage.isCustomStage && PlayState.instance.Stage.luaArray.length >= 1)
+			PlayState.instance.Stage.callOnLuas('onCreatePost', []); //i swear if this starts crashing stuff i'mma cry
 
 		PlayState.instance.setCameraOffsets();
 
@@ -1226,7 +1224,7 @@ class ModchartState
 				PlayState.instance.luaArray.push(new ModchartState(cervix)); 
 				return;
 			}
-			luaTrace("Script doesn't exist!");
+			luaTrace("addLuaScript: Script doesn't exist!", false, false, FlxColor.RED);
 		});
 		Lua_helper.add_callback(lua, "removeLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) { //would be dope asf. 
 			var cervix = luaFile + ".lua";
@@ -1275,7 +1273,7 @@ class ModchartState
 				}
 				return;
 			}
-			luaTrace("Script doesn't exist!");
+			luaTrace("removeLuaScript: Script doesn't exist!", false, false, FlxColor.RED);
 		});
 
 		//because the regular close function isn't working for me
@@ -1316,7 +1314,7 @@ class ModchartState
 				}
 				return;
 			}
-			luaTrace("Script doesn't exist!");
+			luaTrace("closeLuaScript: Script doesn't exist!", false, false, FlxColor.RED);
 		});
 
 		Lua_helper.add_callback(lua, "getRunningScripts", function(){
@@ -2071,11 +2069,11 @@ class ModchartState
 			if(!color.startsWith('0x')) colorNum = Std.parseInt('0xff' + color);
 			cameraFromString(camera).flash(colorNum, duration,null,forced);
 		});
-		Lua_helper.add_callback(lua, "cameraFade", function(camera:String, color:String, duration:Float,forced:Bool) {
+		Lua_helper.add_callback(lua, "cameraFade", function(camera:String, color:String, duration:Float,forced:Bool, ?fadeOut:Bool = false) {
 			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			var colorNum:Int = Std.parseInt(color);
 			if(!color.startsWith('0x')) colorNum = Std.parseInt('0xff' + color);
-			cameraFromString(camera).fade(colorNum, duration,false,null,forced);
+			cameraFromString(camera).fade(colorNum, duration,fadeOut,null,forced);
 		});
 
 		Lua_helper.add_callback(lua, "flashCam", function (r:Int,g:Int,b:Int, d:Float, f:Bool, ?camera:String) {
@@ -3318,6 +3316,10 @@ class ModchartState
 		Lua_helper.add_callback(lua, "setProperty", function(variable:String, value:Dynamic) {
 			var killMe:Array<String> = variable.split('.');
 		
+			if (variable.contains('velocity.')){
+				if (PlayState.instance != null){value *= PlayState.instance.playbackRate;}
+			}
+
 			if (Stage.instance.swagBacks.exists(killMe[0]))
 			{
 				Stage.instance.setProperty(variable, value);
@@ -3662,7 +3664,7 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua, "precacheImage", function(name:String) {
-			return name; //lol
+			Paths.returnGraphic(name);
 		});
 
 		Lua_helper.add_callback(lua, "loadGraphic", function(variable:String, image:String, ?gridX:Int, ?gridY:Int) {
@@ -3880,11 +3882,24 @@ class ModchartState
 			return Std.parseInt(color);
 		});
 
-		Lua_helper.add_callback(lua, "objectColorTransform", function(obj:String, r:Int, g:Int, b:Int, a:Int) {
+		Lua_helper.add_callback(lua, "objectColorTransform", function(obj:String, color:String) {
 			var spr:Dynamic = getObjectDirectly2(obj);
 
 			if(spr != null) {
 				spr.useColorTransform = true;
+
+				var daColor:String = color;
+				if(!color.startsWith('0x')) daColor = '0xff'+color;
+
+				var r, g, b, a:Int = 255;
+
+				daColor = daColor.substring(2);
+
+				r = Std.parseInt('0x' + daColor.substring(2,4));
+				g = Std.parseInt('0x' + daColor.substring(4,6));
+				b = Std.parseInt('0x' + daColor.substring(6,8));
+				a = Std.parseInt('0x' + daColor.substring(0,2));
+
 				spr.setColorTransform(0, 0, 0, 1, r, g, b, a);
 			}
 		});
@@ -4047,6 +4062,17 @@ class ModchartState
 
 		//wow very convenient
 		Lua_helper.add_callback(lua, "makeHealthIcon", function(tag:String, character:String, player:Bool = false) {
+			tag = tag.replace('.', '');
+			resetIconTag(tag);
+			var leSprite:ModchartIcon = new ModchartIcon(character, player);
+			PlayState.instance.modchartIcons.set(tag, leSprite); //yes
+			var shit:ModchartIcon = PlayState.instance.modchartIcons.get(tag);
+			shit.cameras = [PlayState.instance.camHUD];
+			getInstance().add(shit);
+		});
+		
+		//because the naming is stupid
+		Lua_helper.add_callback(lua, "makeLuaIcon", function(tag:String, character:String, player:Bool = false) {
 			tag = tag.replace('.', '');
 			resetIconTag(tag);
 			var leSprite:ModchartIcon = new ModchartIcon(character, player);

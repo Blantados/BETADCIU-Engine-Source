@@ -356,7 +356,7 @@ class Character extends FlxSprite
 					if (animation.curAnim.name.startsWith('sing'))
 						holdTimer += elapsed;
 		
-					if (holdTimer >= Conductor.stepCrochet * singDuration * 0.001)
+					if (holdTimer >= Conductor.stepCrochet * singDuration * 0.001 / (PlayState.instance != null ? 1 : PlayState.instance.playbackRate))
 					{
 						dance();
 						holdTimer = 0;
@@ -546,12 +546,22 @@ class Character extends FlxSprite
 		if (AnimName.endsWith('miss') && curCharacter == 'bf-sky' && doMissThing)
 			missed = true;
 
-		if (animation.getByName(AnimName) == null) // if it's STILL null, just play idle
+		if (animation.getByName(AnimName) == null) // if it's STILL null, just play idle, and if you REALLY messed up, it'll look in the xml for a valid anim
 		{
-			if(danceIdle)
+			if(danceIdle && animation.getByName('danceRight') != null)
 				AnimName = 'danceRight';
-			else
+			else if (animation.getByName('idle') != null)
 				AnimName = 'idle';
+			else{
+				if (graphic.key == 'bruhtf')
+					quickAnimAdd(AnimName, CoolUtil.findFirstAnim(Assets.getText(Paths.xmlNew('images/bruhtf'))));
+				else{
+					var path:String = Paths.xmlNew('images/' + imageFile);
+
+					quickAnimAdd(AnimName, CoolUtil.findFirstAnim((FileSystem.exists(path) ? File.getContent(path) : Assets.getText(path))));
+				}
+			}
+				
 		}
 
 		animation.play(AnimName, Force, Reversed, Frame);

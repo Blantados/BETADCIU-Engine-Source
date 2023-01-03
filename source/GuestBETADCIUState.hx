@@ -577,26 +577,30 @@ class GuestBETADCIUState extends MusicBeatState
 		PlayState.storyWeek = songs[curSelected].week;
 
 		CoolUtil.difficulties = CoolUtil.defaultDifficulties.copy();
-		var diffStr:String = WeekData.getCurrentWeek().difficulties;
-		if(diffStr != null) diffStr = diffStr.trim(); //Fuck you HTML5
-
-		if(diffStr != null && diffStr.length > 0)
+		
+		if (!warning)
 		{
-			var diffs:Array<String> = diffStr.split(',');
-			var i:Int = diffs.length - 1;
-			while (i > 0)
+			var diffStr:String = WeekData.getCurrentWeek().difficulties;
+			if(diffStr != null) diffStr = diffStr.trim(); //Fuck you HTML5
+	
+			if(diffStr != null && diffStr.length > 0)
 			{
-				if(diffs[i] != null)
+				var diffs:Array<String> = diffStr.split(',');
+				var i:Int = diffs.length - 1;
+				while (i > 0)
 				{
-					diffs[i] = diffs[i].trim();
-					if(diffs[i].length < 1) diffs.remove(diffs[i]);
+					if(diffs[i] != null)
+					{
+						diffs[i] = diffs[i].trim();
+						if(diffs[i].length < 1) diffs.remove(diffs[i]);
+					}
+					--i;
 				}
-				--i;
-			}
-
-			if(diffs.length > 0 && diffs[0].length > 0)
-			{
-				CoolUtil.difficulties = diffs;
+	
+				if(diffs.length > 0 && diffs[0].length > 0)
+				{
+					CoolUtil.difficulties = diffs;
+				}
 			}
 		}
 		
