@@ -671,7 +671,7 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(player2DropDown);
 		tab_group_song.add(gfVersionDropDown);
 		tab_group_song.add(player1DropDown);
-
+		tab_group_song.add(reloadDropDowns);
 		
 		UI_box.addGroup(tab_group_song);
 		UI_box.scrollFactor.set();
@@ -1952,7 +1952,7 @@ class ChartingState extends MusicBeatState
 		var path:String = Paths.jsonNew(characterPath);
 
 		#if MODS_ALLOWED
-			if (FileSystem.exists(Paths.modFolders('characters/'+char+'.json')))
+			if (FileSystem.exists(Paths.modFolders('characters/'+char+'.json')) || Assets.exists(Paths.modFolders('characters/'+char+'.json')))
 				path = Paths.modFolders('characters/'+char+'.json');
 		#end
 

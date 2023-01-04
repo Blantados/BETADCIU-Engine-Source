@@ -529,7 +529,7 @@ class Paths
 
 		for (i in 0...pathsToCheck.length)
 		{
-			if(FileSystem.exists(pathsToCheck[i])) {
+			if(FileSystem.exists(pathsToCheck[i]) || Assets.exists(pathsToCheck[i])) {
 				return true;
 			}
 		}
@@ -552,7 +552,7 @@ class Paths
 
 		for (i in 0...pathsToCheck.length)
 		{
-			if(FileSystem.exists(pathsToCheck[i])) {
+			if(FileSystem.exists(pathsToCheck[i]) || Assets.exists(pathsToCheck[i])) {
 				path = pathsToCheck[i];
 			}
 		}
@@ -568,7 +568,9 @@ class Paths
 					var matrix:Matrix = new Matrix();
 					matrix.scale(0.5, 0.5);
 
-					var bigBMP:BitmapData = BitmapData.fromFile(path);
+					var bigBMP:BitmapData;
+
+					(FileSystem.exists(path) ? bigBMP = BitmapData.fromFile(path) : bigBMP = OpenFlAssets.getBitmapData(path));
 
 					if (bigBMP.width <= 1) //prevents having 0 width for cases like empty gf and empty strums
 						newBitmap = bigBMP;
@@ -582,8 +584,10 @@ class Paths
 						bigBMP = null;
 					}
 				}
-				else	
-					newBitmap = BitmapData.fromFile(path);
+				else{
+					(FileSystem.exists(path) ? newBitmap = BitmapData.fromFile(path) : newBitmap = OpenFlAssets.getBitmapData(path));
+				}
+					
 
 				var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(newBitmap, false, key);
 				newGraphic.persist = true;
@@ -640,6 +644,10 @@ class Paths
 
 		for (i in 0...pathsToCheck.length)
 		{
+			if(Assets.exists(pathsToCheck[i])) {
+				rawXml = Assets.getText(pathsToCheck[i]);
+			}
+
 			if(FileSystem.exists(pathsToCheck[i])) {
 				rawXml = File.getContent(pathsToCheck[i]);
 			}

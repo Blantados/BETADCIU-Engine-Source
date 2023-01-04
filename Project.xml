@@ -100,8 +100,10 @@
 	<assets path="assets/week5"    library="week5"    exclude="*.mp3" unless="web"/>
 	<assets path="assets/week6"    library="week6"    exclude="*.ogg" if="web"/>
 	<assets path="assets/week6"    library="week6"    exclude="*.mp3" unless="web"/>
-	
+
 	<assets path='example_mods' rename='mods' embed='false'/>
+	<assets path='embed_mods' rename='mods' embed='true'/>
+
 	<assets path='art/readme.txt' rename='do NOT readme.txt' />
 	<assets path='LICENSE' rename='LICENSE.txt' />
 	<!-- <template path='mods' /> -->
@@ -115,9 +117,10 @@
 	-->
 	<assets path="assets/fonts" embed='true'/>
 
-	<!-- Kixel doesn't want these sprites public -->
-	<assets path="example_mods/BETADCIU/images/characters/quintet" embed='true'/>
-	
+	<!-- Kixel doesn't want the sprites public -->
+	<!--<assets path="example_mods/folder_template/images/characters/quintet_embed" embed='true'/> -->
+	<!--<assets path="example_mods/folder_template/characters" embed='true'/> -->
+
 	<!-- _______________________________ Libraries ______________________________ -->
 
 	<haxelib name="flixel" />

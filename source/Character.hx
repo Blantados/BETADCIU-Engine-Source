@@ -145,7 +145,7 @@ class Character extends FlxSprite
 				var path:String = Paths.jsonNew(characterPath);
 				
 				#if MODS_ALLOWED
-					if (FileSystem.exists(Paths.modFolders('characters/'+curCharacter+'.json')))
+					if (FileSystem.exists(Paths.modFolders('characters/'+curCharacter+'.json')) || Assets.exists(Paths.modFolders('characters/'+curCharacter+'.json')))
 						path = Paths.modFolders('characters/'+curCharacter+'.json');
 				#end
 			
