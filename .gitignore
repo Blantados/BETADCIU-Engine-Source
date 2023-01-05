@@ -4,5 +4,12 @@ assets/preload/data/milf/modchart.lua
 assets/shared/images/corruption/
 assets/shared/images/characters/DADDY_DEAREST_
 assets/shared/images/corruption/ween/
-embed_mods/
+embed_mods/images/characters/
+embed_mods/images/icons/
+embed_mods/characters/
 .git/
+
+!embed_mods/images/characters/readme.txt
+!embed_mods/characters/readme.txt
+!embed_mods/images/icons/readme.txt
+
