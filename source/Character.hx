@@ -112,6 +112,8 @@ class Character extends FlxSprite
 	public var singDuration:Float = 4; //Multiplier of how long a character holds the sing pose
 	public var animationsArray:Array<AnimArray> = [];
 	public var stopIdle:Bool = false;
+
+	public var stunned:Bool = false;
 	
 	public static var DEFAULT_CHARACTER:String = 'bf'; //In case a character is missing, it will use BF on its place
 	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false)

@@ -2564,9 +2564,12 @@ class PlayState extends MusicBeatState
 
 			startTimer = new FlxTimer().start(Conductor.crochet / 1000 / playbackRate, function(tmr:FlxTimer)
 			{
-				dad.dance();
-				gf.dance();
-				boyfriend.dance();
+				if (dad != null && !dad.stunned)
+					dad.dance();
+				if (gf != null && !gf.stunned)
+					gf.dance();
+				if (boyfriend != null && !boyfriend.stunned)
+					boyfriend.dance();
 
 				if (modchartCharacters != [])
 				{
@@ -2574,7 +2577,8 @@ class PlayState extends MusicBeatState
 					{
 						daChar = modchartCharacters.get(value);
 						
-						daChar.dance();
+						if (!daChar.stunned)
+							daChar.dance();
 					}
 				}
 
