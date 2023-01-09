@@ -5114,7 +5114,7 @@ class PlayState extends MusicBeatState
 		} 
 		
 		// HOLDS, check for sustain notes
-		if (holdArray.contains(true) && /*!boyfriend.stunned && */ generatedMusic)
+		if (holdArray.contains(true) && !boyfriend.stunned && generatedMusic)
 		{
 			notes.forEachAlive(function(daNote:Note)
 			{
@@ -5124,23 +5124,8 @@ class PlayState extends MusicBeatState
 		}
 	
 		// PRESSES, check for note hits
-		if (pressArray.contains(true) && /*!boyfriend.stunned && */ generatedMusic)
+		if (pressArray.contains(true) && !boyfriend.stunned && generatedMusic)
 		{
-			// lemme try disabling these for a sec
-			//if (playBF)
-				//boyfriend.holdTimer = 0;
-
-			/*if (modchartCharacters != [])
-			{
-				for (value in modchartCharacters.keys())
-				{
-					daChar = modchartCharacters.get(value);
-					
-					if ((daChar.isPlayer && daChar.flipMode == false || !daChar.isPlayer && daChar.flipMode == true))
-						daChar.holdTimer = 0;
-				}
-			}*/
-	
 			var possibleNotes:Array<Note> = []; // notes that can be hit
 			var directionList:Array<Int> = []; // directions that can be hit
 			var dumbNotes:Array<Note> = []; // notes to kill later
@@ -6489,10 +6474,10 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		if (!boyfriend.animation.curAnim.name.startsWith("sing") && boyfriend.animation.curAnim != null)
+		if (!boyfriend.animation.curAnim.name.startsWith("sing") && boyfriend.animation.curAnim != null && !boyfriend.stunned)
 			boyfriend.dance();
 
-		if (!dad.animation.curAnim.name.startsWith("sing") && !PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection && !dad.specialAnim && dad.animation.curAnim != null)
+		if (!dad.animation.curAnim.name.startsWith("sing") && !PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection && !dad.specialAnim && dad.animation.curAnim != null && !dad.stunned)
 			dad.dance();	
 
 		if (modchartCharacters != [])
@@ -6503,16 +6488,16 @@ class PlayState extends MusicBeatState
 				
 				if (!PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection)
 				{
-					if ((!daChar.isPlayer && daChar.flipMode == false || daChar.isPlayer && daChar.flipMode == true) && !daChar.animation.curAnim.name.startsWith("sing") && !daChar.specialAnim)
+					if ((!daChar.isPlayer && daChar.flipMode == false || daChar.isPlayer && daChar.flipMode == true) && !daChar.animation.curAnim.name.startsWith("sing") && !daChar.specialAnim && !daChar.stunned)
 						daChar.dance();
 				}
 
-				if ((daChar.isPlayer && daChar.flipMode == false || !daChar.isPlayer && daChar.flipMode == true) && !daChar.animation.curAnim.name.startsWith("sing") && !daChar.specialAnim)
+				if ((daChar.isPlayer && daChar.flipMode == false || !daChar.isPlayer && daChar.flipMode == true) && !daChar.animation.curAnim.name.startsWith("sing") && !daChar.specialAnim && !daChar.stunned)
 					daChar.dance();
 			}
 		}
 
-		if (curBeat % gfSpeed == 0 && !gf.animation.curAnim.name.startsWith("sing") && !gf.specialAnim)
+		if (curBeat % gfSpeed == 0 && !gf.animation.curAnim.name.startsWith("sing") && !gf.specialAnim && !gf.stunned)
 			gf.dance();
 	}
 

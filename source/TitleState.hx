@@ -88,8 +88,9 @@ class TitleState extends MusicBeatState
 
 		FlxG.save.bind('funkin', 'ninjamuffin99');
 
+		ClientPrefs.loadPrefs();
 		KadeEngineData.initSave();
-
+	
 		Highscore.load();
 
 		if (FlxG.save.data.weekUnlocked != null)

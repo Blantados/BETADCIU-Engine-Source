@@ -71,7 +71,6 @@ import hscript.Interp;
 import hscript.Expr;
 #end
 
-
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 #end
@@ -1667,14 +1666,11 @@ class ModchartState
 			PlayState.instance.healthBar.updateBar();
 		});
 
-		Lua_helper.add_callback(lua,"returnDominantColor", function(sprite:String, ?remove0:Bool = false){
+		Lua_helper.add_callback(lua,"getDominantColor", function(sprite:String){
 			var shit:Dynamic = getObjectDirectly2(sprite);
 
 			var coolColor = FlxColor.fromInt(CoolUtil.dominantColor(shit));
 			var daColor = coolColor.toHexString();
-
-			if (remove0)
-				daColor = daColor.substring(2);
 
 			return daColor;
 		});
@@ -2056,10 +2052,12 @@ class ModchartState
 		});
 
 		Lua_helper.add_callback(lua, "cameraShake", function(camera:String, intensity:Float, duration:Float) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			cameraFromString(camera).shake(intensity, duration);
 		});
 
 		Lua_helper.add_callback(lua, "objectShake", function(camera:String, intensity:Float, duration:Float) {
+			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			getObjectDirectly(camera).shake(intensity, duration);
 		});
 		
@@ -4602,6 +4600,41 @@ class ModchartState
 			return false;
 		});
 
+		Lua_helper.add_callback(lua, "runHaxeCode", function(codeToRun:String) {
+			var retVal:Dynamic = null;
+
+			#if hscript
+			initHaxeModule();
+			try {
+				retVal = hscript.execute(codeToRun);
+			}
+			catch (e:Dynamic) {
+				luaTrace(scriptName + ":" + lastCalledFunction + " - " + e, false, false, FlxColor.RED);
+			}
+			#else
+			luaTrace("runHaxeCode: HScript isn't supported on this platform!", false, false, FlxColor.RED);
+			#end
+
+			if(retVal != null && !isOfTypes(retVal, [Bool, Int, Float, String, Array])) retVal = null;
+			if(retVal == null) Lua.pushnil(lua);
+			return retVal;
+		});
+
+		Lua_helper.add_callback(lua, "addHaxeLibrary", function(libName:String, ?libPackage:String = '') {
+			#if hscript
+			initHaxeModule();
+			try {
+				var str:String = '';
+				if(libPackage.length > 0)
+					str = libPackage + '.';
+
+				hscript.variables.set(libName, Type.resolveClass(str + libName));
+			}
+			catch (e:Dynamic) {
+				luaTrace(scriptName + ":" + lastCalledFunction + " - " + e, false, false, FlxColor.RED);
+			}
+			#end
+		});
 
 		Lua_helper.add_callback(lua, "getShaderBool", function(obj:String, prop:String) {
 			#if (!flash && MODS_ALLOWED && sys)
@@ -5023,6 +5056,26 @@ class ModchartState
 
 		pee.destroy();
 		PlayState.instance.modchartTrails.remove(tag);
+	}
+
+	#if hscript
+	public function initHaxeModule()
+	{
+		if(hscript == null)
+		{
+			trace('initializing haxe interp for: $scriptName');
+			hscript = new HScript(); //TO DO: Fix issue with 2 scripts not being able to use the same variable names
+		}
+	}
+	#end
+
+	public static function isOfTypes(value:Any, types:Array<Dynamic>)
+	{
+		for (type in types)
+		{
+			if(Std.isOfType(value, type)) return true;
+		}
+		return false;
 	}
 
 	public static function getVarInArray(instance:Dynamic, variable:String):Any

@@ -130,7 +130,9 @@ class Character extends FlxSprite
 		antialiasing = true;
 		isCustom = false;
 		pre = "";
-		noteSkin = PlayState.SONG.noteStyle;
+
+		if (PlayState.SONG != null)
+			noteSkin = PlayState.SONG.noteStyle;
 		
 		//should now only be using the default psych json stuff
 
@@ -165,7 +167,7 @@ class Character extends FlxSprite
 				if (json.noteSkin != null){noteSkin = json.noteSkin;}
 				if (json.isPlayerChar){isPsychPlayer = json.isPlayerChar;}
 					
-				if (noteSkin == "" || noteSkin == 'normal' || noteSkin == 'default')
+				if ((noteSkin == "" || noteSkin == 'normal' || noteSkin == 'default') && PlayState.SONG != null)
 					noteSkin = PlayState.SONG.noteStyle;	
 
 				if(json.no_antialiasing) {

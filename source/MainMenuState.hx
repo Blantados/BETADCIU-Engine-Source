@@ -230,7 +230,7 @@ class MainMenuState extends MusicBeatState
 										trace("Vitor Menu Selected");
 									
 									case 'options':
-										MusicBeatState.switchState(new OptionsMenu());
+										MusicBeatState.switchState(new options.OptionsState());
 
 									case 'extras':
 										MusicBeatState.switchState(new GuestBETADCIUState());

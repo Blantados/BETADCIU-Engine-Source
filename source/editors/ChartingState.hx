@@ -852,7 +852,7 @@ class ChartingState extends MusicBeatState
 		{
 			for (i in 0..._song.notes[curSec].sectionNotes.length)
 			{
-				var note = _song.notes[curSec].sectionNotes[i];
+				var note:Array<Dynamic> = _song.notes[curSec].sectionNotes[i];
 				var half = Main.keyAmmo[_song.mania];
 				note[1] = (note[1] + half) % (half * 2);
 				_song.notes[curSec].sectionNotes[i] = note;
