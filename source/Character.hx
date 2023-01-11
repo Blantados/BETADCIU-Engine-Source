@@ -667,32 +667,84 @@ class Character extends FlxSprite
 
 	public function flipAnims()
 	{
-		if (animation.getByName('singRIGHT') != null && animation.getByName('singLEFT') != null)
+		// IF THEY HAVE NORMAL ANIMATIONS??
+		if(animation.getByName('singLEFT') != null && animation.getByName('singRIGHT') != null)
 		{
-			var oldRight = animation.getByName('singRIGHT').frames;
+			var oldSing = animation.getByName('singRIGHT').frames;
 			animation.getByName('singRIGHT').frames = animation.getByName('singLEFT').frames;
-			animation.getByName('singLEFT').frames = oldRight;
+			animation.getByName('singLEFT').frames = oldSing;
+		}
+
+		// IF THEY HAVE ALT ANIMATIONS??
+		if(animation.getByName('singLEFT-alt') != null && animation.getByName('singRIGHT-alt') != null)
+		{
+			var oldAltSing = animation.getByName('singRIGHT-alt').frames;
+			animation.getByName('singRIGHT-alt').frames = animation.getByName('singLEFT-alt').frames;
+			animation.getByName('singLEFT-alt').frames = oldAltSing;
+		}
+			
+		// IF THEY HAVE LOOP ANIMATIONS??
+		if(animation.getByName('singLEFT-loop') != null && animation.getByName('singRIGHT-loop') != null)
+		{
+			var oldSingLoop = animation.getByName('singRIGHT-loop').frames;
+			animation.getByName('singRIGHT-loop').frames = animation.getByName('singLEFT-loop').frames;
+			animation.getByName('singLEFT-loop').frames = oldSingLoop;
+		}
+
+		// IF THEY HAVE ALT LOOP ANIMATIONS??
+		if(animation.getByName('singLEFT-alt-loop') != null && animation.getByName('singRIGHT-alt-loop') != null)
+		{
+			var oldAltSingLoop = animation.getByName('singRIGHT-alt-loop').frames;
+			animation.getByName('singRIGHT-alt-loop').frames = animation.getByName('singLEFT-alt-loop').frames;
+			animation.getByName('singLEFT-alt-loop').frames = oldAltSingLoop;
 		}
 
 		// IF THEY HAVE MISS ANIMATIONS??
-		if (animation.getByName('singRIGHTmiss') != null && animation.getByName('singLEFTmiss') != null)
+		if (animation.getByName('singLEFTmiss') != null && animation.getByName('singRIGHTmiss') != null)
 		{
-			var oldMiss = animation.getByName('singRIGHTmiss').frames;
+			var oldSingMiss = animation.getByName('singRIGHTmiss').frames;
 			animation.getByName('singRIGHTmiss').frames = animation.getByName('singLEFTmiss').frames;
-			animation.getByName('singLEFTmiss').frames = oldMiss;
-		}
-		if (animation.getByName('singRIGHT-alt') != null && animation.getByName('singLEFT-alt') != null)
-		{
-			var oldAlt = animation.getByName('singRIGHT-alt').frames;
-			animation.getByName('singRIGHT-alt').frames = animation.getByName('singLEFT-alt').frames;
-			animation.getByName('singLEFT-alt').frames = oldAlt;
+			animation.getByName('singLEFTmiss').frames = oldSingMiss;
 		}
 
-		if (animation.getByName('singRIGHT-loop') != null && animation.getByName('singLEFT-loop') != null)
+		// IF THEY HAVE MISS ALT ANIMATIONS??
+		if (animation.getByName('singLEFTmiss-alt') != null && animation.getByName('singRIGHTmiss-alt') != null)
 		{
-			var oldLoop = animation.getByName('singRIGHT-loop').frames;
-			animation.getByName('singRIGHT-loop').frames = animation.getByName('singLEFT-loop').frames;
-			animation.getByName('singLEFT-loop').frames = oldLoop;
+			var oldAltSingMiss = animation.getByName('singRIGHTmiss-alt').frames;
+			animation.getByName('singRIGHTmiss-alt').frames = animation.getByName('singLEFTmiss-alt').frames;
+			animation.getByName('singLEFTmiss-alt').frames = oldAltSingMiss;
+		}
+
+		// IF THEY HAVE DANCELEFT ANIMATIONS??
+		if (animation.getByName('danceLeft') != null && animation.getByName('danceRight') != null)
+		{				
+			var oldDance = animation.getByName('danceRight').frames;
+			animation.getByName('danceRight').frames = animation.getByName('danceLeft').frames;
+			animation.getByName('danceLeft').frames = oldDance;
+		}
+
+		// IF THEY HAVE DANCELEFT ALT ANIMATIONS??
+		if (animation.getByName('danceLeft-alt') != null && animation.getByName('danceRight-alt') != null)
+		{
+			var oldAltDance = animation.getByName('danceRight-alt').frames;
+			animation.getByName('danceRight-alt').frames = animation.getByName('danceLeft-alt').frames;
+			animation.getByName('danceLeft-alt').frames = oldAltDance;
+		}
+
+		// IF THEY HAVE DANCELEFT LOOP ANIMATIONS??
+		if (animation.getByName('danceLeft-loop') != null && animation.getByName('danceRight-loop') != null)
+		{
+			var oldDanceLoop = animation.getByName('danceRight-loop').frames;
+			animation.getByName('danceRight-loop').frames = animation.getByName('danceLeft-loop').frames;
+			animation.getByName('danceLeft-loop').frames = oldDanceLoop;
+		}
+
+		// IF THEY HAVE DANCELEFT ALT LOOP ANIMATIONS??
+		if (animation.getByName('danceLeft-alt-loop') != null && animation.getByName('danceRight-alt-loop') != null)
+		{
+			var oldAltDanceLoop = animation.getByName('danceRight-alt-loop').frames;
+			animation.getByName('danceRight-alt-loop').frames = animation.getByName('danceLeft-alt-loop').frames;
+			animation.getByName('danceLeft-alt-loop').frames = oldAltDanceLoop;
 		}
 
 		if (curCharacter.contains('9key'))
