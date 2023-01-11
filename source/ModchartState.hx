@@ -707,7 +707,7 @@ class ModchartState
 		PlayState.instance.removeObject(PlayState.instance.Stage);
 		PlayState.instance.destroyObject(PlayState.instance.Stage);
 		
-		PlayState.instance.Stage = new Stage(id);
+		PlayState.instance.Stage = new Stage(id, false);
 		PlayState.curStage = PlayState.instance.Stage.curStage;
 		PlayState.instance.defaultCamZoom = PlayState.instance.Stage.camZoom;
 
@@ -4154,7 +4154,7 @@ class ModchartState
 
 		Lua_helper.add_callback(lua, "setObjectOrder", function(obj:String, position:Int) {
 			var killMe:Array<String> = obj.split('.');
-			var leObj:FlxBasic = getObjectDirectly(killMe[0]);
+			var leObj:FlxBasic = getObjectDirectly2(killMe[0]);
 			if(killMe.length > 1) {
 				leObj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 			}

@@ -489,6 +489,7 @@ class ChartingState extends MusicBeatState
 		};
 
 		oldBpmInputText = new FlxUIInputText(130, 160, 90, Std.string(tempBpm));
+		oldBpmInputText.focusLost = openOldBpmMenu;
 		blockPressWhileTypingOn.push(oldBpmInputText);
 
 		#if !html5
@@ -518,6 +519,11 @@ class ChartingState extends MusicBeatState
 	}
 
 	var oldBpmInputText:FlxUIInputText;
+
+	function openOldBpmMenu() //do you really have to do it like this?
+	{
+		openSubState(new Prompt('Is this the correct BPM?', 0, function(){fitNotesToBpm(Std.parseFloat(oldBpmInputText.text));}, null,ignoreWarnings));
+	}
 
 	function addSongUI():Void
 	{
@@ -818,8 +824,7 @@ class ChartingState extends MusicBeatState
 
 		var clearSectionButton:FlxButton = new FlxButton(pasteButton.x + 100, pasteButton.y, "Clear Section", function()
 		{
-			if(check_notesSec.checked)
-			{
+			if(check_notesSec.checked){
 				_song.notes[curSec].sectionNotes = [];
 			}
 
@@ -1490,10 +1495,6 @@ class ChartingState extends MusicBeatState
 			setDaOldBPM = false;
 		}
 
-		if (!oldBpmInputText.hasFocus && Std.parseFloat(oldBpmInputText.text) != tempBpm && !setDaOldBPM){
-			openSubState(new Prompt('Is this the correct BPM?', 0, function(){fitNotesToBpm(Std.parseFloat(oldBpmInputText.text));}, null,ignoreWarnings));
-		}
-	
 		//i like... never use this. also it's annoying when doing alt+tab to check something else
 		/*if (FlxG.keys.justPressed.ALT && !FlxG.keys.justPressed.ENTER && UI_box.selected_tab == 0)
 		{

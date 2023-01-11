@@ -367,7 +367,7 @@ class PlayState extends MusicBeatState
 	public var modchartIcons:Map<String, ModchartIcon> = new Map<String, ModchartIcon>(); //should also help for cosmic
 	public var modchartTexts:Map<String, ModchartText> = new Map<String, ModchartText>();
 	public var modchartCharacters:Map<String, Character> = new Map<String, Character>(); //worth a shot
-	public var modchartTrails:Map<String, DeltaTrail> = new Map<String, DeltaTrail>(); // modchart trails for real this time
+	public var modchartTrails:Map<String, DeltaTrail> = new Map<String, DeltaTrail>(); // modchart 	trails for real this time
 	public var variables:Map<String, Dynamic> = new Map();
 	public var modchartInputTexts:Map<String, ModchartInputText> = new Map<String, ModchartInputText>(); //because monochrome
 	public var noteTypeMap:Map<String, Bool> = new Map<String, Bool>();
@@ -595,7 +595,7 @@ class PlayState extends MusicBeatState
 			}
 		} else {stageCheck = SONG.stage;}
 
-		Stage = new Stage(stageCheck);
+		Stage = new Stage(stageCheck, false);
 		defaultCamZoom = Stage.camZoom;
 		curStage = Stage.curStage;
 		usesStageHx = true;
@@ -1352,7 +1352,7 @@ class PlayState extends MusicBeatState
 
 	override function destroy() {
 		for (lua in luaArray) {
-			lua.call('onDestroy', []);
+			lua.callPsych('onDestroy', []);
 			lua.stop();
 		}
 		luaArray = [];
@@ -1735,6 +1735,11 @@ class PlayState extends MusicBeatState
 				}
 			case 'Set Property':
 				var killMe:Array<String> = value1.split('.');
+
+				if (value1.contains('velocity.')){
+					if (PlayState.instance != null){value2 = Std.string(Std.parseInt(value2)*playbackRate);}
+				}
+
 				if(killMe.length > 1) {
 					if (Std.isOfType(getObjectDirectly2(killMe[0]), Character) && killMe[killMe.length-1] == 'color')
 					{
@@ -4113,9 +4118,9 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		FlxG.watch.addQuick("secShit", curSection);
 		FlxG.watch.addQuick("beatShit", curBeat);
 		FlxG.watch.addQuick("stepShit", curStep);
-		FlxG.watch.addQuick("secShit", curSection);
 		FlxG.watch.addQuick("songPos", Conductor.songPosition);
 
 		if (health <= 0 || FlxG.keys.justPressed.R && !inCutscene)

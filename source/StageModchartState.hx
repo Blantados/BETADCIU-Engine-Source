@@ -2386,6 +2386,7 @@ class StageModchartState
 
 			Lua_helper.add_callback(lua, "makeLuaSprite", function(tag:String, image:String, x:Float, y:Float, ?antialiasing:Bool = true) {
 				tag = tag.replace('.', '');
+				resetSpriteTag(tag);
 				var leSprite:ModchartSprite = new ModchartSprite(x, y);
 				if(image != null && image.length > 0) {
 
@@ -2412,18 +2413,20 @@ class StageModchartState
 
 			Lua_helper.add_callback(lua, "makeAnimatedLuaSprite", function(tag:String, image:String, x:Float, y:Float,spriteType:String="sparrow") {
 				tag = tag.replace('.', '');
+				resetSpriteTag(tag);
 				var leSprite:ModchartSprite = new ModchartSprite(x, y);
-				
+
 				loadFrames(leSprite, image, spriteType);
 				leSprite.antialiasing = true;
 
-				if (!preloading)
+				if (!preloading){
 					Stage.instance.swagBacks.set(tag, leSprite);
+				}
 			});
 
 			Lua_helper.add_callback(lua, "makeLuaBackdrop", function(tag:String, image:String, x:Float, y:Float, ?antialiasing:Bool = true) {
 				tag = tag.replace('.', '');
-
+				//resetSpriteTag(tag);
 				var leSprite:FlxBackdrop = null;
 				
 				if(image != null && image.length > 0) {
@@ -2625,94 +2628,17 @@ class StageModchartState
 				{
 					var shit = Stage.instance.swagBacks.get(tag);
 		
-					if (place == -1 || place == false)
-						Stage.instance.toAdd.push(shit);
-					else
-					{
-						if (place == true){place = 2;}
-						Stage.instance.layInFront[place].push(shit);
-					}
-				}
-			});
-
-			//push directly to playstate
-			Lua_helper.add_callback(lua, "makeLuaSpritePS", function(tag:String, image:String, x:Float, y:Float, ?antialiasing:Bool = true) {
-				tag = tag.replace('.', '');
-				resetSpriteTag(tag);
-				var leSprite:ModchartSprite = new ModchartSprite(x, y);
-				if(image != null && image.length > 0) {
-					var rawPic:Dynamic;
-
-					if (!Paths.currentTrackedAssets.exists(image))
-						Paths.cacheImage(image);
-
-					rawPic = Paths.currentTrackedAssets.get(image);
-
-					leSprite.loadGraphic(rawPic);					
-				}
-				leSprite.antialiasing = antialiasing;
-				PlayState.instance.modchartSprites.set(tag, leSprite);
-				leSprite.active = true;
-			});
-
-			Lua_helper.add_callback(lua, "makeAnimatedLuaSpritePS", function(tag:String, image:String, x:Float, y:Float,spriteType:String="sparrow", ?antialiasing:Bool = true) {
-				tag = tag.replace('.', '');
-				resetSpriteTag(tag);
-				var leSprite:ModchartSprite = new ModchartSprite(x, y);
-				
-				switch(spriteType.toLowerCase()){
-				
-					case "texture" | "textureatlas"|"tex":
-						leSprite.frames = AtlasFrameMaker.construct(image);
-						
-					case "packer" |"packeratlas"|"pac":
-						leSprite.frames = Paths.getPackerAtlas(image);
-					
-					default:
-					{
-						var rawPic:Dynamic;
-						var rawXml:String;
-
-						if (!Paths.currentTrackedAssets.exists(image))
-							Paths.cacheImage(image);
-
-						rawPic = Paths.currentTrackedAssets.get(image);
-
-						if (FileSystem.exists(FileSystem.absolutePath("assets/shared/images/"+image+".xml")))
-							rawXml = File.getContent(FileSystem.absolutePath("assets/shared/images/"+image+".xml"));
-						else
-							rawXml = File.getContent(Paths.xmlNew('images/' + image));
-
-						leSprite.frames = FlxAtlasFrames.fromSparrow(rawPic,rawXml);
-					}
-				}
-				
-				
-				leSprite.antialiasing = antialiasing;
-				PlayState.instance.modchartSprites.set(tag, leSprite);
-			});
-
-			Lua_helper.add_callback(lua, "addLuaSpritePS", function(tag:String, front:Bool = false) {
-				if(PlayState.instance.modchartSprites.exists(tag)) {
-					var shit:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
-					if(!shit.wasAdded) {
-						if(front)
-						{
-							getInstance().add(shit);
-						}
+					//if (!shit.wasAdded)
+					//{
+						if (place == -1 || place == false)
+							Stage.instance.toAdd.push(shit);
 						else
 						{
-							var position:Int = PlayState.instance.members.indexOf(PlayState.instance.gf);
-							if(PlayState.instance.members.indexOf(PlayState.instance.boyfriend) < position) {
-								position = PlayState.instance.members.indexOf(PlayState.instance.boyfriend);
-							} else if(PlayState.instance.members.indexOf(PlayState.instance.dad) < position) {
-								position = PlayState.instance.members.indexOf(PlayState.instance.dad);
-							}
-							PlayState.instance.insert(position, shit);
+							if (place == true){place = 2;}
+							Stage.instance.layInFront[place].push(shit);
 						}
-						shit.wasAdded = true;
-						//trace('added a thing: ' + tag);
-					}
+					//	shit.wasAdded = true;
+					//}
 				}
 			});
 
@@ -2991,7 +2917,7 @@ class StageModchartState
 			});
 			Lua_helper.add_callback(lua, "setObjectOrder", function(obj:String, position:Int) {
 				var killMe:Array<String> = obj.split('.');
-				var leObj:FlxBasic = getObjectDirectly(killMe[0]);
+				var leObj:FlxBasic = getObjectDirectly2(killMe[0]);
 				if(killMe.length > 1) {
 					leObj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 				}
@@ -3505,29 +3431,36 @@ class StageModchartState
 		return FlxEase.linear;
 	}
 
-	function resetSpriteTag(tag:String) {
-		if(!PlayState.instance.modchartSprites.exists(tag) && !PlayState.instance.Stage.swagBacks.exists(tag)) {
+	function resetSpriteTag(tag:String = "") {
+		if(!PlayState.instance.modchartSprites.exists(tag) && !Stage.instance.swagBacks.exists(tag)) {
 			return;
 		}
 		
-		if(PlayState.instance.modchartSprites.exists(tag))
+		if (PlayState.instance != null)
 		{
-			var pee:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
-			pee.kill();
-			if(pee.wasAdded) {
-				PlayState.instance.remove(pee, true);
+			if(PlayState.instance.modchartSprites.exists(tag))
+			{
+				var pee:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
+				pee.kill();
+				if(pee.wasAdded) {
+					PlayState.instance.remove(pee, true);
+				}
+				pee.destroy();
+				PlayState.instance.modchartSprites.remove(tag);
+				return;
 			}
-			pee.destroy();
-			PlayState.instance.modchartSprites.remove(tag);
-		}
-		
-		if(PlayState.instance.Stage.swagBacks.exists(tag))
-		{
-			var pee:ModchartSprite = PlayState.instance.Stage.swagBacks.get(tag);
-			pee.kill();
-			PlayState.instance.remove(pee, true);
-			pee.destroy();
-			PlayState.instance.Stage.swagBacks.remove(tag);
+			
+			if(Stage.instance.swagBacks.exists(tag))
+			{
+				var pee:ModchartSprite = Stage.instance.swagBacks.get(tag);
+				pee.kill();
+				//if(pee.wasAdded) {
+					PlayState.instance.remove(pee, true);
+				//}
+				pee.destroy();
+				Stage.instance.swagBacks.remove(tag);
+				return;
+			}
 		}
 	}
 
