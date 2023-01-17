@@ -24,7 +24,7 @@ import flixel.text.FlxText;
 import flixel.effects.particles.FlxEmitter; //never have i ever used this until now.
 import flixel.effects.particles.FlxParticle;
 import StageData;
-import StageModchartState;
+import ModchartState;
 import openfl.display.BitmapData;
 import flixel.graphics.FlxGraphic;
 import openfl.Lib;
@@ -661,7 +661,7 @@ class Stage extends MusicBeatState
 				if (stageData.countdownAssets != null)
 					introAssets = stageData.countdownAssets;
 
-				luaArray.push(new StageModchartState(curStage, preloading));
+				luaArray.push(new ModchartState(curStage, preloading, true));
 
 				if (luaArray.length >= 1)
 				{
@@ -938,11 +938,11 @@ class Stage extends MusicBeatState
 		});
 	}
 
-	public var closeLuas:Array<StageModchartState> = [];
-	public var luaArray:Array<StageModchartState> = [];
+	public var closeLuas:Array<ModchartState> = [];
+	public var luaArray:Array<ModchartState> = [];
 
 	public function callOnLuas(event:String, args:Array<Dynamic>, ignoreStops = true, exclusions:Array<String> = null):Dynamic {
-		var returnVal:Dynamic = StageModchartState.Function_Continue;
+		var returnVal:Dynamic = ModchartState.Function_Continue;
 		#if LUA_ALLOWED
 		if(exclusions == null) exclusions = [];
 		for (script in luaArray) {
@@ -950,11 +950,11 @@ class Stage extends MusicBeatState
 				continue;
 
 			var ret:Dynamic = script.call(event, args);
-			if(ret == StageModchartState.Function_StopLua && !ignoreStops)
+			if(ret == ModchartState.Function_StopLua && !ignoreStops)
 				break;
 			
 			// had to do this because there is a bug in haxe where Stop != Continue doesnt work
-			var bool:Bool = ret == StageModchartState.Function_Continue;
+			var bool:Bool = ret == ModchartState.Function_Continue;
 			if(!bool) {
 				returnVal = cast ret;
 			}
@@ -967,7 +967,7 @@ class Stage extends MusicBeatState
 	public function setOnLuas(variable:String, arg:Dynamic) {
 		#if LUA_ALLOWED
 		for (i in 0...luaArray.length) {
-			luaArray[i].setVar(variable, arg);
+			luaArray[i].set(variable, arg);
 		}
 		#end
 	}

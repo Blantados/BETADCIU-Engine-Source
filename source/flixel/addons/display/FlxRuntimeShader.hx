@@ -721,6 +721,28 @@ class FlxRuntimeShader extends FlxShader
 		return prop.value;
 	}
 
+	/**
+	 * Gets a field from a string. Used with like runHaxeCode and FlxTweens or smthn.
+	 * @param name The name of the shader input to modify.
+	 * @param value The field type.
+	 */
+	 public function getField(name:String, fieldType:String = "float"):ShaderParameter<Dynamic>
+	{
+		var prop:ShaderParameter<Dynamic> = Reflect.field(this.data, name);
+
+		/*switch (fieldType.toLowerCase())
+		{
+			case "int": var prop:ShaderParameter<Int>;
+			case "float": var prop:ShaderParameter<Float>;
+			case "bool": var prop:ShaderParameter<Bool>;
+			case "sampler2D": var prop:ShaderParameter<BitmapData>;
+		}*/
+
+		//prop = Reflect.field(this.data, name);
+		
+		(prop == null ? return null : return prop);
+	}
+
 	public function toString():String
 	{
 		return 'FlxRuntimeShader';

@@ -946,8 +946,8 @@ class EditorPlayState extends MusicBeatState
 			
 			notes.forEachAlive(function(daNote:Note)
 			{
-				if(FlxG.save.data.downscroll && daNote.y > playerStrums.members[daNote.noteData].y - 20 ||
-				!FlxG.save.data.downscroll && daNote.y < playerStrums.members[daNote.noteData].y + 20 || daNote.downscroll && daNote.y > playerStrums.members[daNote.noteData].y)
+				if((FlxG.save.data.downscroll || !FlxG.save.data.downscroll && daNote.flipScroll) && daNote.y > playerStrums.members[daNote.noteData].y - 20 ||
+				(!FlxG.save.data.downscroll || FlxG.save.data.downscroll && daNote.flipScroll) && daNote.y < playerStrums.members[daNote.noteData].y + 20)
 				{
 					// Force good note hit regardless if it's too late to hit it or not as a fail safe
 					if(FlxG.save.data.botplay && daNote.canBeHit && daNote.mustPress ||

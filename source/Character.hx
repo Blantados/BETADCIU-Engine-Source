@@ -133,7 +133,7 @@ class Character extends FlxSprite
 		isCustom = false;
 		pre = "";
 
-		if (PlayState.SONG != null)
+		if (PlayState.instance != null)
 			noteSkin = PlayState.SONG.noteStyle;
 		
 		//should now only be using the default psych json stuff

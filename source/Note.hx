@@ -91,7 +91,7 @@ class Note extends FlxSprite
 	public static var swidths:Array<Float> = [160, 120, 90, 140, 110];
 	public static var posRest:Array<Int> = [0, 35, 70, 60, 20];
 	public var curSpeed:Float;
-	public var downscroll:Bool = false; //just use false for upscroll
+	public var flipScroll:Bool = false; //just use false for upscroll
 	var pre:String;
 	var suf:String;
 
@@ -247,7 +247,7 @@ class Note extends FlxSprite
 			offset.y = -30;
 		}
 
-		if ((FlxG.save.data.downscroll || downscroll) && sustainNote) 
+		if ((FlxG.save.data.downscroll || !FlxG.save.data.downscroll && flipScroll) && sustainNote) 
 			flipY = true;
 
 		if (isSustainNote && prevNote != null)
@@ -306,10 +306,10 @@ class Note extends FlxSprite
 	{
 		super.update(elapsed);
 
-		if ((FlxG.save.data.downscroll || downscroll) && (isSustainNote && prevNote != null) && !flipY)
+		if ((FlxG.save.data.downscroll || !FlxG.save.data.downscroll && flipScroll) && (isSustainNote && prevNote != null) && !flipY)
 			flipY = true;
 
-		if (flipY && (isSustainNote && prevNote != null) && (!FlxG.save.data.downscroll && !downscroll))
+		if (flipY && (isSustainNote && prevNote != null) && (!FlxG.save.data.downscroll && !(FlxG.save.data.downscroll && flipScroll)))
 			flipY = false;
 
 		if (modifiedByLua)

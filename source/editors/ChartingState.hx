@@ -235,9 +235,9 @@ class ChartingState extends MusicBeatState
 		rightIcon = new HealthIcon(_song.player2);
 
 		if (leftIcon.animation.name == 'face')
-			leftIcon.useOldSystem('bf');
+			leftIcon.changeIcon('bf');
 		if (rightIcon.animation.name == 'face')
-			rightIcon.useOldSystem('dad');
+			rightIcon.changeIcon('dad');
 
 		leftIcon.scrollFactor.set(1, 1);
 		rightIcon.scrollFactor.set(1, 1);
@@ -1932,17 +1932,17 @@ class ChartingState extends MusicBeatState
 
 		if (check_mustHitSection.checked)
 		{
-			leftIcon.useOldSystem(healthIconP1);
-			rightIcon.useOldSystem(healthIconP2);
-			if (leftIcon.animation.name == 'face'){leftIcon.useOldSystem('bf');}
-			if (rightIcon.animation.name == 'face'){rightIcon.useOldSystem('dad');}
+			leftIcon.changeIcon(healthIconP1);
+			rightIcon.changeIcon(healthIconP2);
+			if (leftIcon.animation.name == 'face'){leftIcon.changeIcon('bf');}
+			if (rightIcon.animation.name == 'face'){rightIcon.changeIcon('dad');}
 		}
 		else
 		{
-			leftIcon.useOldSystem(healthIconP2);
-			rightIcon.useOldSystem(healthIconP1);
-			if (leftIcon.animation.name == 'face'){leftIcon.useOldSystem('dad');}
-			if (rightIcon.animation.name == 'face'){rightIcon.useOldSystem('bf');}
+			leftIcon.changeIcon(healthIconP2);
+			rightIcon.changeIcon(healthIconP1);
+			if (leftIcon.animation.name == 'face'){leftIcon.changeIcon('dad');}
+			if (rightIcon.animation.name == 'face'){rightIcon.changeIcon('bf');}
 		}
 		if (_song.notes[curSec].gfSection) leftIcon.changeIcon('gf');
 	}

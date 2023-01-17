@@ -730,7 +730,7 @@ class StageEditorState extends MusicBeatState
 				for (i in Stage.luaArray)
 				{
 					Stage.luaArray.remove(i);
-					i.die();
+					i.stop();
 				}
 				Stage.luaArray = [];
 			}

@@ -29,7 +29,7 @@ class HealthIcon extends FlxSprite
 	public var char:String = 'bf';
 	public var isPlayer:Bool = false;
 	public var isOldIcon:Bool = false;
-	public var hasWinning:Bool = false;
+	public var hasWinning:Bool = true;
 
 	public function new(?char:String = 'bf', ?isPlayer:Bool = false)
 	{
@@ -38,19 +38,27 @@ class HealthIcon extends FlxSprite
 		this.char = char;
 		this.isPlayer = isPlayer;
 
-		useOldSystem(char);
+		changeIcon(char);
 		scrollFactor.set();
 	}
 
 	public function changeIcon(char:String)
 	{
-		if (!FileSystem.exists(Paths.image('icons/icon-' + char)) && !FileSystem.exists(Paths.modsImages('icons/icon-' + char)))
+		if (!FileSystem.exists(Paths.image('icons/icon-' + char)) && !FileSystem.exists(Paths.modsImages('icons/icon-' + char)) && !Assets.exists(Paths.modsImages('icons/icon-' + char)))
 			char = 'face';
 
-		var rawPic = BitmapData.fromFile(Paths.image('icons/icon-'+char));
+		var rawPic:BitmapData;
 
-		if (FileSystem.exists(Paths.modsImages('icons/icon-' + char)))
-			rawPic = BitmapData.fromFile(Paths.modsImages('icons/icon-' + char));
+		//if statements looked better
+		if (FileSystem.exists(Paths.modsImages('icons/icon-' + char))){
+			rawPic = BitmapData.fromFile(Paths.modsImages('icons/icon-'+char));
+		}
+		else if (Assets.exists(Paths.modsImages('icons/icon-' + char))){
+			rawPic = OpenFlAssets.getBitmapData(Paths.modsImages('icons/icon-'+char));
+		}
+		else {
+			rawPic = BitmapData.fromFile(Paths.image('icons/icon-'+char));
+		}
 
 		loadGraphic(rawPic, true, 150, 150);
 
@@ -62,7 +70,6 @@ class HealthIcon extends FlxSprite
 		if (rawPic.width == 450)
 		{
 			animation.add(char, [0, 1, 2], 0, false, isPlayer);
-			hasWinning = true;
 		}
 		else
 		{
@@ -70,8 +77,6 @@ class HealthIcon extends FlxSprite
 				animation.add(char, [0, 0, 0], 0, false, isPlayer); //that way everyone technically has a winning icon
 			else
 				animation.add(char, [0, 1, 0], 0, false, isPlayer); //that way everyone technically has a winning icon
-
-			hasWinning = false;
 		}
 		
 		animation.play(char);
@@ -88,43 +93,7 @@ class HealthIcon extends FlxSprite
 			char = curChar;
 
 		if(isOldIcon = !isOldIcon) changeIcon(char+'-old');
-		else useOldSystem(char);
-	}
-
-	public function useOldSystem(char:String)
-	{
-		//is exactly the same as changeicon except it uses the hardcoded paths instead of bitmapdata.
-		if (!OpenFlAssets.exists(Paths.image('icons/icon-' + char)) || FileSystem.exists(Paths.modsImages('icons/icon-' + char)))
-			changeIcon(char);
-		else
-		{
-			var file:Dynamic = Paths.image('icons/icon-'+char);
-			var fileSize:FlxSprite = new FlxSprite().loadGraphic(file);
-	
-			loadGraphic(file, true, 150, 150);
-		
-			if (char.startsWith('senpai') || char.contains('pixel') || char.startsWith('spirit') || char.startsWith('monika') && char != 'monika-real' && !char.contains('hd'))
-				antialiasing = false;
-			else
-				antialiasing = true;
-	
-			if (fileSize.width == 450) //now with winning icon support
-			{
-				animation.add(char, [0, 1, 2], 0, false, isPlayer);
-				hasWinning = true;
-			}
-			else
-			{
-				if (fileSize.width == 150)
-					animation.add(char, [0, 0, 0], 0, false, isPlayer);
-				else
-					animation.add(char, [0, 1, 0], 0, false, isPlayer);
-				
-				hasWinning = false;
-			}
-				
-			animation.play(char);
-		}		
+		else changeIcon(char);
 	}
 
 	override function update(elapsed:Float)
