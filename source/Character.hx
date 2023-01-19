@@ -27,6 +27,8 @@ import flixel.text.FlxText;
 import haxe.xml.Access;
 import flixel.math.FlxMath;
 
+import animateatlas.AtlasFrameMaker;
+
 using StringTools;
 
 typedef CharacterFile = {
@@ -47,6 +49,9 @@ typedef CharacterFile = {
 	var healthbar_colors:Array<Int>;
 	var noteSkin:String;
 	var isPlayerChar:Bool;
+
+	@:optional
+	var spriteType:String;
 }
 
 typedef AnimArray = {
@@ -114,6 +119,9 @@ class Character extends FlxSprite
 	public var stopIdle:Bool = false;
 
 	public var stunned:Bool = false;
+
+	//might try using texture atlas.
+	public var spriteType:String;
 	
 	public static var DEFAULT_CHARACTER:String = 'bf'; //In case a character is missing, it will use BF on its place
 	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false)
@@ -176,24 +184,23 @@ class Character extends FlxSprite
 					antialiasing = false;
 					noAntialiasing = true;
 				}
-
-				var imagePath = Paths.image(json.image);
-
-				if (!Paths.currentTrackedAssets.exists(json.image))
-				{
-					if (Assets.exists(imagePath) && !FileSystem.exists(imagePath) && !FileSystem.exists(Paths.modsImages(imagePath)))
-						Paths.cacheImage(json.image, 'shared', false, !noAntialiasing);
-					else
-						Paths.cacheImage(json.image, 'preload', false, !noAntialiasing);	
-				}
-
+				
 				charPath = json.image + '.png'; //cuz we only use pngs anyway
 				imageFile = json.image; //psych
 
-				if(FileSystem.exists(Paths.txtNew('images/' + json.image)))
-					frames = Paths.getPackerAtlas(json.image);
-				else 
-					frames = Paths.getSparrowAtlas(json.image);
+				(json.spriteType != null ? spriteType = json.spriteType.toUpperCase() : spriteType = "SPARROW");
+
+				var imagePath = Paths.image(json.image);
+
+				if (!Paths.currentTrackedAssets.exists(json.image + (spriteType == "TEXTURE" ? '/spritemap' : "")))
+				{
+					if (Assets.exists(imagePath) && !FileSystem.exists(imagePath) && !FileSystem.exists(Paths.modsImages(imagePath)))
+						Paths.cacheImage(json.image + (spriteType == "TEXTURE" ? '/spritemap' : ""), 'shared', false, !noAntialiasing);
+					else
+						Paths.cacheImage(json.image + (spriteType == "TEXTURE" ? '/spritemap' : ""), 'preload', false, !noAntialiasing);	
+				}
+
+				frames = (spriteType == "TEXTURE" ? AtlasFrameMaker.construct(imageFile) : Paths.getAtlasFromData(imageFile, spriteType));
 
 				if(FlxG.save.data.poltatoPC)
 				{	
@@ -246,10 +253,13 @@ class Character extends FlxSprite
 						var animLoop:Bool = !!anim.loop; //Bruh
 						var animIndices:Array<Int> = anim.indices;
 						if(animIndices != null && animIndices.length > 0) {
-							animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
-						} else {
-							animation.addByPrefix(animAnim, animName, animFps, animLoop);
+							if (animName == "") //texture atlas
+								animation.add(animAnim, animIndices, animFps, animLoop);
+							else
+								animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
 						}
+						else
+							animation.addByPrefix(animAnim, animName, animFps, animLoop);
 
 						if (isPlayer)
 						{
@@ -346,7 +356,7 @@ class Character extends FlxSprite
 					if (animation.curAnim.name.startsWith('sing'))
 						holdTimer += elapsed;
 		
-					if (holdTimer >= Conductor.stepCrochet * singDuration * 0.001)
+					if (holdTimer >= Conductor.stepCrochet * singDuration * 0.001 / (PlayState.instance != null ? 1 : PlayState.instance.playbackRate))
 					{
 						dance();
 						holdTimer = 0;
@@ -471,58 +481,6 @@ class Character extends FlxSprite
 		scale.set(daValue, daValue);
 	}
 
-	public function loadOffsetFile(character:String)
-	{
-		var offset:Array<String>;
-		
-		if (isPlayer)
-		{
-			if (Assets.exists(Paths.txtNew('images/characters/offsets/' + character + "PlayerOffsets", 'shared')))
-				offset = CoolUtil.coolTextFile(Paths.txtNew('images/characters/offsets/' + character + "PlayerOffsets", 'shared'));
-			else if (Assets.exists(Paths.txtNew('images/characters/offsets/' + character + "Offsets", 'shared')))
-				offset = CoolUtil.coolTextFile(Paths.txtNew('images/characters/offsets/' + character + "Offsets", 'shared'));
-			else
-				offset = CoolUtil.coolTextFile(Paths.txtNew('images/characters/offsets/noOffsets', 'shared'));
-		}
-		else
-		{
-			if (Assets.exists(Paths.txtNew('images/characters/offsets/' + character + "Offsets", 'shared')))
-				offset = CoolUtil.coolTextFile(Paths.txtNew('images/characters/offsets/' + character + "Offsets", 'shared'));
-			else if (Assets.exists(Paths.txtNew('images/characters/offsets/' + character + "PlayerOffsets", 'shared')))
-				offset = CoolUtil.coolTextFile(Paths.txtNew('images/characters/offsets/' + character + "PlayerOffsets", 'shared'));	
-			else
-				offset = CoolUtil.coolTextFile(Paths.txtNew('images/characters/offsets/noOffsets', 'shared'));
-		}
-
-		for (i in 0...offset.length)
-		{
-			var data:Array<String> = offset[i].split(' ');
-			addOffset(data[0], Std.parseInt(data[1]), Std.parseInt(data[2]));
-		}
-		
-		//for saving playerOffsets in jsons
-		if (Assets.exists(Paths.txtNew('images/characters/offsets/' + character + "PlayerOffsets", 'shared')))
-		{
-			var playerOffset:Array<String>;
-
-			playerOffset = CoolUtil.coolTextFile(Paths.txtNew('images/characters/offsets/' + character + "PlayerOffsets", 'shared'));
-
-			for (i in 0...playerOffset.length)
-			{
-				var data:Array<String> = playerOffset[i].split(' ');
-				addPlayerOffset(data[0], Std.parseInt(data[1]), Std.parseInt(data[2]));
-			}
-		}
-		else
-		{
-			for (i in 0...offset.length)
-			{
-				var data:Array<String> = offset[i].split(' ');
-				addPlayerOffset(data[0], Std.parseInt(data[1]), Std.parseInt(data[2]));
-			}
-		}
-	}
-
 	var missed:Bool = false;
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
@@ -557,19 +515,18 @@ class Character extends FlxSprite
 			else if (animation.getByName('idle') != null)
 				AnimName = 'idle';
 			else{
-				if (graphic.key == 'bruhtf')
-					quickAnimAdd(AnimName, CoolUtil.findFirstAnim(Assets.getText(Paths.xmlNew('images/bruhtf'))));
-				else{
+				if (FileSystem.exists(Paths.xmlNew('images/' + imageFile)))
+				{
 					var path:String = Paths.xmlNew('images/' + imageFile);
-
 					quickAnimAdd(AnimName, CoolUtil.findFirstAnim((FileSystem.exists(path) ? File.getContent(path) : Assets.getText(path))));
+				}		
+				else{
+					quickAnimAdd(AnimName, CoolUtil.findFirstAnim(Assets.getText(Paths.xmlNew('images/bruhtf'))));
 				}
-			}
-				
+			}	
 		}
 
 		animation.play(AnimName, Force, Reversed, Frame);
-
 
 		if (missed)
 			color = 0xCFAFFF;
@@ -623,14 +580,6 @@ class Character extends FlxSprite
 		addAnimationByPrefix(name, anim, 24, false);
 	}
 
-	public function getCharPath(path:String, ?library:String)
-	{	
-		charPath = path + '.png'; //cuz we only use pngs anyway
-		imageFile = path; //psych
-
-		return Paths.getSparrowAtlas(path, library);
-	}
-
 	//so that I can convert em to psych faster
 	public function addAnimationByPrefix(name:String, prefix:String, framerate:Int = 24, loop:Bool = false)
 	{
@@ -667,39 +616,20 @@ class Character extends FlxSprite
 
 	public function flipAnims()
 	{
-		if (animation.getByName('singRIGHT') != null && animation.getByName('singLEFT') != null)
-		{
-			var oldRight = animation.getByName('singRIGHT').frames;
-			animation.getByName('singRIGHT').frames = animation.getByName('singLEFT').frames;
-			animation.getByName('singLEFT').frames = oldRight;
+		var animSuf:Array<String> = ["", "miss", "-alt", "-alt2", "-loop"];
+
+		if (curCharacter.contains('9key')){
+			animSuf.push("2");
 		}
 
-		// IF THEY HAVE MISS ANIMATIONS??
-		if (animation.getByName('singRIGHTmiss') != null && animation.getByName('singLEFTmiss') != null)
+		for (i in 0...animSuf.length)
 		{
-			var oldMiss = animation.getByName('singRIGHTmiss').frames;
-			animation.getByName('singRIGHTmiss').frames = animation.getByName('singLEFTmiss').frames;
-			animation.getByName('singLEFTmiss').frames = oldMiss;
-		}
-		if (animation.getByName('singRIGHT-alt') != null && animation.getByName('singLEFT-alt') != null)
-		{
-			var oldAlt = animation.getByName('singRIGHT-alt').frames;
-			animation.getByName('singRIGHT-alt').frames = animation.getByName('singLEFT-alt').frames;
-			animation.getByName('singLEFT-alt').frames = oldAlt;
-		}
-
-		if (animation.getByName('singRIGHT-loop') != null && animation.getByName('singLEFT-loop') != null)
-		{
-			var oldLoop = animation.getByName('singRIGHT-loop').frames;
-			animation.getByName('singRIGHT-loop').frames = animation.getByName('singLEFT-loop').frames;
-			animation.getByName('singLEFT-loop').frames = oldLoop;
-		}
-
-		if (curCharacter.contains('9key'))
-		{
-			var oldRight = animation.getByName('singRIGHT2').frames;
-			animation.getByName('singRIGHT2').frames = animation.getByName('singLEFT2').frames;
-			animation.getByName('singLEFT2').frames = oldRight;
+			if (animation.getByName('singRIGHT' + animSuf[i]) != null && animation.getByName('singLEFT' + animSuf[i]) != null)
+			{
+				var oldRight = animation.getByName('singRIGHT' + animSuf[i]).frames;
+				animation.getByName('singRIGHT' + animSuf[i]).frames = animation.getByName('singLEFT' + animSuf[i]).frames;
+				animation.getByName('singLEFT' + animSuf[i]).frames = oldRight;
+			}
 		}
 	}
 }

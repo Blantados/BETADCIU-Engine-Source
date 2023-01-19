@@ -247,7 +247,7 @@ class Note extends FlxSprite
 			offset.y = -30;
 		}
 
-		if ((FlxG.save.data.downscroll || !FlxG.save.data.downscroll && flipScroll) && sustainNote) 
+		if ((FlxG.save.data.downscroll || (!FlxG.save.data.downscroll && flipScroll)) && sustainNote) 
 			flipY = true;
 
 		if (isSustainNote && prevNote != null)
@@ -306,7 +306,7 @@ class Note extends FlxSprite
 	{
 		super.update(elapsed);
 
-		if ((FlxG.save.data.downscroll || !FlxG.save.data.downscroll && flipScroll) && (isSustainNote && prevNote != null) && !flipY)
+		if ((FlxG.save.data.downscroll || (!FlxG.save.data.downscroll && flipScroll)) && (isSustainNote && prevNote != null) && !flipY)
 			flipY = true;
 
 		if (flipY && (isSustainNote && prevNote != null) && (!FlxG.save.data.downscroll && !(FlxG.save.data.downscroll && flipScroll)))

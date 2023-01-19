@@ -16,7 +16,7 @@ import openfl.geom.Matrix;
 import openfl.display.Bitmap;
 import openfl.display.PixelSnapping;
 import haxe.Json;
-
+import animateatlas.AtlasFrameMaker;
 
 using StringTools;
 
@@ -219,7 +219,7 @@ class Paths
 			suf = 'NN';
 		if (PlayState.isVitor)		
 			suf = 'V';
-		if (PlayState.isBETADCIU && PlayState.storyDifficulty == 5 && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Inst'+'Guest'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'InstGuest'))))		
+		if (PlayState.isBETADCIU && CoolUtil.difficulties[0] == "Guest" && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Inst'+'Guest'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'InstGuest'))))		
 			suf = 'Guest';
 		if (PlayState.isBETADCIU && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Inst'+'BETADCIU'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'InstBETADCIU'))))
 			suf = 'BETADCIU';
@@ -250,7 +250,7 @@ class Paths
 			suf = 'NN';
 		if (PlayState.isVitor)		
 			suf = 'V';
-		if (PlayState.isBETADCIU && PlayState.storyDifficulty == 5 && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Voices'+'Guest'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'VoicesGuest'))))		
+		if (PlayState.isBETADCIU && CoolUtil.difficulties[0] == "Guest" && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Voices'+'Guest'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'VoicesGuest'))))		
 			suf = 'Guest';
 		if (PlayState.isBETADCIU && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Voices'+'BETADCIU'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'VoicesBETADCIU'))))
 			suf = 'BETADCIU';
@@ -280,7 +280,7 @@ class Paths
 			suf = 'NN';
 		if (PlayState.isVitor)
 			suf = 'V';
-		if (PlayState.isBETADCIU && PlayState.storyDifficulty == 5)		
+		if (PlayState.isBETADCIU && CoolUtil.difficulties[0] == "Guest")		
 			suf = 'Guest';
 		if (PlayState.isBETADCIU && (songLowercase == 'kaboom' || songLowercase == 'triple-trouble'))		
 			suf = 'BETADCIU';
@@ -307,7 +307,7 @@ class Paths
 			suf = 'NN';
 		if (PlayState.isVitor)		
 			suf = 'V';
-		if (PlayState.isBETADCIU && PlayState.storyDifficulty == 5 && Assets.exists('songs:assets/songs/${songLowercase}/'+'Inst'+'Guest'+'.$SOUND_EXT'))		
+		if (PlayState.isBETADCIU && CoolUtil.difficulties[0] == "Guest" && Assets.exists('songs:assets/songs/${songLowercase}/'+'Inst'+'Guest'+'.$SOUND_EXT'))		
 			suf = 'Guest';
 	
 		return 'songs:assets/songs/${songLowercase}/'+pre+'Inst'+suf+'.$SOUND_EXT';
@@ -348,6 +348,7 @@ class Paths
 
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
 	public static var currentTrackedSounds:Map<String, Sound> = [];
+	public static var currentTrackedTexts:Map<String, String> = [];
 	public static var localTrackedAssets:Array<String> = [];
 
 	//idk if this shit works. holy s%$t it did.
@@ -371,6 +372,15 @@ class Paths
 			&& !dumpExclusions.contains(key) && key != null) {
 				Assets.cache.clear(key);
 				currentTrackedSounds.remove(key);
+			}
+		}
+
+		// clear all texts
+		for (key in currentTrackedTexts.keys()) {
+			if (!localTrackedAssets.contains(key) 
+			&& !dumpExclusions.contains(key) && key != null) {
+				Assets.cache.clear(key);
+				currentTrackedTexts.remove(key);
 			}
 		}
 		
@@ -441,6 +451,8 @@ class Paths
 	
 				if(currentTrackedAssets.exists(key)) 
 					currentTrackedAssets.remove(key);
+
+				trace ('success!');
 			}
 		}
 		
@@ -558,7 +570,7 @@ class Paths
 		}
 		
 		if (FileSystem.exists(path) || Assets.exists(path)) 
-		{
+		{	
 			if(!currentTrackedAssets.exists(key) || forced) 
 			{
 				var newBitmap:BitmapData;
@@ -588,7 +600,6 @@ class Paths
 					(FileSystem.exists(path) ? newBitmap = BitmapData.fromFile(path) : newBitmap = OpenFlAssets.getBitmapData(path));
 				}
 					
-
 				var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(newBitmap, false, key);
 				newGraphic.persist = true;
 				currentTrackedAssets.set(key, newGraphic);
@@ -604,29 +615,34 @@ class Paths
 	static public function getTextFromFile(key:String, ?ignoreMods:Bool = false):String
 	{
 		#if sys
+		var path:String = "ksajdlahfjhadjfhdshfkjhd";
+
+		var pathsToCheck:Array<String> = [FileSystem.absolutePath("assets/shared/"+key), Paths.getPreloadPath(key)];
+
 		#if MODS_ALLOWED
-		if (!ignoreMods && FileSystem.exists(modFolders(key)))
-			return File.getContent(modFolders(key));
+			pathsToCheck.push(modFolders(key));
 		#end
 
-		if (FileSystem.exists(getPreloadPath(key)))
-			return File.getContent(getPreloadPath(key));
-
-		if (currentLevel != null)
+		for (i in 0...pathsToCheck.length)
 		{
-			var levelPath:String = '';
-			if(currentLevel != 'shared') {
-				levelPath = getLibraryPathForce(key, currentLevel);
-				if (FileSystem.exists(levelPath))
-					return File.getContent(levelPath);
+			if(FileSystem.exists(pathsToCheck[i]) || Assets.exists(pathsToCheck[i])) {
+				path = pathsToCheck[i];
 			}
-
-			levelPath = getLibraryPathForce(key, 'shared');
-			if (FileSystem.exists(levelPath))
-				return File.getContent(levelPath);
+		}
+		
+		if (FileSystem.exists(path) || Assets.exists(path)) 
+		{	
+			if (!currentTrackedTexts.exists(key))
+			{
+				var newText:String = (FileSystem.exists(path) ? File.getContent(path) : Assets.getText(path));		
+				currentTrackedTexts.set(key, newText);
+			}
+			return currentTrackedTexts.get(key);
 		}
 		#end
-		return Assets.getText(getPath(key, TEXT));
+		
+		trace('getTextFromFile: you failed dipshit.');
+		return null;		
 	}
 
 	public static var poltatoAlphabetXml:String = null;
@@ -642,23 +658,11 @@ class Paths
 		if (library != null)
 			pathsToCheck.push(FileSystem.absolutePath("assets/"+library+"/images/"+key+".xml"));
 
-		for (i in 0...pathsToCheck.length)
-		{
-			if(Assets.exists(pathsToCheck[i])) {
-				rawXml = Assets.getText(pathsToCheck[i]);
-			}
-
-			if(FileSystem.exists(pathsToCheck[i])) {
-				rawXml = File.getContent(pathsToCheck[i]);
-			}
-		}
+		rawXml = checkAndReturn(pathsToCheck);
 		
 		if (imageLoaded == null)
-		{
-			trace('image is null!');
-			Paths.cacheImage('bruhtf', 'shared');
-			imageLoaded = Paths.currentTrackedAssets.get('bruhtf');
-		}
+			imageLoaded = returnGraphic('bruhtf', 'shared');
+
 		if (rawXml == "")
 			rawXml = Assets.getText(Paths.xmlNew('images/bruhtf')); //load something
 
@@ -675,7 +679,6 @@ class Paths
 			}
 		}
 			
-
 		return FlxAtlasFrames.fromSparrow(imageLoaded, rawXml);
 		#else
 		return FlxAtlasFrames.fromSparrow(image(key, library), file('images/$key.xml', library));
@@ -688,25 +691,18 @@ class Paths
 		var imageLoaded:FlxGraphic = returnGraphic(key, library);
 		var rawTxt:String = "";
 
-		var pathsToCheck:Array<String> = [modsTxt(key), FileSystem.absolutePath("assets/shared/images/"+key+".xml"), Paths.xmlNew('images/' + key)];
+		var pathsToCheck:Array<String> = [modsTxt(key), FileSystem.absolutePath("assets/shared/images/"+key+".txt"), Paths.txtNew('images/' + key)];
 
 		if (library != null)
 			pathsToCheck.push(FileSystem.absolutePath("assets/"+library+"/images/"+key+".txt"));
 
-		for (i in 0...pathsToCheck.length)
-		{
-			if(FileSystem.exists(pathsToCheck[i])) {
-				rawTxt = File.getContent(pathsToCheck[i]);
-			}
-		}
+		rawTxt = checkAndReturn(pathsToCheck);
 
 		if (imageLoaded == null)
-		{
-			Paths.cacheImage('characters/spirit', 'shared');
-			imageLoaded = Paths.currentTrackedAssets.get('characters/spirit');
-		}
+			imageLoaded = returnGraphic('bruhtf', 'shared');
+
 		if (rawTxt == "")
-			rawTxt = Assets.getText(Paths.txtNew('images/characters/spirit')); //load something
+			rawTxt = Assets.getText(Paths.txtNew('images/bruhtf')); //load something
 
 		if (FlxG.save.data.poltatoPC)
 			rawTxt = CoolUtil.resizeTxt(rawTxt, 0.5);
@@ -718,13 +714,52 @@ class Paths
 	}
 
 	inline static public function getXMLAtlas(key:String, ?library:String) //idk what to call this one
-	{
+	{	#if MODS_ALLOWED
+		var imageLoaded:FlxGraphic = returnGraphic(key, library);
+		var rawXml:String = "";
+
+		var pathsToCheck:Array<String> = [modsXml(key), FileSystem.absolutePath("assets/shared/images/"+key+".xml"), Paths.xmlNew('images/' + key)];
+
+		if (library != null)
+			pathsToCheck.push(FileSystem.absolutePath("assets/"+library+"/images/"+key+".xml"));
+
+		rawXml = checkAndReturn(pathsToCheck);
+		
+		if (imageLoaded == null)
+			imageLoaded = returnGraphic('bruhtf', 'shared');
+
+		if (rawXml == "")
+			rawXml = Assets.getText(Paths.xmlNew('images/bruhtfgeneric')); //load something
+
+		return FlxAtlasFrames.fromTexturePackerXml(imageLoaded, rawXml);
+		#else
 		return FlxAtlasFrames.fromTexturePackerXml(image(key, library), file('images/$key.xml', library));
+		#end
 	}
 
 	inline static public function getJSONAtlas(key:String, ?library:String)
 	{
+		#if MODS_ALLOWED
+		var imageLoaded:FlxGraphic = returnGraphic(key, library);
+		var rawJson:String = "";
+
+		var pathsToCheck:Array<String> = [modsJson(key), FileSystem.absolutePath("assets/shared/images/"+key+".json"), Paths.jsonNew('images/' + key)];
+
+		if (library != null)
+			pathsToCheck.push(FileSystem.absolutePath("assets/"+library+"/images/"+key+".json"));
+
+		rawJson = checkAndReturn(pathsToCheck);
+		
+		if (imageLoaded == null)
+			imageLoaded = returnGraphic('bruhtf', 'shared');
+
+		if (rawJson == "")
+			rawJson = Assets.getText(Paths.jsonNew('images/bruhtf')); //load something
+
+		return FlxAtlasFrames.fromTexturePackerJson(imageLoaded, rawJson);
+		#else
 		return FlxAtlasFrames.fromTexturePackerJson(image(key, library), file('images/$key.json', library));
+		#end
 	}
 
 	inline static public function fileExists(key:String, type:AssetType, ?ignoreMods:Bool = false, ?library:String)
@@ -735,14 +770,43 @@ class Paths
 		}
 		#end
 		
-		if(FileSystem.exists(mods(currentModDirectory + '/' + key)) || FileSystem.exists(mods(key))) {
-			return true;
-		}
-		
 		if(OpenFlAssets.exists(Paths.getPath(key, type))) {
 			return true;
 		}
 		return false;
+	}
+
+	static public function getAtlasFromData(key:String, data:String = "SPARROW")
+	{
+		switch (data.toLowerCase())
+		{
+			case 'sparrow':
+				return getSparrowAtlas(key);
+			case 'genericxml':
+				return getXMLAtlas(key);
+			case 'packer':
+				return getPackerAtlas(key);
+			case 'json':
+				return getJSONAtlas(key);
+		}
+
+		return getSparrowAtlas(key);
+	}
+
+	static function checkAndReturn(pathsToCheck:Array<String>)
+	{
+		for (i in 0...pathsToCheck.length)
+		{
+			if(Assets.exists(pathsToCheck[i])) {
+				return Assets.getText(pathsToCheck[i]);
+			}
+
+			if(FileSystem.exists(pathsToCheck[i])) {
+				return File.getContent(pathsToCheck[i]);
+			}
+		}
+
+		return "";
 	}
 
 	#if desktop

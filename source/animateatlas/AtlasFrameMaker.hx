@@ -47,7 +47,9 @@ class AtlasFrameMaker extends FlxFramesCollection
 
 		if (Paths.fileExists('images/$key/spritemap1.json', TEXT))
 		{
-			PlayState.instance.addTextToDebug("Only Spritemaps made with Adobe Animate 2018 are supported", FlxColor.RED);
+			if (PlayState.instance != null)
+				PlayState.instance.addTextToDebug("Only Spritemaps made with Adobe Animate 2018 are supported", FlxColor.RED);
+
 			trace("Only Spritemaps made with Adobe Animate 2018 are supported");
 			return null;
 		}
@@ -55,7 +57,7 @@ class AtlasFrameMaker extends FlxFramesCollection
 		var animationData:AnimationData = Json.parse(Paths.getTextFromFile('images/$key/Animation.json'));
 		var atlasData:AtlasData = Json.parse(Paths.getTextFromFile('images/$key/spritemap.json').replace("\uFEFF", ""));
 
-		var graphic:FlxGraphic = Paths.returnGraphic('$key/spritemap');
+		var graphic:FlxGraphic = Paths.currentTrackedAssets.get('$key/spritemap');
 		var ss:SpriteAnimationLibrary = new SpriteAnimationLibrary(animationData, atlasData, graphic.bitmap);
 		var t:SpriteMovieClip = ss.createAnimation(noAntialiasing);
 		if(_excludeArray == null)
@@ -63,7 +65,6 @@ class AtlasFrameMaker extends FlxFramesCollection
 			_excludeArray = t.getFrameLabels();
 			//trace('creating all anims');
 		}
-		trace('Creating: ' + _excludeArray);
 
 		frameCollection = new FlxFramesCollection(graphic, FlxFrameCollectionType.IMAGE);
 		for(x in _excludeArray)

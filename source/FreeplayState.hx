@@ -66,7 +66,7 @@ class FreeplayState extends MusicBeatState
 		if (FlxG.sound.music.volume == 0 || !FlxG.sound.music.playing)
 		{
 			FlxG.sound.music.volume = 1;
-			FlxG.sound.playMusic(Paths.music('freakyMenu'));
+			FlxG.sound.playMusic(Paths.music('newMenu'));
 		}
 
 		for (i in 0...WeekData.weeksList.length) {
@@ -91,12 +91,6 @@ class FreeplayState extends MusicBeatState
 			}
 		}
 		WeekData.setDirectoryFromWeek();
-
-		if (FlxG.sound.music.volume == 0)
-		{
-			FlxG.sound.music.volume = 1;
-			FlxG.sound.playMusic(Paths.music('freakyMenu'));
-		}
 
 		 #if windows
 		 // Updating Discord Rich Presence

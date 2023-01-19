@@ -415,16 +415,6 @@ class PlayState extends MusicBeatState
 		}
 		if (isVitor)
 			suf = '-vitor';		
-		
-		if (isBETADCIU && storyDifficulty == 5)
-		{
-			if (!FlxG.save.data.stageChange && FileSystem.exists(Paths.lua(SONG.song.toLowerCase()  + "/modchart-guest-noStage")))
-				suf = '-guest-noStage';	
-			else
-			{
-				suf = '-guest';	
-			}
-		}
 
 		if (isBETADCIU && FileSystem.exists(Paths.lua(SONG.song.toLowerCase()  + "/modchart-betadciu")))
 			suf = '-betadciu';
@@ -3812,21 +3802,25 @@ class PlayState extends MusicBeatState
 		else
 			iconP2.animation.curAnim.curFrame = 0;
 
-		if (FlxG.keys.justPressed.FOUR || FlxG.keys.justPressed.TWO)
+		if (FlxG.keys.justPressed.EIGHT) // swapping some stuff around
 		{
 			PlayState.instance.callOnLuas('onExitSong', []);
 			persistentUpdate = false;
 
-			(FlxG.keys.justPressed.FOUR ? MusicBeatState.switchState(new CharacterEditorState(dad.curCharacter)) : MusicBeatState.switchState(new CharacterEditorState(boyfriend.curCharacter)));
-		
+			MusicBeatState.switchState(new CharacterEditorState((FlxG.keys.pressed.SHIFT ? boyfriend.curCharacter : dad.curCharacter))); // so you can access both characters
 		}
 
-		if (FlxG.keys.justPressed.EIGHT)
+		if (FlxG.keys.justPressed.TWO)
 		{
 			PlayState.instance.callOnLuas('onExitSong', []);
 			persistentUpdate = false;
 
 			MusicBeatState.switchState(new StageEditorState(Stage.curStage));
+		}
+
+		// so the song can play in the background.
+		if(FlxG.keys.justPressed.FOUR) {
+			FlxG.autoPause = !FlxG.autoPause;
 		}
 
 		#if debug
@@ -4431,7 +4425,7 @@ class PlayState extends MusicBeatState
 
 			if (storyPlaylist.length <= 0)
 			{
-				FlxG.sound.playMusic(Paths.music('freakyMenu'));
+				FlxG.sound.playMusic(Paths.music('newMenu'));
 
 				if(FlxTransitionableState.skipNextTransIn) {
 					CustomFadeTransition.nextCamera = null;

@@ -82,10 +82,10 @@ class VitorState extends MusicBeatState
 			trace('warn em bro!');
 		}
 
-		if (FlxG.sound.music != null)
+		if (FlxG.sound.music.volume == 0 || !FlxG.sound.music.playing)
 		{
-			FlxG.sound.music.fadeIn(2, 0, 0.8);
-			FlxG.sound.playMusic(Paths.music('haachama'), 0);
+			FlxG.sound.music.volume = 1;
+			FlxG.sound.playMusic(Paths.music('newMenu'));
 		}
 
 		 #if desktop

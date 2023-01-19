@@ -145,15 +145,15 @@ class TitleState extends MusicBeatState
 			// https://github.com/HaxeFlixel/flixel-addons/pull/348
 
 			// var music:FlxSound = new FlxSound();
-			// music.loadStream(Paths.music('freakyMenu'));
+			// music.loadStream(Paths.music('newMenu'));
 			// FlxG.sound.list.add(music);
 			// music.play();
-			FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+			FlxG.sound.playMusic(Paths.music('newMenu'), 0);
 
 			FlxG.sound.music.fadeIn(4, 0, 0.7);
 		}
 
-		Conductor.changeBPM(102);
+		Conductor.changeBPM(110);
 		persistentUpdate = true;
 
 		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);

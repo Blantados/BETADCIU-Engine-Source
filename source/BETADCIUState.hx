@@ -100,7 +100,7 @@ class BETADCIUState extends MusicBeatState
 		if (FlxG.sound.music.volume == 0 || !FlxG.sound.music.playing)
 		{
 			FlxG.sound.music.volume = 1;
-			FlxG.sound.playMusic(Paths.music('freakyMenu'));
+			FlxG.sound.playMusic(Paths.music('newMenu'));
 		}
 
 		Main.isMegalo = false;

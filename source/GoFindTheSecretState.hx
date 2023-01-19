@@ -91,7 +91,7 @@ class GoFindTheSecretState extends MusicBeatState
 		if (FlxG.keys.justPressed.ENTER)
 		{
 			FlxG.sound.music.stop();
-			FlxG.sound.playMusic(Paths.music('freakyMenu'));
+			FlxG.sound.playMusic(Paths.music('newMenu'));
 			MusicBeatState.switchState(new MainMenuState());
 		}
 	}
