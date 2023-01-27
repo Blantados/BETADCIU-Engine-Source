@@ -128,7 +128,8 @@ class BETADCIUState extends MusicBeatState
 		bg.scrollFactor.x = 0;
 		add(bg);
 
-		bgManifest = new FlxSprite().loadGraphic(Paths.image('menuBGManifest'));
+		bgManifest = new FlxSprite().loadGraphic(Paths.image('menuBGStorm'));
+		bgManifest.color = FlxColor.RED;
 		bgManifest.scrollFactor.x = 0;
 		bgManifest.alpha = 0;
 		add(bgManifest);
@@ -393,7 +394,7 @@ class BETADCIUState extends MusicBeatState
 
 		var upP = controls.UP_P;
 		var downP = controls.DOWN_P;
-		var accepted = controls.ACCEPT;
+		var accepted = controls.ACCEPT && !FlxG.keys.pressed.ALT;
 
 		if (warning && accepted)
 			MusicBeatState.switchState(new MainMenuState());
@@ -523,11 +524,6 @@ class BETADCIUState extends MusicBeatState
 			passwordText.text = '';
 			wrongPass = false;
 		}
-
-		#if !switch
-		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
-		combo = Highscore.getCombo(songs[curSelected].songName, curDifficulty);
-		#end
 	}
 
 	function startSong(songName:String):Void
@@ -597,11 +593,6 @@ class BETADCIUState extends MusicBeatState
 			
 		changeBGColor();
 		// selector.y = (70 * curSelected) + 30;
-
-		#if !switch
-		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
-		//intendedRating = Highscore.getRating(songs[curSelected].songName, curDifficulty);
-		#end
 
 		var bullShitX:Int = 0;
 		var bullShitY:Int = 0;
@@ -674,5 +665,10 @@ class BETADCIUState extends MusicBeatState
 		{
 			curDifficulty = newPos;
 		}
+
+		#if !switch
+		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
+		combo = Highscore.getCombo(songs[curSelected].songName, curDifficulty);
+		#end
 	}
 }

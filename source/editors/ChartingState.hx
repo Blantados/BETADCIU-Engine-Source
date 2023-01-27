@@ -488,17 +488,17 @@ class ChartingState extends MusicBeatState
 			ignoreWarnings = FlxG.save.data.ignoreWarnings;
 		};
 
-		oldBpmInputText = new FlxUIInputText(130, 160, 90, Std.string(tempBpm));
+		oldBpmInputText = new FlxUIInputText(130, 145, 90, Std.string(tempBpm));
 		oldBpmInputText.focusLost = openOldBpmMenu;
 		blockPressWhileTypingOn.push(oldBpmInputText);
 
 		#if !html5
-		sliderRate = new FlxUISlider(this, 'playbackSpeed', 120, 240, 0.5, 3, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
+		sliderRate = new FlxUISlider(this, 'playbackSpeed', 120, 165, 0.5, 3, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
 		sliderRate.nameLabel.text = 'Playback Rate';
 		tab_group_chart.add(sliderRate);
 		#end
 
-		tab_group_chart.add(new FlxText(130, 130, 0, 'Old BPM (Fits chart from this \nBPM to Song BPM)'));
+		tab_group_chart.add(new FlxText(130, oldBpmInputText.y - 30, 0, 'Old BPM (Fits chart from this \nBPM to Song BPM)'));
 		tab_group_chart.add(oldBpmInputText);
 
 		tab_group_chart.add(new FlxText(instVolume.x, instVolume.y - 15, 0, 'Inst Volume'));
@@ -529,6 +529,7 @@ class ChartingState extends MusicBeatState
 	{
 		var UI_songTitle = new FlxUIInputText(10, 10, 70, _song.song, 8);
 		typingShit = UI_songTitle;
+		blockPressWhileTypingOn.push(UI_songTitle);
 
 		var check_voices = new FlxUICheckBox(10, 25, null, null, "Has voice track", 100);
 		check_voices.checked = _song.needsVoices;
@@ -641,11 +642,17 @@ class ChartingState extends MusicBeatState
 		var reloadDropDowns:FlxButton = new FlxButton(player1DropDown.x + 140, player2DropDown.y, "Reload Dropdowns", function()
 		{
 			var dropDowns:Array<FlxUIDropDownMenuCustom> = [player1DropDown, player2DropDown, gfVersionDropDown, stageDropDown, noteStyleDropDown];
-			var dropDownsData:Array<Array<String>> = [characters, characters, characters, stages, noteStyles];
-			
-			for (i in 0...dropDowns.length)
+			var dropDownsData:Array<Array<String>> = [CoolUtil.coolTextFile(Paths.txt('characterList')), CoolUtil.coolTextFile(Paths.txt('characterList')), CoolUtil.coolTextFile(Paths.txt('characterList')), CoolUtil.coolTextFile(Paths.txt('stageList')), CoolUtil.coolTextFile(Paths.txt('noteStyleList'))];
+			var dropDownsLabel:Array<String> = [_song.player1, _song.player2, _song.gfVersion, _song.stage, _song.noteStyle];
+
+			for (i in 0...dropDowns.length){
 				dropDowns[i].setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(dropDownsData[i], true));
+				dropDowns[i].selectedLabel = dropDownsLabel[i];
+			}
 		});
+
+		reloadDropDowns.setGraphicSize(80, 30);
+		reloadDropDowns.updateHitbox();
 
 		var tab_group_song = new FlxUI(null, UI_box);
 		tab_group_song.name = "Song";
@@ -660,6 +667,7 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(new FlxText(stageDropDown.x, stageDropDown.y - 15, 0, 'Stage:'));
 		tab_group_song.add(new FlxText(noteStyleDropDown.x, noteStyleDropDown.y - 15, 0, 'Note Style:'));
 
+		tab_group_song.add(reloadDropDowns);
 		tab_group_song.add(check_voices);
 		tab_group_song.add(clear_notes);
 		tab_group_song.add(clear_events);
@@ -677,7 +685,6 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(player2DropDown);
 		tab_group_song.add(gfVersionDropDown);
 		tab_group_song.add(player1DropDown);
-		tab_group_song.add(reloadDropDowns);
 		
 		UI_box.addGroup(tab_group_song);
 		UI_box.scrollFactor.set();
@@ -866,6 +873,7 @@ class ChartingState extends MusicBeatState
 		});
 
 		var stepperCopyLast:FlxUINumericStepper = new FlxUINumericStepper(110, swapSection.y + 30, 1, 1, -999, 999, 0);
+		blockPressWhileTypingOnStepper.push(stepperCopyLast);
 
 		var copyLastButton:FlxButton = new FlxButton(10, swapSection.y + 30, "Copy last section", function()
 		{
@@ -1975,6 +1983,8 @@ class ChartingState extends MusicBeatState
 	{
 		if (curSelectedNote != null) 
 		{
+			noteTypeDropDown.selectedLabel = '';
+
 			if(curSelectedNote[3] != null) 
 			{
 				currentType = noteTypeMap.get(curSelectedNote[3]);
@@ -1983,7 +1993,7 @@ class ChartingState extends MusicBeatState
 				} else {
 					noteTypeDropDown.selectedLabel = currentType + '. ' + curSelectedNote[3];
 				}
-			}
+			}			
 
 			if(curSelectedNote[2] != null) 
 				stepperSusLength.value = curSelectedNote[2];

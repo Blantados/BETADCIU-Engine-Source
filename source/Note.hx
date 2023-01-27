@@ -121,6 +121,9 @@ class Note extends FlxSprite
 
 	public var copyX:Bool = true;
 	public var copyY:Bool = true;
+	public var copyAlpha:Bool = true;
+	public var copyAngle:Bool = true;
+	public var copyVisible:Bool = true;
 	public var distance:Float = 2000; //plan on doing scroll directions soon -bb
 
 	public var originalHeightForCalcs:Float = 6;
@@ -242,11 +245,6 @@ class Note extends FlxSprite
 				animation.play(frameN[noteData] + 'Scroll');
 		}
 
-		if (style == "guitar"){
-			offset.x = -15;
-			offset.y = -30;
-		}
-
 		if ((FlxG.save.data.downscroll || (!FlxG.save.data.downscroll && flipScroll)) && sustainNote) 
 			flipY = true;
 
@@ -306,27 +304,17 @@ class Note extends FlxSprite
 	{
 		super.update(elapsed);
 
-		if ((FlxG.save.data.downscroll || (!FlxG.save.data.downscroll && flipScroll)) && (isSustainNote && prevNote != null) && !flipY)
+		//this is dumb but it wouldn't work with the other way I did it so....
+		if (((FlxG.save.data.downscroll && !flipScroll) || (!FlxG.save.data.downscroll && flipScroll)) && (isSustainNote && prevNote != null) && !flipY){
 			flipY = true;
-
-		if (flipY && (isSustainNote && prevNote != null) && (!FlxG.save.data.downscroll && !(FlxG.save.data.downscroll && flipScroll)))
+		}
+		else if (flipY && (isSustainNote && prevNote != null) && ((!FlxG.save.data.downscroll && !flipScroll) || (FlxG.save.data.downscroll && flipScroll))){
 			flipY = false;
-
+		}
+			
+		
 		if (modifiedByLua)
 			angle = modAngle;
-
-		//we added event arrows so this isn't needed.
-		//if (noteData == -1)
-			//this.kill(); //removes psych event arrows when porting charts from psych.
-
-		if(isSustainNote) 
-		{ 
-		/*	switch (noteType)
-			{
-				case 2 | 3 | 4 | 5 | 6:
-					this.kill();
-			}	*/
-		}
 
 		if (mustPress)
 		{

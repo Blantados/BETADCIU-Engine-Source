@@ -483,6 +483,7 @@ class CharacterEditorState extends MusicBeatState
 			reloadCharacterDropDown();
 		});
 		charDropDown.selectedLabel = daAnim;
+		blockPressWhileScrolling.push(charDropDown);
 		reloadCharacterDropDown();
 
 		var reloadCharacter:FlxButton = new FlxButton(140, 20, "Reload Char", function()
@@ -601,11 +602,6 @@ class CharacterEditorState extends MusicBeatState
 			for (i in 0...char.animationsArray.length)
 			{
 				char.animationsArray[i].playerOffsets = char.animationsArray[i].offsets;
-
-				if (char.isPlayer && char.animationsArray[i].playerOffsets != null && char.animationsArray[i].name == 'singLEFT')
-				{
-
-				}
 			}
 		});
 
@@ -652,6 +648,7 @@ class CharacterEditorState extends MusicBeatState
 		playerPositionCameraYStepper = new FlxUINumericStepper(playerPositionYStepper.x, playerPositionYStepper.y + 40, 10, char.playerCameraPosition[1], -9000, 9000, 0);
 
 		noteSkinInputText = new FlxUIInputText(15, playerPositionXStepper.y, 75, 'normal', 8);
+		blockPressWhileTypingOn.push(noteSkinInputText);
 
 		var saveCharacterButton:FlxButton = new FlxButton(reloadImage.x, noAntialiasingCheckBox.y + 140, "Save Character", function() {
 			saveCharacter();
@@ -662,10 +659,14 @@ class CharacterEditorState extends MusicBeatState
 		{
 			char.spriteType = dataString.toLowerCase();
 		});
+		blockPressWhileScrolling.push(spriteTypeDropDown);
 
 		healthColorStepperR = new FlxUINumericStepper(singDurationStepper.x, saveCharacterButton.y, 20, char.healthColorArray[0], 0, 255, 0);
 		healthColorStepperG = new FlxUINumericStepper(singDurationStepper.x + 65, saveCharacterButton.y, 20, char.healthColorArray[1], 0, 255, 0);
 		healthColorStepperB = new FlxUINumericStepper(singDurationStepper.x + 130, saveCharacterButton.y, 20, char.healthColorArray[2], 0, 255, 0);
+
+		var stepperArray:Array<FlxUINumericStepper> = [positionXStepper, positionYStepper, playerPositionXStepper, playerPositionYStepper, positionCameraXStepper, positionCameraYStepper, playerPositionCameraXStepper, playerPositionCameraYStepper, healthColorStepperR, healthColorStepperG, healthColorStepperB, singDurationStepper, scaleStepper];
+		blockPressWhileTypingOnStepper.concat(stepperArray);
 
 		tab_group.add(new FlxText(15, imageInputText.y - 18, 0, 'Image file name:'));
 		tab_group.add(new FlxText(15, healthIconInputText.y - 18, 0, 'Health icon name:'));
@@ -678,30 +679,21 @@ class CharacterEditorState extends MusicBeatState
 		tab_group.add(new FlxText(playerPositionCameraXStepper.x, playerPositionCameraXStepper.y - 18, 0, 'Player Camera X/Y:'));
 		tab_group.add(new FlxText(healthColorStepperR.x, healthColorStepperR.y - 18, 0, 'Health bar R/G/B:'));
 		tab_group.add(new FlxText(spriteTypeDropDown.x, spriteTypeDropDown.y - 18, 0, 'Sprite Type:'));
-		tab_group.add(imageInputText);
-		tab_group.add(reloadImage);
-		tab_group.add(copyOffset);
-		tab_group.add(decideIconColor);
-		tab_group.add(healthIconInputText);
-		tab_group.add(noteSkinInputText);
-		tab_group.add(singDurationStepper);
-		tab_group.add(scaleStepper);
-		tab_group.add(flipXCheckBox);
-		tab_group.add(noAntialiasingCheckBox);
-		tab_group.add(psychPlayerCheckBox);
-		tab_group.add(positionXStepper);
-		tab_group.add(positionYStepper);
-		tab_group.add(playerPositionXStepper);
-		tab_group.add(playerPositionYStepper);
-		tab_group.add(positionCameraXStepper);
-		tab_group.add(positionCameraYStepper);
-		tab_group.add(playerPositionCameraXStepper);
-		tab_group.add(playerPositionCameraYStepper);
-		tab_group.add(healthColorStepperR);
-		tab_group.add(healthColorStepperG);
-		tab_group.add(healthColorStepperB);
+
+		blockPressWhileTypingOn.push(imageInputText);
+		blockPressWhileTypingOn.push(healthIconInputText);
+		blockPressWhileTypingOn.push(noteSkinInputText);
+
+		var toAdd:Array<Dynamic> = [imageInputText, healthIconInputText, noteSkinInputText, reloadImage, copyOffset, decideIconColor, flipXCheckBox, noAntialiasingCheckBox, psychPlayerCheckBox, saveCharacterButton];
+
+		for (i in 0...stepperArray.length){
+			if (i < toAdd.length)
+				tab_group.add(toAdd[i]);
+				
+			tab_group.add(stepperArray[i]);
+		}
+		
 		tab_group.add(spriteTypeDropDown);
-		tab_group.add(saveCharacterButton);
 		UI_characterbox.addGroup(tab_group);
 	}
 
@@ -723,6 +715,14 @@ class CharacterEditorState extends MusicBeatState
 		animationNameFramerate = new FlxUINumericStepper(animationInputText.x + 170, animationInputText.y, 1, 24, 0, 240, 0);
 		animationLoopCheckBox = new FlxUICheckBox(animationNameInputText.x + 170, animationNameInputText.y - 1, null, null, "Should it Loop?", 100);
 
+		blockPressWhileTypingOn.push(animationInputText);
+		blockPressWhileTypingOn.push(imageInputText);
+		blockPressWhileTypingOn.push(healthIconInputText);
+		blockPressWhileTypingOn.push(animationNameInputText);
+		blockPressWhileTypingOn.push(animationIndicesInputText);
+
+		blockPressWhileTypingOnStepper.push(animationNameFramerate);
+
 		animationDropDown = new FlxUIDropDownMenuCustom(15, animationInputText.y - 55, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(pressed:String) {
 			var selectedAnimation:Int = Std.parseInt(pressed);
 			var anim:AnimArray = char.animationsArray[selectedAnimation];
@@ -734,6 +734,7 @@ class CharacterEditorState extends MusicBeatState
 			var indicesStr:String = anim.indices.toString();
 			animationIndicesInputText.text = indicesStr.substr(1, indicesStr.length - 2);
 		});
+		blockPressWhileScrolling.push(animationDropDown);
 
 		ghostDropDown = new FlxUIDropDownMenuCustom(animationDropDown.x + 150, animationDropDown.y, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(pressed:String) {
 			var selectedAnimation:Int = Std.parseInt(pressed);
@@ -745,6 +746,7 @@ class CharacterEditorState extends MusicBeatState
 				char.alpha = 0.85;
 			}
 		});
+		blockPressWhileScrolling.push(ghostDropDown);
 
 		var addUpdateButton:FlxButton = new FlxButton(70, animationIndicesInputText.y + 130, "Add/Update", function() {
 		var indices:Array<Int> = [];
@@ -1333,6 +1335,10 @@ class CharacterEditorState extends MusicBeatState
 		#end
 	}
 
+	private var blockPressWhileTypingOn:Array<FlxUIInputText> = [];
+	private var blockPressWhileTypingOnStepper:Array<FlxUINumericStepper> = [];
+	private var blockPressWhileScrolling:Array<FlxUIDropDownMenuCustom> = [];
+
 	override function update(elapsed:Float)
 	{
 		if(char.animationsArray[curAnim] != null) {
@@ -1346,22 +1352,48 @@ class CharacterEditorState extends MusicBeatState
 			textAnim.text = '';
 		}
 
-		var inputTexts:Array<FlxUIInputText> = [animationInputText, imageInputText, healthIconInputText, animationNameInputText, animationIndicesInputText];
-		for (i in 0...inputTexts.length) {
-			if(inputTexts[i].hasFocus) {
-				FlxG.sound.muteKeys = [];
-				FlxG.sound.volumeDownKeys = [];
-				FlxG.sound.volumeUpKeys = [];
-				super.update(elapsed);
-				return;
+		var blockInput:Bool = false;
+
+		if (!blockInput) {
+			for (inputText in blockPressWhileTypingOn) {
+				if(inputText.hasFocus) {
+					FlxG.sound.muteKeys = [];
+					FlxG.sound.volumeDownKeys = [];
+					FlxG.sound.volumeUpKeys = [];
+					blockInput = true;
+					break;
+				}
 			}
 		}
 
-		FlxG.sound.muteKeys = TitleState.muteKeys;
-		FlxG.sound.volumeDownKeys = TitleState.volumeDownKeys;
-		FlxG.sound.volumeUpKeys = TitleState.volumeUpKeys;
+		if(!blockInput) {
+			for (stepper in blockPressWhileTypingOnStepper) {
+				@:privateAccess
+				var leText:Dynamic = stepper.text_field;
+				var leText:FlxUIInputText = leText;
+				if(leText.hasFocus) {
+					FlxG.sound.muteKeys = [];
+					FlxG.sound.volumeDownKeys = [];
+					FlxG.sound.volumeUpKeys = [];
+					blockInput = true;
+					break;
+				}
+			}
+		}
 
-		if(!charDropDown.dropPanel.visible) {
+		if(!blockInput) {
+			FlxG.sound.muteKeys = TitleState.muteKeys;
+			FlxG.sound.volumeDownKeys = TitleState.volumeDownKeys;
+			FlxG.sound.volumeUpKeys = TitleState.volumeUpKeys;
+			for (dropDownMenu in blockPressWhileScrolling) {
+				if(dropDownMenu.dropPanel.visible) {
+					blockInput = true;
+					break;
+				}
+			}
+		}
+
+		if(!blockInput) {
 			if (FlxG.keys.justPressed.ESCAPE) {
 				MusicBeatState.switchState(new PlayState());
 				FlxG.mouse.visible = false;

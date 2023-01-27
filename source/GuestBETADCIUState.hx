@@ -36,7 +36,7 @@ class GuestBETADCIUState extends MusicBeatState
 
 	var selector:FlxText;
 	public static var curSelected:Int = 0;
-	var curDifficulty:Int = 5;
+	var curDifficulty:Int = 1;
 
 	var scoreText:FlxText;
 	var diffText:FlxText;
@@ -114,7 +114,6 @@ class GuestBETADCIUState extends MusicBeatState
 
 		var isDebug:Bool = false;
 
-		MainMenuState.mainMusic = false;
 		canMove = true;
 
 		#if debug
@@ -187,8 +186,6 @@ class GuestBETADCIUState extends MusicBeatState
 		ytIcon.screenCenter();
 		ytIcon.x += 350;
 		ytIcon.y -= 50;
-
-		ytIcon.animation.play('snow');
 		add(ytIcon);
 
 		var text1 = new FlxText(0, ytIcon.y + 220, 0, "This BETADCIU was made by:", 32);
@@ -346,7 +343,7 @@ class GuestBETADCIUState extends MusicBeatState
 
 		var upP = controls.UP_P;
 		var downP = controls.DOWN_P;
-		var accepted = controls.ACCEPT;
+		var accepted = controls.ACCEPT && !FlxG.keys.pressed.ALT;
 
 		if (warning && accepted)
 			MusicBeatState.switchState(new MainMenuState());
@@ -419,17 +416,6 @@ class GuestBETADCIUState extends MusicBeatState
 					FlxTween.tween(e, {x: e.x + 20}, llll/1000);
 				}	
 			});
-		}
-
-		#if !switch
-		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
-		combo = Highscore.getCombo(songs[curSelected].songName, curDifficulty);
-		#end
-
-		switch (curDifficulty)
-		{
-			case 5:
-				diffText.text = "HARD";
 		}
 	}
 
@@ -543,11 +529,6 @@ class GuestBETADCIUState extends MusicBeatState
 		changeIcon();
 		// selector.y = (70 * curSelected) + 30;
 
-		#if !switch
-		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
-		//intendedRating = Highscore.getRating(songs[curSelected].songName, curDifficulty);
-		#end
-
 		var bullShitX:Int = 0;
 		var bullShitY:Int = 0;
 
@@ -619,6 +600,13 @@ class GuestBETADCIUState extends MusicBeatState
 		{
 			curDifficulty = newPos;
 		}
+
+		#if !switch
+		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
+		combo = Highscore.getCombo(songs[curSelected].songName, curDifficulty);
+		#end
+
+		diffText.text = "< HARD >";
 	}
 }
 

@@ -69,7 +69,8 @@ class BETADCIUSecretState extends MusicBeatState
 
 		// LOAD CHARACTERS
 
-		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuBG'));
+		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
+		bg.color = 0xFFFDE871;
 		add(bg);
 
 		grpSongs = new FlxTypedGroup<Alphabet>();

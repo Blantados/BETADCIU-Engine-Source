@@ -93,7 +93,7 @@ class CustomLoading extends MusicBeatState
 		if (PlayState.isVitor)
 			suf = '-vitor';		
 
-        if (PlayState.isBETADCIU && PlayState.storyDifficulty == 5)
+        if (PlayState.isBETADCIU && CoolUtil.difficulties[0] == "Guest")
         {
             if (!FlxG.save.data.stageChange && FileSystem.exists(Paths.lua(PlayState.SONG.song.toLowerCase()  + "/modchart-guest-noStage")))
                 suf = '-guest-noStage';

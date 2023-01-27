@@ -42,6 +42,11 @@ class PauseSubState extends MusicBeatSubstate
 	var skipTimeTracker:Alphabet;
 	var curTime:Float = Math.max(0, Conductor.songPosition);
 
+	var levelDifficulty:FlxText;
+	public static var difficultyText:String = "";
+
+	public static var instance:PauseSubState;
+
 	public function new(x:Float, y:Float)
 	{
 		super();
@@ -89,7 +94,7 @@ class PauseSubState extends MusicBeatSubstate
 		levelInfo.updateHitbox();
 		add(levelInfo);
 
-		var levelDifficulty:FlxText = new FlxText(20, 15 + 32, 0, "", 32);
+		levelDifficulty = new FlxText(20, 15 + 32, 0, "", 32);
 		levelDifficulty.text += CoolUtil.difficulties[PlayState.storyDifficulty];
 		levelDifficulty.scrollFactor.set();
 		levelDifficulty.setFormat(Paths.font('vcr.ttf'), 32);
@@ -98,6 +103,10 @@ class PauseSubState extends MusicBeatSubstate
 
 		levelDifficulty.alpha = 0;
 		levelInfo.alpha = 0;
+
+		if (difficultyText != ""){
+			levelDifficulty.text = difficultyText;
+		}
 
 		levelInfo.x = FlxG.width - (levelInfo.width + 20);
 		levelDifficulty.x = FlxG.width - (levelDifficulty.width + 20);
@@ -189,64 +198,6 @@ class PauseSubState extends MusicBeatSubstate
 				}
 		}
 
-		
-		#if cpp
-			//no.
-			/*else if (leftP)
-			{
-				oldOffset = PlayState.songOffset;
-				PlayState.songOffset -= 1;
-				sys.FileSystem.rename(songPath + oldOffset + '.offset', songPath + PlayState.songOffset + '.offset');
-				perSongOffset.text = "Additive Offset (Left, Right): " + PlayState.songOffset + " - Description - " + 'Adds value to global offset, per song.';
-
-				// Prevent loop from happening every single time the offset changes
-				if(!offsetChanged)
-				{
-					grpMenuShit.clear();
-
-					menuItems = ['Restart Song', 'Exit to menu'];
-
-					for (i in 0...menuItems.length)
-					{
-						var songText:Alphabet = new Alphabet(0, (70 * i) + 30, menuItems[i], true);
-						songText.isMenuItem = true;
-						songText.targetY = i;
-						grpMenuShit.add(songText);
-					}
-
-					changeSelection();
-
-					cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-					offsetChanged = true;
-				}
-			}else if (rightP)
-			{
-				oldOffset = PlayState.songOffset;
-				PlayState.songOffset += 1;
-				sys.FileSystem.rename(songPath + oldOffset + '.offset', songPath + PlayState.songOffset + '.offset');
-				perSongOffset.text = "Additive Offset (Left, Right): " + PlayState.songOffset + " - Description - " + 'Adds value to global offset, per song.';
-				if(!offsetChanged)
-				{
-					grpMenuShit.clear();
-
-					menuItems = ['Restart Song', 'Restart with Cutscene', 'Exit to menu'];
-
-					for (i in 0...menuItems.length)
-					{
-						var songText:Alphabet = new Alphabet(0, (70 * i) + 30, menuItems[i], true);
-						songText.isMenuItem = true;
-						songText.targetY = i;
-						grpMenuShit.add(songText);
-					}
-
-					changeSelection();
-
-					cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-					offsetChanged = true;
-				}
-			}*/
-		#end
-
 		if (accepted && !FlxG.keys.pressed.ALT)
 		{
 			var daSelected:String = menuItems[curSelected];
@@ -301,7 +252,7 @@ class PauseSubState extends MusicBeatSubstate
 					
 					if (PlayState.isBETADCIU)
 					{
-						if (PlayState.storyDifficulty == 5)
+						if (CoolUtil.difficulties[0] == "Guest")
 							MusicBeatState.switchState(new GuestBETADCIUState());
 						else
 							MusicBeatState.switchState(new BETADCIUState());
@@ -322,6 +273,14 @@ class PauseSubState extends MusicBeatSubstate
 			// for reference later!
 			// PlayerSettings.player1.controls.replaceBinding(Control.LEFT, Keys, FlxKey.J, null);
 		}
+	}
+
+	override function close()
+	{
+		if (PlayState.instance != null)
+			PlayState.instance.isPaused = false;
+
+		super.close();
 	}
 
 	public static function restartSong(?noTrans:Bool = false, ?cutscene:Bool = false)

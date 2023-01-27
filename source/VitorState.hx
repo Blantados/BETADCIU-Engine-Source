@@ -105,6 +105,7 @@ class VitorState extends MusicBeatState
 		// LOAD CHARACTERS
 
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuBGTemplate'));
+		bg.color = 0xFFFDE871;
 		add(bg);
 
 		grpSongs = new FlxTypedGroup<Alphabet>();
@@ -162,23 +163,6 @@ class VitorState extends MusicBeatState
 		// add(selector);
 
 		var swag:Alphabet = new Alphabet(1, 0, "swag");
-
-		// JUST DOIN THIS SHIT FOR TESTING!!!
-		/* 
-			var md:String = Markdown.markdownToHtml(Assets.getText('CHANGELOG.md'));
-
-			var texFel:TextField = new TextField();
-			texFel.width = FlxG.width;
-			texFel.height = FlxG.height;
-			// texFel.
-			texFel.htmlText = md;
-
-			FlxG.stage.addChild(texFel);
-
-			// scoreText.textField.htmlText = md;
-
-			trace(md);
-		 */
 
 		if (warning)
 		{
@@ -247,7 +231,7 @@ class VitorState extends MusicBeatState
 
 		var upP = controls.UP_P;
 		var downP = controls.DOWN_P;
-		var accepted = controls.ACCEPT;
+		var accepted = controls.ACCEPT && !FlxG.keys.pressed.ALT;
 
 		if (warning && accepted)
 			MusicBeatState.switchState(new MainMenuState());
@@ -311,21 +295,6 @@ class VitorState extends MusicBeatState
 				}	
 			});
 		}
-
-		#if !switch
-		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
-		combo = Highscore.getCombo(songs[curSelected].songName, curDifficulty);
-		#end
-
-		switch (curDifficulty)
-		{
-			case 0:
-				diffText.text = "EASY";
-			case 1:
-				diffText.text = 'NORMAL';
-			case 4:
-				diffText.text = "HARD";
-		}
 	}
 
 	function changeSelection(change:Int = 0)
@@ -376,5 +345,7 @@ class VitorState extends MusicBeatState
 				// item.setGraphicSize(Std.int(item.width));
 			}
 		}
+
+		diffText.text = "< HARD >";
 	}
 }

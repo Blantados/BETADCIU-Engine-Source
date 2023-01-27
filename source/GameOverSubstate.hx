@@ -183,7 +183,7 @@ class GameOverSubstate extends MusicBeatSubstate
 			if (PlayState.isStoryMode)
 				MusicBeatState.switchState(new StoryMenuState());
 			else if (PlayState.isBETADCIU)
-				if (PlayState.storyDifficulty == 5)
+				if (CoolUtil.difficulties[0] == "Guest")
 					MusicBeatState.switchState(new GuestBETADCIUState());
 				else
 					MusicBeatState.switchState(new BETADCIUState());

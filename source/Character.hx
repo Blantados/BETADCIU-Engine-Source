@@ -163,7 +163,7 @@ class Character extends FlxSprite
 			
 				if (!FileSystem.exists(path) && !Assets.exists(path))
 				{
-					trace('oh no missingno');
+					trace('oh no missingno. Character '+curCharacter+" not found.");
 					path = Paths.jsonNew('images/characters/jsons/' + DEFAULT_CHARACTER); //If a character couldn't be found, change to bf just to prevent a crash
 					curCharacter = DEFAULT_CHARACTER;
 				}

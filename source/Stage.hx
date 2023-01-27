@@ -424,6 +424,9 @@ class Stage extends MusicBeatState
 				toAdd.push(bgGirls);
 
 				introAssets = ['weeb/pixelUI/ready-pixel', 'weeb/pixelUI/set-pixel', 'weeb/pixelUI/date-pixel'];
+
+				pixelShitPart1 = 'weeb/pixelUI/';
+				pixelShitPart2 = '-pixel';	
 			}
 
 			case 'schoolEvil':
@@ -660,7 +663,7 @@ class Stage extends MusicBeatState
 				
 				if (stageData.countdownAssets != null)
 					introAssets = stageData.countdownAssets;
-
+				
 				luaArray.push(new ModchartState(curStage, preloading, true));
 
 				if (luaArray.length >= 1)
@@ -693,21 +696,7 @@ class Stage extends MusicBeatState
 		}
 
 		if (isCustomStage && !preloading && luaArray.length >= 1)
-		{
 			callOnLuas('onUpdate', [elapsed]);
-
-			if (PlayState.instance.songStarted)
-			{
-				setOnLuas("mustHitSection",PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection);
-
-				if (PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection)
-					callOnLuas('playerOneTurn', []);
-				else if (!PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection)
-					callOnLuas('playerTwoTurn', []);
-			}
-
-			callOnLuas('onUpdatePost', [elapsed]);
-		}
 	}
 
 	override function stepHit()
@@ -743,12 +732,6 @@ class Stage extends MusicBeatState
 					bg.visible = !bg.visible;
 			}
 		}
-
-		if (isCustomStage && luaArray.length >= 1)
-		{
-			setOnLuas('curStep',curStep);
-			callOnLuas('onStepHit', [curStep]);
-		}
 	}
 
 	// Variables and Functions for Stages
@@ -777,12 +760,6 @@ class Stage extends MusicBeatState
 				if (!stopBGDancing)
 					bg.animation.play('idle');
 			}		
-		}
-
-		if (isCustomStage && luaArray.length >= 1)
-		{
-			setOnLuas('curBeat',curBeat);
-			callOnLuas('onBeatHit', [curBeat]);
 		}
 		
 		switch (curStage)
@@ -1071,15 +1048,4 @@ class Stage extends MusicBeatState
 			trace('done!');
 		}
 	}	
-		
-	public function noteHit(?isPlayer:Bool = false, ?i:Int, ?noteData:Int, ?isSustain:Bool = false, ?noteType:String, ?dType:Int)
-	{
-		if (isCustomStage && luaArray.length >= 1)
-		{
-			if (isPlayer)
-				callOnLuas('goodNoteHit', [i, noteData, noteType, isSustain, dType]);
-			else
-				callOnLuas('opponentNoteHit', [i, noteData, noteType, isSustain, dType]);
-		}
-	}
 }

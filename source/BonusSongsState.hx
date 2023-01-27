@@ -340,8 +340,7 @@ class BonusSongsState extends MusicBeatState
 	{
 		super.update(elapsed);
 
-		if (FlxG.sound.music.volume < 0.7)
-		{
+		if (FlxG.sound.music.volume < 0.7){
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 		}
 
@@ -371,7 +370,7 @@ class BonusSongsState extends MusicBeatState
 
 		var upP = controls.UP_P;
 		var downP = controls.DOWN_P;
-		var accepted = controls.ACCEPT;
+		var accepted = controls.ACCEPT && !FlxG.keys.pressed.ALT;
 
 		var shiftMult:Int = 1;
 		if(FlxG.keys.pressed.SHIFT) shiftMult = 3;
@@ -459,19 +458,6 @@ class BonusSongsState extends MusicBeatState
 					FlxTween.tween(e, {x: e.x + 20}, llll/1000);
 				}
 			});
-		}
-
-		if (songs[curSelected].songName.toLowerCase() == 'sharkventure')
-		{
-			infoBG.visible = true;
-			infoText.visible = true;
-			copyrightText.visible = true;	
-		}
-		else if (songs[curSelected].songName.toLowerCase() != 'sharkventure')
-		{
-			infoBG.visible = false;
-			infoText.visible = false;
-			copyrightText.visible = false;		
 		}
 
 		if (infoText.visible == true && FlxG.keys.justPressed.P)
@@ -606,6 +592,19 @@ class BonusSongsState extends MusicBeatState
 		if(newPos > -1)
 		{
 			curDifficulty = newPos;
+		}
+
+		if (songs[curSelected].songName.toLowerCase() == 'sharkventure')
+		{
+			infoBG.visible = true;
+			infoText.visible = true;
+			copyrightText.visible = true;	
+		}
+		else if (songs[curSelected].songName.toLowerCase() != 'sharkventure')
+		{
+			infoBG.visible = false;
+			infoText.visible = false;
+			copyrightText.visible = false;		
 		}
 	}
 }

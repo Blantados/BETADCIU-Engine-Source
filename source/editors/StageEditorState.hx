@@ -248,6 +248,12 @@ class StageEditorState extends MusicBeatState
 			focusPlayer = !focusPlayer;
 		};
 
+		var freeCameraCheckBox = new FlxUICheckBox(positionYStepper.x + 80, focusPlayerCheckBox.y + 40, null, null, "Free Camera", 100);
+		freeCameraCheckBox.checked = freeCamera;
+		freeCameraCheckBox.callback = function() {
+			freeCamera = !freeCamera;
+		};
+
 		var saveStageJsonButton:FlxButton = new FlxButton(focusPlayerCheckBox.x, 150, "Save Stage JSON", function() {
 			saveStageJson();
 		});
@@ -271,6 +277,7 @@ class StageEditorState extends MusicBeatState
 		tab_group.add(new FlxText(15, camZoomStepper.y - 18, 0, "Cam Zoom:"));
 
 		tab_group.add(focusPlayerCheckBox);
+		tab_group.add(freeCameraCheckBox);
 		tab_group.add(positionXStepper);
 		tab_group.add(positionYStepper);
 		tab_group.add(gfPositionXStepper);
@@ -646,6 +653,7 @@ class StageEditorState extends MusicBeatState
 	function reloadStageOptions() {
 		if(UI_stagebox != null) {		
 			focusPlayerCheckBox.checked = focusPlayer;
+			//freeCameraCheckBox.checked = freeCamera;
 			camZoomStepper.value = Stage.camZoom;
 			positionXStepper.value = Stage.dadYOffset;
 			positionYStepper.value = Stage.dadYOffset;
@@ -785,6 +793,9 @@ class StageEditorState extends MusicBeatState
 						add(bg);
 			}
 		}	
+
+		if (Stage.hideGirlfriend)
+			gf.alpha = 0;
 
 		reloadStageOptions();
 	}
@@ -1074,6 +1085,8 @@ class StageEditorState extends MusicBeatState
 
 		Stage.beatHit();
 
+		Stage.callOnLuas("onBeatHit", [curBeat]);
+
 		var chars:Array<Character> = [gf, dad, boyfriend];
 
 		for (i in 0...chars.length)
@@ -1090,6 +1103,8 @@ class StageEditorState extends MusicBeatState
 		Stage.stepHit();
 
 	}
+
+	var freeCamera:Bool = false;
 
 	override function update(elapsed:Float)
 	{
@@ -1108,21 +1123,27 @@ class StageEditorState extends MusicBeatState
 		FlxG.sound.volumeDownKeys = TitleState.volumeDownKeys;
 		FlxG.sound.volumeUpKeys = TitleState.volumeUpKeys;
 
-		if (!focusPlayer && camFollow.x != dad.getMidpoint().x + 150 + dad.cameraPosition[0] + (Stage.opponentCameraOffset != null ? Stage.opponentCameraOffset[0] : 0))
+		if (!freeCamera)
 		{
-			camFollow.setPosition(dad.getMidpoint().x + 150, dad.getMidpoint().y - 100);
+			if (!focusPlayer && camFollow.x != dad.getMidpoint().x + 150 + dad.cameraPosition[0] + (Stage.opponentCameraOffset != null ? Stage.opponentCameraOffset[0] : 0))
+			{
+				camFollow.setPosition(dad.getMidpoint().x + 150, dad.getMidpoint().y - 100);
+	
+				camFollow.x += dad.cameraPosition[0] + (Stage.opponentCameraOffset != null ? Stage.opponentCameraOffset[0] : 0);
+				camFollow.y += dad.cameraPosition[1] + (Stage.opponentCameraOffset != null ? Stage.opponentCameraOffset[1] : 0);
+			}
+	
+			if (focusPlayer && camFollow.x != boyfriend.getMidpoint().x - 100 - boyfriend.cameraPosition[0] - (Stage.boyfriendCameraOffset != null ? Stage.boyfriendCameraOffset[0] : 0))
+			{
+				camFollow.setPosition(boyfriend.getMidpoint().x - 100, boyfriend.getMidpoint().y - 100);
+				camFollow.x -= boyfriend.cameraPosition[0] - (Stage.boyfriendCameraOffset != null ? Stage.boyfriendCameraOffset[0] : 0);
+				camFollow.y += boyfriend.cameraPosition[1] + (Stage.boyfriendCameraOffset != null ? Stage.boyfriendCameraOffset[1] : 0);
+			}	
 
-			camFollow.x += dad.cameraPosition[0] + (Stage.opponentCameraOffset != null ? Stage.opponentCameraOffset[0] : 0);
-			camFollow.y += dad.cameraPosition[1] + (Stage.opponentCameraOffset != null ? Stage.opponentCameraOffset[1] : 0);
+			if (FlxG.camera.zoom != Stage.camZoom)
+				FlxG.camera.zoom = FlxMath.lerp(Stage.camZoom, FlxG.camera.zoom, 0.95);
 		}
-
-		if (focusPlayer && camFollow.x != boyfriend.getMidpoint().x - 100 - boyfriend.cameraPosition[0] - (Stage.boyfriendCameraOffset != null ? Stage.boyfriendCameraOffset[0] : 0))
-		{
-			camFollow.setPosition(boyfriend.getMidpoint().x - 100, boyfriend.getMidpoint().y - 100);
-			camFollow.x -= boyfriend.cameraPosition[0] - (Stage.boyfriendCameraOffset != null ? Stage.boyfriendCameraOffset[0] : 0);
-			camFollow.y += boyfriend.cameraPosition[1] + (Stage.boyfriendCameraOffset != null ? Stage.boyfriendCameraOffset[1] : 0);
-		}	
-
+	
 		Conductor.songPosition += FlxG.elapsed * 1000;
 
 		if (FlxG.keys.justPressed.ESCAPE) {
@@ -1130,9 +1151,6 @@ class StageEditorState extends MusicBeatState
 			FlxG.mouse.visible = false;
 			return;
 		}
-		
-		if (FlxG.camera.zoom != Stage.camZoom)
-			FlxG.camera.zoom = FlxMath.lerp(Stage.camZoom, FlxG.camera.zoom, 0.95);
 
 		if (FlxG.keys.pressed.I || FlxG.keys.pressed.J || FlxG.keys.pressed.K || FlxG.keys.pressed.L)
 		{
@@ -1149,6 +1167,15 @@ class StageEditorState extends MusicBeatState
 				camFollow.x -= addToCam;
 			else if (FlxG.keys.pressed.L)
 				camFollow.x += addToCam;
+		}
+
+		if (FlxG.keys.pressed.E && FlxG.camera.zoom < 3) {
+			FlxG.camera.zoom += elapsed * FlxG.camera.zoom;
+			if(FlxG.camera.zoom > 3) FlxG.camera.zoom = 3;
+		}
+		if (FlxG.keys.pressed.Q && FlxG.camera.zoom > 0.1) {
+			FlxG.camera.zoom -= elapsed * FlxG.camera.zoom;
+			if(FlxG.camera.zoom < 0.1) FlxG.camera.zoom = 0.1;
 		}
 
 		//camMenu.zoom = FlxG.camera.zoom;

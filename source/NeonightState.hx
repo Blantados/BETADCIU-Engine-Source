@@ -252,7 +252,7 @@ class NeonightState extends MusicBeatState
 
 		var upP = controls.UP_P;
 		var downP = controls.DOWN_P;
-		var accepted = controls.ACCEPT;
+		var accepted = controls.ACCEPT && !FlxG.keys.pressed.ALT;
 
 		if (warning && accepted)
 			MusicBeatState.switchState(new MainMenuState());
@@ -317,17 +317,6 @@ class NeonightState extends MusicBeatState
 				}	
 			});
 		}
-
-		#if !switch
-		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
-		combo = Highscore.getCombo(songs[curSelected].songName, curDifficulty);
-		#end
-
-		switch (curDifficulty)
-		{
-			case 3:
-				diffText.text = "HARD";
-		}
 	}
 
 	function changeSelection(change:Int = 0)
@@ -378,5 +367,7 @@ class NeonightState extends MusicBeatState
 				// item.setGraphicSize(Std.int(item.width));
 			}
 		}
+
+		diffText.text = "< HARD >";
 	}
 }
