@@ -46,6 +46,13 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			'If checked, notes go Down instead of Up, simple enough.', //Description
 			'downscroll', //Save data variable name
 			'bool', //Variable type
+			false); //Default value	
+		addOption(option);
+
+		var option:Option = new Option('Botplay', //Name
+			'If checked, song will auto play for you.', //Description
+			'botplay', //Save data variable name
+			'bool', //Variable type
 			false); //Default value
 		addOption(option);
 

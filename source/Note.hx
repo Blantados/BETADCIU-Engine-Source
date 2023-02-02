@@ -126,6 +126,8 @@ class Note extends FlxSprite
 	public var copyVisible:Bool = true;
 	public var distance:Float = 2000; //plan on doing scroll directions soon -bb
 
+	public var animSuffix:String = '';
+
 	public var originalHeightForCalcs:Float = 6;
 
 	public var noteSection:Int = 0;
@@ -168,6 +170,8 @@ class Note extends FlxSprite
 					hitCausesMiss = true;
 					lateHitMult = 0.4;
 					earlyHitMult = 0.6;
+				case 'Alt Animation':
+					animSuffix = '-alt';
 				case 'No Animation':
 					noAnimation = true;
 				case 'GF Sing': 

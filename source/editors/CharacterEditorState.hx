@@ -41,6 +41,8 @@ import sys.FileSystem;
 import sys.io.File;
 #end
 
+import ModchartState;
+
 using StringTools;
 
 /**
@@ -204,6 +206,10 @@ class CharacterEditorState extends MusicBeatState
 
 		FlxG.mouse.visible = true;
 		reloadCharacterOptions();
+
+		luaDebugGroup = new FlxTypedGroup<DebugLuaText>();
+		add(luaDebugGroup);
+		luaDebugGroup.cameras = [camMenu];
 
 		super.create();
 	}
@@ -1097,7 +1103,28 @@ class CharacterEditorState extends MusicBeatState
 		}
 	}
 
+	//more lua shit taken from psych
+	public var luaDebugGroup:FlxTypedGroup<DebugLuaText>;
+	
+	public function addTextToDebug(text:String, ?color:FlxColor = FlxColor.RED) {
+		luaDebugGroup.forEachAlive(function(spr:DebugLuaText) {
+			spr.y += 20;
+		});
+
+		if(luaDebugGroup.members.length > 34) {
+			var blah = luaDebugGroup.members[34];
+			blah.destroy();
+			luaDebugGroup.remove(blah);
+		}
+		luaDebugGroup.insert(0, new DebugLuaText(text, luaDebugGroup, color));
+	}
+
 	function loadChar(isDad:Bool, blahBlahBlah:Bool = true) {
+		if (daAnim.contains('-embed')){
+			addTextToDebug("ACCESS DENIED: CHARACTER IS EMBEDDED!", 0xFFFF0000);
+			return;
+		}
+
 		var i:Int = charLayer.members.length-1;
 		while(i >= 0) {
 			var memb:Character = charLayer.members[i];
@@ -1109,6 +1136,7 @@ class CharacterEditorState extends MusicBeatState
 			--i;
 		}
 		charLayer.clear();
+
 		ghostChar = new Character(0, 0, daAnim, !isDad);
 		ghostChar.debugMode = true;
 		ghostChar.alpha = 0.6;

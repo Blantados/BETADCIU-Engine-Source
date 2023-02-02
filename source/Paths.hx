@@ -660,9 +660,13 @@ class Paths
 
 		rawXml = checkAndReturn(pathsToCheck);
 		
-		if (imageLoaded == null)
-			imageLoaded = returnGraphic('bruhtf', 'shared');
+		if (imageLoaded == null){
+			if (PlayState.instance != null)
+				PlayState.instance.addTextToDebug(key + " not found!");
 
+			imageLoaded = returnGraphic('bruhtf', 'shared');
+		}
+			
 		if (rawXml == "")
 			rawXml = Assets.getText(Paths.xmlNew('images/bruhtf')); //load something
 
@@ -698,8 +702,12 @@ class Paths
 
 		rawTxt = checkAndReturn(pathsToCheck);
 
-		if (imageLoaded == null)
+		if (imageLoaded == null){
+			if (PlayState.instance != null)
+				PlayState.instance.addTextToDebug(key + " not found!");
+			
 			imageLoaded = returnGraphic('bruhtf', 'shared');
+		}
 
 		if (rawTxt == "")
 			rawTxt = Assets.getText(Paths.txtNew('images/bruhtf')); //load something
@@ -725,8 +733,12 @@ class Paths
 
 		rawXml = checkAndReturn(pathsToCheck);
 		
-		if (imageLoaded == null)
+		if (imageLoaded == null){
+			if (PlayState.instance != null)
+				PlayState.instance.addTextToDebug(key + " not found!");
+			
 			imageLoaded = returnGraphic('bruhtf', 'shared');
+		}
 
 		if (rawXml == "")
 			rawXml = Assets.getText(Paths.xmlNew('images/bruhtfgeneric')); //load something
@@ -750,8 +762,12 @@ class Paths
 
 		rawJson = checkAndReturn(pathsToCheck);
 		
-		if (imageLoaded == null)
+		if (imageLoaded == null){
+			if (PlayState.instance != null)
+				PlayState.instance.addTextToDebug(key + " not found!");
+			
 			imageLoaded = returnGraphic('bruhtf', 'shared');
+		}
 
 		if (rawJson == "")
 			rawJson = Assets.getText(Paths.jsonNew('images/bruhtf')); //load something

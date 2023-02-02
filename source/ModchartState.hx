@@ -3245,7 +3245,7 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua, "setPropertyPsych", function(variable:String, value:Dynamic) {
-				luaTrace('setPropertyPsych is deprecated. Use getProperty instead.');
+				luaTrace('setPropertyPsych is deprecated. Use setProperty instead.');
 	
 				var killMe:Array<String> = variable.split('.');
 			
@@ -4457,10 +4457,8 @@ class ModchartState
 				
 			});
 	
-			Lua_helper.add_callback(lua, "addEffect", function(camera:String,effect:String, ?val1:Dynamic, ?val2:Dynamic, ?val3:Dynamic, ?val4:Dynamic) {
-				
-				PlayState.instance.addShaderToCamera(camera, getEffectFromString(effect, val1, val2, val3, val4));
-				
+			Lua_helper.add_callback(lua, "addEffect", function(camera:String,effect:String, ?val1:Dynamic, ?val2:Dynamic, ?val3:Dynamic) {
+				PlayState.instance.addShaderToCamera(camera, getEffectFromString(effect, val1, val2, val3));		
 			});
 			Lua_helper.add_callback(lua, "clearEffects", function(camera:String) {
 				PlayState.instance.clearShaderFromCamera(camera);
@@ -4636,6 +4634,26 @@ class ModchartState
 					else{
 						var daObj:FlxSprite = leObj;
 						daObj.shader = null;
+					}
+					
+					return true;
+				}
+				return false;
+			});
+
+			Lua_helper.add_callback(lua, "removeSpriteAnim", function(obj:String, anim:String) {
+				var killMe:Array<String> = obj.split('.');
+				var leObj:Dynamic = getObjectDirectly2(killMe[0]);
+				if(killMe.length > 1) {
+					leObj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
+				}
+	
+				if(leObj != null) {
+					var daObj:FlxSprite = leObj;
+					daObj.animation.remove(anim);
+
+					if (Std.isOfType(leObj, Character) || Std.isOfType(leObj, ModchartSprite)){
+						leObj.animOffsets.remove(anim);
 					}
 					
 					return true;
@@ -5288,7 +5306,7 @@ class ModchartState
 		return FlxEase.linear;
 	}
 
-	function getEffectFromString(?effect:String = '', ?val1:Dynamic, ?val2:Dynamic, ?val3:Dynamic , ?val4:Dynamic):ShaderEffect {
+	function getEffectFromString(?effect:String = '', ?val1:Dynamic, ?val2:Dynamic, ?val3:Dynamic , ?val4:Dynamic = ""):ShaderEffect {
 		switch(effect.toLowerCase().trim()) {
 			case 'grayscale' | 'greyscale' : return new GreyscaleEffect();
 			case 'oldtv' : return new OldTVEffect();

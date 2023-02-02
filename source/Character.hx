@@ -28,12 +28,13 @@ import haxe.xml.Access;
 import flixel.math.FlxMath;
 
 import animateatlas.AtlasFrameMaker;
+import flxanimate.FlxAnimate;
 
 using StringTools;
 
 typedef CharacterFile = {
 	var animations:Array<AnimArray>;
-	var playerAnimations:Array<AnimArray>; //bcuz garcello
+
 	var image:String;
 	var scale:Float;
 	var sing_duration:Float;
@@ -51,6 +52,7 @@ typedef CharacterFile = {
 	var isPlayerChar:Bool;
 
 	@:optional
+	var playerAnimations:Array<AnimArray>; //bcuz garcello
 	var spriteType:String;
 }
 
@@ -117,6 +119,10 @@ class Character extends FlxSprite
 	public var singDuration:Float = 4; //Multiplier of how long a character holds the sing pose
 	public var animationsArray:Array<AnimArray> = [];
 	public var stopIdle:Bool = false;
+
+	public var animateAtlas:FlxAnimate;
+    @:noCompletion public var atlasPlayingAnim:String;
+    @:noCompletion public var atlasPath:String;
 
 	public var stunned:Bool = false;
 
@@ -188,112 +194,117 @@ class Character extends FlxSprite
 				charPath = json.image + '.png'; //cuz we only use pngs anyway
 				imageFile = json.image; //psych
 
+				var imagePath = Paths.image(json.image);
+				
 				(json.spriteType != null ? spriteType = json.spriteType.toUpperCase() : spriteType = "SPARROW");
 
-				var imagePath = Paths.image(json.image);
-
-				if (!Paths.currentTrackedAssets.exists(json.image + (spriteType == "TEXTURE" ? '/spritemap' : "")))
+				if (FileSystem.exists(Paths.modsImages(json.image+"/spritemap1")))
 				{
-					if (Assets.exists(imagePath) && !FileSystem.exists(imagePath) && !FileSystem.exists(Paths.modsImages(imagePath)))
-						Paths.cacheImage(json.image + (spriteType == "TEXTURE" ? '/spritemap' : ""), 'shared', false, !noAntialiasing);
-					else
-						Paths.cacheImage(json.image + (spriteType == "TEXTURE" ? '/spritemap' : ""), 'preload', false, !noAntialiasing);	
+					//new atlas. still implementing it
+					animateAtlas = new FlxAnimate(x, y, json.image);
+					atlasPath = json.image;
 				}
-
-				frames = (spriteType == "TEXTURE" ? AtlasFrameMaker.construct(imageFile) : Paths.getAtlasFromData(imageFile, spriteType));
-
-				if(FlxG.save.data.poltatoPC)
-				{	
-					json.scale *= 2;
-					
-					if (isPlayer && json.playerposition != null)
-						json.playerposition = [json.playerposition[0] + 100, json.playerposition[1] + 170];
-					else
-						json.position = [json.position[0] + 100, json.position[1] + 170];
-				}
-
-				if(json.scale != 1) {
-					jsonScale = json.scale;
-
-					(FlxG.save.data.poltatoPC ? scale.set(jsonScale, jsonScale) : setGraphicSize(Std.int(width * jsonScale))); // is this different?
-					updateHitbox();
-				}
-
-				healthIcon = json.healthicon;
-				
-				(isPlayer && json.playerposition != null ? positionArray = json.playerposition : positionArray = json.position);
-				(json.playerposition != null ? playerPositionArray = json.playerposition : playerPositionArray = json.position);
-				(isPlayer && json.player_camera_position != null ? cameraPosition = json.player_camera_position : cameraPosition = json.camera_position);
-				(json.player_camera_position != null ? playerCameraPosition = json.player_camera_position : playerCameraPosition = json.camera_position);
-				
-				singDuration = json.sing_duration;
-				flipX = !!json.flip_x;
-
-				if(json.healthbar_colors != null && json.healthbar_colors.length > 2)
-					healthColorArray = json.healthbar_colors;
-
-				//cuz the way bar colors are calculated here is like in B&B
-				colorPreString = FlxColor.fromRGB(healthColorArray[0], healthColorArray[1], healthColorArray[2]);
-				colorPreCut = colorPreString.toHexString();
-
-				iconColor = colorPreCut.substring(2);
-
-				antialiasing = !noAntialiasing;
-
-				animationsArray = json.animations;
-
-				if (isPlayer && json.playerAnimations != null)
-					animationsArray = json.playerAnimations;
-
-				if(animationsArray != null && animationsArray.length > 0) {
-					for (anim in animationsArray) {
-						var animAnim:String = '' + anim.anim;
-						var animName:String = '' + anim.name;
-						var animFps:Int = anim.fps;
-						var animLoop:Bool = !!anim.loop; //Bruh
-						var animIndices:Array<Int> = anim.indices;
-						if(animIndices != null && animIndices.length > 0) {
-							if (animName == "") //texture atlas
-								animation.add(animAnim, animIndices, animFps, animLoop);
-							else
-								animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
-						}
-						else
-							animation.addByPrefix(animAnim, animName, animFps, animLoop);
-
-						if (isPlayer)
-						{
-							if(anim.playerOffsets != null && anim.playerOffsets.length > 1) {
-								addOffset(anim.anim, anim.playerOffsets[0], anim.playerOffsets[1]);
-							}
-							else if(anim.offsets != null && anim.offsets.length > 1) {
-								addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
-							}
-						}
-						else
-						{
-							if(anim.offsets != null && anim.offsets.length > 1) {
-								addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
-							}
-						}
-
-						if(anim.playerOffsets != null && anim.playerOffsets.length > 1) {
-							addPlayerOffset(anim.anim, anim.playerOffsets[0], anim.playerOffsets[1]);
-						}
-					
-					}
-				} else {
-					quickAnimAdd('idle', 'BF idle dance');
-					quickAnimAdd('singUP', 'BF idle dance');
-					quickAnimAdd('singDOWN', 'BF idle dance');
-					quickAnimAdd('singLEFT', 'BF idle dance');
-					quickAnimAdd('singRIGHT', 'BF idle dance');
-				}
-
-				if (animOffsets.exists('danceRight'))
-					playAnim('danceRight');
 				else
-					playAnim('idle');
+				{
+					if (!Paths.currentTrackedAssets.exists(json.image + (spriteType == "TEXTURE" ? '/spritemap' : "")))
+					{
+						if (Assets.exists(imagePath) && !FileSystem.exists(imagePath) && !FileSystem.exists(Paths.modsImages(imagePath)))
+							Paths.cacheImage(json.image + (spriteType == "TEXTURE" ? '/spritemap' : ""), 'shared', false, !noAntialiasing);
+						else
+							Paths.cacheImage(json.image + (spriteType == "TEXTURE" ? '/spritemap' : ""), 'preload', false, !noAntialiasing);	
+					}
+	
+					frames = (spriteType == "TEXTURE" ? AtlasFrameMaker.construct(imageFile) : Paths.getAtlasFromData(imageFile, spriteType));
+	
+					if(FlxG.save.data.poltatoPC)
+					{	
+						json.scale *= 2;
+						
+						if (isPlayer && json.playerposition != null)
+							json.playerposition = [json.playerposition[0] + 100, json.playerposition[1] + 170];
+						else
+							json.position = [json.position[0] + 100, json.position[1] + 170];
+					}
+	
+					if(json.scale != 1) {
+						jsonScale = json.scale;
+	
+						(FlxG.save.data.poltatoPC ? scale.set(jsonScale, jsonScale) : setGraphicSize(Std.int(width * jsonScale))); // is this different?
+						updateHitbox();
+					}
+	
+					healthIcon = json.healthicon;
+					
+					(isPlayer && json.playerposition != null ? positionArray = json.playerposition : positionArray = json.position);
+					(json.playerposition != null ? playerPositionArray = json.playerposition : playerPositionArray = json.position);
+					(isPlayer && json.player_camera_position != null ? cameraPosition = json.player_camera_position : cameraPosition = json.camera_position);
+					(json.player_camera_position != null ? playerCameraPosition = json.player_camera_position : playerCameraPosition = json.camera_position);
+					
+					singDuration = json.sing_duration;
+					flipX = !!json.flip_x;
+	
+					if(json.healthbar_colors != null && json.healthbar_colors.length > 2)
+						healthColorArray = json.healthbar_colors;
+	
+					//cuz the way bar colors are calculated here is like in B&B
+					colorPreString = FlxColor.fromRGB(healthColorArray[0], healthColorArray[1], healthColorArray[2]);
+					colorPreCut = colorPreString.toHexString();
+	
+					iconColor = colorPreCut.substring(2);
+	
+					antialiasing = !noAntialiasing;
+	
+					animationsArray = json.animations;
+	
+					if (isPlayer && json.playerAnimations != null)
+						animationsArray = json.playerAnimations;
+	
+					if(animationsArray != null && animationsArray.length > 0) {
+						for (anim in animationsArray) {
+							var animAnim:String = '' + anim.anim;
+							var animName:String = '' + anim.name;
+							var animFps:Int = anim.fps;
+							var animLoop:Bool = !!anim.loop; //Bruh
+							var animIndices:Array<Int> = anim.indices;
+							if(animIndices != null && animIndices.length > 0) {
+								if (animName == "") //texture atlas
+									animation.add(animAnim, animIndices, animFps, animLoop);
+								else
+									animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
+							}
+							else
+								animation.addByPrefix(animAnim, animName, animFps, animLoop);
+	
+							if (isPlayer)
+							{
+								if(anim.playerOffsets != null && anim.playerOffsets.length > 1) {
+									addOffset(anim.anim, anim.playerOffsets[0], anim.playerOffsets[1]);
+								}
+								else if(anim.offsets != null && anim.offsets.length > 1) {
+									addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
+								}
+							}
+							else
+							{
+								if(anim.offsets != null && anim.offsets.length > 1) {
+									addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
+								}
+							}
+	
+							if(anim.playerOffsets != null && anim.playerOffsets.length > 1) {
+								addPlayerOffset(anim.anim, anim.playerOffsets[0], anim.playerOffsets[1]);
+							}
+						
+						}
+					} else {
+						quickAnimAdd('idle', 'BF idle dance');
+					}
+	
+					if (animOffsets.exists('danceRight'))
+						playAnim('danceRight');
+					else
+						playAnim('idle');
+				}	
 		}
 
 		if(animation.getByName('danceLeft') != null && animation.getByName('danceRight') != null)
@@ -348,7 +359,7 @@ class Character extends FlxSprite
 				specialAnim = false;
 				dance();
 			}
-	
+			
 			if (flipMode)
 			{
 				if (isPlayer)
@@ -401,37 +412,17 @@ class Character extends FlxSprite
 			switch (curCharacter)
 			{
 				default:
-					if (danceIdle)
+					var daAlt:String = (isPlayer ? bfAltAnim : altAnim);
+
+					if (!stopIdle)
 					{
-						if (!stopIdle)
+						if (danceIdle)
 						{
 							danced = !danced;
-		
-							if (isPlayer)
-							{
-								if (danced)
-									playAnim('danceRight' + bfAltAnim + idleSuffix);
-								else
-									playAnim('danceLeft' + bfAltAnim + idleSuffix);
-							}
-							else
-							{
-								if (danced)
-									playAnim('danceRight' + altAnim + idleSuffix);
-								else
-									playAnim('danceLeft' + altAnim + idleSuffix);
-							}	
+							playAnim((danced ? "danceRight" : "danceLeft") + daAlt + idleSuffix);
 						}
-					}
-					else
-					{
-						if (!stopIdle)
-						{
-							if (isPlayer)
-								playAnim('idle' + bfAltAnim + idleSuffix);
-							else
-								playAnim('idle' + altAnim + idleSuffix);	
-						}
+						else
+							playAnim("idle" + daAlt + idleSuffix);
 					}
 			}
 		

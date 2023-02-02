@@ -545,6 +545,10 @@ class PlayState extends MusicBeatState
 		FlxG.cameras.setDefaultDrawTarget(camGame, true);
 		CustomFadeTransition.nextCamera = camOther;
 
+		luaDebugGroup = new FlxTypedGroup<DebugLuaText>();
+		add(luaDebugGroup);
+		luaDebugGroup.cameras = [camOther];
+		
 		if(FlxG.save.data.distractions && SONG.stage == 'garage'){
 			camGame.setFilters(filters);
 			camGame.filtersEnabled = true;
@@ -784,10 +788,6 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
-
-		luaDebugGroup = new FlxTypedGroup<DebugLuaText>();
-		luaDebugGroup.cameras = [camOther];
-		add(luaDebugGroup);
 
 		if (loadRep)
 		{
@@ -3770,8 +3770,8 @@ class PlayState extends MusicBeatState
 		if (health > maxHealth)
 			health = maxHealth;
 
-		iconP1.animation.curAnim.curFrame = (healthBar.percent < 20 ? 1 : (healthBar.percent > 80 && iconP1.hasWinning ? 2 : 0));
-		iconP2.animation.curAnim.curFrame = (healthBar.percent < 20 ? 1 : (healthBar.percent > 80 && iconP2.hasWinning ? 2 : 0));
+		iconP1.animation.curAnim.curFrame = (healthBar.percent < 20 ? 1 : ((healthBar.percent > 80 && iconP1.hasWinning) ? 2 : 0));
+		iconP2.animation.curAnim.curFrame = (healthBar.percent > 80 ? 1 : ((healthBar.percent < 20 && iconP2.hasWinning) ? 2 : 0));
 
 		if (FlxG.keys.justPressed.EIGHT) // swapping some stuff around
 		{
@@ -5349,25 +5349,16 @@ class PlayState extends MusicBeatState
 		}
 
 		dad.altAnim = "";
-
-		#if windows
-		if (luaArray.length >= 1)
-		{
-			if (luaArray[0].get("dadAltAnim",'bool'))
-				dad.altAnim = '-alt';
-			else
-				dad.altAnim = "";
-		}
-		#end
-
-		if (note.noteType == "Alt Animation")
-			dad.altAnim = '-alt';
 			
 		if (SONG.notes[Math.floor(curStep / 16)] != null)
 		{
-			if (SONG.notes[Math.floor(curStep / 16)].altAnim)
-				dad.altAnim = '-alt';				
+			if (SONG.notes[Math.floor(curStep / 16)].altAnim){
+				note.animSuffix = "-alt";
+			}					
 		}
+
+		if (note.animSuffix != "")
+			dad.altAnim = note.animSuffix;
 
 		var dDir:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
 
@@ -5395,13 +5386,10 @@ class PlayState extends MusicBeatState
 		#end
 
 		switch (mania)
-		{
-			case 1:
-				dDir = ['LEFT', 'UP', 'RIGHT', 'LEFT', 'DOWN', 'RIGHT'];
-			case 2:
-				dDir = ['LEFT', 'DOWN', 'UP', 'RIGHT', 'UP', 'LEFT', 'DOWN', 'UP', 'RIGHT'];
-			case 3:
-				dDir = ['LEFT', 'DOWN', 'UP', 'UP', 'RIGHT'];
+		{ 
+			case 1: dDir = ['LEFT', 'UP', 'RIGHT', 'LEFT', 'DOWN', 'RIGHT'];		
+			case 2: dDir = ['LEFT', 'DOWN', 'UP', 'RIGHT', 'UP', 'LEFT', 'DOWN', 'UP', 'RIGHT'];
+			case 3: dDir = ['LEFT', 'DOWN', 'UP', 'UP', 'RIGHT'];		
 			case 4:
 				if (dad.curCharacter.contains('-9key'))
 					dDir = ['LEFT', 'UP', 'RIGHT', 'UP3', 'LEFT2', 'DOWN', 'RIGHT2'];
@@ -5539,14 +5527,15 @@ class PlayState extends MusicBeatState
 			}
 			#end
 
-			if (note.noteType == "Alt Animation")
-				char.bfAltAnim = '-alt';
-
 			if (SONG.notes[Math.floor(curStep / 16)] != null)
 			{
-				if (SONG.notes[Math.floor(curStep / 16)].bfAltAnim)
-					char.bfAltAnim = '-alt';	
+				if (SONG.notes[Math.floor(curStep / 16)].bfAltAnim){
+					note.animSuffix = "-alt";
+				}					
 			}
+
+			if (note.animSuffix != "")
+				char.bfAltAnim = note.animSuffix;
 
 			playBF = true;	
 
