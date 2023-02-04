@@ -4604,14 +4604,23 @@ class ModchartState
 				}
 	
 				var killMe:Array<String> = obj.split('.');
-				var leObj:FlxSprite = getObjectDirectly2(killMe[0]);
+				var leObj:Dynamic = getObjectDirectly2(killMe[0]);
 				if(killMe.length > 1) {
 					leObj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 				}
 	
 				if(leObj != null) {
 					var arr:Array<String> = PlayState.instance.runtimeShaders.get(shader);
-					leObj.shader = new FlxRuntimeShader(arr[0], arr[1]);
+					var daShader:FlxRuntimeShader = new FlxRuntimeShader(arr[0], arr[1]); 
+
+					if (Std.isOfType(leObj, FlxCamera)){
+						leObj.setFilters([new ShaderFilter(daShader)]);
+					}
+					else{
+						var daObj:FlxSprite = leObj;
+						daObj.shader = daShader;
+					}
+					
 					return true;
 				}
 				#else
