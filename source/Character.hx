@@ -120,9 +120,9 @@ class Character extends FlxSprite
 	public var animationsArray:Array<AnimArray> = [];
 	public var stopIdle:Bool = false;
 
-	public var animateAtlas:FlxAnimate;
+	/*public var animateAtlas:FlxAnimate;
     @:noCompletion public var atlasPlayingAnim:String;
-    @:noCompletion public var atlasPath:String;
+    @:noCompletion public var atlasPath:String;*/
 
 	public var stunned:Bool = false;
 
@@ -200,9 +200,10 @@ class Character extends FlxSprite
 
 				if (FileSystem.exists(Paths.modsImages(json.image+"/spritemap1")))
 				{
+					// i'll reenable it once I figure it out.
 					//new atlas. still implementing it
-					animateAtlas = new FlxAnimate(x, y, json.image);
-					atlasPath = json.image;
+					//animateAtlas = new FlxAnimate(x, y, json.image);
+					//atlasPath = json.image;
 				}
 				else
 				{
