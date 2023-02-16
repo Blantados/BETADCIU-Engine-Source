@@ -410,7 +410,7 @@ class Note extends FlxSprite
 	{
 		switch (style)
 		{
-			case 'pixel': //| 'pixel-corrupted' | 'neon' | 'doki-pixel':
+			case 'pixel':
 				var suf:String = "";
 				isPixel = true;
 

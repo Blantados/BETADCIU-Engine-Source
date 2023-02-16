@@ -62,23 +62,18 @@ class HealthIcon extends FlxSprite
 
 		loadGraphic(rawPic, true, 150, 150);
 
-		if (char.startsWith('senpai') || char.contains('pixel') || char.startsWith('spirit') || char.startsWith('monika') && char != 'monika-real' && !char.contains('hd'))
-			antialiasing = false;
-		else
-			antialiasing = true;
+		antialiasing = true;
 
-		if (rawPic.width == 450)
-		{
-			animation.add(char, [0, 1, 2], 0, false, isPlayer);
+		if (char.startsWith('senpai') || char.contains('pixel') || char.startsWith('spirit'))
+			antialiasing = false;			
+
+		var animArray:Array<Int> = [];
+
+		for(i in 0...3){
+			animArray.push((i <= frames.frames.length - 1 ? i : 0));
 		}
-		else
-		{
-			if (rawPic.width == 150)
-				animation.add(char, [0, 0, 0], 0, false, isPlayer); //that way everyone technically has a winning icon
-			else
-				animation.add(char, [0, 1, 0], 0, false, isPlayer); //that way everyone technically has a winning icon
-		}
-		
+
+		animation.add(char, animArray, 0, false, isPlayer);
 		animation.play(char);
 	}
 

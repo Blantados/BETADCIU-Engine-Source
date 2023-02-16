@@ -79,6 +79,8 @@ import flixel.addons.display.FlxRuntimeShader;
 #end
 
 import openfl.filters.BitmapFilter;
+import openfl.display.ShaderParameter;
+import openfl.display.ShaderParameterType;
 
 using StringTools;
 
@@ -120,7 +122,7 @@ class ModchartState
 
 			if (type != Lua.LUA_TFUNCTION) {
 				if (type > Lua.LUA_TNIL)
-					luaTrace("ERROR (" + func + "): attempt to call a " + typeToString(type) + " value", false, false, FlxColor.RED);
+					luaTrace(scriptName + ": ERROR (" + func + "): attempt to call a " + typeToString(type) + " value", false, false, FlxColor.RED);
 
 				Lua.pop(lua, 1);
 				return Function_Continue;
@@ -132,7 +134,7 @@ class ModchartState
 			// Checks if it's not successful, then show a error.
 			if (status != Lua.LUA_OK) {
 				var error:String = getErrorMessage(status);
-				luaTrace("ERROR (" + func + "): " + error, false, false, FlxColor.RED);
+				luaTrace(scriptName + ": ERROR (" + func + "): " + error, false, false, FlxColor.RED);
 				return Function_Continue;
 			}
 
@@ -264,7 +266,7 @@ class ModchartState
 
 
 	private function convert(v : Any, type : String) : Dynamic { // I didn't write this lol
-		if( Std.is(v, String) && type != null ) {
+		if( Std.isOfType(v, String) && type != null ) {
 		var v : String = v;
 		if( type.substr(0, 4) == 'array' ) {
 			if( type.substr(4) == 'float' ) {
@@ -1020,6 +1022,7 @@ class ModchartState
 		set('luaDebugMode', true);
 		set('luaDeprecatedWarnings', true);
 		set('inChartEditor', false);
+		set('inGameOver', false);
 
 		set("difficulty", PlayState.storyDifficulty);
 		set("bpm", PlayState.SONG.bpm);
@@ -1031,8 +1034,13 @@ class ModchartState
 		set("distractions", FlxG.save.data.distractions);
 		set('songLength', FlxG.sound.music.length);
 		set('songName', PlayState.SONG.song);
+		set('songPath', Paths.formatToSongPath(PlayState.SONG.song));
 		set('seenCutscene', PlayState.seenCutscene);
 		set('scriptName', scriptName);
+
+		var difficultyName:String = CoolUtil.difficulties[PlayState.storyDifficulty];
+		set('difficultyName', difficultyName);
+		set('difficultyPath', Paths.formatToSongPath(difficultyName));
 
 		set("curStep", 0);
 		set("daSection", 0);
@@ -1061,8 +1069,7 @@ class ModchartState
 		set("windowHeight",FlxG.height);
 
 		set("mustHitSection", false);
-		set("newIcons", false);
-		set("swapIcons", true);
+		set('gfSection', false);
 		set("playDadSing", true);
 		set("playBFSing", true);
 
@@ -1076,6 +1083,21 @@ class ModchartState
 
 			set('playbackRate', PlayState.instance.playbackRate);
 		}
+
+		// Character shit
+		set('boyfriendName', PlayState.SONG.player1);
+		set('dadName', PlayState.SONG.player2);
+		set('gfName', PlayState.SONG.gfVersion);
+
+		set('score', 0);
+		set('misses', 0);
+		set('hits', 0);
+
+		set('rating', 0);
+		set('ratingName', '');
+		set('ratingFC', '');
+
+		set('currentModDirectory', Paths.currentModDirectory);
 	
 		// callbacks
 
@@ -1691,6 +1713,16 @@ class ModchartState
 				PlayState.instance.healthBar.createFilledBar(FlxColor.fromString('#' + opponent), FlxColor.fromString('#' + player));
 				PlayState.instance.healthBar.updateBar();
 			});
+
+			Lua_helper.add_callback(lua, "setHealthBarColors", function(leftHex:String, rightHex:String) {
+				var left:FlxColor = Std.parseInt(leftHex);
+				if(!leftHex.startsWith('0x')) left = Std.parseInt('0xff' + leftHex);
+				var right:FlxColor = Std.parseInt(rightHex);
+				if(!rightHex.startsWith('0x')) right = Std.parseInt('0xff' + rightHex);
+	
+				PlayState.instance.healthBar.createFilledBar(left, right);
+				PlayState.instance.healthBar.updateBar();
+			});
 	
 			Lua_helper.add_callback(lua,"getDominantColor", function(sprite:String){
 				var shit:Dynamic = getObjectDirectly2(sprite);
@@ -1900,10 +1932,6 @@ class ModchartState
 				return FlxG.random.float(min, max);
 			});
 	
-			Lua_helper.add_callback(lua,"exeStatic", function(?id:String, color:Int = 0) {
-				PlayState.instance.staticHitMiss(color);
-			});
-	
 			Lua_helper.add_callback(lua,"changeDadIconNew", function(id:String) {
 				PlayState.instance.iconP2.changeIcon(id);
 			});
@@ -2003,10 +2031,6 @@ class ModchartState
 	
 			Lua_helper.add_callback(lua,"changeIndividualNotes", function(style:String, i:Int, ?noteTypeStyle:String = "") {
 				PlayState.instance.unspawnNotes[i].reloadNote(style, noteTypeStyle);
-			});
-	
-			Lua_helper.add_callback(lua,"doStaticSign", function(lestatic:Int = 0, ?leopa:Bool = true) {
-				PlayState.instance.doStaticSign(lestatic, leopa);
 			});
 	
 			Lua_helper.add_callback(lua,"characterZoom", function(id:String, zoomAmount:Float, ?isSenpai:Bool = false) {
@@ -2155,49 +2179,29 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua,"changeCamSpeed", function(camFollowSpeed:Float = 0.04) { //i know psych has that camSpeed stuff but I don't feel like changing to Psych's camera system
-				FlxG.camera.follow(PlayState.instance.camFollow, LOCKON, camFollowSpeed * (30 / (cast (Lib.current.getChildAt(0), Main)).getFPS()));	
+				FlxG.camera.follow(PlayState.instance.camFollow, LOCKON, camFollowSpeed * (30 / (cast (Lib.current.getChildAt(0), Main)).getFPS()) * (120 / Main.getFPSStatic()));	
 			});
 	
 			Lua_helper.add_callback(lua,"setCamFollow", function(x:Float, y:Float) {
-				PlayState.instance.camFollowIsOn = false;
+				PlayState.instance.isCameraOnForcedPos = true;
 				PlayState.instance.camFollow.setPosition(x, y);
 			});
 	
-			Lua_helper.add_callback(lua,"setDelayedCamFollow", function(time:Float,x:Float, y:Float) {
-				PlayState.instance.camFollowIsOn = false;
-	
-				new FlxTimer().start(time, function(tmr:FlxTimer)
-				{
-					PlayState.instance.camFollow.setPosition(x, y);
-				});	
-			});
-	
 			Lua_helper.add_callback(lua,"offCamFollow", function(id:String) {
-				PlayState.instance.camFollowIsOn = false;
+				PlayState.instance.isCameraOnForcedPos = false;
 			});
-	
-			Lua_helper.add_callback(lua,"resetCamFollow", function(id:String) {
-				PlayState.instance.camFollowIsOn = true;
-			});
-	
+
 			Lua_helper.add_callback(lua,"snapCam", function(x:Float, y:Float) {
-				PlayState.instance.camFollowIsOn = false;
-			//	PlayState.instance.defaultCamFollow = false;
-				{
-					var camPosition:FlxObject;
-					camPosition = new FlxObject(0, 0, 1, 1);
-					camPosition.setPosition(x, y);
-					FlxG.camera.focusOn(camPosition.getPosition());
-				}
+				PlayState.instance.isCameraOnForcedPos = true;
+				
+				var camPosition:FlxObject = new FlxObject(0, 0, 1, 1);
+				camPosition.setPosition(x, y);
+				FlxG.camera.focusOn(camPosition.getPosition());
 			});
 	
 			Lua_helper.add_callback(lua,"resetSnapCam", function(id:String) {
 				//The string does absolutely nothing
 				//PlayState.instance.defaultCamFollow = true;
-			});
-			
-			Lua_helper.add_callback(lua,"resetCamEffects", function(id:String) {
-				PlayState.instance.camFollowIsOn = true;
 			});
 	
 			Lua_helper.add_callback(lua,"stopCameraEffects", function(id:String) { //how convenient
@@ -2485,10 +2489,6 @@ class ModchartState
 					getActorByName(id).alpha = alpha;
 				}
 			});
-	
-			/*Lua_helper.add_callback(lua,"boomBoom", function(visible:Bool,id:String, id2:Int) {
-				getActorByName(id).members[id2].visible = visible;
-			});*/
 	
 			Lua_helper.add_callback(lua,"setActorVisibility", function(alpha:Bool,id:String, ?bg:Bool = false) {
 				if (bg){
@@ -3197,10 +3197,10 @@ class ModchartState
 				return false;
 			});
 			
-			Lua_helper.add_callback(lua, "startVideo", function(videoFile:String) {
+			Lua_helper.add_callback(lua, "startVideo", function(videoFile:String, ?skippable:Bool = true) {
 				#if VIDEOS_ALLOWED
 				if(FileSystem.exists(Paths.video(videoFile))) {
-					PlayState.instance.startVideo(videoFile);
+					PlayState.instance.startVideo(videoFile, skippable);
 					return true;
 				} else {
 					luaTrace('startVideo: Video file not found: ' + videoFile, false, false, FlxColor.RED);
@@ -3613,6 +3613,27 @@ class ModchartState
 	
 			Lua_helper.add_callback(lua, "precacheImage", function(name:String) {
 				Paths.returnGraphic(name);
+			});
+
+			Lua_helper.add_callback(lua, "loadSong", function(?name:String = null, ?difficultyNum:Int = -1) {
+				if(name == null || name.length < 1)
+					name = PlayState.SONG.song;
+				if (difficultyNum == -1)
+					difficultyNum = PlayState.storyDifficulty;
+	
+				var poop = Highscore.formatSong(name, difficultyNum);
+				PlayState.SONG = Song.loadFromJson(poop, name);
+				PlayState.storyDifficulty = difficultyNum;
+				PlayState.instance.persistentUpdate = false;
+				LoadingState.loadAndSwitchState(new PlayState());
+	
+				FlxG.sound.music.pause();
+				FlxG.sound.music.volume = 0;
+				if(PlayState.instance.vocals != null)
+				{
+					PlayState.instance.vocals.pause();
+					PlayState.instance.vocals.volume = 0;
+				}
 			});
 	
 			Lua_helper.add_callback(lua, "loadGraphic", function(variable:String, image:String, ?gridX:Int, ?gridY:Int) {
@@ -4422,9 +4443,19 @@ class ModchartState
 					default: return '';
 				}
 			});
-	
-			Lua_helper.add_callback(lua,"setPlaybackRate", function(x:Float) {
-				PlayState.instance.set_playbackRate(x);
+
+			Lua_helper.add_callback(lua, "getTextFromFile", function(path:String, ?ignoreModFolders:Bool = false) {
+				return Paths.getTextFromFile(path, ignoreModFolders);
+			});
+
+			Lua_helper.add_callback(lua, "luaSpriteExists", function(tag:String) {
+				return PlayState.instance.modchartSprites.exists(tag);
+			});
+			Lua_helper.add_callback(lua, "luaTextExists", function(tag:String) {
+				return PlayState.instance.modchartTexts.exists(tag);
+			});
+			Lua_helper.add_callback(lua, "luaSoundExists", function(tag:String) {
+				return PlayState.instance.modchartSounds.exists(tag);
 			});
 	
 			Lua_helper.add_callback(lua, "updateHitbox", function(obj:String) {
@@ -4577,6 +4608,28 @@ class ModchartState
 				catch (e:Dynamic) {
 					luaTrace(scriptName + ":" + lastCalledFunction + " - " + e, false, false, FlxColor.RED);
 				}
+				#end
+			});
+
+			Lua_helper.add_callback(lua, "checkFileExists", function(filename:String, ?absolute:Bool = false) {
+				#if MODS_ALLOWED
+				if(absolute)
+				{
+					return FileSystem.exists(filename);
+				}
+	
+				var path:String = Paths.modFolders(filename);
+				if(FileSystem.exists(path))
+				{
+					return true;
+				}
+				return FileSystem.exists(Paths.getPath('assets/$filename', TEXT));
+				#else
+				if(absolute)
+				{
+					return Assets.exists(filename);
+				}
+				return Assets.exists(Paths.getPath('assets/$filename', TEXT));
 				#end
 			});
 
@@ -4827,8 +4880,7 @@ class ModchartState
 				luaTrace("setShaderSampler2D: Platform unsupported for Runtime Shaders!", false, false, FlxColor.RED);
 				#end
 			});
-			
-	
+
 			// default strums
 	
 			Lua_helper.add_callback(lua, "getNotes", function(y:Float)
@@ -5169,6 +5221,8 @@ class ModchartState
 
 	public static function setVarInArray(instance:Dynamic, variable:String, value:Dynamic):Any
 	{
+		if (value == "true") value = true; //stupid fix but whatever
+		
 		var shit:Array<String> = variable.split('[');
 		if(shit.length > 1)
 		{
@@ -5204,9 +5258,6 @@ class ModchartState
 			}
 			return blah;
 		}
-		/*if(Std.isOfType(instance, Map))
-			instance.set(variable,value);
-		else*/
 			
 		if(PlayState.instance.variables.exists(variable))
 		{
@@ -5273,7 +5324,7 @@ class ModchartState
 		return NORMAL;
 	}
 
-	function getFlxEaseByString(?ease:String = '') {
+	public static function getFlxEaseByString(?ease:String = '') {
 		switch(ease.toLowerCase().trim()) {
 			case 'backin': return FlxEase.backIn;
 			case 'backinout': return FlxEase.backInOut;
@@ -5554,6 +5605,9 @@ class HScript
 		interp.variables.set('Character', Character);
 		interp.variables.set('Alphabet', Alphabet);
 		//interp.variables.set('CustomSubstate', CustomSubstate);
+		#if (!flash && sys)
+		interp.variables.set('FlxRuntimeShader', FlxRuntimeShader);
+		#end
 		interp.variables.set('ShaderFilter', openfl.filters.ShaderFilter);
 		interp.variables.set('StringTools', StringTools);
 

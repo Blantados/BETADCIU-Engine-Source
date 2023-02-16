@@ -23,6 +23,7 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 import flixel.input.keyboard.FlxKey;
 import flixel.graphics.FlxGraphic;
+import openfl.Lib;
 import Controls;
 
 using StringTools;
@@ -104,8 +105,6 @@ class VisualsUISubState extends BaseOptionsMenu
 			true);
 		addOption(option);
 		option.onChange = onChangeFPSCounter;
-
-
 		#end
 		
 		/*var option:Option = new Option('Pause Screen Song:',
@@ -156,6 +155,8 @@ class VisualsUISubState extends BaseOptionsMenu
 	#if !mobile
 	function onChangeFPSCounter()
 	{
+		trace("FPS: "+FlxG.save.data.fps);
+
 		if(Main.fpsCounter != null)
 			Main.fpsCounter.visible = ClientPrefs.showFPS;
 	}

@@ -257,7 +257,7 @@ class FreeplayState extends MusicBeatState
 		if (controls.RIGHT_P && canMove)
 			changeDiff(1);
 
-		if (controls.BACK)
+		if (controls.BACK && canMove)
 		{
 			persistentUpdate = false;
 			

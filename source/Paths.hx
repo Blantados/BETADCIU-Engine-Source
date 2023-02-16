@@ -62,7 +62,7 @@ class Paths
 		//localTrackedAssets.push(key);
 		return currentTrackedAssets.get(key);
 
-		trace('you failed dipshit');
+		trace('returnGraphic: You failed dipshit! Key '+key+" not found!");
 		return null;
 	}
 
@@ -608,7 +608,7 @@ class Paths
 			return currentTrackedAssets.get(key);
 		}
 
-		trace('you failed dipshit');
+		trace('cacheImage: You failed dipshit! Key '+key+" not found!");
 		return null;		
 	}
 
@@ -641,7 +641,7 @@ class Paths
 		}
 		#end
 		
-		trace('getTextFromFile: you failed dipshit.');
+		trace('getTextFromFile: You failed dipshit! Key '+key+" not found!");
 		return null;		
 	}
 

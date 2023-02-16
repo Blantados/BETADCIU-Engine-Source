@@ -102,13 +102,14 @@ class ClientPrefs {
 		FlxG.save.data.downscroll = downscroll;
 		FlxG.save.data.middleScroll = middleScroll;
 		FlxG.save.data.opponentStrums = opponentStrums;
+		FlxG.save.data.fps = showFPS;
 		FlxG.save.data.showFPS = showFPS;
 		FlxG.save.data.flashing = flashing;
 		FlxG.save.data.globalAntialiasing = globalAntialiasing;
 		FlxG.save.data.noteSplash = noteSplashes;
 		FlxG.save.data.lowQuality = lowQuality;
 		FlxG.save.data.shaders = shaders;
-		FlxG.save.data.framerate = framerate;
+		FlxG.save.data.fpsCap = framerate;
 		//FlxG.save.data.cursing = cursing;
 		//FlxG.save.data.violence = violence;
 		FlxG.save.data.camZooms = camZooms;
@@ -176,8 +177,8 @@ class ClientPrefs {
 		if(FlxG.save.data.shaders != null) {
 			shaders = FlxG.save.data.shaders;
 		}
-		/*if(FlxG.save.data.framerate != null) {
-			framerate = FlxG.save.data.framerate;
+		if(FlxG.save.data.fpsCap != null) {
+			framerate = FlxG.save.data.fpsCap;
 			if(framerate > FlxG.drawFramerate) {
 				FlxG.updateFramerate = framerate;
 				FlxG.drawFramerate = framerate;
@@ -185,7 +186,7 @@ class ClientPrefs {
 				FlxG.drawFramerate = framerate;
 				FlxG.updateFramerate = framerate;
 			}
-		}*/
+		}
 		/*if(FlxG.save.data.cursing != null) {
 			cursing = FlxG.save.data.cursing;
 		}
@@ -277,10 +278,6 @@ class ClientPrefs {
 		}
 		if (FlxG.save.data.comboStacking != null)
 			comboStacking = FlxG.save.data.comboStacking;
-
-		if(FlxG.save.data.fpsCap != null) {
-			fpsCap = FlxG.save.data.fpsCap;	
-		}
 
 		if(FlxG.save.data.psychUI != null) {
 			psychUI = FlxG.save.data.psychUI;

@@ -58,13 +58,14 @@ class ChartingState extends MusicBeatState
 		'Alt Animation',
 		'Hey!',
 		'Hurt Note',
-		'Auditor Note',//'GF Sing',
+		'Auditor Note',
 		'Static Note',
 		'blah',
 		'blah',
 		'Haato Note',
 		'Scythe Note',
 		'Phantom Note',
+		'GF Sing',
 		'No Animation'
 	];
 	private var noteTypeIntMap:Map<Int, String> = new Map<Int, String>();
@@ -542,6 +543,10 @@ class ChartingState extends MusicBeatState
 
 		var saveButton:FlxButton = new FlxButton(110, 8, "Save", function()
 		{
+			//if the song is playing and you have autoPause disabled, it'll crash.
+			FlxG.sound.music.pause();
+			vocals.pause();
+
 			saveLevel();
 		});
 
@@ -580,6 +585,10 @@ class ChartingState extends MusicBeatState
 
 		var saveEvents:FlxButton = new FlxButton(110, reloadSongJson.y, 'Save Events', function ()
 		{
+			//if the song is playing and you have autoPause disabled, it'll crash.
+			FlxG.sound.music.pause();
+			vocals.pause();
+			
 			saveEvents();
 		});
 
@@ -1378,12 +1387,18 @@ class ChartingState extends MusicBeatState
 			if(curSelectedNote != null)
 			{
 				if(sender == value1InputText) {
-					curSelectedNote[1][curEventSelected][1] = value1InputText.text;
-					updateGrid();
+					if(curSelectedNote[1][curEventSelected] != null)
+					{
+						curSelectedNote[1][curEventSelected][1] = value1InputText.text;
+						updateGrid();
+					}
 				}
 				else if(sender == value2InputText) {
-					curSelectedNote[1][curEventSelected][2] = value2InputText.text;
-					updateGrid();
+					if(curSelectedNote[1][curEventSelected] != null)
+					{
+						curSelectedNote[1][curEventSelected][2] = value2InputText.text;
+						updateGrid();
+					}
 				}
 				else if(sender == strumTimeInputText) {
 					var value:Float = Std.parseFloat(strumTimeInputText.text);
@@ -1662,12 +1677,10 @@ class ChartingState extends MusicBeatState
 				LoadingState.loadAndSwitchState(new PlayState());
 			}
 	
-			if (FlxG.keys.justPressed.E)
-			{
+			if (FlxG.keys.justPressed.E){	
 				changeNoteSustain(Conductor.stepCrochet * (FlxG.keys.pressed.SHIFT ? (curSelectedNote[2] != 0 ? 4 : 3) : 1));
 			}
-			if (FlxG.keys.justPressed.Q)
-			{
+			if (FlxG.keys.justPressed.Q){
 				changeNoteSustain(-Conductor.stepCrochet * (FlxG.keys.pressed.SHIFT ? (curSelectedNote[2] != 0 ? 4 : 3) : 1));
 			}
 	

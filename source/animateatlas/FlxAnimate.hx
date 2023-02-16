@@ -13,7 +13,7 @@ import flixel.FlxBasic;
 
 class FlxAnimate extends flxanimate.FlxAnimate {
 	var rotOffsetAngle:Dynamic = null;
-	var rotOffsetAngle:Dynamic = null;
+	var rotOffset:Dynamic = null;
 	var useOffsetAsRotOffset:Bool = false;
 	
 	override function drawLimb(limb:FlxFrame, _matrix:FlxMatrix, ?colorTransform:ColorTransform)

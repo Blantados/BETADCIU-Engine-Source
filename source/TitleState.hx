@@ -59,6 +59,7 @@ class TitleState extends MusicBeatState
 			sys.FileSystem.createDirectory(Sys.getCwd() + "/assets/replays");
 		#end
 
+		FlxG.game.focusLostFramerate = 60;
 		FlxG.sound.muteKeys = muteKeys;
 		FlxG.sound.volumeDownKeys = volumeDownKeys;
 		FlxG.sound.volumeUpKeys = volumeUpKeys;
@@ -70,6 +71,7 @@ class TitleState extends MusicBeatState
 		}
 		
 		PlayerSettings.init();
+
 
 		#if windows
 		DiscordClient.initialize();
@@ -88,8 +90,8 @@ class TitleState extends MusicBeatState
 
 		FlxG.save.bind('funkin', 'ninjamuffin99');
 
-		ClientPrefs.loadPrefs();
 		KadeEngineData.initSave();
+		ClientPrefs.loadPrefs();
 	
 		Highscore.load();
 
@@ -162,14 +164,14 @@ class TitleState extends MusicBeatState
 		// bg.updateHitbox();
 		add(bg);
 
-			logoBl = new FlxSprite(-150, 1500);
-			logoBl.frames = Paths.getSparrowAtlas('logoBumpin');
-			logoBl.antialiasing = true;
-			logoBl.animation.addByPrefix('bump', 'logo bumpin', 24);
-			logoBl.animation.play('bump');
-			logoBl.updateHitbox();
-			// logoBl.screenCenter();
-			// logoBl.color = FlxColor.BLACK;
+		logoBl = new FlxSprite(-150, 1500);
+		logoBl.frames = Paths.getSparrowAtlas('logoBumpin');
+		logoBl.antialiasing = true;
+		logoBl.animation.addByPrefix('bump', 'logo bumpin', 24);
+		logoBl.animation.play('bump');
+		logoBl.updateHitbox();
+		// logoBl.screenCenter();
+		// logoBl.color = FlxColor.BLACK;
 
 		gfDance = new FlxSprite(FlxG.width * 0.4, FlxG.height * 0.07);
 		gfDance.frames = Paths.getSparrowAtlas('gfDanceTitle');
@@ -308,12 +310,12 @@ class TitleState extends MusicBeatState
 			new FlxTimer().start(2, function(tmr:FlxTimer)
 			{
 				MusicBeatState.switchState(new SecretState());
+				closedState = true;
 			});
 			// FlxG.sound.play(Paths.music('titleShoot'), 0.7);
 		}
 
-		if (pressedEnter && !skippedIntro && initialized)
-		{
+		if (pressedEnter && !skippedIntro && initialized){
 			skipIntro();
 		}
 
@@ -341,6 +343,8 @@ class TitleState extends MusicBeatState
 		textGroup.add(coolText);
 	}
 
+	public static var closedState:Bool = false;
+
 	function deleteCoolText()
 	{
 		while (textGroup.members.length > 0)
@@ -354,79 +358,87 @@ class TitleState extends MusicBeatState
 	{
 		super.beatHit();
 
-		logoBl.animation.play('bump');
-		danceLeft = !danceLeft;
+		if (logoBl != null)
+			logoBl.animation.play('bump');
 
-		if (danceLeft)
-			gfDance.animation.play('danceRight');
-		else
-			gfDance.animation.play('danceLeft');
+		if (gfDance != null)
+		{
+			danceLeft = !danceLeft;
 
+			if (danceLeft)
+				gfDance.animation.play('danceRight');
+			else
+				gfDance.animation.play('danceLeft');
+		}
+		
 		FlxG.log.add(curBeat);
 
-		switch (curBeat)
+		if (!closedState)
 		{
-			case 1:
-				createCoolText(['ninjamuffin99', 'phantomArcade', 'kawaisprite', 'evilsk8er']);
-			// credTextShit.visible = true;
-			case 3:
-				addMoreText('present');
-			// credTextShit.text += '\npresent...';
-			// credTextShit.addText();
-			case 4:
-				deleteCoolText();
-			// credTextShit.visible = false;
-			// credTextShit.text = 'In association \nwith';
-			// credTextShit.screenCenter();
-			case 5:
-				if (Main.watermarks)
-					createCoolText(['Kade Engine', 'by']);
-				else
-					createCoolText(['In Partnership', 'with']);
-			case 7:
-				if (Main.watermarks)
-					addMoreText('KadeDeveloper');
-				else
-				{
-					addMoreText('Newgrounds');
-					ngSpr.visible = true;
-				}
-			// credTextShit.text += '\nNewgrounds';
-			case 8:
-				deleteCoolText();
-				ngSpr.visible = false;
-			// credTextShit.visible = false;
-
-			// credTextShit.text = 'Shoutouts Tom Fulp';
-			// credTextShit.screenCenter();
-			case 9:
-				Main.seenMessage = true;
-				createCoolText([curWacky[0]]);
-			// credTextShit.visible = true;
-			case 11:
-				addMoreText(curWacky[1]);
-				if (curWacky[1].contains('uncorruption'))
-				{
-					Main.restoreUnlocked = true;
-				}
-			// credTextShit.text += '\nlmao';
-			case 12:
-				deleteCoolText();
-			// credTextShit.visible = false;
-			// credTextShit.text = "Friday";
-			// credTextShit.screenCenter();
-			case 13:
-				addMoreText('Friday Night Funkin');
-			// credTextShit.visible = true;
-			case 14:
-				addMoreText('BETADCIU');
-			// credTextShit.text += '\nNight';
-			case 15:
-				addMoreText('Mod'); // credTextShit.text += '\nFunkin';
-
-			case 16:
-				skipIntro();
-		}
+			switch (curBeat)
+			{
+				case 1:
+					createCoolText(['ninjamuffin99', 'phantomArcade', 'kawaisprite', 'evilsk8er']);
+				// credTextShit.visible = true;
+				case 3:
+					addMoreText('present');
+				// credTextShit.text += '\npresent...';
+				// credTextShit.addText();
+				case 4:
+					deleteCoolText();
+				// credTextShit.visible = false;
+				// credTextShit.text = 'In association \nwith';
+				// credTextShit.screenCenter();
+				case 5:
+					if (Main.watermarks)
+						createCoolText(['Kade Engine', 'by']);
+					else
+						createCoolText(['In Partnership', 'with']);
+				case 7:
+					if (Main.watermarks)
+						addMoreText('KadeDeveloper');
+					else
+					{
+						addMoreText('Newgrounds');
+						ngSpr.visible = true;
+					}
+				// credTextShit.text += '\nNewgrounds';
+				case 8:
+					deleteCoolText();
+					ngSpr.visible = false;
+				// credTextShit.visible = false;
+	
+				// credTextShit.text = 'Shoutouts Tom Fulp';
+				// credTextShit.screenCenter();
+				case 9:
+					Main.seenMessage = true;
+					createCoolText([curWacky[0]]);
+				// credTextShit.visible = true;
+				case 11:
+					addMoreText(curWacky[1]);
+					if (curWacky[1].contains('uncorruption'))
+					{
+						Main.restoreUnlocked = true;
+					}
+				// credTextShit.text += '\nlmao';
+				case 12:
+					deleteCoolText();
+				// credTextShit.visible = false;
+				// credTextShit.text = "Friday";
+				// credTextShit.screenCenter();
+				case 13:
+					addMoreText('Friday Night Funkin');
+				// credTextShit.visible = true;
+				case 14:
+					addMoreText('BETADCIU');
+				// credTextShit.text += '\nNight';
+				case 15:
+					addMoreText('Mod'); // credTextShit.text += '\nFunkin';
+	
+				case 16:
+					skipIntro();
+			}
+		}	
 	}
 
 	var skippedIntro:Bool = false;

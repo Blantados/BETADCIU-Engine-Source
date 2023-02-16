@@ -115,8 +115,8 @@ class Main extends Sprite
 		addChild(fpsCounter);
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
-		toggleFPS(FlxG.save.data.fps);
-
+		var daBool:Bool = FlxG.save.data.fps || FlxG.save.data.showFPS;
+		toggleFPS(daBool);
 		#end
 
 		#if CRASH_HANDLER
@@ -167,6 +167,11 @@ class Main extends Sprite
 	}
 
 	public function getFPS():Float
+	{
+		return fpsCounter.currentFPS;
+	}
+
+	public static function getFPSStatic():Float
 	{
 		return fpsCounter.currentFPS;
 	}

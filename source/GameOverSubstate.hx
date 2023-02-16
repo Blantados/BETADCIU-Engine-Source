@@ -17,7 +17,7 @@ using Lambda;
 
 class GameOverSubstate extends MusicBeatSubstate
 {
-	var bf:Boyfriend;
+	var boyfriend:Boyfriend;
 	var camFollow:FlxObject;
 
 	public var stageSuffix:String = "";
@@ -29,7 +29,7 @@ class GameOverSubstate extends MusicBeatSubstate
 	var blue = 204;
 	var deathTimer:FlxTimer = new FlxTimer();
 
-	public static var characterName:String = 'bf';
+	public static var characterName:String = 'bf-dead';
 	public static var deathSoundName:String = 'fnf_loss_sfx';
 	public static var loopSoundName:String = 'gameOver';
 	public static var endSoundName:String = 'gameOverEnd';
@@ -38,10 +38,28 @@ class GameOverSubstate extends MusicBeatSubstate
 
 	public static var instance:GameOverSubstate;
 
-	public function new(x:Float, y:Float)
+	public static function resetVariables() {
+		characterName = 'bf-dead';
+		deathSoundName = 'fnf_loss_sfx';
+		loopSoundName = 'gameOver';
+		endSoundName = 'gameOverEnd';
+	}
+
+	override function create()
 	{
 		instance = this;
 		PlayState.instance.callOnLuas('onGameOverStart', []);
+
+		super.create();
+	}
+
+	public function new(x:Float, y:Float)
+	{
+		super();
+
+		PlayState.instance.setOnLuas('inGameOver', true);
+
+		Conductor.songPosition = 0;
 
 		var daCharacter = PlayState.instance.boyfriend.curCharacter;
 		var daBf:String = '';
@@ -52,58 +70,26 @@ class GameOverSubstate extends MusicBeatSubstate
 
 		switch (daCharacter)
 		{
-			/*case 'bf-pixel' | 'bf-pixeld4' | 'bf-pixeld4BSide':
-				stageSuffix = '-pixel';
-				daBf = 'bf-pixel-dead';
-			case 'bf-tankman-pixel' | 'bf-pico-pixel' | 'bf-rico-pixel' | 'bf-tom-pixel' | 'bf-sonic-pixel' | 'bf-gf-pixel' | 'bf-wright-pixel' | 'bf-sans-pixel':
-				stageSuffix = '-pixel';
-				daBf = daCharacter + '-dead';
-			case 'bf-aloe' | 'bf-aloe-confused' | 'bf-aloe-car' | 'bf1' | 'bf-aloe-past' | 'bf-aloe-deathless':	
-				daBf = 'bf-aloe';
-			case 'bf-aloe-corrupt':
-				daBf = daCharacter;
-				isCorrupt = true;
-			case 'bf-nene' | 'bf-nene-scream':
-				daBf = 'bf-nene';
-			case 'bf-pixel-neon':
-				stageSuffix = '-pixel';
-				daBf = 'bf-pixel-dead';
-			case 'bf-demoncesar' | 'bf-demoncesar-trollge':
-				daBf = 'bf-cesar';
-			case 'bf-gf' | 'bf-gf-demon':	
-				daBf = 'bf-gf';	
-			case 'bf-senpai-pixel' | 'bf-senpai-angry-pixel':
-				stageSuffix = '-senpai';
-				daBf = 'bf-senpai-pixel-dead';
-				isSenpai = true;
-			case 'bf-senpai-tankman':
-				stageSuffix = '-senpaitankman';
-				daBf = 'bf-senpai-tankman-pixel-dead';
-				isSenpai = true;*/
 			default:	
 			{
-				if (characterName != 'bf')
+				if (characterName != 'bf-dead')
 					daBf = characterName;
 				else
 					daBf = deathSpritesCheck(daCharacter);								
 			}		
 		}
 
-		super();
-
-		Conductor.songPosition = 0;
-
-		bf = new Boyfriend(x, y, daBf);
-		add(bf);
+		boyfriend = new Boyfriend(x, y, daBf);
+		add(boyfriend);
 
 		if (isSenpai)
-			camFollow = new FlxObject(bf.getMidpoint().x - 300, bf.getMidpoint().y - 500, 1, 1);
+			camFollow = new FlxObject(boyfriend.getMidpoint().x - 300, boyfriend.getMidpoint().y - 500, 1, 1);
 		else
-			camFollow = new FlxObject(bf.getGraphicMidpoint().x, bf.getGraphicMidpoint().y, 1, 1);
+			camFollow = new FlxObject(boyfriend.getGraphicMidpoint().x, boyfriend.getGraphicMidpoint().y, 1, 1);
 
 		add(camFollow);
 
-		FlxG.sound.play(Paths.sound('fnf_loss_sfx' + stageSuffix));
+		FlxG.sound.play(Paths.returnSound("sounds", deathSoundName));
 		Conductor.changeBPM(100);
 
 		// FlxG.camera.followLerp = 1;
@@ -111,15 +97,15 @@ class GameOverSubstate extends MusicBeatSubstate
 		FlxG.camera.scroll.set();
 		FlxG.camera.target = null;
 
-		if (bf.animation.getByName('firstDeath') != null)
+		if (boyfriend.animation.getByName('firstDeath') != null)
 		{
 			noDeathAnim = false;
-			bf.playAnim('firstDeath');
+			boyfriend.playAnim('firstDeath');
 		}
 		else
 		{
 			noDeathAnim = true;
-			bf.animation.pause();
+			boyfriend.animation.pause();
 		}
 
 		deathTimer.start(2.375, function(tmr:FlxTimer)
@@ -129,7 +115,7 @@ class GameOverSubstate extends MusicBeatSubstate
 				startedMusic = true;
 
 				if (!isCorrupt)
-					FlxG.sound.playMusic(Paths.music('gameOver' + stageSuffix));
+					FlxG.sound.playMusic(Paths.returnSound("music", loopSoundName));
 	
 				if (noDeathAnim)
 					doIdle = true;
@@ -142,7 +128,7 @@ class GameOverSubstate extends MusicBeatSubstate
 		//a simple check to see if a dead spritesheet exists.
 		var daChar:String = char;
 
-		//in case you have two or more dashes like bf-aloe-confused. ok this really only works with two dashes but whatever.
+		//in case you have two or more dashes like boyfriend-aloe-confused. ok this really only works with two dashes but whatever.
 		var dashCount:Int = daChar.indexOf('-');
 
 		if (dashCount >= 2)
@@ -166,6 +152,8 @@ class GameOverSubstate extends MusicBeatSubstate
 	{
 		super.update(elapsed);
 
+		PlayState.instance.callOnLuas('onUpdate', [elapsed]);
+
 		if (controls.ACCEPT)
 		{
 			endBullshit();
@@ -175,8 +163,7 @@ class GameOverSubstate extends MusicBeatSubstate
 		{
 			FlxG.sound.music.stop();
 
-			if (PlayState.isPixel)
-			{
+			if (PlayState.isPixel){
 				PlayState.isPixel = false;
 			}
 
@@ -196,6 +183,8 @@ class GameOverSubstate extends MusicBeatSubstate
 			else
 				MusicBeatState.switchState(new FreeplayState());
 			PlayState.loadRep = false;
+
+			PlayState.instance.callOnLuas('onGameOverConfirm', [false]);
 		}
 
 		new FlxTimer().start(0.5, function(tmr:FlxTimer)
@@ -208,8 +197,10 @@ class GameOverSubstate extends MusicBeatSubstate
 			Conductor.songPosition = FlxG.sound.music.time;
 		}
 
-		if (noDeathAnim && bf != null)
-			bf.setColorTransform(0, 0, 0, 1, red, green, blue);
+		if (noDeathAnim && boyfriend != null)
+			boyfriend.setColorTransform(0, 0, 0, 1, red, green, blue);
+
+		PlayState.instance.callOnLuas('onUpdatePost', [elapsed]);
 	}
 
 	override function beatHit()
@@ -217,7 +208,7 @@ class GameOverSubstate extends MusicBeatSubstate
 		super.beatHit();
 
 		if (doIdle)
-			bf.dance();
+			boyfriend.dance();
 				
 		FlxG.log.add('beat');
 	}
@@ -231,18 +222,18 @@ class GameOverSubstate extends MusicBeatSubstate
 			isEnding = true;
 			deathTimer.destroy();
 
-			if (bf.animation.getByName('deathConfirm') != null)
-				bf.playAnim('deathConfirm', true);
+			if (boyfriend.animation.getByName('deathConfirm') != null)
+				boyfriend.playAnim('deathConfirm', true);
 
 			if (noDeathAnim)
 			{
 				doIdle = false;
 				FlxTween.tween(this, {'red': 255, 'blue': 255, 'green': 255}, 0.08);
-				bf.animation.pause();
+				boyfriend.animation.pause();
 			}
 				
 			FlxG.sound.music.stop();
-			FlxG.sound.play(Paths.music('gameOverEnd' + stageSuffix));
+			FlxG.sound.play(Paths.returnSound("music", endSoundName));
 
 			if (PlayState.isPixel)
 			{

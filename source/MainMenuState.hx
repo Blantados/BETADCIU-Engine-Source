@@ -12,6 +12,7 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import lime.app.Application;
+import openfl.Lib;
 
 #if desktop
 import Discord.DiscordClient;
@@ -39,7 +40,7 @@ class MainMenuState extends MusicBeatState
 
 	public static var kadeEngineVer:String = "BETADCIU Engine";
 	public static var gameVer:String = "0.2.8";
-	public static var betadciuVer:String = "Version 1.5";
+	public static var betadciuVer:String = "Version 1.5.1";
 
 	var magenta:FlxSprite;
 	var camFollow:FlxObject;
@@ -114,7 +115,7 @@ class MainMenuState extends MusicBeatState
 			menuItem.centerOffsets();
 		}
 
-		FlxG.camera.follow(camFollow, null, 0.06);
+		FlxG.camera.follow(camFollow, null, 0.06 * (120 / (cast (Lib.current.getChildAt(0), Main)).getFPS()));
 
 		var versionShit:FlxText = new FlxText(5, FlxG.height - 18, 0, gameVer + " FNF - " + kadeEngineVer + " " + betadciuVer, 12);
 		versionShit.scrollFactor.set();

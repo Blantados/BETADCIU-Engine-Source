@@ -6,13 +6,13 @@ class Ratings
     {
         var ranking:String = "N/A";
 
-        if (PlayState.instance.misses == 0 && PlayState.bads == 0 && PlayState.shits == 0 && PlayState.goods == 0) // Marvelous (SICK) Full Combo
+        if (PlayState.instance.songMisses == 0 && PlayState.bads == 0 && PlayState.shits == 0 && PlayState.goods == 0) // Marvelous (SICK) Full Combo
             ranking = "(MFC)";
-        else if (PlayState.instance.misses == 0 && PlayState.bads == 0 && PlayState.shits == 0 && PlayState.goods >= 1) // Good Full Combo (Nothing but Goods & Sicks)
+        else if (PlayState.instance.songMisses == 0 && PlayState.bads == 0 && PlayState.shits == 0 && PlayState.goods >= 1) // Good Full Combo (Nothing but Goods & Sicks)
             ranking = "(GFC)";
-        else if (PlayState.instance.misses == 0) // Regular FC
+        else if (PlayState.instance.songMisses == 0) // Regular FC
             ranking = "(FC)";
-        else if (PlayState.instance.misses < 10) // Single Digit Combo Breaks
+        else if (PlayState.instance.songMisses < 10) // Single Digit Combo Breaks
             ranking = "(SDCB)";
         else
             ranking = "(Clear)";
@@ -92,13 +92,13 @@ class Ratings
     {
         var ranking:String = "N/A";
 
-        if (PlayState.instance.misses == 0 && PlayState.bads == 0 && PlayState.shits == 0 && PlayState.goods == 0) // Marvelous (SICK) Full Combo
+        if (PlayState.instance.songMisses == 0 && PlayState.bads == 0 && PlayState.shits == 0 && PlayState.goods == 0) // Marvelous (SICK) Full Combo
             ranking = "MFC";
-        else if (PlayState.instance.misses == 0 && PlayState.bads == 0 && PlayState.shits == 0 && PlayState.goods >= 1) // Good Full Combo (Nothing but Goods & Sicks)
+        else if (PlayState.instance.songMisses == 0 && PlayState.bads == 0 && PlayState.shits == 0 && PlayState.goods >= 1) // Good Full Combo (Nothing but Goods & Sicks)
             ranking = "GFC";
-        else if (PlayState.instance.misses == 0) // Regular FC
+        else if (PlayState.instance.songMisses == 0) // Regular FC
             ranking = "FC";
-        else if (PlayState.instance.misses < 10) // Single Digit Combo Breaks
+        else if (PlayState.instance.songMisses < 10) // Single Digit Combo Breaks
             ranking = "SDCB";
         else
             ranking = "Clear";
@@ -180,7 +180,7 @@ class Ratings
          "NPS: " + nps + " (Max " + maxNPS + ")" + (" | ") : "") +								// 	NPS
          ("Score:" + (Conductor.safeFrames != 10 ? score + " (" + scoreDef + ")" : "" + score) + 		// Score
          (FlxG.save.data.accuracyDisplay ?																						// Accuracy Toggle
-         " | Combo Breaks:" + PlayState.instance.misses + 																				// 	instance.misses/Combo Breaks
+         " | Combo Breaks:" + PlayState.instance.songMisses + 																				// 	instance.songMisses/Combo Breaks
          " | Accuracy:" + (HelperFunctions.truncateFloat(accuracy, 2) + " %") +  				// 	Accuracy
          " | " + GenerateLetterRank(accuracy) : "")); 																		// 	Letter Rank
     }

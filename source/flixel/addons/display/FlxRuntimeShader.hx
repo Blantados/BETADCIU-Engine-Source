@@ -747,4 +747,38 @@ class FlxRuntimeShader extends FlxShader
 	{
 		return 'FlxRuntimeShader';
 	}
+
+	/*public function getParameter(vars:Dynamic)
+	{
+		//var daType:Class<T> = Type.getClass(vars);
+
+		//i don't know how to get classes based on the var
+		var penisExam:Dynamic;
+
+		if (Std.isOfType(vars, Bool))
+			var penisExam:ShaderParameter<Bool> = Reflect.field(this.data, vars);
+		else
+			var penisExam:ShaderParameter<Float> = Reflect.field(this.data, vars);
+
+		if (penisExam != null){
+			trace("penisExam Results: "+ penisExam);
+			return penisExam;
+		}
+			
+
+		return null;
+	}*/
+
+	public function callOnCompleted(type:String = "tween", tag:String, ?loops:Int, ?loopsLeft:Int)
+	{
+		switch (type.toLowerCase())
+		{
+			case 'timer':
+				PlayState.instance.callOnLuas("onTimerCompleted", [tag]);
+			default:
+				PlayState.instance.callOnLuas("onTweenCompleted", [tag]);
+		}	
+
+		(type.toLowerCase() == 'timer' ? PlayState.instance.modchartTimers.remove(tag) : PlayState.instance.modchartTweens.remove(tag));
+	}
 }

@@ -70,7 +70,7 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 		#if !html5 //Apparently other framerates isn't correctly supported on Browser? Probably it has some V-Sync shit enabled by default, idk
 		var option:Option = new Option('Framerate',
 			"Pretty self explanatory, isn't it?",
-			'fpsCap',
+			'framerate',
 			'int',
 			120);
 		addOption(option);
@@ -98,10 +98,11 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 
 	function onChangeFramerate()
 	{
-		FlxG.save.data.fpsCap = ClientPrefs.fpsCap;
-		(cast (Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
+		FlxG.save.data.fpsCap = ClientPrefs.framerate;
 
-		/*if(ClientPrefs.framerate > FlxG.drawFramerate)
+		(cast (Lib.current.getChildAt(0), Main)).setFPSCap(ClientPrefs.framerate);
+
+		if(ClientPrefs.framerate > FlxG.drawFramerate)
 		{
 			FlxG.updateFramerate = ClientPrefs.framerate;
 			FlxG.drawFramerate = ClientPrefs.framerate;
@@ -110,6 +111,6 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 		{
 			FlxG.drawFramerate = ClientPrefs.framerate;
 			FlxG.updateFramerate = ClientPrefs.framerate;
-		}*/
+		}
 	}
 }

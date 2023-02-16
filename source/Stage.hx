@@ -119,7 +119,7 @@ class Stage extends MusicBeatState
 
 		if (!preloading) //clears the filters
 		{
-			if (PlayState.instance.camGameShaders.length > 0 || PlayState.instance.camGameShaders.length > 0)
+			if (PlayState.instance.camGameShaders.length > 0)
 			{
 				PlayState.instance.clearShaderFromCamera('hud');
 				PlayState.instance.clearShaderFromCamera('game');
@@ -666,8 +666,7 @@ class Stage extends MusicBeatState
 				
 				luaArray.push(new ModchartState(curStage, preloading, true));
 
-				if (luaArray.length >= 1)
-				{
+				if (luaArray.length >= 1){
 					callOnLuas('onCreate', []);	
 				}
 			}

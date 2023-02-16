@@ -11,18 +11,18 @@ class MP4Handler extends vlc.VlcBitmap
 {
 	public var readyCallback:Void->Void;
 	public var finishCallback:Void->Void;
-	public var unskippable:Bool = false;
+	public var skippable:Bool = true;
 
 	var pauseMusic:Bool;
 
-	public function new(width:Float = 320, height:Float = 240, autoScale:Bool = true, ?unskippable:Bool = false)
+	public function new(width:Float = 320, height:Float = 240, autoScale:Bool = true, ?skippable:Bool = true)
 	{
 		super(width, height, autoScale);
 
 		onVideoReady = onVLCVideoReady;
 		onComplete = finishVideo;
 		onError = onVLCError;
-		this.unskippable = unskippable;
+		this.skippable = skippable;
 
 		FlxG.addChildBelowMouse(this);
 
@@ -40,7 +40,7 @@ class MP4Handler extends vlc.VlcBitmap
 
 	function update(e:Event)
 	{
-		if ((FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.SPACE) && isPlaying && !unskippable)
+		if ((FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.SPACE) && isPlaying && skippable)
 			finishVideo();
 
 		if (FlxG.sound.muted || FlxG.sound.volume <= 0)

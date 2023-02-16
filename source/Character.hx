@@ -28,7 +28,7 @@ import haxe.xml.Access;
 import flixel.math.FlxMath;
 
 import animateatlas.AtlasFrameMaker;
-import flxanimate.FlxAnimate;
+import animateatlas.FlxAnimate;
 
 using StringTools;
 
@@ -66,9 +66,8 @@ typedef AnimArray = {
 	var playerOffsets:Array<Int>;
 }
 
-class Character extends FlxSprite
+class Character extends FunkinSprite
 {
-	public var animOffsets:Map<String, Array<Dynamic>>;
 	public var animPlayerOffsets:Map<String, Array<Dynamic>>; //for saving as jsons lol
 	public var debugMode:Bool = false;
 	public var idleSuffix:String = '';
@@ -119,10 +118,7 @@ class Character extends FlxSprite
 	public var singDuration:Float = 4; //Multiplier of how long a character holds the sing pose
 	public var animationsArray:Array<AnimArray> = [];
 	public var stopIdle:Bool = false;
-
-	/*public var animateAtlas:FlxAnimate;
-    @:noCompletion public var atlasPlayingAnim:String;
-    @:noCompletion public var atlasPath:String;*/
+	public var skipDance:Bool = false; // hey there's a psych var now! neat!
 
 	public var stunned:Bool = false;
 
@@ -134,7 +130,6 @@ class Character extends FlxSprite
 	{
 		super(x, y);
 
-		animOffsets = new Map<String, Array<Dynamic>>();
 		animPlayerOffsets = new Map<String, Array<Dynamic>>();
 		curCharacter = character;
 		healthIcon = character;
@@ -198,10 +193,9 @@ class Character extends FlxSprite
 				
 				(json.spriteType != null ? spriteType = json.spriteType.toUpperCase() : spriteType = "SPARROW");
 
-				if (FileSystem.exists(Paths.modsImages(json.image+"/spritemap1")))
+				if (FileSystem.exists(Paths.modsImages(json.image+"/spritemap1")) && spriteType == "TEXTURE")
 				{
 					// i'll reenable it once I figure it out.
-					//new atlas. still implementing it
 					//animateAtlas = new FlxAnimate(x, y, json.image);
 					//atlasPath = json.image;
 				}
@@ -316,7 +310,8 @@ class Character extends FlxSprite
 
 		originalFlipX = flipX;
 
-		dance();
+		recalculateDanceIdle();
+		dance();	
 
 		if (isPlayer)
 		{
@@ -368,7 +363,7 @@ class Character extends FlxSprite
 					if (animation.curAnim.name.startsWith('sing'))
 						holdTimer += elapsed;
 		
-					if (holdTimer >= Conductor.stepCrochet * singDuration * 0.001 / (PlayState.instance != null ? 1 : PlayState.instance.playbackRate))
+					if (holdTimer >= Conductor.stepCrochet * singDuration * 0.001 / (PlayState.instance != null ? PlayState.instance.playbackRate : 1))
 					{
 						dance();
 						holdTimer = 0;
@@ -382,7 +377,7 @@ class Character extends FlxSprite
 					if (animation.curAnim.name.startsWith('sing'))
 						holdTimer += elapsed;
 		
-					if (holdTimer >= Conductor.stepCrochet * singDuration * 0.001 / (PlayState.instance != null ? 1 : PlayState.instance.playbackRate))
+					if (holdTimer >= Conductor.stepCrochet * singDuration * 0.001 / (PlayState.instance != null ? PlayState.instance.playbackRate : 1))
 					{
 						dance();
 						holdTimer = 0;
@@ -408,23 +403,20 @@ class Character extends FlxSprite
 
 	public function dance()
 	{
-		if (!debugMode && !specialAnim)
+		if (!debugMode && !specialAnim && !stopIdle && !skipDance)
 		{
 			switch (curCharacter)
 			{
 				default:
 					var daAlt:String = (isPlayer ? bfAltAnim : altAnim);
 
-					if (!stopIdle)
+					if (danceIdle)
 					{
-						if (danceIdle)
-						{
-							danced = !danced;
-							playAnim((danced ? "danceRight" : "danceLeft") + daAlt + idleSuffix);
-						}
-						else
-							playAnim("idle" + daAlt + idleSuffix);
+						danced = !danced;
+						playAnim((danced ? "danceRight" : "danceLeft") + daAlt + idleSuffix);
 					}
+					else
+						playAnim("idle" + daAlt + idleSuffix);
 			}
 		
 			if (color != curColor && doMissThing)
@@ -555,11 +547,6 @@ class Character extends FlxSprite
 			if (AnimName == 'singUP' || AnimName == 'singDOWN')
 				danced = !danced;
 		}
-	}
-
-	public function addOffset(name:String, x:Float = 0, y:Float = 0)
-	{
-		animOffsets[name] = [x, y];
 	}
 
 	public function addPlayerOffset(name:String, x:Float = 0, y:Float = 0)

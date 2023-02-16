@@ -15,6 +15,14 @@ import lime.utils.AssetLibrary;
 import lime.utils.AssetManifest;
 import openfl.utils.Assets;
 
+import flixel.graphics.frames.FlxFrame;
+import flixel.graphics.frames.FlxFramesCollection;
+import flixel.graphics.frames.FlxAtlasFrames;
+import flixel.system.FlxAssets.FlxGraphicAsset;
+import flixel.graphics.FlxGraphic;
+import animateatlas.AtlasFrameMaker;
+import haxe.io.Path;
+
 using StringTools;
 
 class CoolUtil
@@ -194,6 +202,57 @@ class CoolUtil
 			}
 		}
 		return maxKey;
+	}
+
+	public static function loadFrames(path:String, Unique:Bool = false, Key:String = null, SkipAtlasCheck:Bool = false):FlxFramesCollection {
+		var noExt = Path.withoutExtension(path);
+
+		if (properPathsCheck('$noExt/1.png')) {
+			// MULTIPLE SPRITESHEETS!!
+
+			var graphic = FlxG.bitmap.add("flixel/images/logo/default.png", false, '$noExt/mult');
+			var frames = FlxAtlasFrames.findFrame(graphic);
+			if (frames != null)
+				return frames;
+
+			trace("no frames yet for multiple atlases!!");
+			var spritesheets = [];
+			var cur = 1;
+			var finalFrames = new FlxFramesCollection(graphic, ATLAS);
+			while(properPathsCheck('$noExt/$cur.png')) {
+				spritesheets.push(loadFrames('$noExt/$cur.png'));
+				cur++;
+			}
+			for(frames in spritesheets)
+				if (frames != null && frames.frames != null)
+					for(f in frames.frames)
+						if (f != null) {
+							finalFrames.frames.push(f);
+							f.parent = frames.parent;
+						}
+			return finalFrames;
+		} else if (!SkipAtlasCheck && properPathsCheck('$noExt/Animation.json')
+		&& properPathsCheck('$noExt/spritemap.json')
+		&& properPathsCheck('$noExt/spritemap.png')) {
+			return AtlasFrameMaker.construct(noExt);
+		} else if (properPathsCheck('$noExt.xml')) {
+			return Paths.getSparrowAtlas(noExt);
+		} else if (properPathsCheck('$noExt.txt')) {
+			return Paths.getPackerAtlas(noExt);
+		}
+
+		var graph:FlxGraphic = FlxG.bitmap.add(path, Unique, Key);
+		if (graph == null)
+			return null;
+		return graph.imageFrame;
+	}
+
+	public static function properPathsCheck(path:String)
+	{
+		if (Assets.exists(path) || FileSystem.exists(path) || FileSystem.exists(Paths.modFolders(path)))
+			return true;
+
+		return false;
 	}
 
 	public static function coolTextFile2(path:String):Array<String>
