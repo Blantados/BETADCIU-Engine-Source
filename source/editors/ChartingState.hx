@@ -526,6 +526,57 @@ class ChartingState extends MusicBeatState
 		openSubState(new Prompt('Is this the correct BPM?', 0, function(){fitNotesToBpm(Std.parseFloat(oldBpmInputText.text));}, null,ignoreWarnings));
 	}
 
+	//KADE ENGINE!!!
+	function shiftNotes(measure:Int = 0, step:Int = 0, ms:Int = 0):Void
+	{
+		var newSong = [];
+
+		var millisecadd = (((measure * 4) + step / 4) * (60000 / _song.bpm)) + ms;
+		var totaladdsection = Std.int((millisecadd / (60000 / _song.bpm) / 4));
+		trace(millisecadd, totaladdsection);
+		if (millisecadd > 0)
+		{
+			for (i in 0...totaladdsection)
+			{
+				newSong.unshift(newSection());
+			}
+		}
+		for (daSection1 in 0..._song.notes.length)
+		{
+			newSong.push(newSection(16, _song.notes[daSection1].mustHitSection, _song.notes[daSection1].altAnim, _song.notes[daSection1].bfAltAnim));
+		}
+
+		for (daSection in 0...(_song.notes.length))
+		{
+			var aimtosetsection = daSection + Std.int((totaladdsection));
+			if (aimtosetsection < 0)
+				aimtosetsection = 0;
+			newSong[aimtosetsection].mustHitSection = _song.notes[daSection].mustHitSection;
+			updateHeads();
+			newSong[aimtosetsection].altAnim = _song.notes[daSection].altAnim;
+			newSong[aimtosetsection].bfAltAnim = _song.notes[daSection].bfAltAnim;
+			// trace("section "+daSection);
+			for (daNote in 0...(_song.notes[daSection].sectionNotes.length))
+			{
+				var newtiming = _song.notes[daSection].sectionNotes[daNote][0] + millisecadd;
+				if (newtiming < 0)
+				{
+					newtiming = 0;
+				}
+				var futureSection = Math.floor(newtiming / 4 / (60000 / _song.bpm));
+				_song.notes[daSection].sectionNotes[daNote][0] = newtiming;
+				newSong[futureSection].sectionNotes.push(_song.notes[daSection].sectionNotes[daNote]);
+
+				// newSong.notes[daSection].sectionNotes.remove(_song.notes[daSection].sectionNotes[daNote]);
+			}
+		}
+		// trace("DONE BITCH");
+		_song.notes = newSong;
+		updateGrid();
+		updateSectionUI();
+		updateNoteUI();
+	}
+
 	function addSongUI():Void
 	{
 		var UI_songTitle = new FlxUIInputText(10, 10, 70, _song.song, 8);
@@ -616,7 +667,7 @@ class ChartingState extends MusicBeatState
 		var stages:Array<String> = CoolUtil.coolTextFile(Paths.txt('stageList'));
 		var noteStyles:Array<String> = CoolUtil.coolTextFile(Paths.txt('noteStyleList'));
 
-		var player1DropDown = new FlxUIDropDownMenuCustom(10, stepperSpeed.y + 45, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
+		var player1DropDown = new FlxUIDropDownMenuCustom(10, stepperSpeed.y + 40, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
 		{
 			_song.player1 = characters[Std.parseInt(character)];
 			updateHeads();
@@ -663,37 +714,57 @@ class ChartingState extends MusicBeatState
 		reloadDropDowns.setGraphicSize(80, 30);
 		reloadDropDowns.updateHitbox();
 
+		var stepperShiftNoteDial:FlxUINumericStepper = new FlxUINumericStepper(10, player2DropDown.y + 50, 1, 0, -1000, 1000, 0);
+		stepperShiftNoteDial.name = 'song_shiftnote';
+
+		var stepperShiftNoteDialStep:FlxUINumericStepper = new FlxUINumericStepper(10, stepperShiftNoteDial.y + 30, 1, 0, -1000, 1000, 0);
+		stepperShiftNoteDialStep.name = 'song_shiftnotems';
+
+		var stepperShiftNoteDialMs:FlxUINumericStepper = new FlxUINumericStepper(10, stepperShiftNoteDialStep.y + 30, 1, 0, -1000, 1000, 2);
+		stepperShiftNoteDialMs.name = 'song_shiftnotems';
+
+		var shiftNoteButton:FlxButton = new FlxButton(10, stepperShiftNoteDialMs.y + 30, "Shift", function()
+		{
+			shiftNotes(Std.int(stepperShiftNoteDial.value), Std.int(stepperShiftNoteDialStep.value), Std.int(stepperShiftNoteDialMs.value));
+		});
+
 		var tab_group_song = new FlxUI(null, UI_box);
 		tab_group_song.name = "Song";
 		tab_group_song.add(UI_songTitle);
 
-		tab_group_song.add(new FlxText(stepperBPM.x, stepperBPM.y - 15, 0, 'Song BPM:'));
-		tab_group_song.add(new FlxText(stepperSpeed.x, stepperSpeed.y - 15, 0, 'Song Speed:'));
-		tab_group_song.add(new FlxText(stepperMania.x, stepperMania.y - 15, 0, 'Song Mania:'));
-		tab_group_song.add(new FlxText(player2DropDown.x, player2DropDown.y - 15, 0, 'Opponent:'));
-		tab_group_song.add(new FlxText(gfVersionDropDown.x, gfVersionDropDown.y - 15, 0, 'Girlfriend:'));
-		tab_group_song.add(new FlxText(player1DropDown.x, player1DropDown.y - 15, 0, 'Player:'));
-		tab_group_song.add(new FlxText(stageDropDown.x, stageDropDown.y - 15, 0, 'Stage:'));
-		tab_group_song.add(new FlxText(noteStyleDropDown.x, noteStyleDropDown.y - 15, 0, 'Note Style:'));
+		// Define the controls as an array of objects
+		var controls:Array<Dynamic> = [
+			{ label: "Shift All Notes by # Sections", control: stepperShiftNoteDial},
+			{ label: 'Shift All Notes by # Steps', control: stepperShiftNoteDialStep },
+			{ label: 'Shift All Notes by # ms', control: stepperShiftNoteDialMs },
+			{ control: shiftNoteButton },
+			{ control: reloadDropDowns },
+			{ control: check_voices },
+			{ control: clear_notes },
+			{ control: clear_events },
+			{ control: saveEvents },
+			{ control: saveButton },
+			{ control: reloadSong },
+			{ control: reloadSongJson },
+			{ control: loadAutosaveBtn },
+			{ control: loadEventJson },
+			{ label: "Song BPM:", control: stepperBPM },
+			{ label: "Song Speed:", control: stepperSpeed },
+			{ label: "Song Mania:", control: stepperMania },
+			{ label: "Note Style:", control: noteStyleDropDown },
+			{ label: "Stage:", control: stageDropDown },
+			{ label: "Opponent:", control: player2DropDown },
+			{ label: "Girlfriend:", control: gfVersionDropDown },
+			{ label: "Player:", control: player1DropDown }
+		];
 
-		tab_group_song.add(reloadDropDowns);
-		tab_group_song.add(check_voices);
-		tab_group_song.add(clear_notes);
-		tab_group_song.add(clear_events);
-		tab_group_song.add(saveEvents);
-		tab_group_song.add(saveButton);
-		tab_group_song.add(reloadSong);
-		tab_group_song.add(reloadSongJson);
-		tab_group_song.add(loadAutosaveBtn);
-		tab_group_song.add(loadEventJson);
-		tab_group_song.add(stepperBPM);
-		tab_group_song.add(stepperSpeed);
-		tab_group_song.add(stepperMania);
-		tab_group_song.add(noteStyleDropDown);
-		tab_group_song.add(stageDropDown);
-		tab_group_song.add(player2DropDown);
-		tab_group_song.add(gfVersionDropDown);
-		tab_group_song.add(player1DropDown);
+		// Loop over the controls and add them to tab_group_song
+		for (control in controls) {
+			if (control.label != null) {
+				tab_group_song.add(new FlxText(control.control.x, control.control.y - 15, 0, control.label));
+			}
+			tab_group_song.add(control.control);
+		}
 		
 		UI_box.addGroup(tab_group_song);
 		UI_box.scrollFactor.set();
@@ -754,7 +825,7 @@ class ChartingState extends MusicBeatState
 		stepperSectionBPM.value = Conductor.bpm;
 		stepperSectionBPM.name = 'section_bpm';
 
-		stepperDType = new FlxUINumericStepper(130, stepperSectionBPM.y, 1, 0, 0, 9, 0);
+		stepperDType = new FlxUINumericStepper(130, stepperSectionBPM.y, 1, 0, 0, 999, 0);
 		stepperDType.value = 0;
 		stepperDType.name = 'section_dtype';
 
@@ -980,7 +1051,6 @@ class ChartingState extends MusicBeatState
 		});
 
 		tab_group_section.add(stepperLength);
-		tab_group_section.add(new FlxText(75 , stepperLength.x,'Section Length (in steps)'));
 		tab_group_section.add(check_mustHitSection);
 		tab_group_section.add(check_gfSection);
 		tab_group_section.add(check_altAnim);
@@ -988,7 +1058,6 @@ class ChartingState extends MusicBeatState
 		tab_group_section.add(check_changeBPM);
 		tab_group_section.add(stepperSectionBPM);
 		tab_group_section.add(stepperDType);
-		tab_group_section.add(new FlxText(stepperDType.x + 60, stepperDType.y,'Section dType'));
 		tab_group_section.add(check_dadCrossfade);
 		tab_group_section.add(check_bfCrossfade);
 		tab_group_section.add(copyButton);
@@ -998,10 +1067,13 @@ class ChartingState extends MusicBeatState
 		tab_group_section.add(check_eventsSec);
 		tab_group_section.add(swapSection);
 		tab_group_section.add(stepperCopyLast);
-		tab_group_section.add(new FlxText(stepperCopyLast.x + 60, stepperCopyLast.y,'sections back'));
 		tab_group_section.add(copyLastButton);
 		tab_group_section.add(duetButton);
 		tab_group_section.add(mirrorButton);
+
+		tab_group_section.add(new FlxText(75 , stepperLength.x,'Section Length (in steps)'));
+		tab_group_section.add(new FlxText(stepperDType.x + 60, stepperDType.y,'Section dType'));
+		tab_group_section.add(new FlxText(stepperCopyLast.x + 60, stepperCopyLast.y,'sections back'));
 
 		UI_box.addGroup(tab_group_section);
 	}
@@ -2387,6 +2459,28 @@ class ChartingState extends MusicBeatState
 		};
 
 		_song.notes.push(sec);
+	}
+
+	private function newSection(lengthInSteps:Int = 16, mustHitSection:Bool = false, altAnim:Bool = true, bfAltAnim:Bool = true, ?sectionBeats:Int = 4):SwagSection
+	{
+		//do nothing fuck you
+		var sec:SwagSection = {
+			sectionBeats: sectionBeats,
+			lengthInSteps: lengthInSteps,
+			bpm: _song.bpm,
+			changeBPM: false,
+			mustHitSection: true,
+			gfSection: false,
+			sectionNotes: [],
+			typeOfSection: 0,
+			altAnim: false,
+			bfAltAnim: false,
+			dadCrossfade: false,
+			bfCrossfade: false,
+			dType: 0
+		};
+
+		return sec;
 	}
 
 	function selectNote(note:Note):Void

@@ -140,10 +140,9 @@ class ModchartState
 
 			// If successful, pass and then return the result.
 			var result:Dynamic = cast Convert.fromLua(lua, -1);
-			if (result == null) result = Function_Continue;
 
 			Lua.pop(lua, 1);
-			return result;
+			return result == null ? Function_Continue : result;
 		}
 		catch (e:Dynamic) {
 			trace(e);
@@ -562,12 +561,12 @@ class ModchartState
 
 	function changeDadCharacter(id:String, x:Float, y:Float)
 	{		
-		PlayState.instance.removeObject(PlayState.instance.dadTrail);
+		//PlayState.instance.removeObject(PlayState.instance.dadTrail);
 		PlayState.instance.removeObject(PlayState.instance.dad);
 		PlayState.instance.destroyObject(PlayState.instance.dad);
 		PlayState.instance.dad = new Character(x, y, id);
-		PlayState.instance.addObject(PlayState.instance.dadTrail);
-		PlayState.instance.dadTrail.resetTrail();
+		//PlayState.instance.addObject(PlayState.instance.dadTrail);
+		//PlayState.instance.dadTrail.resetTrail();
 		PlayState.instance.addObject(PlayState.instance.dad);
 
 		PlayState.instance.iconP2.changeIcon(PlayState.instance.dad.healthIcon);
@@ -592,12 +591,12 @@ class ModchartState
 			animationFrame = PlayState.instance.boyfriend.animation.curAnim.curFrame;
 		}
 
-		PlayState.instance.removeObject(PlayState.instance.bfTrail);
+		//PlayState.instance.removeObject(PlayState.instance.bfTrail);
 		PlayState.instance.removeObject(PlayState.instance.boyfriend);
 		PlayState.instance.destroyObject(PlayState.instance.boyfriend);
 		PlayState.instance.boyfriend = new Boyfriend(x, y, id);
-		PlayState.instance.addObject(PlayState.instance.bfTrail);
-		PlayState.instance.bfTrail.resetTrail();
+		//PlayState.instance.addObject(PlayState.instance.bfTrail);
+		//PlayState.instance.bfTrail.resetTrail();
 		PlayState.instance.addObject(PlayState.instance.boyfriend);
 
 		PlayState.instance.iconP1.changeIcon(PlayState.instance.boyfriend.healthIcon);
@@ -621,7 +620,7 @@ class ModchartState
 		PlayState.instance.removeObject(PlayState.instance.dad);
 		PlayState.instance.removeObject(PlayState.instance.boyfriend);
 
-		if (PlayState.instance.Stage.isCustomStage && PlayState.instance.Stage.luaArray.length >= 1)
+		if (PlayState.instance.Stage.isCustomStage && PlayState.instance.Stage.isLuaStage)
 		{
 			for (i in PlayState.instance.Stage.luaArray)
 			{
@@ -721,7 +720,7 @@ class ModchartState
 		if (FlxG.save.data.uncacheCharacterSwitch && !dontDestroy)
 			bfPath = 'shared:assets/shared/images/'+PlayState.instance.boyfriend.charPath;
 
-		PlayState.instance.removeObject(PlayState.instance.bfTrail);
+		//PlayState.instance.removeObject(PlayState.instance.bfTrail);
 		PlayState.instance.removeObject(PlayState.instance.boyfriend);
 		PlayState.instance.destroyObject(PlayState.instance.boyfriend);
 		PlayState.instance.boyfriend = new Boyfriend(0, 0, id, !flipped);
@@ -763,8 +762,8 @@ class ModchartState
 		PlayState.instance.boyfriend.x = PlayState.instance.Stage.bfXOffset + charX + 770;
 		PlayState.instance.boyfriend.y = PlayState.instance.Stage.bfYOffset + charY + 450;
 
-		PlayState.instance.addObject(PlayState.instance.bfTrail);
-		PlayState.instance.bfTrail.resetTrail();
+		//PlayState.instance.addObject(PlayState.instance.bfTrail);
+		//PlayState.instance.bfTrail.resetTrail();
 		PlayState.instance.addObject(PlayState.instance.boyfriend);
 
 		PlayState.instance.iconP1.changeIcon(PlayState.instance.boyfriend.healthIcon);
@@ -800,7 +799,7 @@ class ModchartState
 		if (FlxG.save.data.uncacheCharacterSwitch && !dontDestroy)
 			dadPath = 'shared:assets/shared/images/'+PlayState.instance.dad.charPath;
 
-		PlayState.instance.removeObject(PlayState.instance.dadTrail);
+		//PlayState.instance.removeObject(PlayState.instance.dadTrail);
 		PlayState.instance.removeObject(PlayState.instance.dad);
 		PlayState.instance.destroyObject(PlayState.instance.dad);
 		PlayState.instance.dad = new Character(0, 0, id, flipped);
@@ -843,8 +842,8 @@ class ModchartState
 		PlayState.instance.dad.x = PlayState.instance.Stage.dadXOffset + charX + 100;
 		PlayState.instance.dad.y = PlayState.instance.Stage.dadYOffset + charY + 100;
 
-		PlayState.instance.addObject(PlayState.instance.dadTrail);
-		PlayState.instance.dadTrail.resetTrail();
+		//PlayState.instance.addObject(PlayState.instance.dadTrail);
+		//PlayState.instance.dadTrail.resetTrail();
 		PlayState.instance.addObject(PlayState.instance.dad);
 
 		PlayState.instance.iconP2.changeIcon(PlayState.instance.dad.healthIcon);
@@ -1881,34 +1880,23 @@ class ModchartState
 				PlayState.instance.iconP1.changeIcon(id);
 			});
 	
-			Lua_helper.add_callback(lua,"changeIcon", function(char:String, id:String) {
-	
-				trace('run dammit!');
-	
-				if(PlayState.instance.modchartIcons.exists(char)) {
-					PlayState.instance.modchartIcons.get(char).changeIcon(id);
-					return;
+			Lua_helper.add_callback(lua,"changeIcon", function(obj:String, iconName:String) {
+				var killMe:Array<String> = obj.split('.');
+				var object:HealthIcon = getObjectDirectly(killMe[0]);
+				if(killMe.length > 1) {
+					object = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 				}
 	
-				switch(char)
-				{
-					case 'bf' | 'boyfriend' | 'iconP1':
-						trace('changing bf icon');
-						PlayState.instance.iconP1.changeIcon(id);
-						trace('changed bf icon');
-					default:
-						trace('changing p2 icon');
-						PlayState.instance.iconP2.changeIcon(id);
-						trace('changed p2 icon');
-				}				
+				if(object != null) {
+					object.changeIcon(iconName);
+					return true;
+				}
+				luaTrace("changeIcon: Icon " + obj + " doesn't exist!", false, false, FlxColor.RED);
+				return false;
 			});
 	
 			Lua_helper.add_callback(lua,"softCountdown", function(id:String) {
 				PlayState.instance.softCountdown(id);
-			});
-	
-			Lua_helper.add_callback(lua,"fixTrail", function(id:String) {
-				PlayState.instance.fixTrailShit(id);
 			});
 	
 			Lua_helper.add_callback(lua,"uncacheObject", function(id:String) {

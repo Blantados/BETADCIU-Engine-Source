@@ -17,6 +17,7 @@ class ClientPrefs {
 	public static var noteSplashes:Bool = true;
 	public static var lowQuality:Bool = false;
 	public static var psychUI:Bool = false;
+	public static var fpsRain:Bool = false;
 	public static var shaders:Bool = true;
 	public static var framerate:Int = 120;
 	public static var fpsCap:Int = 120;
@@ -38,6 +39,7 @@ class ClientPrefs {
 	public static var comboStacking = true;
 	public static var botplay:Bool = false;
 	public static var poltatoPC:Bool = false;
+	public static var songPosition:Bool = false;
 	public static var gameplaySettings:Map<String, Dynamic> = [
 		'scrollspeed' => 1.0,
 		'scrolltype' => 'multiplicative', 
@@ -136,6 +138,8 @@ class ClientPrefs {
 		FlxG.save.data.comboStacking = comboStacking;
 		FlxG.save.data.botplay = botplay;
 		FlxG.save.data.psychUI = psychUI;
+		FlxG.save.data.fpsRain = fpsRain;
+		FlxG.save.data.songPosition = songPosition;
 	
 		FlxG.save.flush();
 
@@ -281,6 +285,14 @@ class ClientPrefs {
 
 		if(FlxG.save.data.psychUI != null) {
 			psychUI = FlxG.save.data.psychUI;
+		}
+
+		if(FlxG.save.data.songPosition != null) {
+			songPosition = FlxG.save.data.songPosition;
+		}
+
+		if(FlxG.save.data.fpsRain != null) {
+			fpsRain = FlxG.save.data.fpsRain;
 		}
 
 		var save:FlxSave = new FlxSave();

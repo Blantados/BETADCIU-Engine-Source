@@ -282,14 +282,8 @@ class StrumNote extends FlxSprite
 		animation.play(anim, force);
 		centerOffsets();
 		centerOrigin();
-		if(animation.curAnim == null || animation.curAnim.name == 'static') 
-		{
 		
-		} 
-		else 
-		{
-			if(animation.curAnim.name == 'confirm' && !isPixel)
-				centerOrigin();
-		}
+		if(animation.curAnim.name == 'confirm' && !isPixel)
+			centerOrigin();
 	}
 }

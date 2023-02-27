@@ -17,26 +17,20 @@ class Boyfriend extends Character
 
 	override function update(elapsed:Float)
 	{
-		if (!debugMode && animation.curAnim != null)
+		if (animation.curAnim != null && !debugMode)
 		{
-			if (animation.curAnim.name.startsWith('sing'))
-			{
+			if (animation.curAnim.name.startsWith('sing')){
 				holdTimer += elapsed;
 			}
 			else
 				holdTimer = 0;
-
-			if (animation.curAnim.name.endsWith('miss') && animation.curAnim.finished && !debugMode)
-			{
-				if (!animOffsets.exists('idle'))
-				{
+			
+			if (animation.curAnim.name.endsWith('miss') && animation.curAnim.finished) {
+				if (animOffsets.exists('idle')) {
+					playAnim('idle', true, false, 10);
+				} else {
 					dance();
 				}
-				
-				else
-				{
-					playAnim('idle', true, false, 10);
-				}	
 			}
 
 			if (animation.curAnim.name == 'firstDeath' && animation.curAnim.finished)

@@ -96,6 +96,7 @@ class Stage extends MusicBeatState
 	public var introAssets:Array<String> = ['ready', 'set', 'go'];
 	public var preloading:Bool = false;
 	public var isCustomStage:Bool = false;
+	public var isLuaStage:Bool = false;
 
 	public var animOffsets:Map<String, Array<Dynamic>>;
 
@@ -427,6 +428,11 @@ class Stage extends MusicBeatState
 
 				pixelShitPart1 = 'weeb/pixelUI/';
 				pixelShitPart2 = '-pixel';	
+
+				bfXOffset = 140;
+				bfYOffset = 50;
+				dadXOffset = 110;
+				dadYOffset = 50;
 			}
 
 			case 'schoolEvil':
@@ -453,6 +459,11 @@ class Stage extends MusicBeatState
 				toAdd.push(bg);
 
 				introAssets = ['weeb/pixelUI/ready-pixel', 'weeb/pixelUI/set-pixel', 'weeb/pixelUI/date-pixel'];
+
+				bfXOffset = 140;
+				bfYOffset = 50;
+				dadXOffset = 110;
+				dadYOffset = 50;
 			}
 
 			case 'tank':
@@ -667,6 +678,7 @@ class Stage extends MusicBeatState
 				luaArray.push(new ModchartState(curStage, preloading, true));
 
 				if (luaArray.length >= 1){
+					isLuaStage = true;
 					callOnLuas('onCreate', []);	
 				}
 			}
@@ -694,7 +706,7 @@ class Stage extends MusicBeatState
 				moveTank();
 		}
 
-		if (isCustomStage && !preloading && luaArray.length >= 1)
+		if (isCustomStage && !preloading && isLuaStage)
 			callOnLuas('onUpdate', [elapsed]);
 	}
 
@@ -702,7 +714,9 @@ class Stage extends MusicBeatState
 	{
 		super.stepHit();
 
-		var array = slowBacks[curStep];
+		//uncomment if you need it or smthn. I have NEVER used this.
+
+		/*var array = slowBacks[curStep];
 		if (array != null && array.length > 0)
 		{
 			if (hideLastBG)
@@ -730,7 +744,7 @@ class Stage extends MusicBeatState
 				for (bg in array)
 					bg.visible = !bg.visible;
 			}
-		}
+		}*/
 	}
 
 	// Variables and Functions for Stages
@@ -942,10 +956,27 @@ class Stage extends MusicBeatState
 
 	public function setOnLuas(variable:String, arg:Dynamic) {
 		#if LUA_ALLOWED
-		for (i in 0...luaArray.length) {
-			luaArray[i].set(variable, arg);
+		for (script in luaArray) {
+			script.set(variable, arg);
 		}
 		#end
+	}
+
+	public function searchLuaVar(variable:String, arg:String, result:Bool) {
+		#if LUA_ALLOWED
+		//if (Stage != null && Stage.isCustomStage && Stage.luaArray.length >= 1)
+		//	Stage.setOnLuas(variable, arg);	
+
+		for (script in luaArray)
+		{
+			if (script.get(variable, arg) == result)
+			{
+				return result;
+				break;
+			}
+		}
+		#end
+		return !result;
 	}
 
 	public function moveTank()

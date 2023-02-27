@@ -343,7 +343,7 @@ class Character extends FunkinSprite
 				heyTimer -= elapsed;
 				if(heyTimer <= 0)
 				{
-					if(specialAnim && animation.curAnim.name == 'hey' || animation.curAnim.name == 'cheer')
+					if(specialAnim && (animation.curAnim.name == 'hey' || animation.curAnim.name == 'cheer'))
 					{
 						specialAnim = false;
 						dance();
@@ -356,32 +356,16 @@ class Character extends FunkinSprite
 				dance();
 			}
 			
-			if (flipMode)
+			if ((flipMode && isPlayer) || (!flipMode && !isPlayer))
 			{
-				if (isPlayer)
-				{
-					if (animation.curAnim.name.startsWith('sing'))
-						holdTimer += elapsed;
-		
-					if (holdTimer >= Conductor.stepCrochet * singDuration * 0.001 / (PlayState.instance != null ? PlayState.instance.playbackRate : 1))
-					{
-						dance();
-						holdTimer = 0;
-					}
+				if (animation.curAnim.name.startsWith('sing')){
+					holdTimer += elapsed;
 				}
-			}
-			else
-			{
-				if (!isPlayer)
+					
+				if (holdTimer >= Conductor.stepCrochet * singDuration * 0.001 / (PlayState.instance != null ? PlayState.instance.playbackRate : 1))
 				{
-					if (animation.curAnim.name.startsWith('sing'))
-						holdTimer += elapsed;
-		
-					if (holdTimer >= Conductor.stepCrochet * singDuration * 0.001 / (PlayState.instance != null ? PlayState.instance.playbackRate : 1))
-					{
-						dance();
-						holdTimer = 0;
-					}
+					dance();
+					holdTimer = 0;
 				}
 			}
 

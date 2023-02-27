@@ -193,54 +193,34 @@ class Note extends FlxSprite
 			prevNote = this;
 
 		prevNote = _prevNote;
-
 		isSustainNote = sustainNote;
+		
 		this.style = style;
 
 		swagWidth = swidths[mania] * 0.7; //factor not the same as noteScale
 		noteScale = scales[mania];
-
-		/*if (PlayState.SONG.song.toLowerCase() == 'bonedoggle')
-		{
-			swagWidth = swidths[3] * 0.7; //factor not the same as noteScale
-			noteScale = scales[3];
-		}
-
-		if (style == 'exe' && mania == 3)
-		{
-			swagWidth = swidths[0] * 0.7; //factor not the same as noteScale
-			noteScale = scales[0];
-		}*/
 		
 		x += 50 - posRest[mania];
 		
 		// MAKE SURE ITS DEFINITELY OFF SCREEN?
 		y -= 2000;
 
-		if (PlayState.SONG.mania == 2)
+		if (mania == 2)
 			x -= tooMuch;
 
 		strumTime = _strumTime;
 
-		if (this.strumTime < 0 )
-			this.strumTime = 0;
-
 		noteData = _noteData % Main.keyAmmo[mania];
-		
-		var daStage:String = PlayState.curStage;
-
-		//defaults if no noteStyle was found in chart
-		var noteTypeCheck:String = 'normal';
 
 		loadNoteAnims(style, sustainNote);
 
 		var frameN:Array<String> = ['purple', 'blue', 'green', 'red'];
 		switch (mania)
 		{
-			case 1: frameN = ['purple', 'green', 'red', 'yellow', 'blue', 'dark'];		
-			case 2: frameN = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'black', 'dark'];	
+			case 1: frameN = ['purple', 'green', 'red', 'yellow', 'blue', 'dark'];
+			case 2: frameN = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'black', 'dark'];
 			case 3: frameN = ['purple', 'blue', 'white', 'green', 'red'];
-			case 4:	frameN = ['purple', 'green', 'red', 'white', 'yellow', 'blue', 'dark'];		
+			case 4:	frameN = ['purple', 'green', 'red', 'white', 'yellow', 'blue', 'dark'];
 		}
 
 		if(_noteData > -1) {
@@ -272,11 +252,7 @@ class Note extends FlxSprite
 			{
 				prevNote.animation.play(frameN[prevNote.noteData] + 'hold');
 
-				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5; //idk why but 1.05 doesn't work.
-				if(PlayState.instance != null){
-					prevNote.scale.y *= PlayState.instance.songSpeed;
-				}
-					
+				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * (PlayState.instance != null ? PlayState.instance.songSpeed : 1); //idk why but 1.05 doesn't work.					
 				prevNote.updateHitbox();
 			}
 		}
@@ -304,40 +280,32 @@ class Note extends FlxSprite
 		}
 	}
 
+	public var curFlipY:Bool = false;
+
+	
+
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 
 		//this is dumb but it wouldn't work with the other way I did it so....
-		if (((FlxG.save.data.downscroll && !flipScroll) || (!FlxG.save.data.downscroll && flipScroll)) && (isSustainNote && prevNote != null) && !flipY){
-			flipY = true;
+		if (isSustainNote && prevNote != null) {
+			var targetFlipY = (FlxG.save.data.downscroll != flipScroll);
+			if (flipY != targetFlipY) {
+				flipY = targetFlipY;
+			}
 		}
-		else if (flipY && (isSustainNote && prevNote != null) && ((!FlxG.save.data.downscroll && !flipScroll) || (FlxG.save.data.downscroll && flipScroll))){
-			flipY = false;
-		}
-			
-		
+
 		if (modifiedByLua)
 			angle = modAngle;
 
 		if (mustPress)
-		{
-			if (isSustainNote)
-			{
-				if (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * 1.5)
-					&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * 0.5))
-					canBeHit = true;
-				else
-					canBeHit = false;
-			}
+		{			 
+			if (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * lateHitMult)
+				&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * earlyHitMult))
+				canBeHit = true;
 			else
-			{
-				if (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * lateHitMult)
-					&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * earlyHitMult))
-					canBeHit = true;
-				else
-					canBeHit = false;
-			}
+				canBeHit = false;
 		
 			if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset * Conductor.timeScale && !wasGoodHit)
 				tooLate = true;
@@ -346,14 +314,15 @@ class Note extends FlxSprite
 		{
 			canBeHit = false;
 
-			if (strumTime <= Conductor.songPosition)
+			if (strumTime <= Conductor.songPosition) {
 				wasGoodHit = true;
+			}
+			
+			return;
 		}
-
-		if (tooLate)
-		{
-			if (alpha > 0.3)
-				alpha = 0.3;
+		
+		if (tooLate) {
+			alpha = alpha < 0.3 ? alpha : 0.3;
 		}
 	}
 
@@ -399,6 +368,7 @@ class Note extends FlxSprite
 				offsetX -= 3;
 			}
 		}
+		
 		updateHitbox();
 
 		style = style2;
@@ -426,37 +396,24 @@ class Note extends FlxSprite
 		
 			case 'noStrums':
 				loadGraphic(Paths.image('notes/noStrums'), true, 17, 17);
-				animation.add('green', [0]);
-				animation.add('red', [0]);
-				animation.add('blue', [0]);
-				animation.add('purple', [0]);
 
 				setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 				antialiasing = false;
 
 				var colorScroll:Array<String> = ['purple', 'blue', 'green', 'red'];
-				var length:Int = 4;
 
-				for (i in 0...length)
+				for (i in 0...colorScroll.length)
 				{
+					animation.add(colorScroll[i], [0]);
 					animation.add(colorScroll[i]+'Scroll', [0]);
 					animation.add(colorScroll[i]+'hold', [0], 12, false);
 					animation.add(colorScroll[i]+'holdend', [0], 24, false);
 				}
 
 			default:
-				if (Assets.exists(Paths.image('notes/'+style)))
-				{
+				if (Assets.exists(Paths.image('notes/'+style))){
 					frames = Paths.getSparrowAtlas('notes/'+style);
-	
-					if (frames == null)
-					{
-						if (mania > 0)
-							frames = Paths.getSparrowAtlas('notes/shaggyNotes');
-						else
-							frames = Paths.getSparrowAtlas('notes/NOTE_assets');
-					}
-					
+
 					addAnims();
 				}
 				else
@@ -466,19 +423,13 @@ class Note extends FlxSprite
 					
 					if (FileSystem.exists(Paths.modsImages(style)))
 					{
-						if (!Paths.currentTrackedAssets.exists(style))
-							Paths.cacheImage(style);
-
-						var rawPic:Dynamic = Paths.currentTrackedAssets.get(style);
+						var rawPic:Dynamic = Paths.returnGraphic(style);
 
 						if (!FileSystem.exists(Paths.modsXml(style)))
 						{
 							if (isSustainNote)
-							{
-								if (!Paths.currentTrackedAssets.exists(style+'ENDS'))
-									Paths.cacheImage(style+'ENDS');
-		
-								var rawPic2:Dynamic = Paths.currentTrackedAssets.get(style+'ENDS');
+							{		
+								var rawPic2:Dynamic = Paths.returnGraphic(style+'ENDS');
 								loadGraphic(rawPic2, true, 7, 6);
 							}
 							else
@@ -492,6 +443,7 @@ class Note extends FlxSprite
 							addAnims();
 						}
 					}
+
 					if (frames == null)
 					{
 						if (isPixel)
@@ -505,20 +457,12 @@ class Note extends FlxSprite
 						}
 						else
 						{
-							if (mania > 0)
-								frames = Paths.getSparrowAtlas('notes/shaggyNotes');
-							else
-								frames = Paths.getSparrowAtlas('notes/NOTE_assets');
-
-							
+							frames = Paths.getSparrowAtlas(mania > 0 ? 'notes/shaggyNotes' : 'notes/NOTE_assets');
 							addAnims();
 						}
 					}
 				}
 		}
-
-		if (burning && !pixelBurn && PlayState.curStage != 'auditorHell' && !isAuditorNote || bomb)
-			setGraphicSize(Std.int(width * 0.86));
 
 		if (FlxG.save.data.poltatoPC)
 		{

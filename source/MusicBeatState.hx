@@ -93,19 +93,22 @@ class MusicBeatState extends FlxUIState
 			}
 		}
 
-		if (FlxG.save.data.fpsRain && skippedFrames >= 6)
+		if (FlxG.save.data.fpsRain)
 		{
-			if (currentColor >= array.length)
-				currentColor = 0;
-			(cast (Lib.current.getChildAt(0), Main)).changeFPSColor(array[currentColor]);
-			currentColor++;
-			skippedFrames = 0;
+			if (skippedFrames >= 6)
+			{
+				if (currentColor >= array.length)
+					currentColor = 0;
+				(cast (Lib.current.getChildAt(0), Main)).changeFPSColor(array[currentColor]);
+				currentColor++;
+				skippedFrames = 0;
+			}
+			else
+				skippedFrames++;
 		}
-		else if (FlxG.save.data.fpsRain)
-			skippedFrames++;
-
-		if ((cast (Lib.current.getChildAt(0), Main)).getFPSCap != FlxG.save.data.fpsCap && FlxG.save.data.fpsCap <= 290)
-			(cast (Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
+		
+		//if ((cast (Lib.current.getChildAt(0), Main)).getFPSCap() != FlxG.save.data.fpsCap && FlxG.save.data.fpsCap <= 290)
+		//	(cast (Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
 
 		super.update(elapsed);
 	}

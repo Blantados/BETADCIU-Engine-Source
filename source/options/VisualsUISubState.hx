@@ -49,6 +49,13 @@ class VisualsUISubState extends BaseOptionsMenu
 			false);
 		addOption(option);
 
+		var option:Option = new Option('Kade Song Position',
+			"If checked, enables Kade Engine's Song Bar. DO NOT USE WITH PSYCH UI!!!",
+			'songPosition',
+			'bool',
+			false);
+		addOption(option);
+
 		/*var option:Option = new Option('Hide HUD',
 			'If checked, hides most HUD elements.',
 			'hideHud',
@@ -105,6 +112,14 @@ class VisualsUISubState extends BaseOptionsMenu
 			true);
 		addOption(option);
 		option.onChange = onChangeFPSCounter;
+
+		var option:Option = new Option('Rainbow FPS',
+		'If checked and FPS Counter is enabled, counter will have rainbow colors!',
+		'fpsRain',
+		'bool',
+		false);
+		addOption(option);
+		option.onChange = onChangeFPSRain;
 		#end
 		
 		/*var option:Option = new Option('Pause Screen Song:',
@@ -155,10 +170,13 @@ class VisualsUISubState extends BaseOptionsMenu
 	#if !mobile
 	function onChangeFPSCounter()
 	{
-		trace("FPS: "+FlxG.save.data.fps);
-
 		if(Main.fpsCounter != null)
 			Main.fpsCounter.visible = ClientPrefs.showFPS;
+	}
+	function onChangeFPSRain()
+	{
+		if(Main.fpsCounter != null)
+			Main.fpsCounter.textColor = FlxColor.WHITE;
 	}
 	#end
 }
