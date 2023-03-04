@@ -90,10 +90,7 @@ class NoteSplash extends FlxSprite
 	}
 
 	function loadAnims(skin:String) {
-		if (Paths.imageExists(skin))
-			frames = Paths.getSparrowAtlas(skin);
-		else
-			frames = Paths.getSparrowAtlas("notes/noteSplashes");
+		frames = Paths.getSparrowAtlas(Paths.imageExists(skin) ? skin : "notes/noteSplashes");
 			
 		if (FlxG.save.data.polatoPC)
 		{
@@ -117,10 +114,14 @@ class NoteSplash extends FlxSprite
 				animation.addByPrefix("note3-" + i, "note splash red " + i, 24, false);
 			}
 		}
+
+		textureLoaded = skin;
 	}
 
 	override function update(elapsed:Float) {
-		if(animation.curAnim.finished) kill();
+		if(animation.curAnim.finished){
+			kill();
+		}
 
 		super.update(elapsed);
 	}

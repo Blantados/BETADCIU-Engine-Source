@@ -270,24 +270,21 @@ class Character extends FunkinSprite
 							else
 								animation.addByPrefix(animAnim, animName, animFps, animLoop);
 	
-							if (isPlayer)
-							{
-								if(anim.playerOffsets != null && anim.playerOffsets.length > 1) {
-									addOffset(anim.anim, anim.playerOffsets[0], anim.playerOffsets[1]);
-								}
-								else if(anim.offsets != null && anim.offsets.length > 1) {
-									addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
-								}
+							var offsets:Array<Int> = anim.offsets;
+							var playerOffsets:Array<Int> = anim.playerOffsets;
+						
+							var swagOffsets:Array<Int> = offsets;
+
+							if (isPlayer && playerOffsets != null && playerOffsets.length > 1){
+								swagOffsets = playerOffsets;
 							}
-							else
-							{
-								if(anim.offsets != null && anim.offsets.length > 1) {
-									addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
-								}
+
+							if(swagOffsets != null && swagOffsets.length > 1) {
+								addOffset(anim.anim, swagOffsets[0], swagOffsets[1]);
 							}
 	
-							if(anim.playerOffsets != null && anim.playerOffsets.length > 1) {
-								addPlayerOffset(anim.anim, anim.playerOffsets[0], anim.playerOffsets[1]);
+							if(playerOffsets != null && playerOffsets.length > 1) {
+								addPlayerOffset(anim.anim, playerOffsets[0], playerOffsets[1]);
 							}
 						
 						}

@@ -22,9 +22,11 @@ import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.graphics.FlxGraphic;
 import animateatlas.AtlasFrameMaker;
 import haxe.io.Path;
+import flixel.FlxSprite;
 
 using StringTools;
 
+@:allow(PlayState)
 class CoolUtil
 {
 	public static var difficultyArray:Array<String> = ['Easy', "Normal", "Hard", "Neonight", "Vitor0502", ""];
@@ -82,6 +84,19 @@ class CoolUtil
 		return Std.string(daXml);
 	}
 
+	public static function resetSprite(spr:FlxSprite, x:Float, y:Float) {
+		spr.reset(x, y);
+		spr.alpha = 1;
+		spr.visible = true;
+		spr.active = true;
+		//spr.antialiasing = FlxSprite.defaultAntialiasing;
+		//spr.rotOffset.set();
+	}
+
+	public static inline function addZeros(str:String, num:Int) {
+		while(str.length < num) str = '0${str}';
+		return str;
+	}
 
 	public static function findFirstAnim(rawXml:String)
 		{

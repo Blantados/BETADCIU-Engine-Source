@@ -22,6 +22,8 @@
 	<!--These window settings apply to all targets-->
 	<window width="1280" height="720" fps="" background="#000000" hardware="true" vsync="false" />
 
+	<haxedef name="profile" />
+
 	<!--HTML5-specific-->
 	<window if="html5" resizable="true" />
 

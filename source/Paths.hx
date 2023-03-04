@@ -315,8 +315,10 @@ class Paths
 
 	inline static public function image(key:String, ?library:String)
 	{
+		#if MODS_ALLOWED
 		if(FileSystem.exists(Paths.modsImages(key)))
 			return Paths.modsImages(key);
+		#end
 			
 		return getPath('images/$key.png', IMAGE, library);
 	}
@@ -530,14 +532,10 @@ class Paths
 	{
 		var path:String = "ksajdlahfjhadjfhdshfkjhd";
 
-		var pathsToCheck:Array<String> = [FileSystem.absolutePath("assets/shared/images/"+key+".png"), Paths.image(key)];
+		var pathsToCheck:Array<String> = [Paths.image(key), FileSystem.absolutePath("assets/shared/images/"+key+".png")];
 
 		if (library != null)
 			pathsToCheck.push(FileSystem.absolutePath("assets/"+library+"/images/"+key+".png"));
-
-		#if MODS_ALLOWED
-			pathsToCheck.push(modsImages(key));
-		#end
 
 		for (i in 0...pathsToCheck.length)
 		{
@@ -546,6 +544,7 @@ class Paths
 			}
 		}
 
+		//trace('returning false for ' + (key));
 		return false;
 	}
 
@@ -790,6 +789,19 @@ class Paths
 			return true;
 		}
 		return false;
+	}
+
+	//return graphic didn't work for me so...
+	inline static public function existsInCTA(key:String)
+	{
+		var daThing:Dynamic;
+
+		if (!Paths.currentTrackedAssets.exists(key))
+			Paths.cacheImage(key);
+
+		daThing = Paths.currentTrackedAssets.get(key);
+
+		return daThing;
 	}
 
 	static public function getAtlasFromData(key:String, data:String = "SPARROW")
