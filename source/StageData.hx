@@ -3,9 +3,9 @@ package;
 #if desktop
 import sys.io.File;
 import sys.FileSystem;
-#else
-import openfl.utils.Assets;
 #end
+
+import openfl.utils.Assets;
 import haxe.Json;
 import haxe.format.JsonParser;
 import Song;
@@ -58,6 +58,8 @@ class StageData {
 		var modPath:String = Paths.modFolders('stages/' + stage + '.json');
 		if(FileSystem.exists(modPath)) {
 			rawJson = File.getContent(modPath);
+		}else if(Assets.exists(modPath)) {
+			rawJson = Assets.getText(modPath);
 		} else if(FileSystem.exists(path)) {
 			rawJson = File.getContent(path);
 		}

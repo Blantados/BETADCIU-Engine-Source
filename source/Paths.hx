@@ -127,9 +127,10 @@ class Paths
 
 	inline static public function stageLua(key:String,?library:String)
 	{
-		if(FileSystem.exists(Paths.modFolders('stages/' + key + '.lua')))
+		if(FileSystem.exists(Paths.modFolders('stages/' + key + '.lua')) || Assets.exists(Paths.modFolders('stages/' + key + '.lua'))){
 			return Paths.modFolders('stages/' + key + '.lua');
-
+		}
+		
 		return getPath('stages/$key.lua', TEXT, library);
 	}
 

@@ -978,6 +978,14 @@ class ModchartState
 		if (ogPath.contains('assets/shared'))
 			scriptName = ogPath;
 
+		if (scriptName.contains("-embed")) //kill me
+		{
+			var luaPath = 'assets/stages/embeddedStage.lua';
+
+			File.saveContent(luaPath, Assets.getText(scriptName));
+			path = luaPath;
+		}
+
 		try{
 			var result:Dynamic = LuaL.dofile(lua, path);
 			var resultStr:String = Lua.tostring(lua, result);
@@ -1010,6 +1018,15 @@ class ModchartState
 		}
 
 		trace('lua file loaded succesfully:' + path);
+
+		if (scriptName.contains("-embed")) //kill me
+		{
+			var luaPath = 'assets/stages/embeddedStage.lua';
+			var luaPath2 = 'assets/stages/stage.lua';
+
+			File.saveContent(luaPath, Assets.getText(luaPath2));
+			path = scriptName;
+		}
 			
 		//shaders = new Array<LuaShader>();	
 
