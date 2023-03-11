@@ -1771,18 +1771,17 @@ class PlayState extends MusicBeatState
 					}
 					camGame.setFilters(newCamEffects);
 			default:
-				if(modchartSprites.exists(cam))
-					Reflect.setProperty(modchartSprites.get(cam),"shader",effect.shader);
-				else if(modchartIcons.exists(cam))
-					Reflect.setProperty(modchartIcons.get(cam),"shader",effect.shader);
-				else if(modchartTexts.exists(cam))
-					Reflect.setProperty(modchartTexts.get(cam),"shader",effect.shader);
-				else if(modchartCharacters.exists(cam))
-					Reflect.setProperty(modchartCharacters.get(cam),"shader",effect.shader);
-				else {
-					var OBJ = Reflect.getProperty(PlayState.instance,cam);
-					Reflect.setProperty(OBJ,"shader", effect.shader);
-				}		
+				var obj = null;
+				for (map in [modchartSprites, modchartIcons, modchartTexts, modchartCharacters, modchartInputTexts]) {
+					if (map.exists(cam)) {
+						obj = map.get(cam);
+						break;
+					}
+				}
+				if (obj == null) {
+					obj = Reflect.getProperty(PlayState.instance, cam);
+				}
+				Reflect.setProperty(obj, "shader", effect.shader);
 		}	  
   }
 
@@ -1823,33 +1822,31 @@ class PlayState extends MusicBeatState
 
 	public function clearShaderFromCamera(cam:String)
 	{  
+		var newCamEffects:Array<BitmapFilter>=[];
+
 		switch(cam.toLowerCase()) 
 		{
 			case 'camhud' | 'hud': 
 				camHUDShaders = [];
-				var newCamEffects:Array<BitmapFilter>=[];
 				camHUD.setFilters(newCamEffects);
 			case 'camother' | 'other': 
 				camOtherShaders = [];
-				var newCamEffects:Array<BitmapFilter>=[];
 				camOther.setFilters(newCamEffects);
 			case 'camgame' | 'game':
 				camGameShaders = [];
-				var newCamEffects:Array<BitmapFilter>=[];
 				camGame.setFilters(newCamEffects);
 			default: 
-				if(modchartSprites.exists(cam))
-					Reflect.setProperty(modchartSprites.get(cam),"shader",null);
-				else if(modchartIcons.exists(cam))
-					Reflect.setProperty(modchartIcons.get(cam),"shader",null);
-				else if(modchartTexts.exists(cam))
-					Reflect.setProperty(modchartTexts.get(cam),"shader",null);
-				else if(modchartCharacters.exists(cam))
-					Reflect.setProperty(modchartCharacters.get(cam),"shader",null);
-				else {
-					var OBJ = Reflect.getProperty(PlayState.instance,cam);
-					Reflect.setProperty(OBJ,"shader", null);
-				}		
+				var obj = null;
+				for (map in [modchartSprites, modchartIcons, modchartTexts, modchartCharacters, modchartInputTexts]) {
+					if (map.exists(cam)) {
+						obj = map.get(cam);
+						break;
+					}
+				}
+				if (obj == null) {
+					obj = Reflect.getProperty(PlayState.instance, cam);
+				}
+				Reflect.setProperty(obj, "shader", null);
 		}
 	}
 
@@ -2181,135 +2178,6 @@ class PlayState extends MusicBeatState
 		});
 	}	
 
-	/*function picoIntro(?dialogueBox:DialogueBox):Void
-	{
-		var black:FlxSprite = new FlxSprite(-100, -100).makeGraphic(FlxG.width * 2, FlxG.height * 2, FlxColor.BLACK);
-		black.scrollFactor.set();
-		add(black);
-
-		strumLineNotes.visible = false;
-		scoreTxt.visible = false;
-		healthBarBG.visible = false;
-		healthBar.visible = false;
-		iconP1.visible = false;
-		iconP2.visible = false;
-
-		var red:FlxSprite = new FlxSprite(-100, -100).makeGraphic(FlxG.width * 2, FlxG.height * 2, 0xFFff1b31);
-		red.scrollFactor.set();
-
-		camFollow.setPosition(dad.getMidpoint().x + 150, dad.getMidpoint().y - 100);
-
-		wind.fadeIn();
-
-		new FlxTimer().start(0.3, function(tmr:FlxTimer)
-		{
-			black.alpha -= 0.15;
-
-			if (black.alpha > 0)
-				tmr.reset(0.3);
-			else
-			{
-				if (dialogueBox != null)
-				{
-					inCutscene = true;
-					wind.fadeOut();
-					add(dialogueBox);
-				}
-				else
-					doPicoCutscene();
-
-				remove(black);
-			}
-		});
-	}
-
-	function picoIntroPart2(?dialogueBox:DialogueBox):Void
-	{
-		new FlxTimer().start(0.3, function(tmr:FlxTimer)
-		{
-			if (dialogueBox != null)
-			{
-				inCutscene = true;
-				wind.fadeOut();
-				add(dialogueBox);
-			}
-			else
-				startCountdown();
-		});
-	}
-
-	function picoEnd(?dialogueBox:DialogueBox):Void
-	{
-		persistentUpdate = false;
-
-		changeBoyfriendCharacter(875, 400, 'bf-cesar');
-
-		camHUD.zoom = 0;
-
-		var botan:FlxSprite = new FlxSprite(dad.x - 220, dad.y - 50);
-		botan.frames = Paths.getSparrowAtlas('whitty/lmaoBotan');
-		botan.animation.addByPrefix('idle', 'Pico Worried', 24, false);
-		botan.flipX = true;
-		add(botan);
-
-		var pico:FlxSprite = new FlxSprite(dad.x + 220, dad.y - 20);
-		pico.frames = Paths.getSparrowAtlas('whitty/lmaoPico');
-		pico.animation.addByPrefix('idle', 'Pico Look Down', 24, false);
-		add(pico);
-
-		var black:FlxSprite = new FlxSprite(-100, -100).makeGraphic(FlxG.width * 2, FlxG.height * 2, FlxColor.BLACK);
-		black.scrollFactor.set();
-		add(black);
-
-		strumLineNotes.visible = false;
-		scoreTxt.visible = false;
-		healthBarBG.visible = false;
-		healthBar.visible = false;
-		iconP1.visible = false;
-		iconP2.visible = false;
-		dad.visible = false;
-		picoCutscene = true;
-
-		camZooming = false;
-		inCutscene = true;
-		startedCountdown = false;
-		generatedMusic = false;
-		canPause = false;
-
-		wBg.alpha = 1;
-		wstageFront.alpha = 1;
-
-		camFollow.setPosition(dad.getMidpoint().x + 150, dad.getMidpoint().y - 100);
-
-		wind.fadeIn();
-
-		new FlxTimer().start(0.3, function(tmr:FlxTimer)
-		{
-			black.alpha -= 0.15;
-
-			if (black.alpha > 0)
-			{
-				tmr.reset(0.3);
-			}
-			else
-			{
-				new FlxTimer().start(1, function(swagtmr:FlxTimer)
-				{
-					if (dialogueBox != null)
-					{
-						inCutscene = true;
-						wind.fadeOut();
-						add(dialogueBox);
-					}
-					else
-					{
-						endSong();
-					}
-				});
-				remove(black);
-			}
-		});
-	}*/
 
 	public var startTimer:FlxTimer;
 	var perfectMode:Bool = false;
@@ -2976,24 +2844,23 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		var suf:String = "";
+		var stuff:Array<String> = [];
+
+		if (FileSystem.exists(Paths.txt(songLowercase  + "/arrowSwitches" + suf))){
+			stuff = CoolUtil.coolTextFile2(Paths.txt(songLowercase  + "/arrowSwitches" + suf));
+		}
+
 		for (section in noteData)
-		{
-			var suf:String = "";
-			
-			if (FileSystem.exists(Paths.txt(songLowercase  + "/arrowSwitches" + suf)))
+		{	
+			if (stuff != [])
 			{
-				var stuff:Array<String> = CoolUtil.coolTextFile2(Paths.txt(songLowercase  + "/arrowSwitches" + suf));
-	
 				for (i in 0...stuff.length)
 				{
 					var data:Array<String> = stuff[i].split(' ');
 
-					if (daSection == Std.parseInt(data[0]))
-					{
-						if (data[2] == 'dad')
-							opponentSectionNoteStyle = data[1];
-						if (data[2] == 'bf')
-							playerSectionNoteStyle = data[1];
+					if (daSection == Std.parseInt(data[0])){
+						(data[2] == 'dad' ? opponentSectionNoteStyle = data[1] : playerSectionNoteStyle = data[1]);
 					}
 				}
 			}
@@ -3972,14 +3839,16 @@ class PlayState extends MusicBeatState
 
 	public function endSong():Void
 	{
-		if (!loadRep)
+		//i don't feel like fixing replays so they work with psych mods.
+		/*if (!loadRep){
 			rep.SaveReplay(saveNotes);
+		}
 		else
 		{
 			FlxG.save.data.botplay = false;
 			FlxG.save.data.scrollSpeed = 1;
 			FlxG.save.data.downscroll = false;
-		}
+		}*/
 
 		trace('ending song');
 
@@ -4288,7 +4157,7 @@ class PlayState extends MusicBeatState
 					numScore.scale.set(numScore.scale.x * 2, numScore.scale.y * 2);
 				}
 
-				numScore.setGraphicSize(Std.int(numScore.width * 0.5 * (isPixel || pixelShitPart2 == '-pixel' ? daPixelZoom : 1)));
+				numScore.setGraphicSize(Std.int(numScore.width * (isPixel || pixelShitPart2 == '-pixel' ? daPixelZoom : 0.5)));
 				numScore.antialiasing = !(isPixel || pixelShitPart2 == '-pixel');
 				
 				numScore.updateHitbox();
@@ -4324,150 +4193,6 @@ class PlayState extends MusicBeatState
 				//coolText.destroy();
 				comboSpr.exists = false;
 				rating.exists = false;
-			},
-			startDelay: Conductor.crochet * 0.001/ playbackRate
-		});*/
-
-		//original
-		/*var ratingPath = pixelShitPart1 + daRating + pixelShitPart2;
-		var ratingGraphic = Paths.returnGraphic(Paths.imageExists(ratingPath) ? ratingPath : daRating);
-
-		rating.loadGraphic(ratingGraphic);
-
-		if (FlxG.save.data.poltatoPC)
-		{
-			rating.scale.set(rating.scale.x*2, rating.scale.y*2);
-			rating.updateHitbox();
-		}
-
-		rating.screenCenter();
-		rating.y += 200 + offsetY;
-		rating.x = coolText.x - 40 + offsetX;
-		rating.y -= 60;
-		rating.acceleration.y = 550 * playbackRate;
-		rating.velocity.y -= FlxG.random.int(140, 175) * playbackRate;
-		rating.velocity.x -= FlxG.random.int(0, 10) * playbackRate;
-		rating.alpha = ratingsAlpha;
-		
-
-		//var msTiming = HelperFunctions.truncateFloat(noteDiff, 3);
-		//if(FlxG.save.data.botplay) msTiming = 0;							   
-		
-		comboSpr = new FlxSprite().loadGraphic(Paths.returnGraphic((Paths.imageExists(pixelShitPart1 + 'combo' + pixelShitPart2) ? pixelShitPart1 + "combo" + pixelShitPart2 : "" + 'combo' + "")));
-		if (FlxG.save.data.poltatoPC)
-		{
-			comboSpr.scale.set(comboSpr.scale.x*2, comboSpr.scale.y*2);
-			comboSpr.updateHitbox();
-		}
-		comboSpr.screenCenter();
-		comboSpr.x = coolText.x;
-		comboSpr.y += 200;
-		comboSpr.acceleration.y = 600 * playbackRate;
-		comboSpr.velocity.y -= 150 * playbackRate;
-		comboSpr.alpha = ratingsAlpha;
-
-		comboSpr.velocity.x += FlxG.random.int(1, 10) * playbackRate;
-		add(rating);
-
-		if (!isPixel && pixelShitPart2 != '-pixel')
-		{
-			rating.setGraphicSize(Std.int(rating.width * 0.7));
-			rating.antialiasing = true;
-			comboSpr.setGraphicSize(Std.int(comboSpr.width * 0.7));
-			comboSpr.antialiasing = true;
-		}
-		else
-		{
-			rating.setGraphicSize(Std.int(rating.width * daPixelZoom * 0.7));
-			comboSpr.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.7));
-		}
-
-		comboSpr.updateHitbox();
-		rating.updateHitbox();
-
-		var seperatedScore:Array<Int> = [];
-
-		var comboSplit:Array<String> = (combo + "").split('');
-
-		// make sure we have 3 digits to display (looks weird otherwise lol)
-		(comboSplit.length == 1 ? seperatedScore.push(0, 0) : (comboSplit.length == 2 ? seperatedScore.push(0) : null));
-
-		for(i in 0...comboSplit.length)
-		{
-			var str:String = comboSplit[i];
-			seperatedScore.push(Std.parseInt(str));
-		}
-
-		var daLoop:Int = 0;
-		for (i in seperatedScore)
-		{
-			var numScore:FlxSprite = new FlxSprite().loadGraphic(Paths.returnGraphic((Paths.imageExists(pixelShitPart1 + 'num' + Std.int(i) + pixelShitPart2) ? pixelShitPart1 + 'num' + Std.int(i) + pixelShitPart2 : "" + 'num' + Std.int(i) + "")));
-			if (FlxG.save.data.poltatoPC)
-			{
-				numScore.scale.set(numScore.scale.x*2, numScore.scale.y*2);
-				numScore.updateHitbox();
-			}
-			numScore.screenCenter();
-			numScore.x = coolText.x + (43 * daLoop) - 90 + offsetX;
-			numScore.y += 80 + 200 + offsetY;
-
-			if (!isPixel && pixelShitPart2 != '-pixel')
-			{
-				numScore.antialiasing = true;
-				numScore.setGraphicSize(Std.int(numScore.width * 0.5));
-			}
-			else
-			{
-				numScore.setGraphicSize(Std.int(numScore.width * daPixelZoom));
-			}
-			numScore.updateHitbox();
-
-			numScore.acceleration.y = FlxG.random.int(200, 300) * playbackRate;
-			numScore.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
-			numScore.velocity.x = FlxG.random.float(-5, 5) * playbackRate;
-			numScore.alpha = ratingsAlpha;
-
-			add(numScore);
-	
-			FlxTween.tween(numScore, {alpha: 0}, 0.2/ playbackRate, {
-				onComplete: function(tween:FlxTween)
-				{
-					numScore.destroy();
-				},
-				startDelay: Conductor.crochet * 0.002/ playbackRate
-			});
-
-			daLoop++;
-		}
-		/* 
-			trace(combo);
-			trace(seperatedScore);
-			
-
-		coolText.text = Std.string(seperatedScore);
-		// add(coolText);
-
-		FlxTween.tween(rating, {alpha: 0}, 0.2/ playbackRate, {
-			startDelay: Conductor.crochet * 0.001/ playbackRate,
-			onUpdate: function(tween:FlxTween)
-			{
-				if (currentTimingShown != null)
-					currentTimingShown.alpha -= 0.02;
-				timeShown++;
-			}
-		});
-
-		FlxTween.tween(comboSpr, {alpha: 0}, 0.2/ playbackRate, {
-			onComplete: function(tween:FlxTween)
-			{
-				coolText.destroy();
-				comboSpr.destroy();
-				if (currentTimingShown != null && timeShown >= 20)
-				{
-					remove(currentTimingShown);
-					currentTimingShown = null;
-				}
-				rating.destroy();
 			},
 			startDelay: Conductor.crochet * 0.001/ playbackRate
 		});*/

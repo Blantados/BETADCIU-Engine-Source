@@ -724,6 +724,11 @@ class StageEditorState extends MusicBeatState
 	}
 
 	function loadStage(?reload:Bool = true) {
+		if (daAnim.contains('-embed')){
+			addTextToDebug("ACCESS DENIED: STAGE IS EMBEDDED!", 0xFFFF0000);
+			return;
+		}
+
 		script = "";
 
 		if (reload)

@@ -148,6 +148,8 @@ class ChartingState extends MusicBeatState
 	var camPos:FlxObject;
 	public var ignoreWarnings = false;
 
+	var tipTextGroup:FlxTypedGroup<FlxText>;
+
 	override function create()
 	{
 		curSec = lastSection;
@@ -175,20 +177,7 @@ class ChartingState extends MusicBeatState
 			};
 		}	
 
-		var keys:Int = 4;
-		switch (_song.mania)
-		{
-			case 0:
-				keys = 4;
-			case 1:
-				keys = 6;
-			case 2:
-				keys = 9;
-			case 3:
-				keys = 5;
-			case 4:
-				keys = 7;
-		}
+		var keys:Int = Main.keyAmmo[_song.mania];
 
 		ignoreWarnings = FlxG.save.data.ignoreWarnings;
 
@@ -300,6 +289,9 @@ class ChartingState extends MusicBeatState
 		\nQ/E - Decrease/Increase Note Sustain Length
 		\nSpace - Stop/Resume song";
 
+		tipTextGroup = new FlxTypedGroup<FlxText>();
+		add(tipTextGroup);
+
 		var tipTextArray:Array<String> = text.split('\n');
 		for (i in 0...tipTextArray.length) {
 			var tipText:FlxText = new FlxText(UI_box.x, UI_box.y + UI_box.height + 8, 0, tipTextArray[i], 16);
@@ -307,8 +299,9 @@ class ChartingState extends MusicBeatState
 			tipText.setFormat(Paths.font("vcr.ttf"), 14, FlxColor.WHITE, LEFT/*, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK*/);
 			//tipText.borderSize = 2;
 			tipText.scrollFactor.set();
-			add(tipText);
+			tipTextGroup.add(tipText);
 		}
+		
 		add(UI_box);
 		
 		addChartingUI();
@@ -659,7 +652,7 @@ class ChartingState extends MusicBeatState
 		stepperSpeed.value = _song.speed;
 		stepperSpeed.name = 'song_speed';
 
-		var stepperMania:FlxUINumericStepper = new FlxUINumericStepper(stepperSpeed.x + 105, stepperSpeed.y, 1, 0, 0, 3, 0);
+		var stepperMania:FlxUINumericStepper = new FlxUINumericStepper(stepperSpeed.x + 105, stepperSpeed.y, 1, 0, 0, 4, 0);
 		stepperMania.value = _song.mania;
 		stepperMania.name = 'song_mania';
 
@@ -723,7 +716,7 @@ class ChartingState extends MusicBeatState
 		var stepperShiftNoteDialMs:FlxUINumericStepper = new FlxUINumericStepper(10, stepperShiftNoteDialStep.y + 30, 1, 0, -1000, 1000, 2);
 		stepperShiftNoteDialMs.name = 'song_shiftnotems';
 
-		var shiftNoteButton:FlxButton = new FlxButton(10, stepperShiftNoteDialMs.y + 30, "Shift", function()
+		var shiftNoteButton:FlxButton = new FlxButton(10, stepperShiftNoteDialMs.y + 20, "Shift", function()
 		{
 			shiftNotes(Std.int(stepperShiftNoteDial.value), Std.int(stepperShiftNoteDialStep.value), Std.int(stepperShiftNoteDialMs.value));
 		});
@@ -1395,64 +1388,35 @@ class ChartingState extends MusicBeatState
 			var nums:FlxUINumericStepper = cast sender;
 			var wname = nums.name;
 			FlxG.log.add(wname);
-			if (wname == 'section_length')
+			switch (wname)
 			{
-				if (nums.value <= 4)
-					nums.value = 4;
-				_song.notes[curSec].lengthInSteps = Std.int(nums.value);
-				updateGrid();
-			}
-			else if (wname == 'song_speed')
-			{
-				if (nums.value <= 0)
-					nums.value = 0;
-				_song.speed = nums.value;
-			}
-			else if (wname == 'song_bpm')
-			{
-				if (nums.value <= 0)
-					nums.value = 1;
-				tempBpm = Std.int(nums.value);
-				Conductor.mapBPMChanges(_song);
-				Conductor.changeBPM(Std.int(nums.value));
-			}
-			else if (wname == 'song_mania')
-			{
-				if (nums.value <= 0)
-					nums.value = 0;
-				_song.mania = Std.int(nums.value);
-			}
-			else if (wname == 'note_susLength')
-			{
-				if (curSelectedNote == null)
-					return;
-
-				if (nums.value <= 0)
-					nums.value = 0;
-				curSelectedNote[2] = nums.value;
-				updateGrid();
-			}
-			else if (wname == 'section_bpm')
-			{
-				if (nums.value <= 0.1)
-					nums.value = 0.1;
-				_song.notes[curSec].bpm = Std.int(nums.value);
-				updateGrid();
-			}else if (wname == 'song_vocalvol')
-			{
-				if (nums.value <= 0.1)
-					nums.value = 0.1;
-				vocals.volume = nums.value;
-			}
-			else if (wname == 'section_dtype')
-			{
-				_song.notes[curSec].dType = Std.int(nums.value);
-				updateGrid();
-			}else if (wname == 'song_instvol')
-			{
-				if (nums.value <= 0.1)
-					nums.value = 0.1;
-				FlxG.sound.music.volume = nums.value;
+				case 'section_length':
+					nums.value = Math.max(nums.value, 4);
+					_song.notes[curSec].lengthInSteps = Std.int(nums.value);
+					updateGrid();
+				case 'song_speed':
+					_song.speed = Math.max(nums.value, 0);
+				case 'song_bpm':
+					tempBpm = Math.max(Std.int(nums.value), 1);
+					Conductor.mapBPMChanges(_song);
+					Conductor.changeBPM(tempBpm);
+				case 'song_mania':
+					_song.mania = Std.int(Math.max(nums.value, 0));
+					updateGrid();
+				case 'note_susLength':
+					if (curSelectedNote == null) return;
+					curSelectedNote[2] = Math.max(nums.value, 0);
+					updateGrid();
+				case 'section_bpm':
+					_song.notes[curSec].bpm = Math.max(Std.int(nums.value), 1);
+					updateGrid();
+				case "song_vocalvol":
+					vocals.volume = Math.max(nums.value, 0.1);
+				case "section_dtype":
+					_song.notes[curSec].dType = Std.int(nums.value);
+					updateGrid();
+				case "song_instvol":
+					FlxG.sound.music.volume = Math.max(nums.value, 0.1);
 			}
 		}
 		else if(id == FlxUIInputText.CHANGE_EVENT && (sender is FlxUIInputText)) {
@@ -1531,12 +1495,6 @@ class ChartingState extends MusicBeatState
 
 		//if (FlxG.keys.justPressed.FIVE)
 			//reloadSpecificNotes();
-
-		if (_song.mania >= 1 && UI_box.x != 640 + GRID_SIZE / 2 + 160)
-			UI_box.x = 640 + GRID_SIZE / 2 + 160;
-
-		if (_song.mania == 0 && UI_box.x != 640 + GRID_SIZE / 2)
-			UI_box.x = 640 + GRID_SIZE / 2;
 
 		if (bpmTxt.x != UI_box.x + 340)
 			bpmTxt.x = UI_box.x + 340;
@@ -2331,6 +2289,16 @@ class ChartingState extends MusicBeatState
 			add(gridBlackLine2);
 		}
 
+		var designatedXPos = (640 + GRID_SIZE / 2 + (_song.mania > 0 ? 160 : 0));
+		if (UI_box.x != designatedXPos)
+		{
+			UI_box.x = designatedXPos;
+			tipTextGroup.forEach(function(text:FlxText)
+			{
+				text.x = UI_box.x;
+			});
+		}
+	
 		var sectionInfo:Array<Dynamic> = _song.notes[curSec].sectionNotes;
 
 		if (_song.notes[curSec].changeBPM && _song.notes[curSec].bpm > 0)
