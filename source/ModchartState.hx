@@ -545,80 +545,31 @@ class ModchartState
 
 	function changeGFCharacter(id:String, x:Float, y:Float)
 	{		
-		PlayState.instance.removeObject(PlayState.instance.gf);
-		//PlayState.instance.gf = new Character(x, y, null);
-		PlayState.instance.destroyObject(PlayState.instance.gf);
-		PlayState.instance.gf = new Character(x, y, id);
-		PlayState.instance.gf.scrollFactor.set(0.95, 0.95);
-		PlayState.instance.addObject(PlayState.instance.gf);
-
-		if (FlxG.save.data.poltatoPC)
-			PlayState.instance.gf.setPosition(PlayState.instance.gf.x + 100, PlayState.instance.gf.y + 170);
-
-		PlayState.instance.startCharacterLua(PlayState.instance.gf.curCharacter);
-		
+		changeGFAuto(id);
+		PlayState.instance.gf.x = x;
+		PlayState.instance.gf.y = y;
 	}
 
 	function changeDadCharacter(id:String, x:Float, y:Float)
 	{		
-		//PlayState.instance.removeObject(PlayState.instance.dadTrail);
-		PlayState.instance.removeObject(PlayState.instance.dad);
-		PlayState.instance.destroyObject(PlayState.instance.dad);
-		PlayState.instance.dad = new Character(x, y, id);
-		//PlayState.instance.addObject(PlayState.instance.dadTrail);
-		//PlayState.instance.dadTrail.resetTrail();
-		PlayState.instance.addObject(PlayState.instance.dad);
-
-		PlayState.instance.iconP2.changeIcon(PlayState.instance.dad.healthIcon);
-		
-		if (PlayState.instance.defaultBar)
-		{
-			PlayState.instance.healthBar.createFilledBar(FlxColor.fromString('#' + PlayState.instance.dad.iconColor), FlxColor.fromString('#' + PlayState.instance.boyfriend.iconColor));
-			PlayState.instance.healthBar.updateBar();
-		}	
-
-		PlayState.instance.startCharacterLua(PlayState.instance.dad.curCharacter);
-	
+		changeDadAuto(id, false, false);
+		PlayState.instance.dad.x = x;
+		PlayState.instance.dad.y = y;
 	}
 
 	function changeBoyfriendCharacter(id:String, x:Float, y:Float)
 	{	
-		var animationName:String = "no way anyone have an anim name this big";
-		var animationFrame:Int = 0;						
-		if (PlayState.instance.boyfriend.animation.curAnim.name.startsWith('sing'))
-		{
-			animationName = PlayState.instance.boyfriend.animation.curAnim.name;
-			animationFrame = PlayState.instance.boyfriend.animation.curAnim.curFrame;
-		}
-
-		//PlayState.instance.removeObject(PlayState.instance.bfTrail);
-		PlayState.instance.removeObject(PlayState.instance.boyfriend);
-		PlayState.instance.destroyObject(PlayState.instance.boyfriend);
-		PlayState.instance.boyfriend = new Boyfriend(x, y, id);
-		//PlayState.instance.addObject(PlayState.instance.bfTrail);
-		//PlayState.instance.bfTrail.resetTrail();
-		PlayState.instance.addObject(PlayState.instance.boyfriend);
-
-		PlayState.instance.iconP1.changeIcon(PlayState.instance.boyfriend.healthIcon);
-			
-		if (PlayState.instance.defaultBar)
-		{
-			PlayState.instance.healthBar.createFilledBar(FlxColor.fromString('#' + PlayState.instance.dad.iconColor), FlxColor.fromString('#' + PlayState.instance.boyfriend.iconColor));
-			PlayState.instance.healthBar.updateBar();
-		}	
-
-		if (PlayState.instance.boyfriend.animOffsets.exists(animationName))
-			PlayState.instance.boyfriend.playAnim(animationName, true, false, animationFrame);
-
-		PlayState.instance.startCharacterLua(PlayState.instance.boyfriend.curCharacter);
+		changeBFAuto(id, false, false);
+		PlayState.instance.boyfriend.x = x;
+		PlayState.instance.boyfriend.y = y;
 	}
 
 	//does this work. right? -- future me here. yes it does.
 	public static function changeStage(id:String)
 	{	
-		PlayState.instance.removeObject(PlayState.instance.gf);
-		PlayState.instance.removeObject(PlayState.instance.dad);
-		PlayState.instance.removeObject(PlayState.instance.boyfriend);
+		for (i in [PlayState.instance.gf, PlayState.instance.dad, PlayState.instance.boyfriend, PlayState.instance.comboGroup]){
+			PlayState.instance.removeObject(i);
+		}
 
 		if (PlayState.instance.Stage.isCustomStage && PlayState.instance.Stage.isLuaStage)
 		{
@@ -654,8 +605,7 @@ class ModchartState
 		PlayState.curStage = PlayState.instance.Stage.curStage;
 		PlayState.instance.defaultCamZoom = PlayState.instance.Stage.camZoom;
 
-		for (i in PlayState.instance.Stage.toAdd)
-		{
+		for (i in PlayState.instance.Stage.toAdd){
 			PlayState.instance.addObject(i);
 		}	
 		
@@ -679,6 +629,8 @@ class ModchartState
 						PlayState.instance.addObject(bg);
 			}
 		}	
+
+		PlayState.instance.addObject(PlayState.instance.comboGroup);
 
 		if (PlayState.instance.Stage.isCustomStage && PlayState.instance.Stage.luaArray.length >= 1)
 			PlayState.instance.Stage.callOnLuas('onCreatePost', []); //i swear if this starts crashing stuff i'mma cry
@@ -720,11 +672,9 @@ class ModchartState
 		if (FlxG.save.data.uncacheCharacterSwitch && !dontDestroy)
 			bfPath = 'shared:assets/shared/images/'+PlayState.instance.boyfriend.charPath;
 
-		//PlayState.instance.removeObject(PlayState.instance.bfTrail);
 		PlayState.instance.removeObject(PlayState.instance.boyfriend);
 		PlayState.instance.destroyObject(PlayState.instance.boyfriend);
 		PlayState.instance.boyfriend = new Boyfriend(0, 0, id, !flipped);
-
 		PlayState.instance.boyfriend.flipMode = flipped;
 
 		var charOffset = new CharacterOffsets(id, !flipped);
@@ -803,13 +753,11 @@ class ModchartState
 		PlayState.instance.removeObject(PlayState.instance.dad);
 		PlayState.instance.destroyObject(PlayState.instance.dad);
 		PlayState.instance.dad = new Character(0, 0, id, flipped);
+		PlayState.instance.dad.flipMode = flipped;
 
 		var charOffset = new CharacterOffsets(id, flipped);
 		var charX:Float = charOffset.daOffsetArray[0];
 		var charY:Float =  charOffset.daOffsetArray[1] + (flipped ? 350 : 0);
-
-		if (flipped)
-			PlayState.instance.dad.flipMode = true;
 
 		if (!PlayState.instance.dad.isCustom)
 		{
@@ -841,9 +789,6 @@ class ModchartState
 
 		PlayState.instance.dad.x = PlayState.instance.Stage.dadXOffset + charX + 100;
 		PlayState.instance.dad.y = PlayState.instance.Stage.dadYOffset + charY + 100;
-
-		//PlayState.instance.addObject(PlayState.instance.dadTrail);
-		//PlayState.instance.dadTrail.resetTrail();
 		PlayState.instance.addObject(PlayState.instance.dad);
 
 		PlayState.instance.iconP2.changeIcon(PlayState.instance.dad.healthIcon);
@@ -863,7 +808,7 @@ class ModchartState
 		PlayState.instance.startCharacterLua(PlayState.instance.dad.curCharacter);
 	}
 
-	public static function changeGFAuto(id:String, ?dontDestroy:Bool = false)
+	public static function changeGFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false)
 	{		
 		PlayState.instance.removeObject(PlayState.instance.gf);
 		PlayState.instance.destroyObject(PlayState.instance.gf);
@@ -2636,6 +2581,15 @@ class ModchartState
 					return shit.getGraphicMidpoint().y;
 	
 				return shit.getMidpoint().y;
+			});
+
+			Lua_helper.add_callback(lua, "getMouseX", function(camera:String) {
+				var cam:FlxCamera = cameraFromString(camera);
+				return FlxG.mouse.getScreenPosition(cam).x;
+			});
+			Lua_helper.add_callback(lua, "getMouseY", function(camera:String) {
+				var cam:FlxCamera = cameraFromString(camera);
+				return FlxG.mouse.getScreenPosition(cam).y;
 			});
 	
 			Lua_helper.add_callback(lua, "getMidpointX", function(variable:String) {

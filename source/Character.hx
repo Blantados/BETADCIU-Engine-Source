@@ -95,12 +95,10 @@ class Character extends FunkinSprite
 	public var daZoom:Float = 1;
 
 	public var tex:FlxAtlasFrames;
-	public var exSpikes:FlxSprite;
 	public var charPath:String;
 
 	public static var colorPreString:FlxColor;
 	public static var colorPreCut:String; 
-	var weZoomed:Bool = false;
 	public var flipMode:Bool = false;
 
 	var pre:String = "";
@@ -130,17 +128,35 @@ class Character extends FunkinSprite
 	{
 		super(x, y);
 
+		loadCharacter(character, isPlayer);
+	}
+
+	public function resetCharacterAttributes(?character:String = "bf", ?isPlayer:Bool = false)
+	{
+		animOffsets = new Map<String, Array<Dynamic>>();
 		animPlayerOffsets = new Map<String, Array<Dynamic>>();
+
 		curCharacter = character;
 		healthIcon = character;
 		this.isPlayer = isPlayer;
+
 		iconColor = isPlayer ? 'FF66FF33' : 'FFFF0000';
 		trailColor = isPlayer ? "FF0026FF" : "FFAA0044";
+		idleSuffix = "";
 		curColor = 0xFFFFFFFF;
-				
+		
 		antialiasing = true;
-		isCustom = false;
-		pre = "";
+
+		for (i in ['flipMode', 'isCustom', 'stopIdle', 'skipDance', 'doMissThing', 'specialAnim', 'stunned']){
+			Reflect.setProperty(this, i, false);		
+			//i = false;
+		}
+	}
+
+	public function loadCharacter(?character:String = "bf", ?isPlayer:Bool = false)
+	{
+		//CoolUtil.resetSpriteAttributes(this);
+		resetCharacterAttributes(character, isPlayer);
 
 		if (PlayState.instance != null)
 			noteSkin = PlayState.SONG.noteStyle;
@@ -152,14 +168,15 @@ class Character extends FunkinSprite
 			//using the psych method instead of modding plus. main reason is to make it easier for me to port them here
 			default:
 				isCustom = true;
+				isPsychPlayer = false;
 
 				var characterPath:String = 'images/characters/jsons/' + curCharacter;
-
 				var path:String = Paths.jsonNew(characterPath);
 				
 				#if MODS_ALLOWED
-					if (FileSystem.exists(Paths.modFolders('characters/'+curCharacter+'.json')) || Assets.exists(Paths.modFolders('characters/'+curCharacter+'.json')))
-						path = Paths.modFolders('characters/'+curCharacter+'.json');
+				if (FileSystem.exists(Paths.modFolders('characters/'+curCharacter+'.json')) || Assets.exists(Paths.modFolders('characters/'+curCharacter+'.json'))) {
+					path = Paths.modFolders('characters/'+curCharacter+'.json');
+				}
 				#end
 			
 				if (!FileSystem.exists(path) && !Assets.exists(path))
@@ -175,8 +192,13 @@ class Character extends FunkinSprite
 				
 				var json:CharacterFile = cast Json.parse(rawJson);
 
-				if (json.noteSkin != null){noteSkin = json.noteSkin;}
-				if (json.isPlayerChar){isPsychPlayer = json.isPlayerChar;}
+				if (json.noteSkin != null){
+					noteSkin = json.noteSkin;
+				}
+				
+				if (json.isPlayerChar){
+					isPsychPlayer = json.isPlayerChar;
+				}
 					
 				if ((noteSkin == "" || noteSkin == 'normal' || noteSkin == 'default') && PlayState.SONG != null)
 					noteSkin = PlayState.SONG.noteStyle;	
@@ -188,7 +210,6 @@ class Character extends FunkinSprite
 				
 				charPath = json.image + '.png'; //cuz we only use pngs anyway
 				imageFile = json.image; //psych
-
 				var imagePath = Paths.image(json.image);
 				
 				(json.spriteType != null ? spriteType = json.spriteType.toUpperCase() : spriteType = "SPARROW");
@@ -230,7 +251,7 @@ class Character extends FunkinSprite
 	
 					healthIcon = json.healthicon;
 					
-					(isPlayer && json.playerposition != null ? positionArray = json.playerposition : positionArray = json.position);
+					positionArray = (isPlayer && json.playerposition != null ? json.playerposition : json.position);
 					(json.playerposition != null ? playerPositionArray = json.playerposition : playerPositionArray = json.position);
 					(isPlayer && json.player_camera_position != null ? cameraPosition = json.player_camera_position : cameraPosition = json.camera_position);
 					(json.player_camera_position != null ? playerCameraPosition = json.player_camera_position : playerCameraPosition = json.camera_position);
@@ -288,14 +309,12 @@ class Character extends FunkinSprite
 							}
 						
 						}
-					} else {
+					} 
+					else {
 						quickAnimAdd('idle', 'BF idle dance');
 					}
 	
-					if (animOffsets.exists('danceRight'))
-						playAnim('danceRight');
-					else
-						playAnim('idle');
+					(animOffsets.exists('danceRight') ? playAnim('danceRight') : playAnim('idle'));
 				}	
 		}
 

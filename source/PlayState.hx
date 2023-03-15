@@ -4368,8 +4368,6 @@ class PlayState extends MusicBeatState
 					{
 						if (mashViolations != 0)
 							mashViolations--;
-
-						scoreTxt.color = FlxColor.WHITE;
 							
 						goodNoteHit(coolNote);		
 					}
@@ -4390,7 +4388,7 @@ class PlayState extends MusicBeatState
 				if (mashViolations > 8)
 				{
 					trace('mash violations ' + mashViolations);
-					scoreTxt.color = FlxColor.RED;
+					//scoreTxt.color = FlxColor.RED;
 					noteMiss(0,null);
 				}
 				else

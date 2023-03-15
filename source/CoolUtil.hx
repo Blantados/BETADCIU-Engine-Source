@@ -93,6 +93,21 @@ class CoolUtil
 		//spr.rotOffset.set();
 	}
 
+	public static function resetSpriteAttributes(spr:FlxSprite)
+	{
+		spr.scale.x = 1;
+		spr.scale.y = 1;
+		spr.offset.x = 0;
+		spr.offset.y = 0;
+		spr.shader = null;
+		spr.alpha = 1;
+		spr.visible = true;
+		spr.flipX = false;
+		spr.flipY = false;
+
+		spr.centerOrigin();
+	}
+
 	public static inline function addZeros(str:String, num:Int) {
 		while(str.length < num) str = '0${str}';
 		return str;

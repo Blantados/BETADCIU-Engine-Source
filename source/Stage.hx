@@ -652,17 +652,21 @@ class Stage extends MusicBeatState
 				dadXOffset = stageData.opponent[0] - 100;
 				dadYOffset = stageData.opponent[1] - 100;
 
-				boyfriendCameraOffset = stageData.camera_boyfriend;
-				if(boyfriendCameraOffset == null) //Fucks sake should have done it since the start :rolling_eyes:
-					boyfriendCameraOffset = [0, 0];
-
-				opponentCameraOffset = stageData.camera_opponent;
-				if(opponentCameraOffset == null)
-					opponentCameraOffset = [0, 0];
-				
+				boyfriendCameraOffset = stageData.camera_boyfriend;			
+				opponentCameraOffset = stageData.camera_opponent;				
 				girlfriendCameraOffset = stageData.camera_girlfriend;
-				if(girlfriendCameraOffset == null)
+
+				if(boyfriendCameraOffset == null){
+					boyfriendCameraOffset = [0, 0];
+				} 
+
+				if(opponentCameraOffset == null){
+					opponentCameraOffset = [0, 0];
+				} 
+
+				if(girlfriendCameraOffset == null){
 					girlfriendCameraOffset = [0, 0];
+				} 
 
 				hideGirlfriend = stageData.hide_girlfriend;
 
@@ -672,8 +676,9 @@ class Stage extends MusicBeatState
 					pixelShitPart2 = stageData.ratingSkin[1];
 				}
 				
-				if (stageData.countdownAssets != null)
+				if (stageData.countdownAssets != null){
 					introAssets = stageData.countdownAssets;
+				}
 				
 				luaArray.push(new ModchartState(curStage, preloading, true));
 
