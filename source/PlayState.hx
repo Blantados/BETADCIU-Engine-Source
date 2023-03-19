@@ -3555,168 +3555,11 @@ class PlayState extends MusicBeatState
 
 				var swagDownscroll:Bool = FlxG.save.data.downscroll;
 				
+				//this just looks so much nicer
 				notes.forEachAlive(function(daNote:Note)
-				{	
-					// instead of doing stupid y > FlxG.height
-					// we be men and actually calculate the time :)
-					if (daNote.tooLate)
-					{
-						daNote.active = false;
-						daNote.visible = false;
-					}
-					else
-						daNote.active = true;
-	
-					var strumGroup:FlxTypedGroup<StrumNote> = playerStrums;
-					if(!daNote.mustPress) strumGroup = opponentStrums;
-					var strumData = strumGroup.members[Math.floor(Math.abs(daNote.noteData))];
-	
-					var strumX:Float = strumData.x;
-					var strumY:Float = strumData.y;
-					var strumAngle:Float = strumData.angle;
-					var strumDirection:Float = strumData.direction;
-					var strumAlpha:Float = strumData.alpha;
-					var strumScroll:Bool = false;
-	
-					if ((swagDownscroll && !daNote.flipScroll) || (!swagDownscroll && daNote.flipScroll))
-						strumScroll = true;
-	
-					strumX += daNote.offsetX;
-					strumY += daNote.offsetY;
-	
-					daNote.distance = ((strumScroll ? 0.45 : -0.45) * (Conductor.songPosition - daNote.strumTime) * songSpeed * daNote.multSpeed);
-	
-					var angleDir = strumDirection * Math.PI / 180;
-	
-					if(daNote.copyX)
-						daNote.x = strumX + Math.cos(angleDir) * daNote.distance;
-	
-					var center:Float = strumY + Note.swagWidth / 2;
-					
-					if (!daNote.modifiedByLua && daNote.copyY)
-					{
-						daNote.y = (strumY + Math.sin(angleDir) * daNote.distance);	
-						
-						// Simplify conditions.
-						var canClipNote:Bool = cpuControlled || !daNote.ignoreNote;
-						var mustClipNote:Bool = daNote.mustPress || daNote.wasGoodHit || (daNote.prevNote != null && daNote.prevNote.wasGoodHit && !daNote.canBeHit);
-	
-						if (strumScroll)
-						{
-							if(daNote.isSustainNote)
-							{
-								if (daNote.animation.curAnim.name.endsWith('end')) {
-									daNote.y += 10.5 * (fakeCrochet / 400) * 1.5 * songSpeed + (46 * (songSpeed - 1));
-									daNote.y -= 46 * (1 - (fakeCrochet / 600)) * songSpeed;
-									if(daNote.isPixel) {
-										daNote.y += 8 + (6 - daNote.originalHeightForCalcs) * PlayState.daPixelZoom;
-									}
-								}
-								daNote.y += (Note.swagWidth / 2) - (60.5 * (songSpeed - 1));
-								daNote.y += 27.5 * ((SONG.bpm / 100) - 1) * (songSpeed - 1);
-								
-								var canClipToCenter = daNote.y - daNote.offset.y * daNote.scale.y + daNote.height >= center;
-								
-								if (!daNote.ignoreNote || !cpuControlled && mustClipNote && canClipToCenter)
-								{
-									// Reuse existing object instead of creating new one
-									var swagRect = daNote.clipRect != null ? daNote.clipRect : new FlxRect();
-						
-									swagRect.x = 0;
-									swagRect.width = daNote.frameWidth * 2;
-									swagRect.height = (center - daNote.y) / daNote.scale.y;
-									swagRect.y = daNote.frameHeight - swagRect.height;
-						
-									daNote.clipRect = swagRect;
-								}
-							}
-						}
-						else
-						{
-							if(daNote.isSustainNote)
-							{
-								//daNote.y -= daNote.height / 2;
-	
-								var canClipToCenter = daNote.y + daNote.offset.y * daNote.scale.y <= center;
-						
-								if (!daNote.ignoreNote || !cpuControlled && mustClipNote && canClipToCenter)
-								{
-									// Reuse existing object instead of creating new one
-									var swagRect = daNote.clipRect != null ? daNote.clipRect : new FlxRect();
-						
-									swagRect.x = 0;
-									swagRect.y = (center - daNote.y) / daNote.scale.y;
-									swagRect.width = daNote.width / daNote.scale.x;
-									swagRect.height = (daNote.height / daNote.scale.y) - swagRect.y;
-									
-									daNote.clipRect = swagRect;
-								}
-							}
-						}
-					}
-	
-					if (!daNote.modifiedByLua)
-					{
-						daNote.visible = strumData.visible;
-	
-						if (!daNote.isSustainNote && daNote.angle != strumData.angle)
-							daNote.angle = strumData.angle;
-	
-						if (daNote.copyAlpha){
-							daNote.alpha = Math.max(strumData.alpha - (daNote.isSustainNote ? 0.4 : 0), 0);
-						}
-					}
-	
-					if (!daNote.mustPress && daNote.wasGoodHit && !daNote.hitByOpponent && !daNote.ignoreNote)
-						opponentNoteHit(daNote);
-	
-					if(((swagDownscroll && !daNote.flipScroll) || (!swagDownscroll && daNote.flipScroll)) && daNote.y > playerStrums.members[daNote.noteData].y - 20 ||
-					((!swagDownscroll && !daNote.flipScroll) || (swagDownscroll && daNote.flipScroll)) && daNote.y < playerStrums.members[daNote.noteData].y + 20)
-					{
-						// Force good note hit regardless if it's too late to hit it or not as a fail safe
-
-						if (cpuControlled && daNote.mustPress && (daNote.canBeHit || daNote.tooLate))
-						{
-							if(loadRep)
-							{
-								if(rep.replay.songNotes.contains(HelperFunctions.truncateFloat(daNote.strumTime, 2))){
-									goodNoteHit(daNote);
-								}
-							}else 
-							{
-								if (!daNote.ignoreNote && !daNote.burning && !daNote.blackStatic){
-									goodNoteHit(daNote);	
-								}
-							}
-						}
-					}
-	
-					// Kill extremely late notes and cause misses
-					if (Conductor.songPosition > noteKillOffset + daNote.strumTime)
-					{
-						if (daNote.mustPress)
-						{
-							if (daNote.canMiss)
-								callOnLuas('noteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote, daNote.dType]); //yeah i didn't know how else to do this
-	
-							if (theFunne && !daNote.canMiss && !cpuControlled && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit)) 
-							{
-								health -= 0.02;
-								totalDamageTaken += 0.02;
-								interupt = true;
-								vocals.volume = 0;	
-								noteMiss(daNote.noteData, daNote);
-							}
-						}
-					
-						daNote.active = false;
-						daNote.visible = false;
-	
-						daNote.kill();
-						notes.remove(daNote, true);
-						daNote.destroy();
-					}
-				});
+				{
+					updateNote(daNote, fakeCrochet, swagDownscroll);
+				});	
 			}
 			else
 			{
@@ -3738,6 +3581,173 @@ class PlayState extends MusicBeatState
 		checkEventNote();
 
 		callOnLuas('onUpdatePost', [elapsed]);
+	}
+
+	function updateNote(daNote:Note, fakeCrochet:Float, swagDownscroll:Bool)
+	{
+		// instead of doing stupid y > FlxG.height
+		// we be men and actually calculate the time :)
+		if (daNote.tooLate)
+		{
+			daNote.active = false;
+			daNote.visible = false;
+		}
+		else
+			daNote.active = true;
+
+		var strumGroup:FlxTypedGroup<StrumNote> = playerStrums;
+		if(!daNote.mustPress) strumGroup = opponentStrums;
+		var strumData = strumGroup.members[Math.floor(Math.abs(daNote.noteData))];
+
+		var strumX:Float = strumData.x;
+		var strumY:Float = strumData.y;
+		var strumAngle:Float = strumData.angle;
+		var strumDirection:Float = strumData.direction;
+		var strumAlpha:Float = strumData.alpha;
+		var strumScroll:Bool = false;
+
+		if ((swagDownscroll && !daNote.flipScroll) || (!swagDownscroll && daNote.flipScroll))
+			strumScroll = true;
+
+		strumX += daNote.offsetX;
+		strumY += daNote.offsetY;
+
+		daNote.distance = ((strumScroll ? 0.45 : -0.45) * (Conductor.songPosition - daNote.strumTime) * songSpeed * daNote.multSpeed);
+
+		var angleDir = strumDirection * Math.PI / 180;
+
+		if(daNote.copyX)
+			daNote.x = strumX + Math.cos(angleDir) * daNote.distance;
+
+		var center:Float = strumY + Note.swagWidth / 2;
+		
+		if (!daNote.modifiedByLua && daNote.copyY)
+		{
+			daNote.y = (strumY + Math.sin(angleDir) * daNote.distance);	
+			
+			// Simplify conditions.
+			var canClipNote:Bool = cpuControlled && !daNote.ignoreNote;
+			var mustClipNote:Bool = !cpuControlled && (!daNote.mustPress || daNote.wasGoodHit || (daNote.prevNote != null && daNote.prevNote.wasGoodHit && !daNote.canBeHit));
+
+			if (strumScroll)
+			{
+				if(daNote.isSustainNote)
+				{
+					if (daNote.animation.curAnim.name.endsWith('end')) {
+						daNote.y += 10.5 * (fakeCrochet / 400) * 1.5 * songSpeed + (46 * (songSpeed - 1));
+						daNote.y -= 46 * (1 - (fakeCrochet / 600)) * songSpeed;
+						if(daNote.isPixel) {
+							daNote.y += 8 + (6 - daNote.originalHeightForCalcs) * PlayState.daPixelZoom;
+						}
+					}
+					daNote.y += (Note.swagWidth / 2) - (60.5 * (songSpeed - 1));
+					daNote.y += 27.5 * ((SONG.bpm / 100) - 1) * (songSpeed - 1);
+					
+					var canClipToCenter = daNote.y - daNote.offset.y * daNote.scale.y + daNote.height >= center;
+					
+					if(!cpuControlled || canClipNote)
+					{
+						if(canClipNote || (mustClipNote && canClipToCenter))
+						{
+							var swagRect = (daNote.clipRect != null ? daNote.clipRect : new FlxRect());
+			
+							swagRect.x = 0;
+							swagRect.width = daNote.frameWidth * 2;
+							swagRect.height = (center - daNote.y) / daNote.scale.y;
+							swagRect.y = daNote.frameHeight - swagRect.height;
+				
+							daNote.clipRect = swagRect;
+						}
+					}
+				}
+			}
+			else
+			{
+				if(daNote.isSustainNote)
+				{
+					//daNote.y -= daNote.height / 2;
+
+					var canClipToCenter = daNote.y + daNote.offset.y * daNote.scale.y <= center;
+					
+					if(!cpuControlled || canClipNote)
+					{
+						if(canClipNote || (mustClipNote && canClipToCenter))
+						{
+							var swagRect = (daNote.clipRect != null ? daNote.clipRect : new FlxRect());
+			
+							swagRect.x = 0;
+							swagRect.y = (center - daNote.y) / daNote.scale.y;
+							swagRect.width = daNote.width / daNote.scale.x;
+							swagRect.height = (daNote.height / daNote.scale.y) - swagRect.y;
+							
+							daNote.clipRect = swagRect;
+						}
+					}
+				}
+			}
+		}
+
+		if (!daNote.modifiedByLua)
+		{
+			daNote.visible = strumData.visible;
+
+			if (!daNote.isSustainNote && daNote.angle != strumData.angle)
+				daNote.angle = strumData.angle;
+
+			if (daNote.copyAlpha){
+				daNote.alpha = Math.max(strumData.alpha - (daNote.isSustainNote ? 0.4 : 0), 0);
+			}
+		}
+
+		if (!daNote.mustPress && daNote.wasGoodHit && !daNote.hitByOpponent && !daNote.ignoreNote)
+			opponentNoteHit(daNote);
+
+		if(((swagDownscroll && !daNote.flipScroll) || (!swagDownscroll && daNote.flipScroll)) && daNote.y > playerStrums.members[daNote.noteData].y - 20 ||
+		((!swagDownscroll && !daNote.flipScroll) || (swagDownscroll && daNote.flipScroll)) && daNote.y < playerStrums.members[daNote.noteData].y + 20)
+		{
+			// Force good note hit regardless if it's too late to hit it or not as a fail safe
+
+			if (cpuControlled && daNote.mustPress && (daNote.canBeHit || daNote.tooLate))
+			{
+				if(loadRep)
+				{
+					if(rep.replay.songNotes.contains(HelperFunctions.truncateFloat(daNote.strumTime, 2))){
+						goodNoteHit(daNote);
+					}
+				}else 
+				{
+					if (!daNote.ignoreNote && !daNote.burning && !daNote.blackStatic){
+						goodNoteHit(daNote);	
+					}
+				}
+			}
+		}
+
+		// Kill extremely late notes and cause misses
+		if (Conductor.songPosition > noteKillOffset + daNote.strumTime)
+		{
+			if (daNote.mustPress)
+			{
+				if (daNote.canMiss)
+					callOnLuas('noteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote, daNote.dType]); //yeah i didn't know how else to do this
+
+				if (theFunne && !daNote.canMiss && !cpuControlled && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit)) 
+				{
+					health -= 0.02;
+					totalDamageTaken += 0.02;
+					interupt = true;
+					vocals.volume = 0;	
+					noteMiss(daNote.noteData, daNote);
+				}
+			}
+		
+			daNote.active = false;
+			daNote.visible = false;
+
+			daNote.kill();
+			notes.remove(daNote, true);
+			daNote.destroy();
+		}
 	}
 
 	function checkDebugKeys()

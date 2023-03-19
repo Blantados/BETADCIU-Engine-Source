@@ -283,7 +283,6 @@ class Note extends FlxSprite
 	public var curFlipY:Bool = false;
 
 	
-
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
@@ -430,10 +429,23 @@ class Note extends FlxSprite
 							if (isSustainNote)
 							{		
 								var rawPic2:Dynamic = Paths.returnGraphic(style+'ENDS');
-								loadGraphic(rawPic2, true, 7, 6);
+
+								loadGraphic(rawPic2);
+
+								width = width / 4;
+								height = height / 2;
+
+								loadGraphic(rawPic2, true, Math.floor(width), Math.floor(height));
 							}
-							else
-								loadGraphic(rawPic, true, 17, 17);
+							else{
+								loadGraphic(rawPic);
+
+								width = width / 4;
+								height = height / 5;
+
+								loadGraphic(rawPic, true, Math.floor(width), Math.floor(height));
+							}
+								
 
 							addAnims(true);
 						}

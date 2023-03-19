@@ -72,16 +72,6 @@ class StrumNote extends FlxSprite
 		switch (style)
 		{
 			case 'pixel':// | 'pixel-corrupted' | 'neon' | 'doki-pixel':
-				switch (style)
-				{
-					case 'pixel-corrupted':
-						suf = '-corrupted';
-					case 'neon':
-						suf = '-neon';
-					case 'doki-pixel':
-						suf = '-doki';
-				}
-
 				loadGraphic(Paths.image('notes/arrows-pixels'+suf), true, 17, 17);
 				
 				animation.add('green', [6]);
@@ -165,7 +155,12 @@ class StrumNote extends FlxSprite
 
 						if (!FileSystem.exists(Paths.modsXml(style)))
 						{
-							loadGraphic(rawPic, true, 17, 17);
+							loadGraphic(rawPic);
+
+							width = width / 4;
+							height = height / 5;
+
+							loadGraphic(rawPic, true, Math.floor(width), Math.floor(height));
 							addAnims(true);
 						}
 						else
