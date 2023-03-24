@@ -212,7 +212,7 @@ class Character extends FunkinSprite
 				imageFile = json.image; //psych
 				var imagePath = Paths.image(json.image);
 				
-				(json.spriteType != null ? spriteType = json.spriteType.toUpperCase() : spriteType = "SPARROW");
+				spriteType = (json.spriteType != null ? json.spriteType.toUpperCase() : "SPARROW");
 
 				if (FileSystem.exists(Paths.modsImages(json.image+"/spritemap1")) && spriteType == "TEXTURE")
 				{

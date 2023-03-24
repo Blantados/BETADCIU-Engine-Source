@@ -570,6 +570,16 @@ class ChartingState extends MusicBeatState
 		updateNoteUI();
 	}
 
+	var characters:Array<String>;
+	var stages:Array<String>;
+	var noteStyles:Array<String>;
+
+	var player1DropDown:FlxUIDropDownMenuCustom;
+	var player2DropDown:FlxUIDropDownMenuCustom;
+	var gfVersionDropDown:FlxUIDropDownMenuCustom;
+	var noteStyleDropDown:FlxUIDropDownMenuCustom;
+	var stageDropDown:FlxUIDropDownMenuCustom;
+
 	function addSongUI():Void
 	{
 		var UI_songTitle = new FlxUIInputText(10, 10, 70, _song.song, 8);
@@ -656,9 +666,7 @@ class ChartingState extends MusicBeatState
 		stepperMania.value = _song.mania;
 		stepperMania.name = 'song_mania';
 
-		var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt('characterList'));
-		var stages:Array<String> = CoolUtil.coolTextFile(Paths.txt('stageList'));
-		var noteStyles:Array<String> = CoolUtil.coolTextFile(Paths.txt('noteStyleList'));
+		loadArrayTexts();
 
 		var player1DropDown = new FlxUIDropDownMenuCustom(10, stepperSpeed.y + 40, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
 		{
@@ -694,6 +702,8 @@ class ChartingState extends MusicBeatState
 
 		var reloadDropDowns:FlxButton = new FlxButton(player1DropDown.x + 140, player2DropDown.y, "Reload Dropdowns", function()
 		{
+			loadArrayTexts();
+		
 			var dropDowns:Array<FlxUIDropDownMenuCustom> = [player1DropDown, player2DropDown, gfVersionDropDown, stageDropDown, noteStyleDropDown];
 			var dropDownsData:Array<Array<String>> = [CoolUtil.coolTextFile(Paths.txt('characterList')), CoolUtil.coolTextFile(Paths.txt('characterList')), CoolUtil.coolTextFile(Paths.txt('characterList')), CoolUtil.coolTextFile(Paths.txt('stageList')), CoolUtil.coolTextFile(Paths.txt('noteStyleList'))];
 			var dropDownsLabel:Array<String> = [_song.player1, _song.player2, _song.gfVersion, _song.stage, _song.noteStyle];
@@ -770,6 +780,12 @@ class ChartingState extends MusicBeatState
 		updateGrid();
 	}
 
+	function loadArrayTexts()
+	{
+		characters = CoolUtil.coolTextFile(Paths.txt('characterList'));
+		stages = CoolUtil.coolTextFile(Paths.txt('stageList'));
+		noteStyles = CoolUtil.coolTextFile(Paths.txt('noteStyleList'));
+	}
 	var stepperLength:FlxUINumericStepper;
 	var check_mustHitSection:FlxUICheckBox;
 	var check_gfSection:FlxUICheckBox;
@@ -1043,26 +1059,10 @@ class ChartingState extends MusicBeatState
 			updateGrid();
 		});
 
-		tab_group_section.add(stepperLength);
-		tab_group_section.add(check_mustHitSection);
-		tab_group_section.add(check_gfSection);
-		tab_group_section.add(check_altAnim);
-		tab_group_section.add(check_bfAltAnim);
-		tab_group_section.add(check_changeBPM);
-		tab_group_section.add(stepperSectionBPM);
-		tab_group_section.add(stepperDType);
-		tab_group_section.add(check_dadCrossfade);
-		tab_group_section.add(check_bfCrossfade);
-		tab_group_section.add(copyButton);
-		tab_group_section.add(pasteButton);
-		tab_group_section.add(clearSectionButton);
-		tab_group_section.add(check_notesSec);
-		tab_group_section.add(check_eventsSec);
-		tab_group_section.add(swapSection);
-		tab_group_section.add(stepperCopyLast);
-		tab_group_section.add(copyLastButton);
-		tab_group_section.add(duetButton);
-		tab_group_section.add(mirrorButton);
+		var swagArray:Array<Dynamic> = [stepperLength, check_mustHitSection, check_gfSection, check_altAnim, check_bfAltAnim, check_changeBPM, stepperSectionBPM, stepperDType, check_dadCrossfade, check_bfCrossfade, copyButton, pasteButton, clearSectionButton, check_notesSec, check_eventsSec, swapSection, stepperCopyLast, copyLastButton, duetButton, mirrorButton];
+		for (i in 0...swagArray.length){
+			tab_group_section.add(swagArray[i]);
+		}
 
 		tab_group_section.add(new FlxText(75 , stepperLength.x,'Section Length (in steps)'));
 		tab_group_section.add(new FlxText(stepperDType.x + 60, stepperDType.y,'Section dType'));

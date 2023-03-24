@@ -941,7 +941,6 @@ class ModchartState
 				#else
 				luaTrace('Error loading lua script: "$script"\n' + resultStr, true, false, FlxColor.RED);
 				#end
-				Lua.close(lua);
 				lua = null;
 
 				if (isStageLua)
@@ -954,7 +953,16 @@ class ModchartState
 					PlayState.instance.luaArray.remove(this);
 					PlayState.instance.luaArray = [];
 				}
-				
+				/*
+				var daArray = (isStageLua ? Stage.instance.luaArray : PlayState.instance.luaArray);
+
+				for (luaInstance in daArray)
+				{
+					if(luaInstance.lua == null){
+						daArray.remove(luaInstance);
+					}
+				}*/
+
 				return;
 			}
 		} catch(e:Dynamic) {
@@ -1043,6 +1051,13 @@ class ModchartState
 			set("camHudAngle", PlayState.instance.camHUD.angle);
 
 			set('playbackRate', PlayState.instance.playbackRate);
+		}
+
+		for (i in 0...4) {
+			set('defaultPlayerStrumX' + i, 0);
+			set('defaultPlayerStrumY' + i, 0);
+			set('defaultOpponentStrumX' + i, 0);
+			set('defaultOpponentStrumY' + i, 0);
 		}
 
 		// Character shit
@@ -4855,16 +4870,12 @@ class ModchartState
 			});
 		
 	
-			if (PlayState.instance != null && PlayState.instance.isDetected)
+			/*if (PlayState.instance != null)
 			{
 				for (i in 0...PlayState.instance.strumLineNotes.length) {
 					var member = PlayState.instance.strumLineNotes.members[i];
-					trace(PlayState.instance.strumLineNotes.members[i].x + " " + PlayState.instance.strumLineNotes.members[i].y + " " + PlayState.instance.strumLineNotes.members[i].angle + " | strum" + i);
-					//set("strum" + i + "X", Math.floor(member.x));
 					set("defaultStrum" + i + "X", Math.floor(member.x));
-					//set("strum" + i + "Y", Math.floor(member.y));
 					set("defaultStrum" + i + "Y", Math.floor(member.y));
-					//set("strum" + i + "Angle", Math.floor(member.angle));
 					set("defaultStrum" + i + "Angle", Math.floor(member.angle));
 					set("defaultStrum" + i + "Alpha", Math.floor(member.alpha));
 					trace("Adding strum" + i);
@@ -4878,7 +4889,7 @@ class ModchartState
 					new LuaGame().Register(lua);
 					new LuaWindow().Register(lua);
 				}
-			}
+			}*/
 			
 			//dumb group dancer shit
 			// default strums

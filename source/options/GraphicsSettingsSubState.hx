@@ -67,6 +67,14 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 			true); //Default value
 		addOption(option);
 
+		//I LOVE KADE ENGINE LEGACY!!!
+		var option:Option = new Option('GPU Rendering', //Name
+			'If checked, loads sprites into VRAM on the GPU.', //Description
+			'useGL', //Save data variable name
+			'bool', //Variable type
+			false); //Default value
+		addOption(option);
+
 		#if !html5 //Apparently other framerates isn't correctly supported on Browser? Probably it has some V-Sync shit enabled by default, idk
 		var option:Option = new Option('Framerate',
 			"Pretty self explanatory, isn't it?",

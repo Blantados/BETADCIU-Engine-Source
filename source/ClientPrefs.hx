@@ -40,6 +40,7 @@ class ClientPrefs {
 	public static var botplay:Bool = false;
 	public static var poltatoPC:Bool = false;
 	public static var songPosition:Bool = false;
+	public static var useGL:Bool = false;
 	public static var gameplaySettings:Map<String, Dynamic> = [
 		'scrollspeed' => 1.0,
 		'scrolltype' => 'multiplicative', 
@@ -101,45 +102,21 @@ class ClientPrefs {
 	}
 
 	public static function saveSettings() {
-		FlxG.save.data.downscroll = downscroll;
-		FlxG.save.data.middleScroll = middleScroll;
-		FlxG.save.data.opponentStrums = opponentStrums;
 		FlxG.save.data.fps = showFPS;
 		FlxG.save.data.showFPS = showFPS;
-		FlxG.save.data.flashing = flashing;
-		FlxG.save.data.globalAntialiasing = globalAntialiasing;
 		FlxG.save.data.noteSplash = noteSplashes;
-		FlxG.save.data.lowQuality = lowQuality;
-		FlxG.save.data.shaders = shaders;
 		FlxG.save.data.fpsCap = framerate;
 		//FlxG.save.data.cursing = cursing;
 		//FlxG.save.data.violence = violence;
-		FlxG.save.data.camZooms = camZooms;
-		FlxG.save.data.noteOffset = noteOffset;
-		FlxG.save.data.hideHud = hideHud;
-		FlxG.save.data.arrowHSV = arrowHSV;
 		FlxG.save.data.ghost = ghostTapping;
-		FlxG.save.data.timeBarType = timeBarType;
-		FlxG.save.data.scoreZoom = scoreZoom;
-		FlxG.save.data.noReset = noReset;
-		FlxG.save.data.healthBarAlpha = healthBarAlpha;
-		FlxG.save.data.comboOffset = comboOffset;
-
-		FlxG.save.data.ratingOffset = ratingOffset;
-		FlxG.save.data.sickWindow = sickWindow;
-		FlxG.save.data.goodWindow = goodWindow;
-		FlxG.save.data.badWindow = badWindow;
-		FlxG.save.data.safeFrames = safeFrames;
 		FlxG.save.data.gameplaySettings = gameplaySettings;
-		FlxG.save.data.controllerMode = controllerMode;
-		FlxG.save.data.hitsoundVolume = hitsoundVolume;
-		FlxG.save.data.pauseMusic = pauseMusic;
-		FlxG.save.data.checkForUpdates = checkForUpdates;
-		FlxG.save.data.comboStacking = comboStacking;
-		FlxG.save.data.botplay = botplay;
-		FlxG.save.data.psychUI = psychUI;
-		FlxG.save.data.fpsRain = fpsRain;
-		FlxG.save.data.songPosition = songPosition;
+
+		var savesArray:Array<String> = ["checkForUpdates", "comboStacking", "psychUI", "useGL", "songPosition", "fpsRain", "poltatoPC", "botplay", "shaders", "downscroll", "flashing", "globalAntialiasing", "sickWindow", "goodWindow", "badWindow", "safeFrames", "controllerMode", "hitsoundVolume", "pauseMusic"];
+		savesArray = savesArray.concat(["camZooms", "hideHud", "noteOffset", "arrowHSV", "timeBarType", "scoreZoom", "noReset", "healthBarAlpha", "comboOffset", "ratingOffset", "lowQuality", "middleScroll", "opponentStrums"]);
+		
+		for (field in savesArray) {
+			Reflect.setProperty(FlxG.save.data, field, Reflect.getProperty(ClientPrefs, field));
+		}
 	
 		FlxG.save.flush();
 
@@ -151,36 +128,17 @@ class ClientPrefs {
 	}
 
 	public static function loadPrefs() {
-		if(FlxG.save.data.downscroll != null) {
-			downscroll = FlxG.save.data.downscroll;
-		}
-		if(FlxG.save.data.middleScroll != null) {
-			middleScroll = FlxG.save.data.middleScroll;
-		}
-		if(FlxG.save.data.opponentStrums != null) {
-			opponentStrums = FlxG.save.data.opponentStrums;
-		}
+		// values I couldn't add to the array since they have different save data names and var names
 		if(FlxG.save.data.fps != null) {
 			showFPS = FlxG.save.data.fps;
 			if(Main.fpsCounter != null) {
 				Main.fpsCounter.visible = showFPS;
 			}
 		}
-		if(FlxG.save.data.flashing != null) {
-			flashing = FlxG.save.data.flashing;
-		}
-		if(FlxG.save.data.globalAntialiasing != null) {
-			globalAntialiasing = FlxG.save.data.globalAntialiasing;
-		}
 		if(FlxG.save.data.noteSplash != null) {
 			noteSplashes = FlxG.save.data.noteSplash;
 		}
-		if(FlxG.save.data.lowQuality != null) {
-			lowQuality = FlxG.save.data.lowQuality;
-		}
-		if(FlxG.save.data.shaders != null) {
-			shaders = FlxG.save.data.shaders;
-		}
+
 		if(FlxG.save.data.fpsCap != null) {
 			framerate = FlxG.save.data.fpsCap;
 			if(framerate > FlxG.drawFramerate) {
@@ -191,73 +149,7 @@ class ClientPrefs {
 				FlxG.updateFramerate = framerate;
 			}
 		}
-		/*if(FlxG.save.data.cursing != null) {
-			cursing = FlxG.save.data.cursing;
-		}
-		if(FlxG.save.data.violence != null) {
-			violence = FlxG.save.data.violence;
-		}*/
-		if(FlxG.save.data.camZooms != null) {
-			camZooms = FlxG.save.data.camZooms;
-		}
-		if(FlxG.save.data.hideHud != null) {
-			hideHud = FlxG.save.data.hideHud;
-		}
-		if(FlxG.save.data.noteOffset != null) {
-			noteOffset = FlxG.save.data.noteOffset;
-		}
-		if(FlxG.save.data.arrowHSV != null) {
-			arrowHSV = FlxG.save.data.arrowHSV;
-		}
-		if(FlxG.save.data.ghost != null) {
-			ghostTapping = FlxG.save.data.ghost;
-		}
-		if(FlxG.save.data.timeBarType != null) {
-			timeBarType = FlxG.save.data.timeBarType;
-		}
-		if(FlxG.save.data.scoreZoom != null) {
-			scoreZoom = FlxG.save.data.scoreZoom;
-		}
-		if(FlxG.save.data.noReset != null) {
-			noReset = FlxG.save.data.noReset;
-		}
-		if(FlxG.save.data.healthBarAlpha != null) {
-			healthBarAlpha = FlxG.save.data.healthBarAlpha;
-		}
-		if(FlxG.save.data.comboOffset != null) {
-			comboOffset = FlxG.save.data.comboOffset;
-		}
-		
-		if(FlxG.save.data.ratingOffset != null) {
-			ratingOffset = FlxG.save.data.ratingOffset;
-		}
-		if(FlxG.save.data.sickWindow != null) {
-			sickWindow = FlxG.save.data.sickWindow;
-		}
-		if(FlxG.save.data.goodWindow != null) {
-			goodWindow = FlxG.save.data.goodWindow;
-		}
-		if(FlxG.save.data.badWindow != null) {
-			badWindow = FlxG.save.data.badWindow;
-		}
-		if(FlxG.save.data.safeFrames != null) {
-			safeFrames = FlxG.save.data.safeFrames;
-		}
-		if(FlxG.save.data.controllerMode != null) {
-			controllerMode = FlxG.save.data.controllerMode;
-		}
-		if(FlxG.save.data.hitsoundVolume != null) {
-			hitsoundVolume = FlxG.save.data.hitsoundVolume;
-		}
-		if(FlxG.save.data.pauseMusic != null) {
-			pauseMusic = FlxG.save.data.pauseMusic;
-		}
-		if(FlxG.save.data.botplay != null) {
-			botplay = FlxG.save.data.botplay;
-		}
-		if(FlxG.save.data.poltatoPC != null) {
-			poltatoPC = FlxG.save.data.poltatoPC;
-		}
+
 		if(FlxG.save.data.gameplaySettings != null)
 		{
 			var savedMap:Map<String, Dynamic> = FlxG.save.data.gameplaySettings;
@@ -268,31 +160,22 @@ class ClientPrefs {
 		}
 		
 		// flixel automatically saves your volume!
-		if(FlxG.save.data.volume != null)
-		{
+
+		if(FlxG.save.data.volume != null){
 			FlxG.sound.volume = FlxG.save.data.volume;
 		}
-		if (FlxG.save.data.mute != null)
-		{
+		if (FlxG.save.data.mute != null){
 			FlxG.sound.muted = FlxG.save.data.mute;
 		}
-		if (FlxG.save.data.checkForUpdates != null)
-		{
-			checkForUpdates = FlxG.save.data.checkForUpdates;
-		}
-		if (FlxG.save.data.comboStacking != null)
-			comboStacking = FlxG.save.data.comboStacking;
 
-		if(FlxG.save.data.psychUI != null) {
-			psychUI = FlxG.save.data.psychUI;
-		}
-
-		if(FlxG.save.data.songPosition != null) {
-			songPosition = FlxG.save.data.songPosition;
-		}
-
-		if(FlxG.save.data.fpsRain != null) {
-			fpsRain = FlxG.save.data.fpsRain;
+		//Arrays make this look so much nicer
+		var savesArray:Array<String> = ["checkForUpdates", "comboStacking", "psychUI", "useGL", "songPosition", "fpsRain", "poltatoPC", "botplay", "shaders", "downscroll", "flashing", "globalAntialiasing", "sickWindow", "goodWindow", "badWindow", "safeFrames", "controllerMode", "hitsoundVolume", "pauseMusic"];
+		savesArray = savesArray.concat(["camZooms", "hideHud", "noteOffset", "arrowHSV", "timeBarType", "scoreZoom", "noReset", "healthBarAlpha", "comboOffset", "ratingOffset", "lowQuality", "middleScroll", "opponentStrums"]);
+		
+		for (field in savesArray) {
+			if (Reflect.getProperty(FlxG.save.data, field) != null) {
+				Reflect.setProperty(ClientPrefs, field, Reflect.getProperty(FlxG.save.data, field));
+			}
 		}
 
 		var save:FlxSave = new FlxSave();

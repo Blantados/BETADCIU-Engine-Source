@@ -212,7 +212,7 @@ class Note extends FlxSprite
 
 		noteData = _noteData % Main.keyAmmo[mania];
 
-		loadNoteAnims(style, sustainNote);
+		texture = style;
 
 		var frameN:Array<String> = ['purple', 'blue', 'green', 'red'];
 		switch (mania)
@@ -252,7 +252,7 @@ class Note extends FlxSprite
 			{
 				prevNote.animation.play(frameN[prevNote.noteData] + 'hold');
 
-				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * (PlayState.instance != null ? PlayState.instance.songSpeed : 1); //idk why but 1.05 doesn't work.					
+				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.05 * (PlayState.instance != null ? PlayState.instance.songSpeed : 1); //idk why but 1.05 doesn't work.					
 				prevNote.updateHitbox();
 			}
 		}

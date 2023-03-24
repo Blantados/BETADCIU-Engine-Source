@@ -17,6 +17,7 @@ import openfl.display.Bitmap;
 import openfl.display.PixelSnapping;
 import haxe.Json;
 import animateatlas.AtlasFrameMaker;
+import openfl.display3D.textures.Texture;
 
 using StringTools;
 
@@ -351,6 +352,7 @@ class Paths
 
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
 	public static var currentTrackedSounds:Map<String, Sound> = [];
+	public static var currentTrackedTextures:Map<String, Texture> = [];
 	public static var currentTrackedTexts:Map<String, String> = [];
 	public static var localTrackedAssets:Array<String> = [];
 
@@ -409,6 +411,13 @@ class Paths
 			if (!localTrackedAssets.contains(key) 
 				&& !dumpExclusions.contains(key)) {
 				// get rid of it
+				if (currentTrackedTextures.exists(key)) {
+					var texture:Null<Texture> = currentTrackedTextures.get(key);
+					texture.dispose();
+					texture = null;
+					currentTrackedTextures.remove(key);
+				}
+
 				var obj = currentTrackedAssets.get(key);
 				@:privateAccess
 				if (obj != null) {
@@ -442,8 +451,14 @@ class Paths
 		else
 		{
 			@:privateAccess
-
 			var obj = FlxG.bitmap._cache.get(key);
+		
+			if (currentTrackedTextures.exists(key)) {
+				var texture:Null<Texture> = currentTrackedTextures.get(key);
+				texture.dispose();
+				texture = null;
+				currentTrackedTextures.remove(key);
+			}
 			
 			if (obj != null)
 			{
@@ -597,10 +612,26 @@ class Paths
 					}
 				}
 				else{
-					(FileSystem.exists(path) ? newBitmap = BitmapData.fromFile(path) : newBitmap = OpenFlAssets.getBitmapData(path));
+					newBitmap = (FileSystem.exists(path) ? BitmapData.fromFile(path) : OpenFlAssets.getBitmapData(path));
 				}
 					
-				var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(newBitmap, false, key);
+				var newGraphic:FlxGraphic;
+
+				if (ClientPrefs.useGL) {
+					var texture:Texture = FlxG.stage.context3D.createTexture(newBitmap.width, newBitmap.height, BGRA, true);
+					texture.uploadFromBitmapData(newBitmap);
+					currentTrackedTextures.set(key, texture);
+
+					newBitmap.disposeImage();
+					newBitmap.dispose();
+					newBitmap = null;
+
+					newGraphic = FlxGraphic.fromBitmapData(BitmapData.fromTexture(texture), false, key);
+				} 
+				else{
+					newGraphic = FlxGraphic.fromBitmapData(newBitmap, false, key);
+				}
+				
 				newGraphic.persist = true;
 				currentTrackedAssets.set(key, newGraphic);
 			}
@@ -653,12 +684,7 @@ class Paths
 		var imageLoaded:FlxGraphic = returnGraphic(key, library);
 		var rawXml:String = "";
 
-		var pathsToCheck:Array<String> = [modsXml(key), FileSystem.absolutePath("assets/shared/images/"+key+".xml"), Paths.xmlNew('images/' + key)];
-
-		if (library != null)
-			pathsToCheck.push(FileSystem.absolutePath("assets/"+library+"/images/"+key+".xml"));
-
-		rawXml = checkAndReturn(pathsToCheck);
+		rawXml = checkAndReturn("xml", key, library);
 		
 		if (imageLoaded == null){
 			if (PlayState.instance != null)
@@ -695,12 +721,7 @@ class Paths
 		var imageLoaded:FlxGraphic = returnGraphic(key, library);
 		var rawTxt:String = "";
 
-		var pathsToCheck:Array<String> = [modsTxt(key), FileSystem.absolutePath("assets/shared/images/"+key+".txt"), Paths.txtNew('images/' + key)];
-
-		if (library != null)
-			pathsToCheck.push(FileSystem.absolutePath("assets/"+library+"/images/"+key+".txt"));
-
-		rawTxt = checkAndReturn(pathsToCheck);
+		rawTxt = checkAndReturn("txt", key, library);
 
 		if (imageLoaded == null){
 			if (PlayState.instance != null)
@@ -726,12 +747,7 @@ class Paths
 		var imageLoaded:FlxGraphic = returnGraphic(key, library);
 		var rawXml:String = "";
 
-		var pathsToCheck:Array<String> = [modsXml(key), FileSystem.absolutePath("assets/shared/images/"+key+".xml"), Paths.xmlNew('images/' + key)];
-
-		if (library != null)
-			pathsToCheck.push(FileSystem.absolutePath("assets/"+library+"/images/"+key+".xml"));
-
-		rawXml = checkAndReturn(pathsToCheck);
+		rawXml = checkAndReturn("xml", key, library);
 		
 		if (imageLoaded == null){
 			if (PlayState.instance != null)
@@ -755,12 +771,7 @@ class Paths
 		var imageLoaded:FlxGraphic = returnGraphic(key, library);
 		var rawJson:String = "";
 
-		var pathsToCheck:Array<String> = [modsJson(key), FileSystem.absolutePath("assets/shared/images/"+key+".json"), Paths.jsonNew('images/' + key)];
-
-		if (library != null)
-			pathsToCheck.push(FileSystem.absolutePath("assets/"+library+"/images/"+key+".json"));
-
-		rawJson = checkAndReturn(pathsToCheck);
+		rawJson = checkAndReturn("json", key, "library");
 		
 		if (imageLoaded == null){
 			if (PlayState.instance != null)
@@ -822,8 +833,23 @@ class Paths
 		return getSparrowAtlas(key);
 	}
 
-	static function checkAndReturn(pathsToCheck:Array<String>)
+	static function checkAndReturn(fileType:String = "xml", key:String, ?library:String = null)
 	{
+		var pathsToCheck:Array<String> = [];
+
+		switch (fileType.toLowerCase())
+		{
+			case "xml":
+				pathsToCheck = [modsXml(key), FileSystem.absolutePath("assets/shared/images/"+key+".xml"), Paths.xmlNew('images/' + key)];
+			case "txt":
+				pathsToCheck = [modsTxt(key), FileSystem.absolutePath("assets/shared/images/"+key+".txt"), Paths.txtNew('images/' + key)];
+			case "json":
+				pathsToCheck = [modsJson(key), FileSystem.absolutePath("assets/shared/images/"+key+".json"), Paths.jsonNew('images/' + key)];
+		}
+
+		if (library != null)
+			pathsToCheck.push(FileSystem.absolutePath("assets/"+library+"/images/"+key+"."+fileType.toLowerCase()));
+		
 		for (i in 0...pathsToCheck.length)
 		{
 			if(Assets.exists(pathsToCheck[i])) {
