@@ -68,6 +68,10 @@ class CharacterEditorState extends MusicBeatState
 		super();
 		this.daAnim = daAnim;
 		this.goToPlayState = goToPlayState;
+
+		if (daAnim.contains('-embed')){
+			daAnim = "bf";
+		}
 	}
 
 	var UI_box:FlxUITabMenu;
@@ -98,6 +102,10 @@ class CharacterEditorState extends MusicBeatState
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camMenu, false);
 		FlxG.cameras.setDefaultDrawTarget(camEditor, true);
+
+		luaDebugGroup = new FlxTypedGroup<DebugLuaText>();
+		add(luaDebugGroup);
+		luaDebugGroup.cameras = [camMenu];
 
 		bgLayer = new FlxTypedGroup<FlxSprite>();
 		add(bgLayer);
@@ -206,10 +214,6 @@ class CharacterEditorState extends MusicBeatState
 
 		FlxG.mouse.visible = true;
 		reloadCharacterOptions();
-
-		luaDebugGroup = new FlxTypedGroup<DebugLuaText>();
-		add(luaDebugGroup);
-		luaDebugGroup.cameras = [camMenu];
 
 		super.create();
 	}
@@ -876,15 +880,12 @@ class CharacterEditorState extends MusicBeatState
 		tab_group.add(new FlxText(animationNameInputText.x, animationNameInputText.y - 18, 0, 'Animation on .XML/.TXT file:'));
 		tab_group.add(new FlxText(animationIndicesInputText.x, animationIndicesInputText.y - 18, 0, 'ADVANCED - Animation Indices:'));
 
-		tab_group.add(animationInputText);
-		tab_group.add(animationNameInputText);
-		tab_group.add(animationIndicesInputText);
-		tab_group.add(animationNameFramerate);
-		tab_group.add(animationLoopCheckBox);
-		tab_group.add(addUpdateButton);
-		tab_group.add(removeButton);
-		tab_group.add(ghostDropDown);
-		tab_group.add(animationDropDown);
+		var swagArray:Array<Dynamic> = [animationInputText, animationNameInputText, animationIndicesInputText, animationNameFramerate, animationLoopCheckBox, addUpdateButton, removeButton, ghostDropDown, animationDropDown];
+	
+		for (i in 0...swagArray.length){
+			tab_group.add(swagArray[i]);
+		}
+
 		UI_characterbox.addGroup(tab_group);
 	}
 
@@ -902,85 +903,99 @@ class CharacterEditorState extends MusicBeatState
 				char.imageFile = imageInputText.text;
 			}
 		} else if(id == FlxUINumericStepper.CHANGE_EVENT && (sender is FlxUINumericStepper)) {
-			if (sender == scaleStepper)
-			{
-				reloadCharacterImage();
-				char.jsonScale = sender.value;
-				char.setGraphicSize(Std.int(char.width * char.jsonScale));
-				char.updateHitbox();
-				reloadGhost();
-				updatePointerPos();
-
-				if(char.animation.curAnim != null) {
-					char.playAnim(char.animation.curAnim.name, true);
+			if(id == FlxUIInputText.CHANGE_EVENT && (sender is FlxUIInputText)) {
+				if(sender == healthIconInputText) {
+					leHealthIcon.changeIcon(healthIconInputText.text);
+					char.healthIcon = healthIconInputText.text;
+					updatePresence();
 				}
-			}
-			else if(sender == positionXStepper)
-			{
-				char.positionArray[0] = positionXStepper.value;
-				if (!char.isPlayer)
-					char.x = char.positionArray[0] + OFFSET_X + 100;
-				updatePointerPos();
-			}
-			else if(sender == singDurationStepper)
-			{
-				char.singDuration = singDurationStepper.value;//ermm you forgot this??
-			}
-			else if(sender == positionYStepper)
-			{
-				char.positionArray[1] = positionYStepper.value;
-				if (!char.isPlayer)
-					char.y = char.positionArray[1];
-				updatePointerPos();
-			}
-			else if(sender == playerPositionXStepper)
-			{
-				char.playerPositionArray[0] = playerPositionXStepper.value;
-				if (char.isPlayer)
-					char.x = char.playerPositionArray[0] + OFFSET_X + 100;
-				updatePointerPos();
-			}
-			else if(sender == playerPositionYStepper)
-			{
-				char.playerPositionArray[1] = playerPositionYStepper.value;
-				if (char.isPlayer)
-					char.y = char.playerPositionArray[1];
-				updatePointerPos();
-			}
-			else if(sender == positionCameraXStepper)
-			{
-				char.cameraPosition[0] = positionCameraXStepper.value;
-				updatePointerPos();
-			}
-			else if(sender == positionCameraYStepper)
-			{
-				char.cameraPosition[1] = positionCameraYStepper.value;
-				updatePointerPos();
-			}
-			else if(sender == playerPositionCameraXStepper)
-			{
-				char.playerCameraPosition[0] = playerPositionCameraXStepper.value;
-				updatePointerPos();
-			}
-			else if(sender == playerPositionCameraYStepper)
-			{
-				char.playerCameraPosition[1] = playerPositionCameraYStepper.value;
-				updatePointerPos();
-			}
-			else if(sender == healthColorStepperR)
-			{
-				char.healthColorArray[0] = Math.round(healthColorStepperR.value);
-				healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
-			}
-			else if(sender == healthColorStepperG)
-			{
-				char.healthColorArray[1] = Math.round(healthColorStepperG.value);
-				healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
-			}
-			else if(sender == healthColorStepperB)
-			{
-				char.healthColorArray[2] = Math.round(healthColorStepperB.value);
-				healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
+				else if(sender == noteSkinInputText) {
+					char.noteSkin = noteSkinInputText.text;
+				}
+				else if(sender == imageInputText) {
+					char.imageFile = imageInputText.text;
+				}
+			} else if(id == FlxUINumericStepper.CHANGE_EVENT && (sender is FlxUINumericStepper)) {
+				if (sender == scaleStepper)
+				{
+					reloadCharacterImage();
+					char.jsonScale = sender.value;
+					char.setGraphicSize(Std.int(char.width * char.jsonScale));
+					char.updateHitbox();
+					reloadGhost();
+					updatePointerPos();
+	
+					if(char.animation.curAnim != null) {
+						char.playAnim(char.animation.curAnim.name, true);
+					}
+				}
+				else if(sender == positionXStepper)
+				{
+					char.positionArray[0] = positionXStepper.value;
+					if (!char.isPlayer)
+						char.x = char.positionArray[0] + OFFSET_X + 100;
+					updatePointerPos();
+				}
+				else if(sender == singDurationStepper)
+				{
+					char.singDuration = singDurationStepper.value;//ermm you forgot this??
+				}
+				else if(sender == positionYStepper)
+				{
+					char.positionArray[1] = positionYStepper.value;
+					if (!char.isPlayer)
+						char.y = char.positionArray[1];
+					updatePointerPos();
+				}
+				else if(sender == playerPositionXStepper)
+				{
+					char.playerPositionArray[0] = playerPositionXStepper.value;
+					if (char.isPlayer)
+						char.x = char.playerPositionArray[0] + OFFSET_X + 100;
+					updatePointerPos();
+				}
+				else if(sender == playerPositionYStepper)
+				{
+					char.playerPositionArray[1] = playerPositionYStepper.value;
+					if (char.isPlayer)
+						char.y = char.playerPositionArray[1];
+					updatePointerPos();
+				}
+				else if(sender == positionCameraXStepper)
+				{
+					char.cameraPosition[0] = positionCameraXStepper.value;
+					updatePointerPos();
+				}
+				else if(sender == positionCameraYStepper)
+				{
+					char.cameraPosition[1] = positionCameraYStepper.value;
+					updatePointerPos();
+				}
+				else if(sender == playerPositionCameraXStepper)
+				{
+					char.playerCameraPosition[0] = playerPositionCameraXStepper.value;
+					updatePointerPos();
+				}
+				else if(sender == playerPositionCameraYStepper)
+				{
+					char.playerCameraPosition[1] = playerPositionCameraYStepper.value;
+					updatePointerPos();
+				}
+				else if(sender == healthColorStepperR)
+				{
+					char.healthColorArray[0] = Math.round(healthColorStepperR.value);
+					healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
+				}
+				else if(sender == healthColorStepperG)
+				{
+					char.healthColorArray[1] = Math.round(healthColorStepperG.value);
+					healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
+				}
+				else if(sender == healthColorStepperB)
+				{
+					char.healthColorArray[2] = Math.round(healthColorStepperB.value);
+					healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
+				}
 			}
 		}
 	}

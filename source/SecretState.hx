@@ -51,7 +51,7 @@ class SecretState extends MusicBeatState
 
 		lolText = new FlxText(0, 0, FlxG.width - 100, 32);
 		lolText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER);
-		lolText.text = "The version 1.5 update for BETADCIU Engine! Psych shaders are now fully implemented (I forgot about runHaxeCode), added support for different character file types, and made some improvements to the lua system. Also added new menu music as well as some quality of life changes! \n\nMore BETADCIU Modpacks will be released soon! Hope you enjoy the update!";
+		lolText.text = "The version 1.6 update for BETADCIU Engine! Optimized the code for the engine a LOT and fixed some features that previously didn't work as intended. Also added an option for GPU Rendering for sprites which I highly recommend you turn on to reduce CPU Usage. As always, I've also added some more lua stuff and made some more minor adjustments. \n\nMore BETADCIU Modpacks will be released soon! Hope you enjoy the update!";
 		lolText.borderColor = FlxColor.BLACK;
 		lolText.borderSize = 3;
 		lolText.borderStyle = FlxTextBorderStyle.OUTLINE;

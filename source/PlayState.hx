@@ -272,6 +272,8 @@ class PlayState extends MusicBeatState
 	var fc:Bool = true;
 	var comboSpr:FlxSprite;
 
+	public static var deathCounter:Int = 0;
+
 	//var wiggleShit:WiggleEffect = new WiggleEffect();
 
 	public var songScore:Int = 0;
@@ -1298,11 +1300,12 @@ class PlayState extends MusicBeatState
 		
 			if(ret != ModchartState.Function_Stop) {
 				boyfriend.stunned = true;
+				deathCounter++;
 
 				persistentUpdate = false;
 				persistentDraw = false;
 				paused = true;
-
+				
 				vocals.stop();
 				FlxG.sound.music.stop();
 
@@ -1655,7 +1658,7 @@ class PlayState extends MusicBeatState
 						var char = modchartCharacters.get(value1);	
 
 						if (char != null){
-							ModchartState.makeLuaCharacter(value1, value2, char.isPlayer, daChar.flipMode);
+							ModchartState.makeLuaCharacter(value1, value2, char.isPlayer, char.flipMode);
 						}
 						
 					}		
@@ -3015,13 +3018,14 @@ class PlayState extends MusicBeatState
 	{
 		if (paused)
 		{
-			if (FlxG.sound.music != null && !startingSong)
-			{
+			if (FlxG.sound.music != null && !startingSong){
 				resyncVocals();
 			}
 
-			if (startTimer != null && !startTimer.finished)
+			if (startTimer != null && !startTimer.finished){
 				startTimer.active = true;
+			}
+				
 			paused = false;
 
 			#if desktop
@@ -3662,6 +3666,7 @@ class PlayState extends MusicBeatState
 		}*/
 
 		trace('ending song');
+		deathCounter = 0;
 
 		if (FlxG.save.data.fpsCap > 240)
 			(cast (Lib.current.getChildAt(0), Main)).setFPSCap(240);

@@ -133,6 +133,7 @@ class Note extends FlxSprite
 	public var noteSection:Int = 0;
 
 	public var texture(default, set):String = null;
+
 	private function set_texture(value:String):String {
 		reloadNote(value);
 		return value;

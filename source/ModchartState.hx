@@ -1118,11 +1118,11 @@ class ModchartState
 					Stage.instance.swagBacks.set(tag, leSprite);
 			});
 
-			Lua_helper.add_callback(lua, "makeLuaBackdrop", function(tag:String, image:String, x:Float, y:Float, ?axes:FlxAxes = XY) {
+			Lua_helper.add_callback(lua, "makeLuaBackdrop", function(tag:String, image:String, x:Float, y:Float, ?axes:String = "XY") {
 				tag = tag.replace('.', '');
 
 				var leSprite:FlxBackdrop = null;
-				
+
 				if(image != null && image.length > 0) {
 
 					var rawPic:Dynamic;
@@ -1132,7 +1132,7 @@ class ModchartState
 
 					rawPic = Paths.currentTrackedAssets.get(image);	
 					
-					leSprite = new FlxBackdrop(rawPic, axes, Std.int(x), Std.int(y));
+					leSprite = new FlxBackdrop(rawPic, FlxAxes.fromString(axes), Std.int(x), Std.int(y));
 				}
 
 				if (leSprite == null)
@@ -1210,6 +1210,31 @@ class ModchartState
 	
 			Lua_helper.add_callback(lua,"fileExists", function(key:String) {
 				if(FileSystem.exists(FileSystem.absolutePath(key))) {
+					return true;
+				}
+				return false;
+			});
+
+			// custom substate
+			Lua_helper.add_callback(lua, "openCustomSubstate", function(name:String, pauseGame:Bool = false) {
+				if(pauseGame)
+				{
+					PlayState.instance.persistentUpdate = false;
+					PlayState.instance.persistentDraw = true;
+					PlayState.instance.paused = true;
+					if(FlxG.sound.music != null) {
+						FlxG.sound.music.pause();
+						PlayState.instance.vocals.pause();
+					}
+				}
+				PlayState.instance.openSubState(new CustomSubstate(name));
+			});
+
+			Lua_helper.add_callback(lua, "closeCustomSubstate", function() {
+				if(CustomSubstate.instance != null)
+				{
+					PlayState.instance.closeSubState();
+					CustomSubstate.instance = null;
 					return true;
 				}
 				return false;
@@ -3538,6 +3563,21 @@ class ModchartState
 				}
 				return boobs;
 			});
+
+			//so that overlapping isn't bullshit
+			Lua_helper.add_callback(lua, "mouseOverlaps", function(variable:String) {
+				var killMe:Array<String> = variable.split('.');
+				var obj:FlxSprite = getObjectDirectly2(killMe[0]);
+				if(killMe.length > 1) {
+					obj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
+				}
+
+				if(obj != null){
+					return FlxG.mouse.overlaps(obj);
+				} 
+
+				return false;
+			});
 	
 			Lua_helper.add_callback(lua, "runTimer", function(tag:String, time:Float = 1, loops:Int = 1) {
 				if (PlayState.instance != null){time = time / PlayState.instance.playbackRate;}
@@ -3684,8 +3724,8 @@ class ModchartState
 				}
 				leSprite.antialiasing = true;
 			});
-	
-			Lua_helper.add_callback(lua, "makeLuaBackdrop", function(tag:String, image:String, x:Float, y:Float, ?axes:FlxAxes = XY) {
+
+			Lua_helper.add_callback(lua, "makeLuaBackdrop", function(tag:String, image:String, x:Float, y:Float, ?axes:String = "XY") {
 				tag = tag.replace('.', '');
 				resetSpriteTag(tag);
 				var leSprite:FlxBackdrop = null;
@@ -3698,7 +3738,7 @@ class ModchartState
 	
 					rawPic = Paths.currentTrackedAssets.get(image);	
 					
-					leSprite = new FlxBackdrop(rawPic, axes, Std.int(x), Std.int(y));
+					leSprite = new FlxBackdrop(rawPic, FlxAxes.fromString(axes), Std.int(x), Std.int(y));
 				}
 	
 				if (leSprite == null)
@@ -3911,8 +3951,10 @@ class ModchartState
 				else
 				{
 					if(PlayState.instance.modchartSprites.exists(tag)) {
-						var shit:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
-						if(!shit.wasAdded) {
+						var shit:Dynamic = PlayState.instance.modchartSprites.get(tag); // fu... why was this :modchartSprite?
+
+						// i will change this back if i see anything that messed up because of this
+						if((Std.isOfType(shit, ModchartSprite) && !shit.wasAdded) || !Std.isOfType(shit, ModchartSprite)) {
 							if(place == 2 || place == true)
 							{
 								getInstance().add(shit);
@@ -4045,7 +4087,7 @@ class ModchartState
 				shit.changeIcon(character);
 			});
 	
-			Lua_helper.add_callback(lua, "makeLuaCharacter", function(tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false) {
+			Lua_helper.add_callback(lua, "makeLuaCharacter", function(tag:String, character:String, isPlayer:Bool = false, ?flipped:Bool = false) {
 				makeLuaCharacter(tag, character, isPlayer, flipped);
 			});
 	
@@ -5546,6 +5588,41 @@ class DebugLuaText extends FlxText
 	}
 }
 
+class CustomSubstate extends MusicBeatSubstate
+{
+	public static var name:String = 'unnamed';
+	public static var instance:CustomSubstate;
+
+	override function create()
+	{
+		instance = this;
+
+		PlayState.instance.callOnLuas('onCustomSubstateCreate', [name]);
+		super.create();
+		PlayState.instance.callOnLuas('onCustomSubstateCreatePost', [name]);
+	}
+	
+	public function new(name:String)
+	{
+		CustomSubstate.name = name;
+		super();
+		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+	}
+	
+	override function update(elapsed:Float)
+	{
+		PlayState.instance.callOnLuas('onCustomSubstateUpdate', [name, elapsed]);
+		super.update(elapsed);
+		PlayState.instance.callOnLuas('onCustomSubstateUpdatePost', [name, elapsed]);
+	}
+
+	override function destroy()
+	{
+		PlayState.instance.callOnLuas('onCustomSubstateDestroy', [name]);
+		super.destroy();
+	}
+}
+
 #if hscript
 class HScript
 {
@@ -5574,7 +5651,7 @@ class HScript
 		interp.variables.set('Conductor', Conductor);
 		interp.variables.set('Character', Character);
 		interp.variables.set('Alphabet', Alphabet);
-		//interp.variables.set('CustomSubstate', CustomSubstate);
+		interp.variables.set('CustomSubstate', CustomSubstate);
 		#if (!flash && sys)
 		interp.variables.set('FlxRuntimeShader', FlxRuntimeShader);
 		#end
