@@ -150,6 +150,10 @@ class ClientPrefs {
 			}
 		}
 
+		if(FlxG.save.data.ghost != null) {
+			ghostTapping = FlxG.save.data.ghost;
+		}
+
 		if(FlxG.save.data.gameplaySettings != null)
 		{
 			var savedMap:Map<String, Dynamic> = FlxG.save.data.gameplaySettings;

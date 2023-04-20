@@ -29,7 +29,12 @@ using StringTools;
 
 class OptionsState extends MusicBeatState
 {
+	#if debug
+	var options:Array<String> = ['Controls', 'Graphics', 'Visuals and UI', 'Gameplay', "Replays", "Modpack Maker"];
+	#else
 	var options:Array<String> = ['Controls', 'Graphics', 'Visuals and UI', 'Gameplay', "Replays"];
+	#end
+	
 	private var grpOptions:FlxTypedGroup<Alphabet>;
 	private static var curSelected:Int = 0;
 	public static var menuBG:FlxSprite;
@@ -50,6 +55,10 @@ class OptionsState extends MusicBeatState
 				openSubState(new options.GameplaySettingsSubState());
 			case 'Adjust Delay and Combo':
 				LoadingState.loadAndSwitchState(new options.NoteOffsetState());
+			#if debug
+			case 'Modpack Maker':
+				LoadingState.loadAndSwitchState(new editors.ModpackMaker());
+			#end
 		}
 	}
 

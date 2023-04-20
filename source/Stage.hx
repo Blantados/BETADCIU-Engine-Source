@@ -911,12 +911,14 @@ class Stage extends MusicBeatState
 	public function resetFastCar():Void
 	{
 		var fastCar = swagBacks['fastCar'];
-		fastCar.x = -12600;
-		fastCar.y = FlxG.random.int(140, 250);
-		if (fastCar.frames != null)
+		if (fastCar != null)
 		{
-			fastCar.velocity.x = 0;
-		}		
+			fastCar.x = -12600;
+			fastCar.y = FlxG.random.int(140, 250);
+			if (fastCar.frames != null){
+				fastCar.velocity.x = 0;
+			}		
+		}
 		fastCarCanDrive = true;
 	}
 
@@ -924,13 +926,18 @@ class Stage extends MusicBeatState
 	{
 		FlxG.sound.play(Paths.soundRandom('carPass', 0, 1), 0.7);
 
-		swagBacks['fastCar'].velocity.x = (FlxG.random.int(170, 220) / FlxG.elapsed) * 3;
-		fastCarCanDrive = false;
-		new FlxTimer().start(2, function(tmr:FlxTimer)
+		var fastCar = swagBacks['fastCar'];
+
+		if (fastCar != null)
 		{
-			if (curStage.contains('limo'))
-				resetFastCar();		
-		});
+			fastCar.velocity.x = (FlxG.random.int(170, 220) / FlxG.elapsed) * 3;
+			fastCarCanDrive = false;
+			new FlxTimer().start(2, function(tmr:FlxTimer)
+			{
+				if (curStage.contains('limo'))
+					resetFastCar();		
+			});
+		}
 	}
 
 	public var closeLuas:Array<ModchartState> = [];

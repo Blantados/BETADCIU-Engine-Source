@@ -3,8 +3,8 @@ package;
 typedef SwagSection =
 {
 	var sectionNotes:Array<Dynamic>;
-	var sectionBeats:Float;
-	var lengthInSteps:Int;
+	var sectionBeats:Null<Float>;
+	var lengthInSteps:Null<Int>;
 	var typeOfSection:Int;
 	var mustHitSection:Bool;
 	var gfSection:Bool;
@@ -21,8 +21,8 @@ class Section
 {
 	public var sectionNotes:Array<Dynamic> = [];
 
-	public var sectionBeats:Float = 4;
-	public var lengthInSteps:Int = 16;
+	public var sectionBeats:Null<Float> = 4;
+	public var lengthInSteps:Null<Int> = 16;
 	public var gfSection:Bool = false;
 	public var typeOfSection:Int = 0;
 	public var mustHitSection:Bool = true;

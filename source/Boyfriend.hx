@@ -9,6 +9,7 @@ using StringTools;
 
 class Boyfriend extends Character
 {
+	public var startedDeath:Bool = false;
 
 	public function new(x:Float, y:Float, ?char:String = 'bf', ?isPlayer:Bool = true)
 	{
@@ -25,7 +26,7 @@ class Boyfriend extends Character
 			else
 				holdTimer = 0;
 			
-			if (animation.curAnim.name.endsWith('miss') && animation.curAnim.finished) {
+			if (animation.curAnim.name.endsWith('miss') && animation.curAnim.finished && !debugMode) {
 				if (animOffsets.exists('idle')) {
 					playAnim('idle', true, false, 10);
 				} else {
@@ -33,7 +34,7 @@ class Boyfriend extends Character
 				}
 			}
 
-			if (animation.curAnim.name == 'firstDeath' && animation.curAnim.finished)
+			if (animation.curAnim.name == 'firstDeath' && animation.curAnim.finished && startedDeath)
 			{
 				playAnim('deathLoop');
 			}

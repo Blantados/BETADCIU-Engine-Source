@@ -721,64 +721,8 @@ class FlxRuntimeShader extends FlxShader
 		return prop.value;
 	}
 
-	/**
-	 * Gets a field from a string. Used with like runHaxeCode and FlxTweens or smthn.
-	 * @param name The name of the shader input to modify.
-	 * @param value The field type.
-	 */
-	 public function getField(name:String, fieldType:String = "float"):ShaderParameter<Dynamic>
-	{
-		var prop:ShaderParameter<Dynamic> = Reflect.field(this.data, name);
-
-		/*switch (fieldType.toLowerCase())
-		{
-			case "int": var prop:ShaderParameter<Int>;
-			case "float": var prop:ShaderParameter<Float>;
-			case "bool": var prop:ShaderParameter<Bool>;
-			case "sampler2D": var prop:ShaderParameter<BitmapData>;
-		}*/
-
-		//prop = Reflect.field(this.data, name);
-		
-		(prop == null ? return null : return prop);
-	}
-
 	public function toString():String
 	{
 		return 'FlxRuntimeShader';
-	}
-
-	/*public function getParameter(vars:Dynamic)
-	{
-		//var daType:Class<T> = Type.getClass(vars);
-
-		//i don't know how to get classes based on the var
-		var penisExam:Dynamic;
-
-		if (Std.isOfType(vars, Bool))
-			var penisExam:ShaderParameter<Bool> = Reflect.field(this.data, vars);
-		else
-			var penisExam:ShaderParameter<Float> = Reflect.field(this.data, vars);
-
-		if (penisExam != null){
-			trace("penisExam Results: "+ penisExam);
-			return penisExam;
-		}
-			
-
-		return null;
-	}*/
-
-	public function callOnCompleted(type:String = "tween", tag:String, ?loops:Int, ?loopsLeft:Int)
-	{
-		switch (type.toLowerCase())
-		{
-			case 'timer':
-				PlayState.instance.callOnLuas("onTimerCompleted", [tag]);
-			default:
-				PlayState.instance.callOnLuas("onTweenCompleted", [tag]);
-		}	
-
-		(type.toLowerCase() == 'timer' ? PlayState.instance.modchartTimers.remove(tag) : PlayState.instance.modchartTweens.remove(tag));
 	}
 }

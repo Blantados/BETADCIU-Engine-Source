@@ -504,7 +504,7 @@ class ModchartState
 		PlayState.instance.startCharacterLua(shit.curCharacter);
 	}
 
-	function getActorByName(id:String):Dynamic
+	public static function getActorByName(id:String):Dynamic
 	{
 		// pre defined names
 		switch(id)
@@ -512,21 +512,6 @@ class ModchartState
 			case 'boyfriend' | 'bf':
                 @:privateAccess
 				return PlayState.instance.boyfriend;
-			case 'gf':
-                @:privateAccess
-				return PlayState.instance.gf;
-			case 'camFollow':
-                @:privateAccess
-				return PlayState.instance.camFollow;
-			case 'camHUD':
-                @:privateAccess
-				return PlayState.instance.camHUD;
-			case 'camGame':
-                @:privateAccess
-				return FlxG.camera;
-			case 'camGame.scroll':
-                @:privateAccess
-				return FlxG.camera.scroll;
 		}
 
 		if (id.contains('stage-'))
@@ -573,11 +558,13 @@ class ModchartState
 
 		if (PlayState.instance.Stage.isCustomStage && PlayState.instance.Stage.isLuaStage)
 		{
-			for (i in PlayState.instance.Stage.luaArray)
+			for (lua in PlayState.instance.Stage.luaArray)
 			{
-				PlayState.instance.Stage.luaArray.remove(i);
-				i.stop();
+				lua.call("onDestroy", []);
+				PlayState.instance.Stage.luaArray.remove(lua);
+				lua.stop();
 			}
+
 			PlayState.instance.Stage.luaArray = [];
 		}
 
@@ -632,9 +619,10 @@ class ModchartState
 
 		PlayState.instance.addObject(PlayState.instance.comboGroup);
 
-		if (PlayState.instance.Stage.isCustomStage && PlayState.instance.Stage.luaArray.length >= 1)
+		if (PlayState.instance.Stage.isCustomStage && PlayState.instance.Stage.luaArray.length >= 1){
 			PlayState.instance.Stage.callOnLuas('onCreatePost', []); //i swear if this starts crashing stuff i'mma cry
-
+		}
+			
 		PlayState.instance.setCameraOffsets();
 
 		//trace(PlayState.instance.Stage.luaArray.length);
@@ -994,18 +982,28 @@ class ModchartState
 		set('inGameOver', false);
 
 		set("difficulty", PlayState.storyDifficulty);
-		set("bpm", PlayState.SONG.bpm);
 		set("curBpm", Conductor.bpm);
-		set("scrollspeed", FlxG.save.data.scrollSpeed != 1 ? FlxG.save.data.scrollSpeed : PlayState.SONG.speed);
 		set("fpsCap", FlxG.save.data.fpsCap);
 		set("downscroll", FlxG.save.data.downscroll);
 		set("flashing", FlxG.save.data.flashing);
 		set("distractions", FlxG.save.data.distractions);
 		set('songLength', FlxG.sound.music.length);
-		set('songName', PlayState.SONG.song);
-		set('songPath', Paths.formatToSongPath(PlayState.SONG.song));
 		set('seenCutscene', PlayState.seenCutscene);
 		set('scriptName', scriptName);
+
+		if (PlayState.SONG != null)
+		{
+			set("bpm", PlayState.SONG.bpm);
+			set('songName', PlayState.SONG.song);
+			set('songPath', Paths.formatToSongPath(PlayState.SONG.song));
+
+			// Character shit
+			set('boyfriendName', PlayState.SONG.player1);
+			set('dadName', PlayState.SONG.player2);
+			set('gfName', PlayState.SONG.gfVersion);
+
+			set("scrollspeed", FlxG.save.data.scrollSpeed != 1 ? FlxG.save.data.scrollSpeed : PlayState.SONG.speed);
+		}
 
 		var difficultyName:String = CoolUtil.difficulties[PlayState.storyDifficulty];
 		set('difficultyName', difficultyName);
@@ -1060,11 +1058,6 @@ class ModchartState
 			set('defaultOpponentStrumY' + i, 0);
 		}
 
-		// Character shit
-		set('boyfriendName', PlayState.SONG.player1);
-		set('dadName', PlayState.SONG.player2);
-		set('gfName', PlayState.SONG.gfVersion);
-
 		set('score', 0);
 		set('misses', 0);
 		set('hits', 0);
@@ -1082,6 +1075,11 @@ class ModchartState
 		if (preloading) //only the necessary functions for preloading are included
 		{
 			Lua_helper.add_callback(lua, "makeLuaSprite", function(tag:String, image:String, x:Float, y:Float, ?antialiasing:Bool = true) {
+				if (editors.ModpackMaker.inModpackMaker && image != null && image.length > 0){
+					editors.ModpackMaker.luaImageList.push(image);
+					return;
+				}
+
 				tag = tag.replace('.', '');
 				var leSprite:ModchartSprite = new ModchartSprite(x, y);
 				if(image != null && image.length > 0) {
@@ -1108,6 +1106,11 @@ class ModchartState
 			});
 
 			Lua_helper.add_callback(lua, "makeAnimatedLuaSprite", function(tag:String, image:String, x:Float, y:Float,spriteType:String="sparrow") {
+				if (editors.ModpackMaker.inModpackMaker && image != null && image.length > 0){
+					editors.ModpackMaker.luaImageList.push(image);
+					return;
+				}
+
 				tag = tag.replace('.', '');
 				var leSprite:ModchartSprite = new ModchartSprite(x, y);
 				
@@ -1119,6 +1122,11 @@ class ModchartState
 			});
 
 			Lua_helper.add_callback(lua, "makeLuaBackdrop", function(tag:String, image:String, x:Float, y:Float, ?axes:String = "XY") {
+				if (editors.ModpackMaker.inModpackMaker && image != null && image.length > 0){
+					editors.ModpackMaker.luaImageList.push(image);
+					return;
+				}
+
 				tag = tag.replace('.', '');
 
 				var leSprite:FlxBackdrop = null;
@@ -1145,6 +1153,58 @@ class ModchartState
 					Stage.instance.swagBacks.set(tag, leSprite);
 			});
 
+			Lua_helper.add_callback(lua, "makeHealthIcon", function(tag:String, character:String, player:Bool = false) {
+				if (editors.ModpackMaker.inModpackMaker){
+					editors.ModpackMaker.luaImageList.push('icons/icon-'+character);
+				}
+				else{
+					Paths.returnGraphic('sounds', 'icons/icon-'+character);
+				}
+			});
+
+			Lua_helper.add_callback(lua, "makeLuaText", function(tag:String, text:String, width:Int, x:Float, y:Float) {
+				tag = tag.replace('.', '');
+				var leText:ModchartText = new ModchartText(x, y, text, width);
+			});
+
+			Lua_helper.add_callback(lua, "precacheSound", function(name:String, ?path:String = "sounds") {
+				if (editors.ModpackMaker.inModpackMaker){
+					editors.ModpackMaker.luaSoundList.push(name);
+				}
+				else{
+					Paths.returnSound(path, name);
+				}
+			});
+
+			Lua_helper.add_callback(lua, "precacheFont", function(name:String) {
+				if (editors.ModpackMaker.inModpackMaker){
+					editors.ModpackMaker.luaFontList.push(name);
+				}
+				return name; // this doesn't actually preload the font.
+			});
+
+			Lua_helper.add_callback(lua, "precacheImage", function(name:String) {
+				if (editors.ModpackMaker.inModpackMaker){
+					editors.ModpackMaker.luaImageList.push(name);
+				}
+				else{
+					Paths.returnGraphic(name);
+				}
+			});
+
+			Lua_helper.add_callback(lua, "getProperty", function(variable:String) {
+				return 0;
+			});
+
+			Lua_helper.add_callback(lua, "getPropertyFromClass", function(variable:String) {
+				return true;
+			});
+
+			Lua_helper.add_callback(lua, "getColorFromHex", function(color:String) {
+				if(!color.startsWith('0x')) color = '0xff' + color;
+				return Std.parseInt(color);
+			});
+
 			// because sink
 			Lua_helper.add_callback(lua, "getRandomInt", function(min:Int, max:Int = FlxMath.MAX_VALUE_INT, exclude:String = '') {
 				var excludeArray:Array<String> = exclude.split(',');
@@ -1167,21 +1227,49 @@ class ModchartState
 			Lua_helper.add_callback(lua, "getRandomBool", function(chance:Float = 50) {
 				return FlxG.random.bool(chance);
 			});
+
+			Lua_helper.add_callback(lua, "setTextFont", function(tag:String, newFont:String) {
+				if (editors.ModpackMaker.inModpackMaker){
+					editors.ModpackMaker.luaFontList.push(newFont);
+				}
+			});
+
+			Lua_helper.add_callback(lua, "setShaderSampler2D", function(obj:String, prop:String, bitmapDataPath:String) {
+				#if (!flash && MODS_ALLOWED && sys)
+				if (editors.ModpackMaker.inModpackMaker){
+					editors.ModpackMaker.luaImageList.push(bitmapDataPath);
+				}
+				else{
+					Paths.returnGraphic(bitmapDataPath);
+				}
+				#end
+			});
 	
 			//because we have to add em otherwise it'll only load the first sprite... for most luas. if you set it up where you make the sprites first and then all the formatting stuff ->
 			//then it shouldn't be a problem
 			
-			var otherCallbacks:Array<String> = ['makeGraphic', 'objectPlayAnimation'];
-			var addCallbacks:Array<String> = ['addAnimationByPrefix', 'addAnimationByIndices', 'addAnimationByIndicesLoop', 'addLuaSprite'];
-			var setCallbacks:Array<String> = ['setProperty', 'setScrollFactor', 'setObjectCamera', 'setObjectOrder', 'scaleObject', 'screenCenter'];
+			var otherCallbacks:Array<String> = ['makeGraphic', 'objectPlayAnimation', "makeLuaCharacter", "playAnim", "getMapKeys"];
+			var addCallbacks:Array<String> = ['addAnimationByPrefix', 'addAnimationByIndices', 'addAnimationByIndicesLoop', 'addLuaSprite', 'addLuaText', "addOffset"];
+			var setCallbacks:Array<String> = ['setProperty', 'setScrollFactor', 'setObjectCamera', 'scaleObject', 'screenCenter', 'setTextSize', 'setTextBorder', 'setTextString', "setTextAlignment", "setTextColor", "setPropertyFromClass", "setBlendMode",];
+			var shaderCallbacks:Array<String> = ["runHaxeCode", "addHaxeLibrary", "initLuaShader", "setSpriteShader", "setShaderFloat", "setShaderFloatArray", "setShaderBool", "setShaderBoolArray"];
 		
 			otherCallbacks = otherCallbacks.concat(addCallbacks);
 			otherCallbacks = otherCallbacks.concat(setCallbacks);
+			otherCallbacks = otherCallbacks.concat(shaderCallbacks);
 
 			for (i in 0...otherCallbacks.length){
-				Lua_helper.add_callback(lua, otherCallbacks[i], function(?string:String){
+				Lua_helper.add_callback(lua, otherCallbacks[i], function(?val1:String){
 					//do almost nothing
 					return true;
+				});
+			}
+
+			var numberCallbacks:Array<String> = ["getObjectOrder", "setObjectOrder"];
+
+			for (i in 0...numberCallbacks.length){
+				Lua_helper.add_callback(lua, numberCallbacks[i], function(?val1:String){
+					//do almost nothing
+					return 0;
 				});
 			}
 		}
@@ -1555,7 +1643,7 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua,"animationSwap", function(char:String, anim1:String, anim2:String) {
-				var shit = getObjectDirectly2(char);
+				var shit = getObjectDirectly(char);
 	
 				if (shit.animation.getByName(anim1) != null)
 				{
@@ -1570,7 +1658,7 @@ class ModchartState
 					PlayState.instance.Stage.destroyObject(PlayState.instance.Stage.swagBacks[id]);
 				else
 				{
-					var shit:Dynamic = getObjectDirectly2(id);
+					var shit:Dynamic = getObjectDirectly(id);
 					PlayState.instance.destroyObject(shit);
 				}
 			});
@@ -1644,8 +1732,8 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua,"setScrollFactor", function(obj:String , scrollX:Float, scrollY:Float, ?bg:Bool = false) {
-				if(getObjectDirectly2(obj)!=null) {
-					getObjectDirectly2(obj).scrollFactor.set(scrollX, scrollY);
+				if(getObjectDirectly(obj)!=null) {
+					getObjectDirectly(obj).scrollFactor.set(scrollX, scrollY);
 					return;
 				}
 	
@@ -1656,12 +1744,12 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua,"getScrollFactor", function(id:String , x:String) {
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 				(x == 'x' ? return shit.scrollFactor.x : return shit.scrollFactor.y);
 			});
 	
 			Lua_helper.add_callback(lua,"changeAnimOffset", function(id:String , x:Float, y:Float) {
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 				shit.addOffset(x, y); // it may say addoffset but it actually changes it instead of adding to the existing offset so this works.
 			});
 	
@@ -1726,7 +1814,7 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua,"getDominantColor", function(sprite:String){
-				var shit:Dynamic = getObjectDirectly2(sprite);
+				var shit:Dynamic = getObjectDirectly(sprite);
 	
 				var coolColor = FlxColor.fromInt(CoolUtil.dominantColor(shit));
 				var daColor = coolColor.toHexString();
@@ -1914,7 +2002,7 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua,"resetTrail", function(id:String) {
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 				shit.resetTrail();
 			});
 	
@@ -1944,12 +2032,12 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua,"removeObject", function(id:String) {
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 				PlayState.instance.removeObject(shit);
 			});
 	
 			Lua_helper.add_callback(lua,"addObject", function(id:String) {
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 				PlayState.instance.addObject(shit);
 			});
 	
@@ -2389,12 +2477,12 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua,"setActorX", function(x:Int,id:String, ?bg:Bool = false) {
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 				shit.x = x;
 			});
 			
 			Lua_helper.add_callback(lua,"setActorScreenCenter", function(id:String, ?pos:String = 'xy') {
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 				switch(pos.trim().toLowerCase())
 				{
 					case 'x': shit.screenCenter(X);	
@@ -2404,7 +2492,7 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua,"screenCenter", function(id:String, ?pos:String) { //same thing. just for psych
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 				switch(pos.trim().toLowerCase())
 				{
 					case 'x': shit.screenCenter(X);	
@@ -2445,7 +2533,7 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua,"playBGAnimation", function(id:String,anim:String,force:Bool = false,reverse:Bool = false) {
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 				shit.animation.play(anim, force, reverse);
 			});
 	
@@ -2467,7 +2555,7 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua,"flickerSprite", function (id:String, duration:Float, interval:Float) {
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 				FlxFlicker.flicker(shit, duration, interval);
 			});
 	
@@ -2515,7 +2603,7 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua,"setActorScale", function(scale:Float,id:String, ?bg:Bool = false) {
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 				shit.setGraphicSize(Std.int(shit.width * scale));
 				shit.updateHitbox();	
 			});
@@ -2539,7 +2627,7 @@ class ModchartState
 				}
 	
 				var killMe:Array<String> = obj.split('.');
-				var poop:FlxSprite = getObjectDirectly2(killMe[0]);
+				var poop:FlxSprite = getObjectDirectly(killMe[0]);
 				if(killMe.length > 1) {
 					poop = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 				}
@@ -2606,7 +2694,7 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua,"getActorXMidpoint", function (id:String, ?graphic:Bool = false) {
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 	
 				if (graphic)
 					return shit.getGraphicMidpoint().x;
@@ -2615,7 +2703,7 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua,"getActorYMidpoint", function (id:String, ?graphic:Bool = false) {
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 	
 				if (graphic)
 					return shit.getGraphicMidpoint().y;
@@ -2634,7 +2722,7 @@ class ModchartState
 	
 			Lua_helper.add_callback(lua, "getMidpointX", function(variable:String) {
 				var killMe:Array<String> = variable.split('.');
-				var obj:FlxSprite = getObjectDirectly2(killMe[0]);
+				var obj:FlxSprite = getObjectDirectly(killMe[0]);
 				if(killMe.length > 1) {
 					obj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 				}
@@ -2644,7 +2732,7 @@ class ModchartState
 			});
 			Lua_helper.add_callback(lua, "getMidpointY", function(variable:String) {
 				var killMe:Array<String> = variable.split('.');
-				var obj:FlxSprite = getObjectDirectly2(killMe[0]);
+				var obj:FlxSprite = getObjectDirectly(killMe[0]);
 				if(killMe.length > 1) {
 					obj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 				}
@@ -2654,7 +2742,7 @@ class ModchartState
 			});
 			Lua_helper.add_callback(lua, "getGraphicMidpointX", function(variable:String) {
 				var killMe:Array<String> = variable.split('.');
-				var obj:FlxSprite = getObjectDirectly2(killMe[0]);
+				var obj:FlxSprite = getObjectDirectly(killMe[0]);
 				if(killMe.length > 1) {
 					obj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 				}
@@ -2664,7 +2752,7 @@ class ModchartState
 			});
 			Lua_helper.add_callback(lua, "getGraphicMidpointY", function(variable:String) {
 				var killMe:Array<String> = variable.split('.');
-				var obj:FlxSprite = getObjectDirectly2(killMe[0]);
+				var obj:FlxSprite = getObjectDirectly(killMe[0]);
 				if(killMe.length > 1) {
 					obj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 				}
@@ -2931,21 +3019,21 @@ class ModchartState
 			//change individual values
 			Lua_helper.add_callback(lua,"changeHue", function(id:String, hue:Int) {
 				var newShader:ColorSwap = new ColorSwap();
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 				shit.shader = newShader.shader;
 				newShader.hue = hue / 360;
 			});
 	
 			Lua_helper.add_callback(lua,"changeSaturation", function(id:String, sat:Int) {
 				var newShader:ColorSwap = new ColorSwap();
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 				shit.shader = newShader.shader;
 				newShader.saturation = sat / 100;
 			});
 	
 			Lua_helper.add_callback(lua,"changeBrightness", function(id:String, bright:Int) {
 				var newShader:ColorSwap = new ColorSwap();
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 				shit.shader = newShader.shader;
 				newShader.brightness = bright / 100;
 			});
@@ -2953,12 +3041,12 @@ class ModchartState
 			//change as a group. you should probably use this one
 			Lua_helper.add_callback(lua,"changeHSB", function(id:String, hue:Int = 0, sat:Int = 0, bright:Int = 0) {
 				var newShader:ColorSwap = new ColorSwap();
+			
+				var shit:Dynamic = getObjectDirectly(id);
+				shit.shader = newShader.shader;
 				newShader.hue = hue / 360;
 				newShader.saturation = sat / 100;
 				newShader.brightness = bright / 100;
-	
-				var shit:FlxSprite = changeSpriteClass(getObjectDirectly2(id));
-				shit.shader = newShader.shader;
 			});
 	
 			Lua_helper.add_callback(lua,"changeGroupHue", function(obj:String, hue:Int) {
@@ -2990,32 +3078,32 @@ class ModchartState
 	
 			//a bunch of psych stuff
 			Lua_helper.add_callback(lua,"tweenAnglePsych", function(id:String, toAngle:Int, time:Float, ease:String, onComplete:String) {
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 				FlxTween.tween(shit, {angle: toAngle}, time, {ease: getFlxEaseByString(ease), onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {call(onComplete,[id]);}}});
 			});
 	
 			Lua_helper.add_callback(lua,"tweenXPsych", function(id:String, toX:Int, time:Float, ease:String, onComplete:String) {
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 				FlxTween.tween(shit, {x: toX}, time, {ease: getFlxEaseByString(ease), onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {call(onComplete,[id]);}}});
 			});
 	
 			Lua_helper.add_callback(lua,"tweenYPsych", function(id:String, toY:Int, time:Float, ease:String, onComplete:String) {
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 				FlxTween.tween(shit, {y: toY}, time, {ease: getFlxEaseByString(ease), onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {call(onComplete,[id]);}}});
 			});
 	
 			Lua_helper.add_callback(lua,"tweenZoomPsych", function(id:String, toZoom:Int, time:Float, ease:String, onComplete:String) {
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 				FlxTween.tween(shit, {zoom: toZoom}, time, {ease: getFlxEaseByString(ease), onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {call(onComplete,[id]);}}});
 			});
 	
 			Lua_helper.add_callback(lua,"tweenScale", function(id:String, scale:Float, time:Float, ease:String, onComplete:String) {
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 				FlxTween.tween(shit, {"scale.x": scale, "scale.y": scale}, time, {ease: getFlxEaseByString(ease), onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {call(onComplete,[id]);}}});			
 			});
 	
 			Lua_helper.add_callback(lua,"tweenAlpha", function(id:String, toAlpha:Float, time:Float, ease:String, onComplete:String) {
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 
 				if (shit != null)
 					FlxTween.tween(shit, {alpha: toAlpha}, time, {ease: getFlxEaseByString(ease), onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {call(onComplete,[id]);}}});
@@ -3260,7 +3348,7 @@ class ModchartState
 	
 				if(killMe.length > 1) {
 	
-					if (Std.isOfType(getObjectDirectly2(killMe[0]), Character) && killMe[killMe.length-1] == 'color')
+					if (Std.isOfType(getObjectDirectly(killMe[0]), Character) && killMe[killMe.length-1] == 'color')
 						setVarInArray(getPropertyLoopThingWhatever(killMe), 'doMissThing', "false");
 		
 					setVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1], value);
@@ -3299,7 +3387,7 @@ class ModchartState
 	
 				if(killMe.length > 1) {
 	
-					if (Std.isOfType(getObjectDirectly2(killMe[0]), Character) && killMe[killMe.length-1] == 'color')
+					if (Std.isOfType(getObjectDirectly(killMe[0]), Character) && killMe[killMe.length-1] == 'color')
 						setVarInArray(getPropertyLoopThingWhatever(killMe), 'doMissThing', "false");
 		
 					setVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1], value);
@@ -3482,7 +3570,7 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua, "setBlendMode", function(obj:String, blend:String = '') {
-				var shit:Dynamic = getObjectDirectly2(obj);
+				var shit:Dynamic = getObjectDirectly(obj);
 				if(shit != null) {
 					shit.blend = blendModeFromString(blend);
 					return true;
@@ -3567,7 +3655,7 @@ class ModchartState
 			//so that overlapping isn't bullshit
 			Lua_helper.add_callback(lua, "mouseOverlaps", function(variable:String) {
 				var killMe:Array<String> = variable.split('.');
-				var obj:FlxSprite = getObjectDirectly2(killMe[0]);
+				var obj:FlxSprite = getObjectDirectly(killMe[0]);
 				if(killMe.length > 1) {
 					obj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 				}
@@ -3621,12 +3709,16 @@ class ModchartState
 				PlayState.instance.startCharacterLua(name);
 			});
 	
-			Lua_helper.add_callback(lua, "precacheSound", function(name:String) {
-				return name; //lol
+			Lua_helper.add_callback(lua, "precacheSound", function(name:String, ?path:String = "sounds") {
+				Paths.returnSound(path, name);
 			});
 	
 			Lua_helper.add_callback(lua, "precacheImage", function(name:String) {
 				Paths.returnGraphic(name);
+			});
+
+			Lua_helper.add_callback(lua, "precacheFont", function(name:String) {
+				return name; // this doesn't actually preload the font.	
 			});
 
 			Lua_helper.add_callback(lua, "loadSong", function(?name:String = null, ?difficultyNum:Int = -1) {
@@ -3652,7 +3744,7 @@ class ModchartState
 	
 			Lua_helper.add_callback(lua, "loadGraphic", function(variable:String, image:String, ?gridX:Int, ?gridY:Int) {
 				var killMe:Array<String> = variable.split('.');
-				var spr:FlxSprite = getObjectDirectly2(killMe[0]);
+				var spr:FlxSprite = getObjectDirectly(killMe[0]);
 				var gX = gridX==null?0:gridX;
 				var gY = gridY==null?0:gridY;
 				var animated = gX!=0 || gY!=0;
@@ -3668,7 +3760,7 @@ class ModchartState
 			});
 			Lua_helper.add_callback(lua, "loadFrames", function(variable:String, image:String, spriteType:String = "sparrow") {
 				var killMe:Array<String> = variable.split('.');
-				var spr:FlxSprite = getObjectDirectly2(killMe[0]);
+				var spr:FlxSprite = getObjectDirectly(killMe[0]);
 				if(killMe.length > 1) {
 					spr = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 				}
@@ -3782,8 +3874,8 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua, "addAnimationByPrefix", function(obj:String, name:String, prefix:String, framerate:Int = 24, loop:Bool = true) {
-				if(getObjectDirectly2(obj)!=null) {
-					var cock:FlxSprite = getObjectDirectly2(obj);
+				if(getObjectDirectly(obj)!=null) {
+					var cock:FlxSprite = getObjectDirectly(obj);
 					cock.animation.addByPrefix(name, prefix, framerate, loop);
 					if(cock.animation.curAnim == null) {
 						cock.animation.play(name, true);
@@ -3807,8 +3899,8 @@ class ModchartState
 					die.push(Std.parseInt(strIndices[i]));
 				}
 	
-				if(getObjectDirectly2(obj)!=null) {
-					var cock:FlxSprite = getObjectDirectly2(obj);
+				if(getObjectDirectly(obj)!=null) {
+					var cock:FlxSprite = getObjectDirectly(obj);
 					cock.animation.add(name, die, framerate, loop);
 					if(cock.animation.curAnim == null) {
 						cock.animation.play(name, true);
@@ -3826,50 +3918,12 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua, "objectPlayAnimation", function(obj:String, name:String, forced:Bool = false) {
-				var spr:Dynamic = getObjectDirectly2(obj);
+				var spr:Dynamic = getObjectDirectly(obj);
 	
 				if(spr != null) {
 					spr.animation.play(name, forced);
 				}
 			});
-	
-			//masking!
-			Lua_helper.add_callback(lua, "addClipRect", function(obj:String, x:Float, y:Float, width:Float, height:Float) {
-				var swagRect = new FlxRect(x, y, width, height);
-	
-				var killMe:Array<String> = obj.split('.');
-				var object:FlxSprite = getObjectDirectly2(killMe[0]);
-				if(killMe.length > 1) {
-					object = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
-				}
-	
-				if(object != null) {
-					object.clipRect = swagRect;
-					return true;
-				}
-				luaTrace("addClipRect: Object " + obj + " doesn't exist!", false, false, FlxColor.RED);
-				return false;
-			});
-	
-			Lua_helper.add_callback(lua, "setClipRectAngle", function(obj:String, degrees:Float) {
-				var daRect:FlxRect = getVarInArray(getPropertyLoopThingWhatever([obj, 'clipRect']), 'clipRect');
-	
-				if(daRect != null) {
-					daRect.getRotatedBounds(degrees);
-	
-					var killMe:Array<String> = obj.split('.');
-					var object:FlxSprite = getObjectDirectly2(killMe[0]);
-					if(killMe.length > 1) {
-						object = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
-					}
-	
-					object.clipRect = daRect;
-					return true;
-				}
-				luaTrace("setClipRectAngle: Object " + obj + " doesn't exist!", false, false, FlxColor.RED);
-				return false;
-			});
-	
 	
 			Lua_helper.add_callback(lua, "getColorFromHex", function(color:String) {
 				if(!color.startsWith('0x')) color = '0xff' + color;
@@ -3877,7 +3931,7 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua, "objectColorTransform", function(obj:String, color:String) {
-				var spr:Dynamic = getObjectDirectly2(obj);
+				var spr:Dynamic = getObjectDirectly(obj);
 	
 				if(spr != null) {
 					spr.useColorTransform = true;
@@ -3899,7 +3953,7 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua, "objectColorTween", function(obj:String, duration:Float, color:String, color2:String, ?ease:String = 'linear') {
-				var spr:Dynamic = getObjectDirectly2(obj);
+				var spr:Dynamic = getObjectDirectly(obj);
 	
 				if(spr != null) {
 					var colorNum:Int = Std.parseInt(color);
@@ -4134,14 +4188,14 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua, "animExists", function(tag:String, anim:String){
-				var shit:Dynamic = getObjectDirectly2(tag);
+				var shit:Dynamic = getObjectDirectly(tag);
 				
 				return shit.animation.getByName(anim) != null;
 			});
 	
 			Lua_helper.add_callback(lua, "getObjectOrder", function(obj:String) {
 				var killMe:Array<String> = obj.split('.');
-				var leObj:FlxBasic = getObjectDirectly2(killMe[0]);
+				var leObj:FlxBasic = getObjectDirectly(killMe[0]);
 				if(killMe.length > 1) {
 					leObj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 				}
@@ -4156,7 +4210,7 @@ class ModchartState
 	
 			Lua_helper.add_callback(lua, "setObjectOrder", function(obj:String, position:Int) {
 				var killMe:Array<String> = obj.split('.');
-				var leObj:FlxBasic = getObjectDirectly2(killMe[0]);
+				var leObj:FlxBasic = getObjectDirectly(killMe[0]);
 				if(killMe.length > 1) {
 					leObj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 				}
@@ -4282,7 +4336,7 @@ class ModchartState
 			});
 			
 			Lua_helper.add_callback(lua, "setOffset", function(id:String, x:Float, y:Float) {
-				var shit:Dynamic = getObjectDirectly2(id);
+				var shit:Dynamic = getObjectDirectly(id);
 				shit.offset.set(x, y);
 			});
 	
@@ -4544,44 +4598,9 @@ class ModchartState
 				return boobs;
 			});
 
-			Lua_helper.add_callback(lua, "setSpriteMask", function(obj:String, mask:String, ?spriteMask:Bool = true) {
-				var killMe:Array<String> = obj.split('.');
-				var leObj:FlxSprite = getObjectDirectly2(killMe[0]);
-				if(killMe.length > 1) {
-					leObj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
-				}
-
-				//mask
-				var killMe2:Array<String> = mask.split('.');
-				var leObj2:FlxSprite = getObjectDirectly2(killMe2[0]);
-				if(killMe2.length > 1) {
-					leObj2 = getVarInArray(getPropertyLoopThingWhatever(killMe2), killMe2[killMe2.length-1]);
-				}
-	
-				if(leObj != null) {
-					PlayState.instance.removeObject(leObj);
-					PlayState.instance.modchartSprites.remove(obj);
-
-					if (spriteMask)
-						FlxSpriteUtil.alphaMaskFlxSprite(leObj, leObj2, leObj);
-					else{
-						leObj.useFramePixels = true;
-						FlxSpriteUtil.alphaMask(leObj, leObj.framePixels, leObj2.pixels);
-					}
-						
-					PlayState.instance.modchartSprites.set(obj, leObj);
-					PlayState.instance.addObject(leObj);
-
-					return true;
-				}
-
-				luaTrace("setSpriteMask: "+(leObj == null ? obj : mask)+" not found!", false, false, FlxColor.RED);
-				return false;
-			});
-
 			Lua_helper.add_callback(lua, "onScreen", function(obj:String) {
 				var killMe:Array<String> = obj.split('.');
-				var leObj:Dynamic = getObjectDirectly2(killMe[0]);
+				var leObj:Dynamic = getObjectDirectly(killMe[0]);
 				if(killMe.length > 1) {
 					leObj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 				}
@@ -4673,7 +4692,7 @@ class ModchartState
 				}
 	
 				var killMe:Array<String> = obj.split('.');
-				var leObj:Dynamic = getObjectDirectly2(killMe[0]);
+				var leObj:Dynamic = getObjectDirectly(killMe[0]);
 				if(killMe.length > 1) {
 					leObj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 				}
@@ -4699,7 +4718,7 @@ class ModchartState
 			});
 			Lua_helper.add_callback(lua, "removeSpriteShader", function(obj:String) {
 				var killMe:Array<String> = obj.split('.');
-				var leObj:Dynamic = getObjectDirectly2(killMe[0]);
+				var leObj:Dynamic = getObjectDirectly(killMe[0]);
 				if(killMe.length > 1) {
 					leObj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 				}
@@ -4721,7 +4740,7 @@ class ModchartState
 
 			Lua_helper.add_callback(lua, "removeSpriteAnim", function(obj:String, anim:String) {
 				var killMe:Array<String> = obj.split('.');
-				var leObj:Dynamic = getObjectDirectly2(killMe[0]);
+				var leObj:Dynamic = getObjectDirectly(killMe[0]);
 				if(killMe.length > 1) {
 					leObj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 				}
@@ -4897,6 +4916,78 @@ class ModchartState
 				#end
 			});
 
+			//masking!
+			Lua_helper.add_callback(lua, "addClipRect", function(obj:String, x:Float, y:Float, width:Float, height:Float) {
+				var swagRect = new FlxRect(x, y, width, height);
+	
+				var killMe:Array<String> = obj.split('.');
+				var object:FlxSprite = getObjectDirectly(killMe[0]);
+				if(killMe.length > 1) {
+					object = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
+				}
+	
+				if(object != null) {
+					object.clipRect = swagRect;
+					return true;
+				}
+				luaTrace("addClipRect: Object " + obj + " doesn't exist!", false, false, FlxColor.RED);
+				return false;
+			});
+	
+			Lua_helper.add_callback(lua, "setClipRectAngle", function(obj:String, degrees:Float) {
+				var daRect:FlxRect = getVarInArray(getPropertyLoopThingWhatever([obj, 'clipRect']), 'clipRect');
+	
+				if(daRect != null) {
+					daRect.getRotatedBounds(degrees);
+	
+					var killMe:Array<String> = obj.split('.');
+					var object:FlxSprite = getObjectDirectly(killMe[0]);
+					if(killMe.length > 1) {
+						object = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
+					}
+	
+					object.clipRect = daRect;
+					return true;
+				}
+				luaTrace("setClipRectAngle: Object " + obj + " doesn't exist!", false, false, FlxColor.RED);
+				return false;
+			});
+	
+			Lua_helper.add_callback(lua, "setSpriteMask", function(obj:String, mask:String, ?spriteMask:Bool = true) {
+				var killMe:Array<String> = obj.split('.');
+				var leObj:FlxSprite = getObjectDirectly(killMe[0]);
+				if(killMe.length > 1) {
+					leObj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
+				}
+
+				//mask
+				var killMe2:Array<String> = mask.split('.');
+				var leObj2:FlxSprite = getObjectDirectly(killMe2[0]);
+				if(killMe2.length > 1) {
+					leObj2 = getVarInArray(getPropertyLoopThingWhatever(killMe2), killMe2[killMe2.length-1]);
+				}
+	
+				if(leObj != null) {
+					PlayState.instance.removeObject(leObj);
+					PlayState.instance.modchartSprites.remove(obj);
+
+					if (spriteMask)
+						FlxSpriteUtil.alphaMaskFlxSprite(leObj, leObj2, leObj);
+					else{
+						leObj.useFramePixels = true;
+						FlxSpriteUtil.alphaMask(leObj, leObj.framePixels, leObj2.pixels);
+					}
+						
+					PlayState.instance.modchartSprites.set(obj, leObj);
+					PlayState.instance.addObject(leObj);
+
+					return true;
+				}
+
+				luaTrace("setSpriteMask: "+(leObj == null ? obj : mask)+" not found!", false, false, FlxColor.RED);
+				return false;
+			});
+
 			// default strums
 	
 			Lua_helper.add_callback(lua, "getNotes", function(y:Float)
@@ -4951,7 +5042,7 @@ class ModchartState
 			var bussy:Dynamic = Stage.instance.swagBacks.get(obj);
 			var pussy:FlxSprite = changeSpriteClass(bussy);
 
-			pussy.animation.addByIndices(name, prefix, die, '', framerate, false);
+			pussy.animation.addByIndices(name, prefix, die, '', framerate, loop);
 			if(pussy.animation.curAnim == null) {
 				pussy.animation.play(name, true);
 			}
@@ -4980,22 +5071,6 @@ class ModchartState
 
 	static function changeSpriteClass(tag:Dynamic):FlxSprite {
 		return tag;
-	}
-	
-	public function getObjectDirectly2(id:String):Dynamic
-	{
-		var shit:Dynamic = "long string of text so there's no way someone names it this";
-
-		if(Stage.instance.swagBacks.exists(id))
-			shit = Stage.instance.swagBacks.get(id);
-		else if(PlayState.instance.Stage.swagBacks.exists(id))
-			shit = PlayState.instance.Stage.swagBacks.get(id);
-		else if(PlayState.instance.getLuaObject(id) != null)
-			shit = PlayState.instance.getLuaObject(id);
-		else if (PlayState.instance != null)
-			shit = getActorByName(id);
-
-		return shit;
 	}
 
     public function executeState(name,args:Array<Dynamic>)
@@ -5047,7 +5122,7 @@ class ModchartState
 	function tweenShit(tag:String, vars:String) {
 		cancelTween(tag);
 		var variables:Array<String> = vars.split('.');
-		var sexyProp:Dynamic = getObjectDirectly2(variables[0]);
+		var sexyProp:Dynamic = getObjectDirectly(variables[0]);
 		if(variables.length > 1) {
 			sexyProp = getVarInArray(getPropertyLoopThingWhatever(variables), variables[variables.length-1]);
 		}
@@ -5223,7 +5298,7 @@ class ModchartState
 		}
 		if (Stage.instance.swagBacks.exists(variable))
 		{
-			var retVal:Dynamic = Stage.instance.swagBacks.get(shit[0]);
+			var retVal:Dynamic = Stage.instance.swagBacks.get(variable);
 				if(retVal != null)
 					return retVal;
 		}
@@ -5309,9 +5384,20 @@ class ModchartState
 			objectName = objectName.substring(0, objectName.length-5); //because we don't use character groups
 		}
 		
-		var coverMeInPiss:Dynamic = PlayState.instance.getLuaObject(objectName, checkForTextsToo);
-		if(coverMeInPiss==null)
+		var coverMeInPiss:Dynamic = null;
+
+		if(Stage.instance.swagBacks.exists(objectName))
+			coverMeInPiss = Stage.instance.swagBacks.get(objectName);
+		else if(PlayState.instance.Stage.swagBacks.exists(objectName))
+			coverMeInPiss = PlayState.instance.Stage.swagBacks.get(objectName);
+		else if(PlayState.instance.getLuaObject(objectName) != null)
+			coverMeInPiss = PlayState.instance.getLuaObject(objectName, checkForTextsToo);
+		
+		if(coverMeInPiss == null)
 			coverMeInPiss = getVarInArray(getInstance(), objectName);
+
+		if (coverMeInPiss == null)
+			coverMeInPiss = getActorByName(objectName);
 
 		return coverMeInPiss;
 	}
@@ -5442,7 +5528,7 @@ class ModchartState
 	public function getShader(obj:String):FlxRuntimeShader
 	{
 		var killMe:Array<String> = obj.split('.');
-		var leObj:FlxSprite = getObjectDirectly2(killMe[0]);
+		var leObj:FlxSprite = getObjectDirectly(killMe[0]);
 		if(killMe.length > 1) {
 			leObj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 		}
@@ -5558,7 +5644,9 @@ class ModchartText extends FlxText
 	{
 		super(x, y, width, text, 16);
 		setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		cameras = [PlayState.instance.camHUD];
+		if (PlayState.instance != null){
+			cameras = [PlayState.instance.camHUD];
+		}
 		scrollFactor.set();
 		borderSize = 2;
 	}

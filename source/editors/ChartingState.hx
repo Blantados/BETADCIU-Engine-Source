@@ -181,9 +181,9 @@ class ChartingState extends MusicBeatState
 
 		ignoreWarnings = FlxG.save.data.ignoreWarnings;
 
-		if(_song.notes[curSec].lengthInSteps != 16){
+		if(_song.notes[curSec].lengthInSteps == null){
 			trace('haha we found no lengthInSteps');
-			_song.notes[curSec].lengthInSteps = 16;
+			_song.notes[curSec].lengthInSteps = (_song.notes[curSec].sectionBeats != null ? Std.int(_song.notes[curSec].sectionBeats * 4) : 16);
 		}
 		
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
@@ -377,13 +377,16 @@ class ChartingState extends MusicBeatState
 		
 		for (ii in 0..._song.notes.length)
 		{
-			for (note in _song.notes[ii].sectionNotes)
+			if (ii >= curSec) // that way if you only want to adjust midsong
 			{
-				note[0] = (note[0] / stepCrochetFormula(oldBPM)) * (stepCrochetFormula(tempBpm));
-				note.strumTime = note[0];
-
-				note[2] = (note[2] / stepCrochetFormula(oldBPM)) * (stepCrochetFormula(tempBpm));
-				note.sustainLength = note[2];
+				for (note in _song.notes[ii].sectionNotes)
+				{
+					note[0] = (note[0] / stepCrochetFormula(oldBPM)) * (stepCrochetFormula(tempBpm));
+					note.strumTime = note[0];
+	
+					note[2] = (note[2] / stepCrochetFormula(oldBPM)) * (stepCrochetFormula(tempBpm));
+					note.sustainLength = note[2];
+				}
 			}
 		}
 
@@ -796,6 +799,7 @@ class ChartingState extends MusicBeatState
 	var check_dadCrossfade:FlxUICheckBox;
 	var check_bfCrossfade:FlxUICheckBox;
 	var stepperDType:FlxUINumericStepper;
+	var stepperBeats:FlxUINumericStepper;
 
 	var typeNameTxt:FlxText;
 	var typeNames:Array<String> = ['Normal', 'Alt Anim', 'Markov', 'Danger', 'Tricky', 'EXE', 'Bomb', 'Rushia', 'Haato', 'Scythe', 'Phantom', 'D Type'];
@@ -1391,9 +1395,12 @@ class ChartingState extends MusicBeatState
 			switch (wname)
 			{
 				case 'section_length':
+				{
 					nums.value = Math.max(nums.value, 4);
 					_song.notes[curSec].lengthInSteps = Std.int(nums.value);
+					trace(_song.notes[curSec].lengthInSteps);
 					updateGrid();
+				}
 				case 'song_speed':
 					_song.speed = Math.max(nums.value, 0);
 				case 'song_bpm':
@@ -2016,7 +2023,7 @@ class ChartingState extends MusicBeatState
 
 		var rawJson:Dynamic;
 
-		(FileSystem.exists(path) ? rawJson = File.getContent(path) : rawJson = Assets.getText(path));
+		rawJson = (FileSystem.exists(path) ?  File.getContent(path) : Assets.getText(path));
 
 		var json:Character.CharacterFile = cast Json.parse(rawJson);
 		return json.healthicon;

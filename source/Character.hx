@@ -54,6 +54,7 @@ typedef CharacterFile = {
 	@:optional
 	var playerAnimations:Array<AnimArray>; //bcuz garcello
 	var spriteType:String;
+	var gameover_character:String;
 }
 
 typedef AnimArray = {
@@ -119,6 +120,7 @@ class Character extends FunkinSprite
 	public var skipDance:Bool = false; // hey there's a psych var now! neat!
 
 	public var stunned:Bool = false;
+	public var gameOverCharacter:String = "";
 
 	//might try using texture atlas.
 	public var spriteType:String;
@@ -250,6 +252,10 @@ class Character extends FunkinSprite
 					}
 	
 					healthIcon = json.healthicon;
+
+					if (json.gameover_character != null){
+						gameOverCharacter = json.gameover_character;
+					}
 					
 					positionArray = (isPlayer && json.playerposition != null ? json.playerposition : json.position);
 					(json.playerposition != null ? playerPositionArray = json.playerposition : playerPositionArray = json.position);

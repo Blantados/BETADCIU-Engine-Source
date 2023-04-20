@@ -322,14 +322,8 @@ class StageEditorState extends MusicBeatState
 		tab_group.name = "Stage Objects";
 
 		objectDropDown = new FlxUIDropDownMenuCustom(15, 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray([""], true), function(pressed:String) {
-			var selectedObject:Int = Std.parseInt(pressed);
-			var objects:Array<String> = [];
-			for (key in Stage.swagBacks.keys()) {
-				objects.push(key);
-			}
-			if(objects.length < 1) objects.push("NO OBJECTS"); //Prevents crash
-			currentObject = changeSpriteClass(Stage.swagBacks[objects[selectedObject]]);
-			reloadObjectInfo(objects[selectedObject]);
+			currentObject = changeSpriteClass(Stage.swagBacks[objectDropDown.selectedLabel]);
+			reloadObjectInfo(objectDropDown.selectedLabel);
 		});
 
 		objectInputText = new FlxUIInputText(15, 70, 80, '', 8);
@@ -403,7 +397,7 @@ class StageEditorState extends MusicBeatState
 
 			if(image != null && image.length > 0) {	
 				if (!Paths.currentTrackedAssets.exists(image))
-					Paths.cacheImage(image);
+					Paths.cacheImage(image, true);
 	
 				rawPic = Paths.currentTrackedAssets.get(image);
 
@@ -1051,21 +1045,24 @@ class StageEditorState extends MusicBeatState
 		reloadObjectsDropDown();
 	}
 
+	public static var gfName:String = "gf";
+	public static var dadName:String = "gf";
+	public static var boyfriendName:String = "gf";
+	
 	function addCharacters()
 	{
-		gf = new Character(400, 130, PlayState.SONG.gfVersion);
+		gf = new Character(400, 130, gfName);
 		gf.scrollFactor.set(0.95, 0.95);
 
 		gf.x += gf.positionArray[0];
 		gf.y += gf.positionArray[1];
 
-		dad = new Character(100, 100, PlayState.SONG.player2);
+		dad = new Character(100, 100, dadName);
 	
 		dad.x += dad.positionArray[0];
 		dad.y += dad.positionArray[1];
 
-		boyfriend = new Boyfriend(770, 450, PlayState.SONG.player1);
-
+		boyfriend = new Boyfriend(770, 450, boyfriendName);
 		boyfriend.x += boyfriend.positionArray[0];
 		boyfriend.y += boyfriend.positionArray[1] - 350;
 		

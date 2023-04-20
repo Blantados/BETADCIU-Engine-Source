@@ -265,7 +265,6 @@ class PlayState extends MusicBeatState
 	public var girlfriendCameraOffset:Array<Float> = null;
 
 	var songName:FlxText;
-	public var tabiTrail:FlxTrail;
 	var altAnim:String = "";
 	var bfAltAnim:String = "";
 
@@ -401,11 +400,6 @@ class PlayState extends MusicBeatState
 		GameOverSubstate.resetVariables();
 		playbackRate = 1;
 		startingFPS = Main.getFPSStatic();
-
-		mania = SONG.mania;
-		isMania = (SONG.mania > 0);
-
-		isDetected = (SONG.song.toLowerCase() == 'detected');
 	
 		var suf:String = "";
 		if (isNeonight)
@@ -533,6 +527,11 @@ class PlayState extends MusicBeatState
 
 		if (SONG == null)
 			SONG = Song.loadFromJson('tutorial', 'tutorial');
+		
+		mania = SONG.mania;
+		isMania = (SONG.mania > 0);
+
+		isDetected = (SONG.song.toLowerCase() == 'detected');
 
 		Conductor.mapBPMChanges(SONG);
 		Conductor.changeBPM(SONG.bpm);
@@ -729,7 +728,6 @@ class PlayState extends MusicBeatState
 						for (bg in array)
 							add(bg);
 					case 1:
-						add(comboGroup);
 						add(dad);
 						for (bg in array)
 							add(bg);
@@ -743,10 +741,11 @@ class PlayState extends MusicBeatState
 		else
 		{
 			add(gf);
-			add(comboGroup);
 			add(dad);
 			add(boyfriend);
 		}
+
+		add(comboGroup);
 
 		if (loadRep)
 		{
@@ -1135,7 +1134,7 @@ class PlayState extends MusicBeatState
 
 		playerSingAnimations = singAnimations;
 
-		setOnLuas("mustHitSection", PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection); //just so we can check the first section
+		setOnLuas("mustHitSection", PlayState.SONG.notes[curSection].mustHitSection); //just so we can check the first section
 		callOnLuas('start', []);			
 		callOnLuas('onCreate', []); //psych	
 
@@ -1320,7 +1319,6 @@ class PlayState extends MusicBeatState
 
 				isDead = true;
 
-				
 				openSubState(new GameOverSubstate(daX, daY));
 
 				#if desktop
@@ -1555,12 +1553,12 @@ class PlayState extends MusicBeatState
 				var char:Character = dad;
 
 				switch(value2.toLowerCase().trim()) {
-					case 'bf' | 'boyfriend' | "1":
-						char = boyfriend;
 					case 'gf' | 'girlfriend' | "2":
 						char = gf;
-					case 'dad' | "0" :
+					case 'dad' | "1":
 						char = dad;
+					case 'boyfriend' | 'bf' | "0":
+						char = boyfriend;
 					default:							
 						char = modchartCharacters.get(value2);	
 				}
@@ -1589,10 +1587,10 @@ class PlayState extends MusicBeatState
 				switch(value1.toLowerCase().trim()) {
 					case 'gf' | 'girlfriend' | "2":
 						char = gf;
-					case 'boyfriend' | 'bf' | "1":
-						char = boyfriend;
-					case 'dad' | "0":
+					case 'dad' | "1":
 						char = dad;
+					case 'boyfriend' | 'bf' | "0":
+						char = boyfriend;
 					default:
 						char = modchartCharacters.get(value1);	
 				}
@@ -1649,10 +1647,10 @@ class PlayState extends MusicBeatState
 				switch(value1.toLowerCase().trim()) {
 					case 'gf' | 'girlfriend' | "2":
 						ModchartState.changeGFAuto(value2);
-					case 'boyfriend' | 'bf' | "1":
-						ModchartState.changeBFAuto(value2);	
-					case 'dad' | "opponent" | "0":
+					case 'dad' | "opponent" | "1":
 						ModchartState.changeDadAuto(value2);
+					case 'boyfriend' | 'bf' | "0":
+						ModchartState.changeBFAuto(value2);	
 					default:
 					{
 						var char = modchartCharacters.get(value1);	
@@ -3027,6 +3025,7 @@ class PlayState extends MusicBeatState
 			}
 				
 			paused = false;
+			pauseCameraEffects = false;
 
 			#if desktop
 			if (startTimer != null && startTimer.finished)
@@ -3108,11 +3107,14 @@ class PlayState extends MusicBeatState
 		#end
 	}
 
+	public var pauseCameraEffects:Bool = false;
+
 	function openPauseMenu()
 	{
 		persistentUpdate = false;
 		persistentDraw = true;
 		paused = true;
+		pauseCameraEffects = true;
 
 		// 1 / 1000 chance for Gitaroo Man easter egg
 		if (FlxG.random.bool(0.1))
@@ -3580,6 +3582,9 @@ class PlayState extends MusicBeatState
 			PlayState.instance.callOnLuas('onExitSong', []);
 			persistentUpdate = false;
 
+			StageEditorState.gfName = gf.curCharacter;
+			StageEditorState.dadName = dad.curCharacter;
+			StageEditorState.boyfriendName = boyfriend.curCharacter;
 			MusicBeatState.switchState(new StageEditorState(Stage.curStage));
 		}
 
@@ -4296,7 +4301,7 @@ class PlayState extends MusicBeatState
 					char = gf;
 			}
 			else if (songStarted)
-				dType = PlayState.SONG.notes[Std.int(curStep / 16)].dType;
+				dType = PlayState.SONG.notes[curSection].dType;
 			
 			playBF = searchLuaVar('playBFSing', 'bool', false);
 			
@@ -4431,9 +4436,9 @@ class PlayState extends MusicBeatState
 
 		dad.altAnim = "";
 			
-		if (SONG.notes[Math.floor(curStep / 16)] != null)
+		if (SONG.notes[curSection] != null)
 		{
-			if (SONG.notes[Math.floor(curStep / 16)].altAnim){
+			if (SONG.notes[curSection].altAnim){
 				note.animSuffix = "-alt";
 			}					
 		}
@@ -4561,9 +4566,9 @@ class PlayState extends MusicBeatState
 			char.bfAltAnim = '';
 			playBF = searchLuaVar('playBFSing', 'bool', false);
 
-			if (SONG.notes[Math.floor(curStep / 16)] != null)
+			if (SONG.notes[curSection] != null)
 			{
-				if (SONG.notes[Math.floor(curStep / 16)].bfAltAnim){
+				if (SONG.notes[curSection].bfAltAnim){
 					note.animSuffix = "-alt";
 				}					
 			}
@@ -5003,18 +5008,18 @@ class PlayState extends MusicBeatState
 	{
 		super.stepHit();
 
-		/*if (SONG.notes[Std.int(curStep / 16)].dadCrossfade)
+		/*if (SONG.notes[curSection].dadCrossfade)
 			dadTrail.active = true;
-		else if (!SONG.notes[Std.int(curStep / 16)].dadCrossfade)
+		else if (!SONG.notes[curSection].dadCrossfade)
 		{
 			dadTrail.active = false;
 			dadTrail.resetTrail();	
 		}
 			
-		if (SONG.notes[Std.int(curStep / 16)].bfCrossfade)
+		if (SONG.notes[curSection].bfCrossfade)
 			bfTrail.active = true;	
 
-		else if (!SONG.notes[Std.int(curStep / 16)].bfCrossfade)
+		else if (!SONG.notes[curSection].bfCrossfade)
 		{
 			bfTrail.active = false;
 			bfTrail.resetTrail();
@@ -5026,7 +5031,7 @@ class PlayState extends MusicBeatState
 		dad.altAnim = "";
 		boyfriend.bfAltAnim = "";
 
-		var notes = SONG.notes[Math.floor(curStep / 16)];
+		var notes = SONG.notes[curSection];
 		if (notes != null)
 		{
 			if (notes.altAnim) dad.altAnim = '-alt';
@@ -5083,7 +5088,7 @@ class PlayState extends MusicBeatState
 		callOnLuas('beatHit', [curBeat]);
 		callOnLuas('onBeatHit', [curBeat]);
 
-		// FlxG.log.add('change bpm' + SONG.notes[Std.int(curStep / 16)].changeBPM);
+		// FlxG.log.add('change bpm' + SONG.notes[curSection].changeBPM);
 		//wiggleShit.update(Conductor.crochet);
 
 		if (FlxG.save.data.camzoom)

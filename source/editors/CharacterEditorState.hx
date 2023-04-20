@@ -383,6 +383,10 @@ class CharacterEditorState extends MusicBeatState
 						0,
 						0
 					],
+					"playerOffsets": [
+						0,
+						0
+					],
 					"fps": 24,
 					"anim": "idle",
 					"indices": [],
@@ -390,6 +394,10 @@ class CharacterEditorState extends MusicBeatState
 				},
 				{
 					"offsets": [
+						0,
+						0
+					],
+					"playerOffsets": [
 						0,
 						0
 					],
@@ -404,6 +412,10 @@ class CharacterEditorState extends MusicBeatState
 						0,
 						0
 					],
+					"playerOffsets": [
+						0,
+						0
+					],
 					"indices": [],
 					"fps": 24,
 					"anim": "singDOWN",
@@ -415,6 +427,10 @@ class CharacterEditorState extends MusicBeatState
 						0,
 						0
 					],
+					"playerOffsets": [
+						0,
+						0
+					],
 					"indices": [],
 					"fps": 24,
 					"anim": "singUP",
@@ -423,6 +439,10 @@ class CharacterEditorState extends MusicBeatState
 				},
 				{
 					"offsets": [
+						0,
+						0
+					],
+					"playerOffsets": [
 						0,
 						0
 					],
@@ -491,6 +511,7 @@ class CharacterEditorState extends MusicBeatState
 			loadChar(!check_player.checked);
 			updatePresence();
 			reloadCharacterDropDown();
+			reloadCharacterOptions();
 		});
 		charDropDown.selectedLabel = daAnim;
 		blockPressWhileScrolling.push(charDropDown);
@@ -500,6 +521,7 @@ class CharacterEditorState extends MusicBeatState
 		{
 			loadChar(!check_player.checked);
 			reloadCharacterDropDown();
+			reloadCharacterOptions();
 		});
 
 		var templateCharacter:FlxButton = new FlxButton(140, 50, "Load Template", function()
