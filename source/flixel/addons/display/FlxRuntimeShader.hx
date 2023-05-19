@@ -196,6 +196,7 @@ class FlxRuntimeShader extends FlxShader
 	 * @param vertexSource The vertex shader source.
 	 * Note you also need to `initialize()` the shader MANUALLY! It can't be done automatically.
 	 */
+
 	public function new(fragmentSource:String = null, vertexSource:String = null, glslVersion:Int = 120):Void
 	{
 		_glslVersion = glslVersion;
@@ -235,7 +236,7 @@ class FlxRuntimeShader extends FlxShader
 	/**
 	 * Replace the `#pragma header` and `#pragma body` with the fragment shader header and body.
 	 */
-	function processFragmentSource(input:String):String
+	public static function processFragmentSource(input:String):String
 	{
 		var result = StringTools.replace(input, PRAGMA_HEADER, BASE_FRAGMENT_HEADER);
 		result = StringTools.replace(result, PRAGMA_BODY, BASE_FRAGMENT_BODY);

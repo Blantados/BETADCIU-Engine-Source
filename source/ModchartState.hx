@@ -798,9 +798,18 @@ class ModchartState
 
 	public static function changeGFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false)
 	{		
+		var animationName:String = "no way anyone have an anim name this big";
+		var animationFrame:Int = 0;						
+		if (PlayState.instance.gf.animation.curAnim.name.startsWith('sing'))
+		{
+			animationName = PlayState.instance.gf.animation.curAnim.name;
+			animationFrame = PlayState.instance.gf.animation.curAnim.curFrame;
+		}
+
 		PlayState.instance.removeObject(PlayState.instance.gf);
 		PlayState.instance.destroyObject(PlayState.instance.gf);
-		PlayState.instance.gf = new Character(0, 0, id);
+		PlayState.instance.gf = new Character(0, 0, id, flipped);
+		PlayState.instance.gf.flipMode = flipped;
 		PlayState.instance.gf.x = PlayState.instance.Stage.gfXOffset + 400 + PlayState.instance.gf.positionArray[0];
 		PlayState.instance.gf.y = PlayState.instance.Stage.gfYOffset + 130 + PlayState.instance.gf.positionArray[1];
 		PlayState.instance.gf.scrollFactor.set(0.95, 0.95);
@@ -813,6 +822,9 @@ class ModchartState
 
 		if (FlxG.save.data.uncacheCharacterSwitch && !dontDestroy)
 			gfPath = 'shared:assets/shared/images/'+PlayState.instance.gf.charPath;
+
+		if (PlayState.instance.gf.animOffsets.exists(animationName))
+			PlayState.instance.gf.playAnim(animationName, true, false, animationFrame);
 
 		if (FlxG.save.data.uncacheCharacterSwitch && !dontDestroy)
 			Paths.clearStoredMemory2(gfPath);
@@ -3802,7 +3814,7 @@ class ModchartState
 				leSprite.active = true;
 			});
 	
-			Lua_helper.add_callback(lua, "makeAnimatedLuaSprite", function(tag:String, image:String, x:Float, y:Float,spriteType:String="sparrow", width:Int = 0, height:Int = 0) {
+			Lua_helper.add_callback(lua, "makeAnimatedLuaSprite", function(tag:String, image:String, x:Float, y:Float,spriteType:String="sparrow") {
 				tag = tag.replace('.', '');
 				resetSpriteTag(tag);
 				var leSprite:ModchartSprite = new ModchartSprite(x, y);
@@ -4681,7 +4693,7 @@ class ModchartState
 				return false;
 			});
 			
-			Lua_helper.add_callback(lua, "setSpriteShader", function(obj:String, shader:String) {
+			Lua_helper.add_callback(lua, "setSpriteShader", function(obj:String, shader:String, ?keepOtherShaders:Bool = false) {
 				if(!FlxG.save.data.shaders) return false;
 	
 				#if (!flash && MODS_ALLOWED && sys)
@@ -4702,7 +4714,11 @@ class ModchartState
 					var daShader:FlxRuntimeShader = new FlxRuntimeShader(arr[0], arr[1]); 
 
 					if (Std.isOfType(leObj, FlxCamera)){
-						leObj.setFilters([new ShaderFilter(daShader)]);
+						var daFilters = (leObj._filters != null) ? leObj._filters : [];
+						
+						daFilters.push(new ShaderFilter(daShader));
+
+						leObj.setFilters(daFilters);
 					}
 					else{
 						var daObj:FlxSprite = leObj;
@@ -4716,7 +4732,7 @@ class ModchartState
 				#end
 				return false;
 			});
-			Lua_helper.add_callback(lua, "removeSpriteShader", function(obj:String) {
+			Lua_helper.add_callback(lua, "removeSpriteShader", function(obj:String, ?shader:String = "") {
 				var killMe:Array<String> = obj.split('.');
 				var leObj:Dynamic = getObjectDirectly(killMe[0]);
 				if(killMe.length > 1) {
@@ -4725,7 +4741,34 @@ class ModchartState
 	
 				if(leObj != null) {
 					if (Std.isOfType(leObj, FlxCamera)){
-						var newCamEffects:Array<BitmapFilter>=[];
+						var newCamEffects = [];
+
+						if (shader != "" && shader.length > 0)
+						{
+							var daFilters = [];
+							var swagFilters = [];
+
+							if (leObj._filters != null){
+								daFilters = leObj._filters;
+								swagFilters = leObj._filters;
+							}
+
+							var arr:Array<String> = PlayState.instance.runtimeShaders.get(shader);
+							
+							for (i in 0...daFilters.length){	
+								var filter:ShaderFilter = daFilters[i];
+								
+								if (filter.shader.glFragmentSource == FlxRuntimeShader.processFragmentSource(arr[0])){
+									trace("removing filter " + shader);
+									swagFilters.remove(filter);
+
+									break;
+								}
+							}
+							
+							newCamEffects = swagFilters;
+						}
+						
 						leObj.setFilters(newCamEffects);
 					}
 					else{
@@ -4758,9 +4801,9 @@ class ModchartState
 				return false;
 			});
 	
-			Lua_helper.add_callback(lua, "getShaderBool", function(obj:String, prop:String) {
+			Lua_helper.add_callback(lua, "getShaderBool", function(obj:String, prop:String, ?swagShader:String = "") {
 				#if (!flash && MODS_ALLOWED && sys)
-				var shader:FlxRuntimeShader = getShader(obj);
+				var shader:FlxRuntimeShader = getShader(obj, swagShader);
 				if (shader == null)
 				{
 					return null;
@@ -4771,9 +4814,9 @@ class ModchartState
 				return null;
 				#end
 			});
-			Lua_helper.add_callback(lua, "getShaderBoolArray", function(obj:String, prop:String) {
+			Lua_helper.add_callback(lua, "getShaderBoolArray", function(obj:String, prop:String, ?swagShader:String = "") {
 				#if (!flash && MODS_ALLOWED && sys)
-				var shader:FlxRuntimeShader = getShader(obj);
+				var shader:FlxRuntimeShader = getShader(obj, swagShader);
 				if (shader == null)
 				{
 					return null;
@@ -4784,9 +4827,9 @@ class ModchartState
 				return null;
 				#end
 			});
-			Lua_helper.add_callback(lua, "getShaderInt", function(obj:String, prop:String) {
+			Lua_helper.add_callback(lua, "getShaderInt", function(obj:String, prop:String, ?swagShader:String = "") {
 				#if (!flash && MODS_ALLOWED && sys)
-				var shader:FlxRuntimeShader = getShader(obj);
+				var shader:FlxRuntimeShader = getShader(obj, swagShader);
 				if (shader == null)
 				{
 					return null;
@@ -4797,9 +4840,9 @@ class ModchartState
 				return null;
 				#end
 			});
-			Lua_helper.add_callback(lua, "getShaderIntArray", function(obj:String, prop:String) {
+			Lua_helper.add_callback(lua, "getShaderIntArray", function(obj:String, prop:String, ?swagShader:String = "") {
 				#if (!flash && MODS_ALLOWED && sys)
-				var shader:FlxRuntimeShader = getShader(obj);
+				var shader:FlxRuntimeShader = getShader(obj, swagShader);
 				if (shader == null)
 				{
 					return null;
@@ -4810,9 +4853,9 @@ class ModchartState
 				return null;
 				#end
 			});
-			Lua_helper.add_callback(lua, "getShaderFloat", function(obj:String, prop:String) {
+			Lua_helper.add_callback(lua, "getShaderFloat", function(obj:String, prop:String, ?swagShader:String = "") {
 				#if (!flash && MODS_ALLOWED && sys)
-				var shader:FlxRuntimeShader = getShader(obj);
+				var shader:FlxRuntimeShader = getShader(obj, swagShader);
 				if (shader == null)
 				{
 					return null;
@@ -4823,9 +4866,9 @@ class ModchartState
 				return null;
 				#end
 			});
-			Lua_helper.add_callback(lua, "getShaderFloatArray", function(obj:String, prop:String) {
+			Lua_helper.add_callback(lua, "getShaderFloatArray", function(obj:String, prop:String, ?swagShader:String = "") {
 				#if (!flash && MODS_ALLOWED && sys)
-				var shader:FlxRuntimeShader = getShader(obj);
+				var shader:FlxRuntimeShader = getShader(obj, swagShader);
 				if (shader == null)
 				{
 					return null;
@@ -4838,9 +4881,9 @@ class ModchartState
 			});
 	
 	
-			Lua_helper.add_callback(lua, "setShaderBool", function(obj:String, prop:String, value:Bool) {
+			Lua_helper.add_callback(lua, "setShaderBool", function(obj:String, prop:String, value:Bool, ?swagShader:String = "") {
 				#if (!flash && MODS_ALLOWED && sys)
-				var shader:FlxRuntimeShader = getShader(obj);
+				var shader:FlxRuntimeShader = getShader(obj, swagShader);
 				if(shader == null) return;
 	
 				shader.setBool(prop, value);
@@ -4848,9 +4891,9 @@ class ModchartState
 				luaTrace("setShaderBool: Platform unsupported for Runtime Shaders!", false, false, FlxColor.RED);
 				#end
 			});
-			Lua_helper.add_callback(lua, "setShaderBoolArray", function(obj:String, prop:String, values:Dynamic) {
+			Lua_helper.add_callback(lua, "setShaderBoolArray", function(obj:String, prop:String, values:Dynamic, ?swagShader:String = "") {
 				#if (!flash && MODS_ALLOWED && sys)
-				var shader:FlxRuntimeShader = getShader(obj);
+				var shader:FlxRuntimeShader = getShader(obj, swagShader);
 				if(shader == null) return;
 	
 				shader.setBoolArray(prop, values);
@@ -4858,9 +4901,9 @@ class ModchartState
 				luaTrace("setShaderBoolArray: Platform unsupported for Runtime Shaders!", false, false, FlxColor.RED);
 				#end
 			});
-			Lua_helper.add_callback(lua, "setShaderInt", function(obj:String, prop:String, value:Int) {
+			Lua_helper.add_callback(lua, "setShaderInt", function(obj:String, prop:String, value:Int, ?swagShader:String = "") {
 				#if (!flash && MODS_ALLOWED && sys)
-				var shader:FlxRuntimeShader = getShader(obj);
+				var shader:FlxRuntimeShader = getShader(obj, swagShader);
 				if(shader == null) return;
 	
 				shader.setInt(prop, value);
@@ -4868,9 +4911,9 @@ class ModchartState
 				luaTrace("setShaderInt: Platform unsupported for Runtime Shaders!", false, false, FlxColor.RED);
 				#end
 			});
-			Lua_helper.add_callback(lua, "setShaderIntArray", function(obj:String, prop:String, values:Dynamic) {
+			Lua_helper.add_callback(lua, "setShaderIntArray", function(obj:String, prop:String, values:Dynamic, ?swagShader:String = "") {
 				#if (!flash && MODS_ALLOWED && sys)
-				var shader:FlxRuntimeShader = getShader(obj);
+				var shader:FlxRuntimeShader = getShader(obj, swagShader);
 				if(shader == null) return;
 	
 				shader.setIntArray(prop, values);
@@ -4878,9 +4921,9 @@ class ModchartState
 				luaTrace("setShaderIntArray: Platform unsupported for Runtime Shaders!", false, false, FlxColor.RED);
 				#end
 			});
-			Lua_helper.add_callback(lua, "setShaderFloat", function(obj:String, prop:String, value:Float) {
+			Lua_helper.add_callback(lua, "setShaderFloat", function(obj:String, prop:String, value:Float, ?swagShader:String = "") {
 				#if (!flash && MODS_ALLOWED && sys)
-				var shader:FlxRuntimeShader = getShader(obj);
+				var shader:FlxRuntimeShader = getShader(obj, swagShader);
 				if(shader == null) return;
 	
 				shader.setFloat(prop, value);
@@ -4888,9 +4931,9 @@ class ModchartState
 				luaTrace("setShaderFloat: Platform unsupported for Runtime Shaders!", false, false, FlxColor.RED);
 				#end
 			});
-			Lua_helper.add_callback(lua, "setShaderFloatArray", function(obj:String, prop:String, values:Dynamic) {
+			Lua_helper.add_callback(lua, "setShaderFloatArray", function(obj:String, prop:String, values:Dynamic, ?swagShader:String = "") {
 				#if (!flash && MODS_ALLOWED && sys)
-				var shader:FlxRuntimeShader = getShader(obj);
+				var shader:FlxRuntimeShader = getShader(obj, swagShader);
 				if(shader == null) return;
 	
 				shader.setFloatArray(prop, values);
@@ -4899,9 +4942,9 @@ class ModchartState
 				#end
 			});
 	
-			Lua_helper.add_callback(lua, "setShaderSampler2D", function(obj:String, prop:String, bitmapdataPath:String) {
+			Lua_helper.add_callback(lua, "setShaderSampler2D", function(obj:String, prop:String, bitmapdataPath:String, ?swagShader:String = "") {
 				#if (!flash && MODS_ALLOWED && sys)
-				var shader:FlxRuntimeShader = getShader(obj);
+				var shader:FlxRuntimeShader = getShader(obj, swagShader);
 				if(shader == null) return;
 	
 				// trace('bitmapdatapath: $bitmapdataPath');
@@ -4986,6 +5029,20 @@ class ModchartState
 
 				luaTrace("setSpriteMask: "+(leObj == null ? obj : mask)+" not found!", false, false, FlxColor.RED);
 				return false;
+			});
+
+			// Other stuff
+			Lua_helper.add_callback(lua, "stringStartsWith", function(str:String, start:String) {
+				return str.startsWith(start);
+			});
+			Lua_helper.add_callback(lua, "stringEndsWith", function(str:String, end:String) {
+				return str.endsWith(end);
+			});
+			Lua_helper.add_callback(lua, "stringSplit", function(str:String, split:String) {
+				return str.split(split);
+			});
+			Lua_helper.add_callback(lua, "stringTrim", function(str:String) {
+				return str.trim();
 			});
 
 			// default strums
@@ -5494,16 +5551,18 @@ class ModchartState
 		if (!Paths.currentTrackedAssets.exists(image))
 			Paths.cacheImage(image);
 
+		var daSpriteType:String = spriteType;
+
 		switch(spriteType.toLowerCase().trim())
 		{
 			case "texture" | "textureatlas"|"tex":
 				spr.frames = AtlasFrameMaker.construct(image);
 			case "texture_noaa" | "textureatlas_noaa" | "tex_noaa":
 				spr.frames = AtlasFrameMaker.construct(image, null, true);
-			case "packer" |"packeratlas"|"pac":
+			case "packer" | "packeratlas" | "pac":
 				spr.frames = Paths.getPackerAtlas(image);
 			default:
-				spr.frames = Paths.getSparrowAtlas(image);
+				spr.frames = Paths.getAtlasFromData(image, daSpriteType);
 		}
 
 		if (FlxG.save.data.poltatoPC)
@@ -5525,17 +5584,42 @@ class ModchartState
 	}
 
 	#if (!flash && sys)
-	public function getShader(obj:String):FlxRuntimeShader
+	public function getShader(obj:String, ?swagShader:String):FlxRuntimeShader
 	{
 		var killMe:Array<String> = obj.split('.');
-		var leObj:FlxSprite = getObjectDirectly(killMe[0]);
+		var leObj:Dynamic = getObjectDirectly(killMe[0]);
 		if(killMe.length > 1) {
 			leObj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 		}
 
 		if(leObj != null) {
-			var shader:Dynamic = leObj.shader;
+			var shader:Dynamic = null;
+		
+			if (Std.isOfType(leObj, FlxCamera)){
+				var daFilters = (leObj._filters != null) ? leObj._filters : [];
+				
+				if (swagShader != null && swagShader.length > 0){
+					var arr:Array<String> = PlayState.instance.runtimeShaders.get(swagShader);
+					
+					for (i in 0...daFilters.length){	
+						var filter:ShaderFilter = daFilters[i];
+						
+						if (filter.shader.glFragmentSource == FlxRuntimeShader.processFragmentSource(arr[0])){
+							shader = filter.shader;
+							break;
+						}
+					}
+				}
+				else{
+					shader = daFilters[0].shader;
+				}
+			}
+			else{
+				shader = leObj.shader;
+			}
+
 			var shader:FlxRuntimeShader = shader;
+			
 			return shader;
 		}
 		return null;
@@ -5596,7 +5680,7 @@ class ModchartState
 		return false;
 	}
 
-	public function callOnCompleted(type:String = "tween", tag:String, ?loops:Int, ?loopsLeft:Int)
+	public static function callOnCompleted(type:String = "tween", tag:String, ?loops:Int, ?loopsLeft:Int)
 	{
 		switch (type.toLowerCase())
 		{

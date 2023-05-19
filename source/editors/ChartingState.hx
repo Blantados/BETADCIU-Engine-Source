@@ -301,6 +301,11 @@ class ChartingState extends MusicBeatState
 			tipText.scrollFactor.set();
 			tipTextGroup.add(tipText);
 		}
+
+		writingNotesText = new FlxUIText(50, 50, 0, "Writing Notes");
+		writingNotesText.setFormat("Arial", 20, FlxColor.WHITE, FlxTextAlign.LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		writingNotesText.visible = false;
+		add(writingNotesText);
 		
 		add(UI_box);
 		
@@ -423,6 +428,14 @@ class ChartingState extends MusicBeatState
 		var tab_group_chart = new FlxUI(null, UI_box);
 		tab_group_chart.name = "Charting";
 		
+		var check_writing_notes = new FlxUICheckBox(10, 60, null, null, "Writing Notes", 100);
+		check_writing_notes.checked = writingNotes;
+		check_writing_notes.callback = function()
+		{
+			writingNotes = !writingNotes;
+			writingNotesText.visible = writingNotes;
+		};
+
 		#if desktop
 		waveformEnabled = new FlxUICheckBox(10, 90, null, null, "Visible Waveform", 100);
 		if (FlxG.save.data.chart_waveform == null) FlxG.save.data.chart_waveform = false;
@@ -494,6 +507,8 @@ class ChartingState extends MusicBeatState
 		sliderRate.nameLabel.text = 'Playback Rate';
 		tab_group_chart.add(sliderRate);
 		#end
+
+		tab_group_chart.add(check_writing_notes);
 
 		tab_group_chart.add(new FlxText(130, oldBpmInputText.y - 30, 0, 'Old BPM (Fits chart from this \nBPM to Song BPM)'));
 		tab_group_chart.add(oldBpmInputText);
@@ -609,6 +624,24 @@ class ChartingState extends MusicBeatState
 
 		var reloadSong:FlxButton = new FlxButton(saveButton.x + 90, saveButton.y, "Reload Audio", function()
 		{
+			// will now also reload the song played in PlayState
+			var instPath = Paths.mods(Paths.currentModDirectory + '/songs/' + _song.song.toLowerCase() + Paths.SOUND_EXT);
+			var voicesPath = Paths.mods(Paths.currentModDirectory + '/songs/' + _song.song.toLowerCase() + Paths.SOUND_EXT);
+
+			if (Paths.currentTrackedSounds.exists(instPath)){
+				trace("huh neat");
+
+				Paths.currentTrackedSounds.remove(instPath);
+				Paths.clearStoredMemory2(instPath, "sound");
+
+				if (Paths.currentTrackedSounds.exists(voicesPath)){
+					trace("double neat");
+	
+					Paths.currentTrackedSounds.remove(voicesPath);
+					Paths.clearStoredMemory2(voicesPath, "sound");
+				}
+			}
+
 			loadSong(_song.song);
 			loadAudioBuffer();
 			updateWaveform();
@@ -1087,9 +1120,6 @@ class ChartingState extends MusicBeatState
 		tab_group_note = new FlxUI(null, UI_box);
 		tab_group_note.name = 'Note';
 
-		writingNotesText = new FlxUIText(20,100, 0, "");
-		writingNotesText.setFormat("Arial",20,FlxColor.WHITE,FlxTextAlign.LEFT,FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
-
 		stepperSusLength = new FlxUINumericStepper(10, 25, Conductor.stepCrochet / 2, 0, 0, Conductor.stepCrochet * _song.notes[curSec].lengthInSteps * 4);
 		stepperSusLength.value = 0;
 		stepperSusLength.name = 'note_susLength';
@@ -1141,7 +1171,6 @@ class ChartingState extends MusicBeatState
 			}
 		});
 
-		tab_group_note.add(writingNotesText);
 		tab_group_note.add(new FlxText(10, 10, 0, 'Sustain length:'));
 		tab_group_note.add(new FlxText(10, 50, 0, 'Strum time (in miliseconds):'));
 		tab_group_note.add(new FlxText(10, 90, 0, 'Note type:'));
@@ -1555,16 +1584,11 @@ class ChartingState extends MusicBeatState
 			setDaOldBPM = false;
 		}
 
-		//i like... never use this. also it's annoying when doing alt+tab to check something else
+		//readded. you just have to access it using a button instead of alt
 		/*if (FlxG.keys.justPressed.ALT && !FlxG.keys.justPressed.ENTER && UI_box.selected_tab == 0)
 		{
 			writingNotes = !writingNotes;
 		}*/ 
-
-		if (writingNotes)
-			writingNotesText.text = "WRITING NOTES";
-		else
-			writingNotesText.text = "";
 
 		if (FlxG.sound.music != null)
 			Conductor.songPosition = FlxG.sound.music.time;
@@ -1600,7 +1624,7 @@ class ChartingState extends MusicBeatState
 							}
 						}
 					trace('adding note');
-					_song.notes[curSec].sectionNotes.push([Conductor.songPosition, i, 0]);
+					_song.notes[curSec].sectionNotes.push([Conductor.songPosition, i, 0, ""]);
 					updateGrid();
 				}
 			}

@@ -15,8 +15,8 @@ using StringTools;
 
 class NoteSplash extends FlxSprite
 {
-	private var idleAnim:String;
-	private var textureLoaded:String = null;
+	public var idleAnim:String;
+	public var textureLoaded:String = null;
 
 	public function new(x:Float = 0, y:Float = 0, ?note:Int = 0) {
 		super(x, y);

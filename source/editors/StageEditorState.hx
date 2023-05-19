@@ -185,7 +185,9 @@ class StageEditorState extends MusicBeatState
 
 	function reloadObjectsDropDown() {
 		var objects:Array<String> = [];
+
 		for (key in Stage.swagBacks.keys()) {
+			
 			objects.push(key);
 		}
 		if(objects.length < 1) objects.push("NO OBJECTS"); //Prevents crash
@@ -396,9 +398,7 @@ class StageEditorState extends MusicBeatState
 			var rawXml:String;
 
 			if(image != null && image.length > 0) {	
-				if (!Paths.currentTrackedAssets.exists(image))
-					Paths.cacheImage(image, true);
-	
+				Paths.cacheImage(image, true);
 				rawPic = Paths.currentTrackedAssets.get(image);
 
 				if (rawPic == null)
@@ -717,6 +717,7 @@ class StageEditorState extends MusicBeatState
 		stageDropDown.selectedLabel = daStage;
 	}
 
+
 	function loadStage(?reload:Bool = true) {
 		if (daStage.contains('-embed')){
 			addTextToDebug("ACCESS DENIED: STAGE IS EMBEDDED!", 0xFFFF0000);
@@ -727,7 +728,6 @@ class StageEditorState extends MusicBeatState
 
 		if (reload)
 		{
-			
 			remove(gf);
 			remove(dad);
 			remove(boyfriend);
@@ -874,7 +874,7 @@ class StageEditorState extends MusicBeatState
 		}
 
 		if (bg.scale.x != 1)
-			scriptLine("scaleObject('"+name+"', "+bg.scale.x+", "+bg.scale.y+")");
+			scriptLine("scaleObject('" + name +"', " + bg.scale.x + ", " + bg.scale.y + (bg.offset.x == 0 ? ", false" : "") + ")");
 
 		if (bg.scrollFactor.x != 1)
 			scriptLine("setScrollFactor('"+name+"', "+bg.scrollFactor.x+", "+bg.scrollFactor.y+")");
@@ -991,10 +991,12 @@ class StageEditorState extends MusicBeatState
 			else if(sender == objectScaleXStepper)
 			{
 				currentObject.scale.x = objectScaleXStepper.value;
+				currentObject.updateHitbox();
 			}	
 			else if(sender == objectScaleYStepper)
 			{
 				currentObject.scale.y = objectScaleYStepper.value;
+				currentObject.updateHitbox();
 			}
 			else if(sender == objectScrollFactorXStepper)
 			{
