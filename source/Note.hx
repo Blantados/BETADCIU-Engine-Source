@@ -184,7 +184,7 @@ class Note extends FlxSprite
 	}
 
 
-	public function new(_strumTime:Float, _noteData:Int, ?_prevNote:Note, ?sustainNote:Bool = false, ?noteTypeOld:String = "", ?style:String = 'normal')
+	public function new(_strumTime:Float, _noteData:Int, ?_prevNote:Note, ?sustainNote:Bool = false, ?noteTypeOld:String = "", ?style:String = "")
 	{
 		super();
 
@@ -414,6 +414,10 @@ class Note extends FlxSprite
 				if (Assets.exists(Paths.image('notes/'+style))){
 					frames = Paths.getSparrowAtlas('notes/'+style);
 
+					if (frames == null){
+						frames = Paths.getSparrowAtlas((mania > 0 ? 'notes/shaggyNotes' : 'notes/NOTE_assets'));
+					}
+						
 					addAnims();
 				}
 				else
@@ -484,7 +488,7 @@ class Note extends FlxSprite
 		}
 	}
 
-	public var noteAnimSuffixes:Array<String> = ['0', ' hold piece', ' hold end']; //accomodate for other namings
+	public var noteAnimSuffixes:Array<String> = ['0', ' hold piece', ' hold end']; //acommodate for other namings
 
 	function addAnims(?pixel:Bool = false)
 	{

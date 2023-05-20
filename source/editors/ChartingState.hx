@@ -628,18 +628,12 @@ class ChartingState extends MusicBeatState
 			var instPath = Paths.mods(Paths.currentModDirectory + '/songs/' + _song.song.toLowerCase() + Paths.SOUND_EXT);
 			var voicesPath = Paths.mods(Paths.currentModDirectory + '/songs/' + _song.song.toLowerCase() + Paths.SOUND_EXT);
 
-			if (Paths.currentTrackedSounds.exists(instPath)){
-				trace("huh neat");
-
-				Paths.currentTrackedSounds.remove(instPath);
-				Paths.clearStoredMemory2(instPath, "sound");
-
-				if (Paths.currentTrackedSounds.exists(voicesPath)){
-					trace("double neat");
-	
-					Paths.currentTrackedSounds.remove(voicesPath);
-					Paths.clearStoredMemory2(voicesPath, "sound");
-				}
+			for (key in Paths.currentTrackedSounds.keys())
+			{
+				if (key.contains(_song.song.toLowerCase())){
+					Paths.currentTrackedSounds.remove(key);
+					Paths.clearStoredMemory2(key, "sound");
+				}		
 			}
 
 			loadSong(_song.song);

@@ -1336,7 +1336,7 @@ class CharacterEditorState extends MusicBeatState
 		var charsLoaded:Map<String, Bool> = new Map();
 
 		#if MODS_ALLOWED
-		characterList = [];
+		characterList = ["bf"];
 
 		if (Paths.currentModDirectory != 'BETADCIU')
 		{

@@ -4732,16 +4732,19 @@ class PlayState extends MusicBeatState
 	}
 
 	public function addTextToDebug(text:String, ?color:FlxColor = FlxColor.RED) {
-		luaDebugGroup.forEachAlive(function(spr:DebugLuaText) {
-			spr.y += 20;
-		});
-
-		if(luaDebugGroup.members.length > 34) {
-			var blah = luaDebugGroup.members[34];
-			blah.destroy();
-			luaDebugGroup.remove(blah);
+		if (luaDebugGroup != null)
+		{
+			luaDebugGroup.forEachAlive(function(spr:DebugLuaText) {
+				spr.y += 20;
+			});
+	
+			if(luaDebugGroup.members.length > 34) {
+				var blah = luaDebugGroup.members[34];
+				blah.destroy();
+				luaDebugGroup.remove(blah);
+			}
+			luaDebugGroup.insert(0, new DebugLuaText(text, luaDebugGroup, color));
 		}
-		luaDebugGroup.insert(0, new DebugLuaText(text, luaDebugGroup, color));
 	}
 
 	public function doTimeTravel(shiftPressed:Bool = false, ?skipExactly:Int = 0)

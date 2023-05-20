@@ -687,9 +687,10 @@ class Paths
 		rawXml = checkAndReturn("xml", key, library);
 		
 		if (imageLoaded == null){
-			if (PlayState.instance != null)
+			if (PlayState.instance != null && PlayState.instance !=){
 				PlayState.instance.addTextToDebug(key + " not found!");
-
+			}
+			
 			imageLoaded = returnGraphic('bruhtf', 'shared');
 		}
 			
@@ -852,12 +853,13 @@ class Paths
 		
 		for (i in 0...pathsToCheck.length)
 		{
-			if(Assets.exists(pathsToCheck[i])) {
-				return Assets.getText(pathsToCheck[i]);
-			}
-
+			//prioritize stuff in the mods folder first.
 			if(FileSystem.exists(pathsToCheck[i])) {
 				return File.getContent(pathsToCheck[i]);
+			}
+
+			if(Assets.exists(pathsToCheck[i])) {
+				return Assets.getText(pathsToCheck[i]);
 			}
 		}
 
