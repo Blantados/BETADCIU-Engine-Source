@@ -488,7 +488,7 @@ class Note extends FlxSprite
 		}
 	}
 
-	public var noteAnimSuffixes:Array<String> = ['0', ' hold piece', ' hold end']; //acommodate for other namings
+	public var noteAnimSuffixes:Array<String> = ['0', ' hold piece', ' hold end']; //accommodate for other namings
 
 	function addAnims(?pixel:Bool = false)
 	{
