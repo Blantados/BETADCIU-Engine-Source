@@ -687,7 +687,7 @@ class Paths
 		rawXml = checkAndReturn("xml", key, library);
 		
 		if (imageLoaded == null){
-			if (PlayState.instance != null && PlayState.instance !=){
+			if (PlayState.instance != null){
 				PlayState.instance.addTextToDebug(key + " not found!");
 			}
 			
