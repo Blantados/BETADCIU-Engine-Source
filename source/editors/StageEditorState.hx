@@ -67,6 +67,10 @@ class StageEditorState extends MusicBeatState
 		super();
 		this.daStage = daStage;
 		this.goToPlayState = goToPlayState;
+
+		if (daStage.contains('-embed')){
+			daStage = "stage";
+		}
 	}
 
 	var UI_box:FlxUITabMenu;
@@ -113,6 +117,10 @@ class StageEditorState extends MusicBeatState
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camMenu, false);
 		FlxG.cameras.setDefaultDrawTarget(camEditor, true);
+
+		luaDebugGroup = new FlxTypedGroup<DebugLuaText>();
+		add(luaDebugGroup);
+		luaDebugGroup.cameras = [camMenu];
 
 		var pointer:FlxGraphic = FlxGraphic.fromClass(GraphicCursorCross);
 		cameraFollowPointer = new FlxSprite().loadGraphic(pointer);
@@ -388,7 +396,7 @@ class StageEditorState extends MusicBeatState
 				addTextToDebug("Animation doesn't exist!");			
 		});
 
-		var addUpdateButton:FlxButton = new FlxButton(70, 340, "Add/Update", function() {
+		var addUpdateButton:FlxButton = new FlxButton(20, 340, "Add/Update", function() {
 			if (objectInputText.text == null)
 				return;
 
@@ -437,7 +445,7 @@ class StageEditorState extends MusicBeatState
 			trace('Added/Updated Object: ' + objectInputText.text);
 		});
 
-		var removeButton:FlxButton = new FlxButton(180, 340, "Remove", function() {
+		var removeButton:FlxButton = new FlxButton(130, 340, "Remove", function() {
 			if (Stage.swagBacks.exists(objectInputText.text))
 			{
 				var leSprite:Dynamic = Stage.swagBacks.get(objectInputText.text);
@@ -446,6 +454,27 @@ class StageEditorState extends MusicBeatState
 				Stage.swagBacks.remove(objectInputText.text);
 
 				trace('Removed Object: ' + objectInputText.text);
+			}
+		});
+
+		var reloadAllButton:FlxButton = new FlxButton(240, 340, "Reload All Assets", function() {
+			for (key in Stage.swagBacks.keys())
+			{
+				var leSprite:FlxSprite = Stage.swagBacks.get(key);
+				var daPath:String = leSprite.graphic.key;
+				var isAnimated:Bool = leSprite.numFrames > 1;
+
+				Paths.currentTrackedAssets.remove(daPath);
+				Paths.clearStoredMemory2(daPath, 'image');
+
+				if (isAnimated){
+					leSprite.frames = Paths.getAtlasFromData(daPath, "sparrow");
+				}
+				else{
+					var rawPic = Paths.returnGraphic(daPath);
+					
+					leSprite.loadGraphic(rawPic);
+				}
 			}
 		});
 
@@ -497,6 +526,7 @@ class StageEditorState extends MusicBeatState
 		tab_group.add(animationLoopCheckBox);
 		tab_group.add(addUpdateButton);
 		tab_group.add(removeButton);
+		tab_group.add(reloadAllButton);
 		
 		tab_group.add(new FlxText(objectInputText.x, objectInputText.y - 18, 0, 'Object name:'));
 		tab_group.add(new FlxText(objectNameInputText.x, objectNameInputText.y - 18, 0, "Object's image name:"));
@@ -1129,7 +1159,7 @@ class StageEditorState extends MusicBeatState
 
 		if (!freeCamera)
 		{
-			if (!focusPlayer && camFollow.x != dad.getMidpoint().x + 150 + dad.cameraPosition[0] + (Stage.opponentCameraOffset != null ? Stage.opponentCameraOffset[0] : 0))
+			if (!focusPlayer && (camFollow.x != dad.getMidpoint().x + 150 + dad.cameraPosition[0] + (Stage.opponentCameraOffset != null ? Stage.opponentCameraOffset[0] : 0) || camFollow.y != dad.getMidpoint().y - 100 + dad.cameraPosition[1] + (Stage.opponentCameraOffset != null ? Stage.opponentCameraOffset[1] : 0)))
 			{
 				camFollow.setPosition(dad.getMidpoint().x + 150, dad.getMidpoint().y - 100);
 	
@@ -1137,7 +1167,7 @@ class StageEditorState extends MusicBeatState
 				camFollow.y += dad.cameraPosition[1] + (Stage.opponentCameraOffset != null ? Stage.opponentCameraOffset[1] : 0);
 			}
 	
-			if (focusPlayer && camFollow.x != boyfriend.getMidpoint().x - 100 - boyfriend.cameraPosition[0] - (Stage.boyfriendCameraOffset != null ? Stage.boyfriendCameraOffset[0] : 0))
+			if (focusPlayer && (camFollow.x != boyfriend.getMidpoint().x - 100 - boyfriend.cameraPosition[0] - (Stage.boyfriendCameraOffset != null ? Stage.boyfriendCameraOffset[0] : 0) || camFollow.y != boyfriend.getMidpoint().y - 100 - boyfriend.cameraPosition[1] - (Stage.boyfriendCameraOffset != null ? Stage.boyfriendCameraOffset[1] : 0) ))
 			{
 				camFollow.setPosition(boyfriend.getMidpoint().x - 100, boyfriend.getMidpoint().y - 100);
 				camFollow.x -= boyfriend.cameraPosition[0] - (Stage.boyfriendCameraOffset != null ? Stage.boyfriendCameraOffset[0] : 0);

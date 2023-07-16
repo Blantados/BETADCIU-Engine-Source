@@ -687,10 +687,10 @@ class Paths
 		rawXml = checkAndReturn("xml", key, library);
 		
 		if (imageLoaded == null){
-			if (PlayState.instance != null){
+			if (PlayState.instance != null && PlayState.inPlayState){
 				PlayState.instance.addTextToDebug(key + " not found!");
 			}
-			
+				
 			imageLoaded = returnGraphic('bruhtf', 'shared');
 		}
 			
@@ -725,8 +725,9 @@ class Paths
 		rawTxt = checkAndReturn("txt", key, library);
 
 		if (imageLoaded == null){
-			if (PlayState.instance != null)
+			if (PlayState.instance != null && PlayState.inPlayState){
 				PlayState.instance.addTextToDebug(key + " not found!");
+			}
 			
 			imageLoaded = returnGraphic('bruhtf', 'shared');
 		}
@@ -751,8 +752,9 @@ class Paths
 		rawXml = checkAndReturn("xml", key, library);
 		
 		if (imageLoaded == null){
-			if (PlayState.instance != null)
+			if (PlayState.instance != null && PlayState.inPlayState){
 				PlayState.instance.addTextToDebug(key + " not found!");
+			}
 			
 			imageLoaded = returnGraphic('bruhtf', 'shared');
 		}
@@ -775,8 +777,9 @@ class Paths
 		rawJson = checkAndReturn("json", key, "library");
 		
 		if (imageLoaded == null){
-			if (PlayState.instance != null)
+			if (PlayState.instance != null && PlayState.inPlayState){
 				PlayState.instance.addTextToDebug(key + " not found!");
+			}
 			
 			imageLoaded = returnGraphic('bruhtf', 'shared');
 		}

@@ -74,7 +74,7 @@ class NoteSplash extends FlxSprite
 		{
 			if (Assets.exists(Paths.image("noteSplashes-" + PlayState.instance.bfStrumStyle)) || FileSystem.exists(Paths.modsImages("noteSplashes-" + PlayState.instance.bfStrumStyle)))
 				texture = "noteSplashes-"+ PlayState.instance.bfStrumStyle;
-			else if (Assets.exists(Paths.image("notes/noteSplashes" + PlayState.instance.bfStrumStyle)) || FileSystem.exists(Paths.modsImages("notes/noteSplashes-" + PlayState.instance.bfStrumStyle)))
+			else if (Assets.exists(Paths.image("notes/noteSplashes-" + PlayState.instance.bfStrumStyle)) || FileSystem.exists(Paths.modsImages("notes/noteSplashes-" + PlayState.instance.bfStrumStyle)))
 				texture = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
 			else if (Assets.exists(Paths.image("notes/"+texture)) || FileSystem.exists(Paths.modsImages("notes/"+texture)))
 				texture = "notes/"+texture;

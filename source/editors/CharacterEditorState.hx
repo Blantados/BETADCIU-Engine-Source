@@ -493,7 +493,6 @@ class CharacterEditorState extends MusicBeatState
 		{
 			char.isPlayer = !char.isPlayer;
 			char.flipX = !char.flipX;
-			updatePointerPos();
 			reloadBGs();
 			char.flipAnims();
 			ghostChar.flipX = char.flipX;
@@ -502,6 +501,8 @@ class CharacterEditorState extends MusicBeatState
 				char.setPosition(char.playerPositionArray[0] + OFFSET_X + 100, char.playerPositionArray[1]);
 			else		
 				char.setPosition(char.positionArray[0] + OFFSET_X + 100, char.positionArray[1]);
+
+			updatePointerPos();
 		};
 
 		charDropDown = new FlxUIDropDownMenuCustom(10, 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(character:String)
@@ -633,7 +634,7 @@ class CharacterEditorState extends MusicBeatState
 		{
 			for (i in 0...char.animationsArray.length)
 			{
-				char.animationsArray[i].playerOffsets = char.animationsArray[i].offsets;
+				char.animationsArray[i].playerOffsets = char.animationsArray[i].offsets;	
 			}
 		});
 
@@ -659,12 +660,16 @@ class CharacterEditorState extends MusicBeatState
 		noAntialiasingCheckBox.callback = function() {
 			char.antialiasing = !noAntialiasingCheckBox.checked;
 			char.noAntialiasing = noAntialiasingCheckBox.checked;
+
+			ghostChar.antialiasing = char.antialiasing;
+			ghostChar.noAntialiasing = char.noAntialiasing;
 		};
 
 		psychPlayerCheckBox = new FlxUICheckBox(flipXCheckBox.x, noAntialiasingCheckBox.y + 40, null, null, "Player Character", 80);
 		psychPlayerCheckBox.checked = char.isPsychPlayer;
 		psychPlayerCheckBox.callback = function() {
 			char.isPsychPlayer = psychPlayerCheckBox.checked;
+			ghostChar.isPsychPlayer = char.isPsychPlayer;
 		};
 
 		positionXStepper = new FlxUINumericStepper(flipXCheckBox.x + 110, flipXCheckBox.y, 10, char.positionArray[0], -9000, 9000, 0);
@@ -690,6 +695,7 @@ class CharacterEditorState extends MusicBeatState
 		function(dataString:String)
 		{
 			char.spriteType = dataString.toLowerCase();
+			ghostChar.spriteType = char.spriteType;
 		});
 		blockPressWhileScrolling.push(spriteTypeDropDown);
 
@@ -698,8 +704,11 @@ class CharacterEditorState extends MusicBeatState
 		healthColorStepperB = new FlxUINumericStepper(singDurationStepper.x + 130, saveCharacterButton.y, 20, char.healthColorArray[2], 0, 255, 0);
 
 		var stepperArray:Array<FlxUINumericStepper> = [positionXStepper, positionYStepper, playerPositionXStepper, playerPositionYStepper, positionCameraXStepper, positionCameraYStepper, playerPositionCameraXStepper, playerPositionCameraYStepper, healthColorStepperR, healthColorStepperG, healthColorStepperB, singDurationStepper, scaleStepper];
-		blockPressWhileTypingOnStepper.concat(stepperArray);
 
+		for (i in stepperArray){
+			blockPressWhileTypingOnStepper.push(i);
+		}
+	
 		tab_group.add(new FlxText(15, imageInputText.y - 18, 0, 'Image file name:'));
 		tab_group.add(new FlxText(15, healthIconInputText.y - 18, 0, 'Health icon name:'));
 		tab_group.add(new FlxText(15, noteSkinInputText.y - 18, 0, 'Noteskin:'));
@@ -1340,6 +1349,10 @@ class CharacterEditorState extends MusicBeatState
 
 		if (Paths.currentModDirectory != 'BETADCIU')
 		{
+			if (FileSystem.exists(Paths.modFolders('data/characterList.txt'))){
+				characterList = CoolUtil.coolTextFile2(Paths.modFolders('data/characterList.txt'));
+			}
+			
 			 //READDED
 			 var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Paths.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')];
 			 for (i in 0...directories.length) {

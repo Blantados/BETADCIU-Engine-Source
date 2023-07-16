@@ -2,78 +2,96 @@ package;
 
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
+#if MODS_ALLOWED
+import sys.io.File;
+import sys.FileSystem;
+#end
+import openfl.utils.Assets;
+import haxe.Json;
+import haxe.format.JsonParser;
 
-class CharacterSetting
-{
-	public var x(default, null):Int;
-	public var y(default, null):Int;
-	public var scale(default, null):Float;
-	public var flipped(default, null):Bool;
-
-	public function new(x:Int = 0, y:Int = 0, scale:Float = 1.0, flipped:Bool = false)
-	{
-		this.x = x;
-		this.y = y;
-		this.scale = scale;
-		this.flipped = flipped;
-	}
+typedef MenuCharacterFile = {
+	var image:String;
+	var scale:Float;
+	var position:Array<Int>;
+	var idle_anim:String;
+	var confirm_anim:String;
+	var flipX:Bool;
 }
 
 class MenuCharacter extends FlxSprite
 {
-	private static var settings:Map<String, CharacterSetting> = [
-		'bf' => new CharacterSetting(0, -20, 1.0, true),
-		'gf' => new CharacterSetting(50, 80, 1.5, true),
-		'dad' => new CharacterSetting(-15, 130),
-		'spooky' => new CharacterSetting(20, 30),
-		'pico' => new CharacterSetting(0, 0, 1.0, true),
-		'mom' => new CharacterSetting(-30, 140, 0.85),
-		'parents-christmas' => new CharacterSetting(100, 130, 1.8),
-		'senpai' => new CharacterSetting(-40, -45, 1.4)
-	];
+	public var character:String;
+	public var hasConfirmAnimation:Bool = false;
+	private static var DEFAULT_CHARACTER:String = 'bf';
 
-	private var flipped:Bool = false;
-
-	public function new(x:Int, y:Int, scale:Float, flipped:Bool)
+	public function new(x:Float, character:String = 'bf')
 	{
-		super(x, y);
-		this.flipped = flipped;
+		super(x);
 
-		antialiasing = true;
-
-		frames = Paths.getSparrowAtlas('campaign_menu_UI_characters');
-
-		animation.addByPrefix('bf', "BF idle dance white", 24);
-		animation.addByPrefix('bfConfirm', 'BF HEY!!', 24, false);
-		animation.addByPrefix('gf', "GF Dancing Beat WHITE", 24);
-		animation.addByPrefix('dad', "Dad idle dance BLACK LINE", 24);
-		animation.addByPrefix('spooky', "spooky dance idle BLACK LINES", 24);
-		animation.addByPrefix('pico', "Pico Idle Dance", 24);
-		animation.addByPrefix('mom', "Mom Idle BLACK LINES", 24);
-		animation.addByPrefix('parents-christmas', "Parent Christmas Idle", 24);
-		animation.addByPrefix('senpai', "SENPAI idle Black Lines", 24);
-
-		setGraphicSize(Std.int(width * scale));
-		updateHitbox();
+		changeCharacter(character);
 	}
 
-	public function setCharacter(character:String):Void
-	{
-		if (character == '')
-		{
-			visible = false;
-			return;
-		}
-		else
-		{
-			visible = true;
-		}
+	public function changeCharacter(?character:String = 'bf') {
+		if(character == null) character = '';
+		if(character == this.character) return;
 
-		animation.play(character);
+		this.character = character;
+		antialiasing = ClientPrefs.globalAntialiasing;
+		visible = true;
 
-		var setting:CharacterSetting = settings[character];
-		offset.set(setting.x, setting.y);
-		setGraphicSize(Std.int(width * setting.scale));
-		flipX = setting.flipped != flipped;
+		var dontPlayAnim:Bool = false;
+		scale.set(1, 1);
+		updateHitbox();
+
+		hasConfirmAnimation = false;
+		switch(character) {
+			case '':
+				visible = false;
+				dontPlayAnim = true;
+			default:
+				var characterPath:String = 'images/menucharacters/' + character + '.json';
+				var rawJson = null;
+
+				#if MODS_ALLOWED
+				var path:String = Paths.modFolders(characterPath);
+				if (!FileSystem.exists(path)) {
+					path = Paths.getPreloadPath(characterPath);
+				}
+
+				if(!FileSystem.exists(path)) {
+					path = Paths.getPreloadPath('images/menucharacters/' + DEFAULT_CHARACTER + '.json');
+				}
+				rawJson = File.getContent(path);
+
+				#else
+				var path:String = Paths.getPreloadPath(characterPath);
+				if(!Assets.exists(path)) {
+					path = Paths.getPreloadPath('images/menucharacters/' + DEFAULT_CHARACTER + '.json');
+				}
+				rawJson = Assets.getText(path);
+				#end
+				
+				var charFile:MenuCharacterFile = cast Json.parse(rawJson);
+				frames = Paths.getSparrowAtlas('menucharacters/' + charFile.image);
+				animation.addByPrefix('idle', charFile.idle_anim, 24);
+
+				var confirmAnim:String = charFile.confirm_anim;
+				if(confirmAnim != null && confirmAnim.length > 0 && confirmAnim != charFile.idle_anim)
+				{
+					animation.addByPrefix('confirm', confirmAnim, 24, false);
+					if (animation.getByName('confirm') != null) //check for invalid animation
+						hasConfirmAnimation = true;
+				}
+
+				flipX = (charFile.flipX == true);
+
+				if(charFile.scale != 1) {
+					scale.set(charFile.scale, charFile.scale);
+					updateHitbox();
+				}
+				offset.set(charFile.position[0], charFile.position[1]);
+				animation.play('idle');
+		}
 	}
 }

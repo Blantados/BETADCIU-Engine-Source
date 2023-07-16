@@ -336,7 +336,6 @@ class Note extends FlxSprite
 
 		var lastScaleY:Float = scale.y;
 		var wasPixelNote:Bool = isPixel;
-		var becomePixelNote:Bool = style2.contains('pixel');
 
 		var animName:String = null;
 		if(animation.curAnim != null) {
@@ -347,6 +346,8 @@ class Note extends FlxSprite
 
 		if(animName != null)
 			animation.play(animName, true);
+
+		var becomePixelNote:Bool = isPixel;
 
 		if(isSustainNote)
 		{
@@ -439,6 +440,8 @@ class Note extends FlxSprite
 
 								width = width / 4;
 								height = height / 2;
+
+								originalHeightForCalcs = 3;
 
 								loadGraphic(rawPic2, true, Math.floor(width), Math.floor(height));
 							}

@@ -4381,10 +4381,24 @@ class ModchartState
 					obj.fieldWidth = width;
 				}
 			});
-			Lua_helper.add_callback(lua, "setTextBorder", function(tag:String, size:Int, color:String) {
+			Lua_helper.add_callback(lua, "setTextBorder", function(tag:String, size:Int, color:String, ?style:String) {
 				var obj:FlxText = getTextObject(tag);
+
 				if(obj != null)
 				{
+					switch (style.toLowerCase())
+					{
+						case "none":
+							obj.borderStyle = NONE;
+							return;
+						case "shadow":
+							obj.borderStyle = SHADOW;
+						case "outlinefast" | "outline_fast" | "outline-fast":
+							obj.borderStyle = OUTLINE_FAST;
+						default:
+							obj.borderStyle = OUTLINE;
+					}
+					
 					var colorNum:Int = Std.parseInt(color);
 					if(!color.startsWith('0x')) colorNum = Std.parseInt('0xff' + color);
 	

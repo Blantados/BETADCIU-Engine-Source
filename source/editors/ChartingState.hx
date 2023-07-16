@@ -735,7 +735,7 @@ class ChartingState extends MusicBeatState
 			loadArrayTexts();
 		
 			var dropDowns:Array<FlxUIDropDownMenuCustom> = [player1DropDown, player2DropDown, gfVersionDropDown, stageDropDown, noteStyleDropDown];
-			var dropDownsData:Array<Array<String>> = [CoolUtil.coolTextFile(Paths.txt('characterList')), CoolUtil.coolTextFile(Paths.txt('characterList')), CoolUtil.coolTextFile(Paths.txt('characterList')), CoolUtil.coolTextFile(Paths.txt('stageList')), CoolUtil.coolTextFile(Paths.txt('noteStyleList'))];
+			var dropDownsData:Array<Array<String>> = [loadCharacterList(), loadCharacterList(), loadCharacterList(), CoolUtil.coolTextFile(Paths.txt('stageList')), CoolUtil.coolTextFile(Paths.txt('noteStyleList'))];
 			var dropDownsLabel:Array<String> = [_song.player1, _song.player2, _song.gfVersion, _song.stage, _song.noteStyle];
 
 			for (i in 0...dropDowns.length){
@@ -812,10 +812,11 @@ class ChartingState extends MusicBeatState
 
 	function loadArrayTexts()
 	{
-		characters = CoolUtil.coolTextFile(Paths.txt('characterList'));
+		characters = loadCharacterList();
 		stages = CoolUtil.coolTextFile(Paths.txt('stageList'));
 		noteStyles = CoolUtil.coolTextFile(Paths.txt('noteStyleList'));
 	}
+
 	var stepperLength:FlxUINumericStepper;
 	var check_mustHitSection:FlxUICheckBox;
 	var check_gfSection:FlxUICheckBox;
@@ -2751,6 +2752,52 @@ class ChartingState extends MusicBeatState
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(data.trim(), "events.json");
 		}
+	}
+
+	function loadCharacterList() {
+		var charsLoaded:Map<String, Bool> = new Map();
+		var characterList:Array<String> = [];
+
+		#if MODS_ALLOWED
+		characterList = ["bf"];
+
+		if (Paths.currentModDirectory != 'BETADCIU')
+		{
+			if (FileSystem.exists(Paths.modFolders('data/characterList.txt'))){
+				characterList = CoolUtil.coolTextFile2(Paths.modFolders('data/characterList.txt'));
+			}
+				
+			 //READDED
+			 var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Paths.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')];
+			 for (i in 0...directories.length) {
+				 var directory:String = directories[i];
+				 if(FileSystem.exists(directory)) {
+					 for (file in FileSystem.readDirectory(directory)) {
+						 var path = haxe.io.Path.join([directory, file]);
+						 if (!sys.FileSystem.isDirectory(path) && file.endsWith('.json')) {
+							 var charToCheck:String = file.substr(0, file.length - 5);
+							 if(!charsLoaded.exists(charToCheck)) {
+								 characterList.push(charToCheck);
+								 charsLoaded.set(charToCheck, true);
+							 }
+						 }
+					 }
+				 }
+			 }
+		}
+		else
+		{
+			//FOR BETADCIU
+			if (FileSystem.exists(Paths.modFolders('data/characterList.txt')))
+				characterList = CoolUtil.coolTextFile2(Paths.modFolders('data/characterList.txt'));
+			else
+				characterList = CoolUtil.coolTextFile(Paths.txt('characterList'));
+		}
+		#else
+		characterList = CoolUtil.coolTextFile(Paths.txt('characterList'));
+		#end
+
+		return characterList;
 	}
 
 	function onSaveComplete(_):Void

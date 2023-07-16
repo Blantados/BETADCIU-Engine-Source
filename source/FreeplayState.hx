@@ -9,6 +9,7 @@ import flixel.math.FlxMath;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import lime.utils.Assets;
+import flixel.system.FlxSound;
 import editors.ChartingState;
 
 #if windows
@@ -51,6 +52,8 @@ class FreeplayState extends MusicBeatState
 	var colorTween:FlxTween;
 	public var canMove:Bool;
 	private static var lastDifficultyName:String = '';
+
+	public static var vocals:FlxSound = null;
 
 	override function create()
 	{
@@ -447,6 +450,14 @@ class FreeplayState extends MusicBeatState
 		{
 			curDifficulty = newPos;
 		}
+	}
+
+	public static function destroyFreeplayVocals() {
+		if(vocals != null) {
+			vocals.stop();
+			vocals.destroy();
+		}
+		vocals = null;
 	}
 }
 
