@@ -8,7 +8,6 @@ import LuaClass.LuaNote;
 #end
 import Section.SwagSection;
 import Song.SwagSong;
-import WiggleEffect.WiggleEffectType;
 import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -93,8 +92,14 @@ import openfl.system.System;
 
 import ModchartState;
 import DialogueBoxPsych;
-import Shaders;
+import shaders.Shaders;
 import flixel.group.FlxSpriteGroup;
+import openfl.geom.Rectangle;
+import flixel.addons.plugin.screengrab.FlxScreenGrab; // all because one betadciu needed it
+
+import shaders.WiggleEffect;
+import shaders.WiggleEffect.WiggleEffectType;
+import MotionBlur;
 
 using StringTools;
 
@@ -1336,7 +1341,7 @@ class PlayState extends MusicBeatState
 		if(variables.exists(tag)) return variables.get(tag);
 		return null;
 	}
-
+		
 	//why?
 	public function addBehindGF(obj:FlxObject)
 	{
@@ -1458,13 +1463,13 @@ class PlayState extends MusicBeatState
 	}
 
 	public function callOnLuas(event:String, args:Array<Dynamic>, ignoreStops = true, exclusions:Array<String> = null):Dynamic {
+		var returnVal:Dynamic = ModchartState.Function_Continue;
+		#if LUA_ALLOWED
 		var stageExclusions:Array<String> = ["onCreate", "onUpdate"];
 
 		if (Stage != null && Stage.isCustomStage && Stage.isLuaStage && !(stageExclusions.contains(event)))
 			Stage.callOnLuas(event, args);	
 
-		var returnVal:Dynamic = ModchartState.Function_Continue;
-		#if LUA_ALLOWED
 		if(exclusions == null) exclusions = [];
 		for (script in luaArray) {
 			if(exclusions.contains(script.scriptName))
@@ -1485,12 +1490,17 @@ class PlayState extends MusicBeatState
 		return returnVal;
 	}
 
-	public function setOnLuas(variable:String, arg:Dynamic) {
+	public function setOnLuas(variable:String, arg:Dynamic, exclusions:Array<String> = null) {
 		#if LUA_ALLOWED
 		if (Stage != null && Stage.isCustomStage && Stage.isLuaStage)
 			Stage.setOnLuas(variable, arg);	
 
+		if(exclusions == null) exclusions = [];
+
 		for (script in luaArray) {
+			if(exclusions.contains(script.scriptName))
+				continue;
+			
 			script.set(variable, arg);
 		}
 		#end
@@ -2353,11 +2363,13 @@ class PlayState extends MusicBeatState
 				var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
 				introAssets.set('default', ['ready', "set", "go"]);
 
-				if (usesStageHx)
+				if (usesStageHx){
 					introAssets.set(curStage, Stage.introAssets);
-
+				}
+					
 				var introAlts:Array<String> = introAssets.get('default');
 				var altSuffix:String = "";
+				var altPrefix:String = "";
 
 				for (value in introAssets.keys())
 				{
@@ -2367,33 +2379,37 @@ class PlayState extends MusicBeatState
 
 						if (usesStageHx && Stage.altSuffix != '')
 							altSuffix = Stage.altSuffix;
-						else
-							altSuffix = '';
+
+						if (usesStageHx && Stage.altPrefix != '')
+							altPrefix = Stage.altPrefix;
 					}
 				}
 
 				#if MODS_ALLOWED
-				if (!FileSystem.exists(Paths.modsSounds('sounds', 'intro3'+altSuffix)) && !FileSystem.exists(Paths.sound('intro3'+altSuffix))) {
+				if (!FileSystem.exists(Paths.modsSounds('sounds', altPrefix + 'intro3' + altSuffix)) && !FileSystem.exists(Paths.sound(altPrefix + 'intro3' + altSuffix))) {
 				#else
-				if (!OpenFlAssets.exists(Paths.sound('intro3'+altSuffix))) {
+				if (!OpenFlAssets.exists(Paths.sound(altPrefix + 'intro3' + altSuffix))) {
 				#end
 					altSuffix = '';
 				}
 				
+				// added stuff to check if you have a graphic for the 3
 				switch (swagCounter)
 				{
 					case 0:
-						countdownOnYourMarks = new FlxSprite().loadGraphic(Paths.image('notes/noStrums'));
-						setupCountdownSprite("countdownOnYourMarks", "notes/noStrums", "intro3" + altSuffix);
+						var dedicatedPath = (introAlts.length > 3 ? introAlts[0] : "notes/noStrums");
+
+						countdownOnYourMarks = new FlxSprite().loadGraphic(Paths.returnGraphic(dedicatedPath));
+						setupCountdownSprite("countdownOnYourMarks", dedicatedPath, altPrefix + "intro3" + altSuffix);
 					case 1:
-						countdownReady = new FlxSprite().loadGraphic(Paths.returnGraphic(introAlts[0]));
-						setupCountdownSprite("countdownReady", introAlts[0], "intro2" + altSuffix);
+						countdownReady = new FlxSprite().loadGraphic(Paths.returnGraphic(introAlts[introAlts.length - 3]));
+						setupCountdownSprite("countdownReady", introAlts[introAlts.length - 3], altPrefix + "intro2" + altSuffix);
 					case 2:
-						countdownSet = new FlxSprite().loadGraphic(Paths.returnGraphic(introAlts[1]));
-						setupCountdownSprite("countdownSet", introAlts[1], "intro1" + altSuffix);
+						countdownSet = new FlxSprite().loadGraphic(Paths.returnGraphic(introAlts[introAlts.length - 2]));
+						setupCountdownSprite("countdownSet", introAlts[introAlts.length - 2], altPrefix + "intro1" + altSuffix);
 					case 3:
-						countdownGo = new FlxSprite().loadGraphic(Paths.returnGraphic(introAlts[2]));
-						setupCountdownSprite("countdownGo", introAlts[2], "introGo" + altSuffix);
+						countdownGo = new FlxSprite().loadGraphic(Paths.returnGraphic(introAlts[introAlts.length - 1]));
+						setupCountdownSprite("countdownGo", introAlts[introAlts.length - 1], altPrefix + "introGo" + altSuffix);
 				}
 
 				callOnLuas('onCountdownTick', [swagCounter]);
@@ -2451,11 +2467,13 @@ class PlayState extends MusicBeatState
 			var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
 			introAssets.set('default', ['ready', "set", "go"]);
 
-			if (usesStageHx)
+			if (usesStageHx){
 				introAssets.set(curStage, Stage.introAssets);
-
+			}
+				
 			var introAlts:Array<String> = introAssets.get('default');
 			var altSuffix:String = "";
+			var altPrefix:String = "";
 
 			for (value in introAssets.keys())
 			{
@@ -2465,33 +2483,37 @@ class PlayState extends MusicBeatState
 
 					if (usesStageHx && Stage.altSuffix != '')
 						altSuffix = Stage.altSuffix;
-					else
-						altSuffix = '';
+
+					if (usesStageHx && Stage.altPrefix != '')
+						altPrefix = Stage.altPrefix;
 				}
 			}
 
 			#if MODS_ALLOWED
-			if (!FileSystem.exists(Paths.modsSounds('sounds', 'intro3'+altSuffix)) && !FileSystem.exists(Paths.sound('intro3'+altSuffix))) {
+			if (!FileSystem.exists(Paths.modsSounds('sounds', altPrefix + 'intro3' + altSuffix)) && !FileSystem.exists(Paths.sound(altPrefix + 'intro3' + altSuffix))) {
 			#else
-			if (!OpenFlAssets.exists(Paths.sound('intro3'+altSuffix))) {
+			if (!OpenFlAssets.exists(Paths.sound(altPrefix + 'intro3' + altSuffix))) {
 			#end
 				altSuffix = '';
 			}
 			
+			// added stuff to check if you have a graphic for the 3
 			switch (dankCounter)
 			{
 				case 0:
-					countdownOnYourMarks = new FlxSprite().loadGraphic(Paths.image('notes/noStrums'));
-					setupCountdownSprite("countdownOnYourMarks", "notes/noStrums", "intro3" + altSuffix);
+					var dedicatedPath = (introAlts.length > 3 ? introAlts[0] : "notes/noStrums");
+
+					countdownOnYourMarks = new FlxSprite().loadGraphic(Paths.returnGraphic(dedicatedPath));
+					setupCountdownSprite("countdownOnYourMarks", dedicatedPath, altPrefix + "intro3" + altSuffix);
 				case 1:
-					countdownReady = new FlxSprite().loadGraphic(Paths.returnGraphic(introAlts[0]));
-					setupCountdownSprite("countdownReady", introAlts[0], "intro2" + altSuffix);
+					countdownReady = new FlxSprite().loadGraphic(Paths.returnGraphic(introAlts[introAlts.length - 3]));
+					setupCountdownSprite("countdownReady", introAlts[introAlts.length - 3], altPrefix + "intro2" + altSuffix);
 				case 2:
-					countdownSet = new FlxSprite().loadGraphic(Paths.returnGraphic(introAlts[1]));
-					setupCountdownSprite("countdownSet", introAlts[1], "intro1" + altSuffix);
+					countdownSet = new FlxSprite().loadGraphic(Paths.returnGraphic(introAlts[introAlts.length - 2]));
+					setupCountdownSprite("countdownSet", introAlts[introAlts.length - 2], altPrefix + "intro1" + altSuffix);
 				case 3:
-					countdownGo = new FlxSprite().loadGraphic(Paths.returnGraphic(introAlts[2]));
-					setupCountdownSprite("countdownGo", introAlts[2], "introGo" + altSuffix);
+					countdownGo = new FlxSprite().loadGraphic(Paths.returnGraphic(introAlts[introAlts.length - 1]));
+					setupCountdownSprite("countdownGo", introAlts[introAlts.length - 1], altPrefix + "introGo" + altSuffix);
 			}
 
 			dankCounter += 1;
@@ -2535,9 +2557,20 @@ class PlayState extends MusicBeatState
 		FlxG.sound.music.onComplete = songOutro;
 		vocals.play();
 
+		if (ClientPrefs.psychUI && startOnTime <= 0)
+		{
+			FlxTween.tween(timeBar, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
+			FlxTween.tween(timeTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
+			FlxTween.tween(timeBarBG, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
+		}
+
+			
 		if(startOnTime > 0)
 		{
 			setSongTime(startOnTime - 500);
+			timeBar.alpha = 1;
+			timeTxt.alpha = 1;
+			timeBarBG.alpha = 1;
 		}
 		startOnTime = 0;
 
@@ -2549,13 +2582,7 @@ class PlayState extends MusicBeatState
 
 		// Song duration in a float, useful for the time left feature
 		songLength = FlxG.sound.music.length;
-		if (ClientPrefs.psychUI)
-		{
-			FlxTween.tween(timeBar, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
-			FlxTween.tween(timeTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
-			FlxTween.tween(timeBarBG, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
-		}
-
+	
 		if (ClientPrefs.songPosition && !ClientPrefs.psychUI)
 		{
 			songPosBG = new FlxSprite(0, 10).loadGraphic(Paths.image('healthBar'));
@@ -2673,10 +2700,12 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		
 		//readSection(0);
 		//readSection(1);
 
-		oldReadSection();
+		oldReadSection(false);
+		//oldReadSection(true);
 
 		var noteData:Array<SwagSection>;
 
@@ -5170,7 +5199,7 @@ class PlayState extends MusicBeatState
 
 	//this is experimental as shit
 		
-	function readSection(sectionNumber:Int){
+	function readSection(sectionNumber:Int, ?checkNoteTypes:Bool = false){
 		var noteData:Array<SwagSection>;
 
 		// NEW SHIT
@@ -5191,7 +5220,7 @@ class PlayState extends MusicBeatState
 			{
 				var data:Array<String> = stuff[i].split(' ');
 
-				if (daSection == Std.parseInt(data[0])){
+				if (sectionNumber == Std.parseInt(data[0])){
 					(data[2] == 'dad' ? opponentSectionNoteStyle = data[1] : playerSectionNoteStyle = data[1]);
 				}
 			}
@@ -5229,6 +5258,10 @@ class PlayState extends MusicBeatState
 				oldNote = null;
 
 			var daType = songNotes[3];
+
+			if (!checkNoteTypes && !(daType == null || daType == "")){
+				continue;
+			}
 
 			var swagNote:Note;
 			swagNote = new Note(daStrumTime, daNoteData, oldNote, false, daType, (gottaHitNote ? (playerSectionNoteStyle != "" ? playerSectionNoteStyle : alt2) : (opponentSectionNoteStyle != "" ? opponentSectionNoteStyle : alt)));
@@ -5280,11 +5313,11 @@ class PlayState extends MusicBeatState
 		unspawnNotes.sort(sortByShit);
 	}
 
-	function oldReadSection()
+	function oldReadSection(?onlyNoteTypes:Bool = true)
 	{
 		var noteData:Array<SwagSection>;
 
-		// NEW SHIT
+		// NEW SHIT	
 		noteData = daSongData.notes;
 
 		var suf:String = "";
@@ -5340,6 +5373,10 @@ class PlayState extends MusicBeatState
 					oldNote = null;
 
 				var daType = songNotes[3];
+
+				if (onlyNoteTypes && (daType == null || daType == "")){
+					continue;
+				}
 
 				var swagNote:Note;
 				swagNote = new Note(daStrumTime, daNoteData, oldNote, false, daType, (gottaHitNote ? (playerSectionNoteStyle != "" ? playerSectionNoteStyle : alt2) : (opponentSectionNoteStyle != "" ? opponentSectionNoteStyle : alt)));

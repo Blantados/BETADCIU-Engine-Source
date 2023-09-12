@@ -119,9 +119,28 @@ class Song
 
 		if(rawJson == null) {
 			#if sys
-			rawJson = sys.io.File.getContent(Paths.json(folderLowercase + '/' + jsonInput.toLowerCase())).trim();
+			if (FileSystem.exists(Paths.json(folderLowercase + '/' + jsonInput.toLowerCase()))){
+				rawJson = sys.io.File.getContent(Paths.json(folderLowercase + '/' + jsonInput.toLowerCase())).trim();
+			}	
 			#else
-			rawJson = Assets.getText(Paths.json(folderLowercase + '/' + jsonInput.toLowerCase())).trim();
+			if (Assets.exists(Paths.json(folderLowercase + '/' + jsonInput.toLowerCase()))){
+				rawJson = Assets.getText(Paths.json(folderLowercase + '/' + jsonInput.toLowerCase())).trim();
+			}
+			#end
+		}
+
+		// if still null, it probably doesn't exist. load a sample song. I'm just sick and tired of those "json doesn't exist" errors that crash the game
+		if(rawJson == null) {
+			folder = "tutorial";
+			jsonInput = "tutorial-hard";
+
+			var formattedFolder:String = Paths.formatToSongPath(folder);
+			var formattedSong:String = Paths.formatToSongPath(jsonInput);
+
+			#if sys
+			rawJson = File.getContent(Paths.json(formattedFolder + '/' + formattedSong)).trim();
+			#else
+			rawJson = Assets.getText(Paths.json(formattedFolder + '/' + formattedSong)).trim();
 			#end
 		}
 

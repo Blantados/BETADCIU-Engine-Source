@@ -518,14 +518,14 @@ class CharacterEditorState extends MusicBeatState
 		blockPressWhileScrolling.push(charDropDown);
 		reloadCharacterDropDown();
 
-		var reloadCharacter:FlxButton = new FlxButton(140, 20, "Reload Char", function()
+		var reloadCharacter:FlxButton = new FlxButton(140, 10, "Reload Char", function()
 		{
 			loadChar(!check_player.checked);
 			reloadCharacterDropDown();
 			reloadCharacterOptions();
 		});
 
-		var templateCharacter:FlxButton = new FlxButton(140, 50, "Load Template", function()
+		var templateCharacter:FlxButton = new FlxButton(140, 40, "Load Template", function()
 		{
 			var parsedJson:CharacterFile = cast Json.parse(TemplateCharacter);
 			var characters:Array<Character> = [char, ghostChar];
@@ -568,6 +568,7 @@ class CharacterEditorState extends MusicBeatState
 			updatePointerPos();
 			genBoyOffsets();
 		});
+			
 		templateCharacter.color = FlxColor.RED;
 		templateCharacter.label.color = FlxColor.WHITE;
 		
@@ -1039,10 +1040,10 @@ class CharacterEditorState extends MusicBeatState
 
 		var anims:Array<AnimArray> = char.animationsArray.copy();
 
-		var daPath:String = char.imageFile;
+		var daPath:String = char.graphic.key;
 
-		if (char.spriteType == "TEXTURE")
-			daPath = daPath + "/spritemap";
+		//if (char.spriteType == "TEXTURE")
+		//	daPath = daPath + "/spritemap";
 
 		Paths.currentTrackedAssets.remove(daPath);
 		Paths.clearStoredMemory2(daPath, 'image');
@@ -1276,6 +1277,8 @@ class CharacterEditorState extends MusicBeatState
 			positionCameraYStepper.value = char.cameraPosition[1];
 			playerPositionCameraXStepper.value = char.playerCameraPosition[0];
 			playerPositionCameraYStepper.value = char.playerCameraPosition[1];
+			psychPlayerCheckBox.checked = char.isPsychPlayer;
+			
 
 			if (char.spriteType != null)
 				spriteTypeDropDown.selectedLabel = Std.string(char.spriteType).toUpperCase();
@@ -1419,6 +1422,49 @@ class CharacterEditorState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
+		if (FlxG.keys.pressed.ALT && FlxG.keys.justPressed.FIVE){
+			var idleAnim = findAnimationByName(char.danceIdle ? "danceRight" : "idle");
+			var idleOffsets = [];
+
+			if (idleAnim == null){
+				idleAnim = char.animationsArray[0];
+			}
+
+			if (char.isPlayer){
+				idleOffsets = idleAnim.playerOffsets;
+
+				for (anim in char.animationsArray){
+					if (anim.anim == "idle" || anim.anim == "danceRight"){
+						continue;
+					}
+
+					anim.playerOffsets = [anim.playerOffsets[0] - idleOffsets[0], anim.playerOffsets[1] - idleOffsets[1]];
+				}
+
+				idleAnim.playerOffsets = [0, 0];
+
+				char.playerPositionArray[0] += idleOffsets[0];
+				char.playerPositionArray[1] += idleOffsets[1];
+			}
+			else{
+				idleOffsets = idleAnim.offsets;
+
+				for (anim in char.animationsArray){
+					if (anim.anim == "idle" || anim.anim == "danceRight"){
+						continue;
+					}
+
+					anim.offsets = [anim.offsets[0] - idleOffsets[0], anim.offsets[1] - idleOffsets[1]];
+				}
+
+				idleAnim.offsets = [0, 0];
+				char.positionArray[0] += idleOffsets[0];
+				char.positionArray[1] += idleOffsets[1];
+			}
+
+			char.playAnim(char.animation.curAnim.name, true);
+		}
+		
 		if(char.animationsArray[curAnim] != null) {
 			textAnim.text = char.animationsArray[curAnim].anim;
 

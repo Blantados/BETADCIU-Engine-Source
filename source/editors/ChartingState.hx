@@ -2006,6 +2006,7 @@ class ChartingState extends MusicBeatState
 	{
 		var healthIconP1:String = loadHealthIconFromCharacter(_song.player1);
 		var healthIconP2:String = loadHealthIconFromCharacter(_song.player2);
+		var healthIconGF:String = loadHealthIconFromCharacter(_song.gfVersion);
 
 		if (check_mustHitSection.checked)
 		{
@@ -2021,7 +2022,7 @@ class ChartingState extends MusicBeatState
 			if (leftIcon.animation.name == 'face'){leftIcon.changeIcon('dad');}
 			if (rightIcon.animation.name == 'face'){rightIcon.changeIcon('bf');}
 		}
-		if (_song.notes[curSec].gfSection) leftIcon.changeIcon('gf');
+		if (_song.notes[curSec].gfSection) leftIcon.changeIcon(healthIconGF);
 	}
 
 	function loadHealthIconFromCharacter(char:String) {

@@ -166,6 +166,12 @@ class MusicBeatState extends FlxUIState
 		// Custom made Trans in
 		var curState:Dynamic = FlxG.state;
 		var leState:MusicBeatState = curState;
+
+		#if skipTransitions // I don't like waiting for the transition to fade in and out while toggling between ChartingState and PlayState
+		FlxTransitionableState.skipNextTransIn = true;
+		FlxTransitionableState.skipNextTransOut = true;
+		#end
+
 		if(!FlxTransitionableState.skipNextTransIn) {
 			leState.openSubState(new CustomFadeTransition(0.6, false));
 			if(nextState == FlxG.state) {
@@ -181,8 +187,9 @@ class MusicBeatState extends FlxUIState
 			}
 			return;
 		}
+		
 		FlxTransitionableState.skipNextTransIn = false;
-		FlxG.switchState(nextState);
+		(nextState == FlxG.state ? FlxG.resetState() : FlxG.switchState(nextState));
 	}
 
 	public static function resetState() {

@@ -84,7 +84,7 @@ class Character extends FunkinSprite
 	
 	public var isPixel:Bool = false;
 	public var noteSkin:String;
-	public var isPsychPlayer:Bool;
+	public var isPsychPlayer:Null<Bool>;
 	public var healthIcon:String = 'bf';
 	public var doMissThing:Bool = false;
 	public var iconColor:String;

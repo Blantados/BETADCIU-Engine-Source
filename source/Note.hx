@@ -16,6 +16,8 @@ import PlayState;
 import LuaClass.LuaNote;
 import Type.ValueType;
 
+import shaders.ColorSwap;
+
 using StringTools;
 
 typedef EventNote = {
@@ -27,6 +29,7 @@ typedef EventNote = {
 
 class Note extends FlxSprite
 {
+	public static var savedNote:Note = null;
 	public var strumTime:Float = 0;
 
 	public var LuaNote:LuaNote;
@@ -259,6 +262,8 @@ class Note extends FlxSprite
 		}
 
 		x += offsetX;
+
+		savedNote = this;
 	}
 
 	public var isPixel:Bool = false;
@@ -377,9 +382,11 @@ class Note extends FlxSprite
 
 	public var noteTypeStyle:String = "";
 
-	function loadNoteAnims(style:String, ?sustainNote:Bool = false) 
+	function loadNoteAnims(daStyle:String, ?sustainNote:Bool = false) 
 	{
-		switch (style)
+		var initialStyle:String = daStyle;
+
+		switch (daStyle)
 		{
 			case 'pixel':
 				var suf:String = "";
@@ -412,8 +419,8 @@ class Note extends FlxSprite
 				}
 
 			default:
-				if (Assets.exists(Paths.image('notes/'+style))){
-					frames = Paths.getSparrowAtlas('notes/'+style);
+				if (Assets.exists(Paths.image('notes/'+daStyle))){
+					frames = Paths.getSparrowAtlas('notes/'+daStyle);
 
 					if (frames == null){
 						frames = Paths.getSparrowAtlas((mania > 0 ? 'notes/shaggyNotes' : 'notes/NOTE_assets'));
@@ -423,18 +430,18 @@ class Note extends FlxSprite
 				}
 				else
 				{
-					if (FileSystem.exists(Paths.modsImages('notes/'+style)))
-						style = 'notes/'+style;
+					if (FileSystem.exists(Paths.modsImages('notes/'+daStyle)))
+						daStyle = 'notes/'+daStyle;
 					
-					if (FileSystem.exists(Paths.modsImages(style)))
+					if (FileSystem.exists(Paths.modsImages(daStyle)))
 					{
-						var rawPic:Dynamic = Paths.returnGraphic(style);
+						var rawPic:Dynamic = Paths.returnGraphic(daStyle);
 
-						if (!FileSystem.exists(Paths.modsXml(style)))
+						if (!FileSystem.exists(Paths.modsXml(daStyle)))
 						{
 							if (isSustainNote)
 							{		
-								var rawPic2:Dynamic = Paths.returnGraphic(style+'ENDS');
+								var rawPic2:Dynamic = Paths.returnGraphic(daStyle+'ENDS');
 
 								loadGraphic(rawPic2);
 
@@ -459,7 +466,7 @@ class Note extends FlxSprite
 						}
 						else
 						{
-							frames = Paths.getSparrowAtlas(style);
+							frames = Paths.getSparrowAtlas(daStyle);
 							addAnims();
 						}
 					}

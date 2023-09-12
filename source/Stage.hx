@@ -35,8 +35,9 @@ import sys.io.File;
 import sys.FileSystem;
 #end
 
+import shaders.Shaders;
+
 using StringTools;
-import Shaders;
 
 class Stage extends MusicBeatState
 {
@@ -90,6 +91,7 @@ class Stage extends MusicBeatState
 	var tankAngle:Float = FlxG.random.float(-90, 45);
 	
 	public var altSuffix:String = '';
+	public var altPrefix:String = '';
 	public var pixelShitPart1:String = '';
 	public var pixelShitPart2:String = '';
 	public var songLowercase:String = '';

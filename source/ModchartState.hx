@@ -51,7 +51,7 @@ import animateatlas.AtlasFrameMaker;
 import flixel.addons.display.FlxShaderMaskCamera;
 
 import Type.ValueType;
-import Shaders;
+import shaders.Shaders;
 import DialogueBoxPsych;
 
 //why is detected's modchart confusing!?
@@ -81,6 +81,8 @@ import flixel.addons.display.FlxRuntimeShader;
 import openfl.filters.BitmapFilter;
 import openfl.display.ShaderParameter;
 import openfl.display.ShaderParameterType;
+
+import shaders.ColorSwap;
 
 using StringTools;
 
@@ -1653,6 +1655,12 @@ class ModchartState
 				}
 				return null;
 			});
+
+			Lua_helper.add_callback(lua, "setOnLuas", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null) {
+				if(exclusions == null) exclusions = [];
+				if(ignoreSelf && !exclusions.contains(scriptName)) exclusions.push(scriptName);
+				PlayState.instance.setOnLuas(varName, arg, exclusions);
+			});
 	
 			Lua_helper.add_callback(lua,"animationSwap", function(char:String, anim1:String, anim2:String) {
 				var shit = getObjectDirectly(char);
@@ -1767,6 +1775,20 @@ class ModchartState
 	
 			//the better version
 			Lua_helper.add_callback(lua, "addOffset", function(obj:String, anim:String, x:Float, y:Float) {
+				if (getObjectDirectly(obj) != null){
+					var spr = getObjectDirectly(obj);
+
+					if (Std.isOfType(spr, ModchartSprite)){
+						spr.animOffsets.set(anim, [x,y]);	
+					}
+
+					if (Std.isOfType(spr, Character)){
+						spr.addOffset(anim, [x,y]);	
+					}
+
+					return true;
+				}
+
 				if(PlayState.instance.modchartSprites.exists(obj)) {
 					PlayState.instance.modchartSprites.get(obj).animOffsets.set(anim, [x, y]);
 					return true;
@@ -1895,6 +1917,8 @@ class ModchartState
 				}
 			});
 			Lua_helper.add_callback(lua, "soundFadeIn", function(tag:String, duration:Float, fromValue:Float = 0, toValue:Float = 1) {
+				if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
+
 				if(tag == null || tag.length < 1) {
 					FlxG.sound.music.fadeIn(duration, fromValue, toValue);
 				} else if(PlayState.instance.modchartSounds.exists(tag)) {
@@ -1903,6 +1927,8 @@ class ModchartState
 				
 			});
 			Lua_helper.add_callback(lua, "soundFadeOut", function(tag:String, duration:Float, toValue:Float = 0) {
+				if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
+				
 				if(tag == null || tag.length < 1) {
 					FlxG.sound.music.fadeOut(duration, toValue);
 				} else if(PlayState.instance.modchartSounds.exists(tag)) {
@@ -2567,6 +2593,7 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua,"flickerSprite", function (id:String, duration:Float, interval:Float) {
+				if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 				var shit:Dynamic = getObjectDirectly(id);
 				FlxFlicker.flicker(shit, duration, interval);
 			});
@@ -3937,6 +3964,8 @@ class ModchartState
 				}
 			});
 	
+			Lua_helper.add_callback(lua, "getColorFromString", function(color:String) return FlxColor.fromString(color));
+
 			Lua_helper.add_callback(lua, "getColorFromHex", function(color:String) {
 				if(!color.startsWith('0x')) color = '0xff' + color;
 				return Std.parseInt(color);
@@ -4319,31 +4348,20 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua, "scaleObject", function(obj:String, x:Float, y:Float, ?updateHitbox:Bool = true) {
-				if(Stage.instance.swagBacks.exists(obj) || PlayState.instance.Stage.swagBacks.exists(obj)) {
-					var shit:FlxSprite = Stage.instance.swagBacks.get(obj);
-					shit.scale.set(x * (FlxG.save.data.poltatoPC ? 2 : 1), y * (FlxG.save.data.poltatoPC ? 2 : 1));
-					if(updateHitbox)shit.updateHitbox();
+				if(getObjectDirectly(obj) != null) {
+					var poop:FlxSprite = getObjectDirectly(obj);
+					poop.scale.set(x * (FlxG.save.data.poltatoPC ? 2 : 1), y * (FlxG.save.data.poltatoPC ? 2 : 1));
+					if(updateHitbox) poop.updateHitbox();
 					return;
 				}
 	
-				if(PlayState.instance.getLuaObject(obj)!=null) {
-					var shit:FlxSprite = PlayState.instance.getLuaObject(obj);
-					shit.scale.set(x * (FlxG.save.data.poltatoPC ? 2 : 1), y * (FlxG.save.data.poltatoPC ? 2 : 1));
-					if(updateHitbox) shit.updateHitbox();
-					return;
-				}
-	
-				var killMe:Array<String> = obj.split('.');
-				var poop:FlxSprite = getObjectDirectly(killMe[0]);
-				if(killMe.length > 1) {
-					poop = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
-				}
-	
+				var poop:FlxSprite = Reflect.getProperty(getInstance(), obj);
 				if(poop != null) {
 					poop.scale.set(x * (FlxG.save.data.poltatoPC ? 2 : 1), y * (FlxG.save.data.poltatoPC ? 2 : 1));
 					if(updateHitbox) poop.updateHitbox();
 					return;
 				}
+				
 				luaTrace('scaleObject: Couldnt find object: ' + obj, false, false, FlxColor.RED);
 			});
 			
@@ -4975,8 +4993,6 @@ class ModchartState
 
 			//masking!
 			Lua_helper.add_callback(lua, "addClipRect", function(obj:String, x:Float, y:Float, width:Float, height:Float) {
-				var swagRect = new FlxRect(x, y, width, height);
-	
 				var killMe:Array<String> = obj.split('.');
 				var object:FlxSprite = getObjectDirectly(killMe[0]);
 				if(killMe.length > 1) {
@@ -4984,6 +5000,12 @@ class ModchartState
 				}
 	
 				if(object != null) {
+					var swagRect = (object.clipRect != null ? object.clipRect : new FlxRect());
+					swagRect.x = x;
+					swagRect.y = y;
+					swagRect.width = width;
+					swagRect.height = height;
+					
 					object.clipRect = swagRect;
 					return true;
 				}
@@ -5156,6 +5178,12 @@ class ModchartState
 			case 'camother' | 'other': return PlayState.instance.camOther;
 			case 'camnotes' | 'notes': return PlayState.instance.camNotes;
 		}
+
+		//modded cameras
+		if (Std.isOfType(PlayState.instance.variables.get(cam), FlxCamera)){
+			return PlayState.instance.variables.get(cam);
+		}
+
 		return PlayState.instance.camGame;
 	}
 
@@ -5464,6 +5492,7 @@ class ModchartState
 		else if(PlayState.instance.getLuaObject(objectName) != null)
 			coverMeInPiss = PlayState.instance.getLuaObject(objectName, checkForTextsToo);
 		
+		
 		if(coverMeInPiss == null)
 			coverMeInPiss = getVarInArray(getInstance(), objectName);
 
@@ -5598,7 +5627,7 @@ class ModchartState
 	}
 
 	#if (!flash && sys)
-	public function getShader(obj:String, ?swagShader:String):FlxRuntimeShader
+	public static function getShader(obj:String, ?swagShader:String):FlxRuntimeShader
 	{
 		var killMe:Array<String> = obj.split('.');
 		var leObj:Dynamic = getObjectDirectly(killMe[0]);

@@ -1,4 +1,4 @@
-package;
+package shaders;
 
 // STOLEN FROM HAXEFLIXEL DEMO LOL
 //Am I even allowed to use this?

@@ -297,6 +297,10 @@ class ModpackMaker extends MusicBeatState {
 							for (i in 0...characters.length)
 							{
 								var data:Array<String> = characters[i].split(' ');
+
+								if (characters[i].contains("-embed")){
+									continue;
+								}
 								
 								for (file in FileSystem.readDirectory(charFolder))
 								{
@@ -379,6 +383,10 @@ class ModpackMaker extends MusicBeatState {
 	
 							for (i in 0...stages.length)
 							{								
+								if (stages[i].contains("-embed")){
+									continue;
+								}
+
 								for (file in FileSystem.readDirectory(stageFolder))
 								{
 									var stageInitPath:String = stageFolder + file;
@@ -460,6 +468,7 @@ class ModpackMaker extends MusicBeatState {
 												}
 											}
 										}
+										
 										if(file.endsWith('.lua'))
 										{
 											var openLua:ModchartState = new ModchartState(stageInitPath, true, false);

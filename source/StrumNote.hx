@@ -8,6 +8,8 @@ import lime.utils.Assets;
 import sys.io.File;
 import sys.FileSystem;
 
+import shaders.ColorSwap;
+
 using StringTools;	
 
 class StrumNote extends FlxSprite

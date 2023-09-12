@@ -1,4 +1,4 @@
-package;
+package shaders;
 
 import openfl.display.Shader;
 import openfl.filters.ShaderFilter;
