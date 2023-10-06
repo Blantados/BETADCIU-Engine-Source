@@ -3540,7 +3540,7 @@ class PlayState extends MusicBeatState
 			PlayState.instance.callOnLuas('onExitSong', []);
 			persistentUpdate = false;
 
-			MusicBeatState.switchState(new CharacterEditorState((FlxG.keys.pressed.SHIFT ? boyfriend.curCharacter : dad.curCharacter))); // so you can access both characters
+			MusicBeatState.switchState(new CharacterEditorState((FlxG.keys.pressed.SHIFT ? boyfriend.curCharacter : (FlxG.keys.pressed.CONTROL ? gf.curCharacter : dad.curCharacter)))); // so you can access both characters
 		}
 
 		if (FlxG.keys.justPressed.TWO)

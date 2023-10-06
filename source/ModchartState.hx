@@ -1018,6 +1018,11 @@ class ModchartState
 
 			set("scrollspeed", FlxG.save.data.scrollSpeed != 1 ? FlxG.save.data.scrollSpeed : PlayState.SONG.speed);
 		}
+		else{
+			set('songName', "");
+		}
+
+		set('currentModDirectory', Paths.currentModDirectory);
 
 		var difficultyName:String = CoolUtil.difficulties[PlayState.storyDifficulty];
 		set('difficultyName', difficultyName);
@@ -1088,6 +1093,22 @@ class ModchartState
 
 		if (preloading) //only the necessary functions for preloading are included
 		{
+			Lua_helper.add_callback(lua, "debugPrint", function(text1:Dynamic = '', text2:Dynamic = '', text3:Dynamic = '', text4:Dynamic = '', text5:Dynamic = '') {
+				if (text1 == null) text1 = '';
+				if (text2 == null) text2 = '';
+				if (text3 == null) text3 = '';
+				if (text4 == null) text4 = '';
+				if (text5 == null) text5 = '';
+
+				if (editors.ModpackMaker.inModpackMaker){
+					trace('' + text1 + text2 + text3 + text4 + text5);
+				}
+				else{
+					luaTrace('' + text1 + text2 + text3 + text4 + text5, true, false);
+				}
+				
+			});
+			
 			Lua_helper.add_callback(lua, "makeLuaSprite", function(tag:String, image:String, x:Float, y:Float, ?antialiasing:Bool = true) {
 				if (editors.ModpackMaker.inModpackMaker && image != null && image.length > 0){
 					editors.ModpackMaker.luaImageList.push(image);
@@ -1172,7 +1193,16 @@ class ModchartState
 					editors.ModpackMaker.luaImageList.push('icons/icon-'+character);
 				}
 				else{
-					Paths.returnGraphic('sounds', 'icons/icon-'+character);
+					Paths.returnGraphic('icons/icon-'+character);
+				}
+			});
+
+			Lua_helper.add_callback(lua, "loadGraphic", function(variable:String, image:String, ?gridX:Int, ?gridY:Int) {
+				if (editors.ModpackMaker.inModpackMaker){
+					editors.ModpackMaker.luaImageList.push(image);
+				}
+				else{
+					Paths.returnGraphic(image);
 				}
 			});
 
@@ -1258,13 +1288,41 @@ class ModchartState
 				}
 				#end
 			});
+
+			Lua_helper.add_callback(lua, "setProperty", function(variable:String, value:Dynamic) {
+				var killMe:Array<String> = variable.split('.');
+			
+				if (editors.ModpackMaker.inModpackMaker){
+					if (variable.contains('altSuffix') || variable.contains('altPrefix')){
+						var checkFiles:Array<String> = ["intro1", "intro2", "intro3", "introGo"];
+						
+						for (snd in checkFiles){
+							editors.ModpackMaker.luaSoundList.push((variable.contains('altSuffix') ? snd + value : value + snd));
+						}
+					}
+				}
+				
+				return true;
+			});
+
+			Lua_helper.add_callback(lua, "playSound", function(sound:String, ?volume:Float = 1, ?tag:String = null) {
+				if (editors.ModpackMaker.inModpackMaker){
+					editors.ModpackMaker.luaSoundList.push(sound);
+				}
+			});
+
+			Lua_helper.add_callback(lua, "getRunningScripts", function(){
+				var runningScripts:Array<String> = [];
+			
+				return runningScripts;
+			});
 	
 			//because we have to add em otherwise it'll only load the first sprite... for most luas. if you set it up where you make the sprites first and then all the formatting stuff ->
 			//then it shouldn't be a problem
 			
 			var otherCallbacks:Array<String> = ['makeGraphic', 'objectPlayAnimation', "makeLuaCharacter", "playAnim", "getMapKeys"];
-			var addCallbacks:Array<String> = ['addAnimationByPrefix', 'addAnimationByIndices', 'addAnimationByIndicesLoop', 'addLuaSprite', 'addLuaText', "addOffset"];
-			var setCallbacks:Array<String> = ['setProperty', 'setScrollFactor', 'setObjectCamera', 'scaleObject', 'screenCenter', 'setTextSize', 'setTextBorder', 'setTextString', "setTextAlignment", "setTextColor", "setPropertyFromClass", "setBlendMode",];
+			var addCallbacks:Array<String> = ['addAnimationByPrefix', 'addAnimationByIndices', 'addAnimationByIndicesLoop', 'addLuaSprite', 'addLuaText', "addOffset", "addClipRect", "addAnimation"];
+			var setCallbacks:Array<String> = ['setScrollFactor', 'setObjectCamera', 'scaleObject', 'screenCenter', 'setTextSize', 'setTextBorder', 'setTextString', "setTextAlignment", "setTextColor", "setPropertyFromClass", "setBlendMode",];
 			var shaderCallbacks:Array<String> = ["runHaxeCode", "addHaxeLibrary", "initLuaShader", "setSpriteShader", "setShaderFloat", "setShaderFloatArray", "setShaderBool", "setShaderBoolArray"];
 		
 			otherCallbacks = otherCallbacks.concat(addCallbacks);
@@ -4994,7 +5052,7 @@ class ModchartState
 			//masking!
 			Lua_helper.add_callback(lua, "addClipRect", function(obj:String, x:Float, y:Float, width:Float, height:Float) {
 				var killMe:Array<String> = obj.split('.');
-				var object:FlxSprite = getObjectDirectly(killMe[0]);
+				var object:Dynamic = getObjectDirectly(killMe[0]);
 				if(killMe.length > 1) {
 					object = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 				}

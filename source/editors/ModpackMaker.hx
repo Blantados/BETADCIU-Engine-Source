@@ -147,6 +147,7 @@ class ModpackMaker extends MusicBeatState {
 
 		directoryDropDown = new FlxUIDropDownMenuCustom(15, 45, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(pressed:String) {
 			swagDirectory = directoryDropDown.selectedLabel;
+			Paths.currentModDirectory = swagDirectory;
 			reloadDirectoryDropDown("data");
 		});
 		blockPressWhileScrolling.push(directoryDropDown);
@@ -183,25 +184,12 @@ class ModpackMaker extends MusicBeatState {
 	function copyAndWriteFiles()
 	{
 		//just copy everything here. it's not like these take up a lot of space anyway.
-		for (dataType in ["shaders", "custom_events", "custom_notetypes"])
+		for (dataType in ["shaders"])
 		{
 			var folder:String = Paths.modFolders(swagDirectory+"/"+dataType+"/");
 			var modpackFolder:String = Paths.modFolders("Da Modpack"+"/"+dataType+"/");
 
-			if (!FileSystem.exists(modpackFolder)){
-				FileSystem.createDirectory(modpackFolder);
-			}
-
-			if(FileSystem.exists(folder))
-			{
-				for (file in FileSystem.readDirectory(folder))
-				{
-					var initPath:String = folder + file;
-					var modifiedPath:String = modpackFolder + file;
-
-					sys.io.File.copy(initPath, modifiedPath);
-				}
-			}
+			doCopyShit(folder, modpackFolder, null);
 		}
 
 		for (dataType in ["data", "songs"]) {
@@ -224,11 +212,12 @@ class ModpackMaker extends MusicBeatState {
 						// i'll do some reading shit with this later. for now leave it blank
 						var openLua:ModchartState = new ModchartState(initPath, true);
 						openLua.call("onCreate", []);
+						openLua.call("onCreatePost", []);
 					}
 
 					if (dataType == "data")
 					{
-						if (file.endsWith(".json") && file.startsWith(swagSongDirectory)){							
+						if (file.endsWith("-hard.json") && file.startsWith(swagSongDirectory)){							
 							var path:String = initPath;			
 							var rawJson:Dynamic;
 
@@ -240,19 +229,78 @@ class ModpackMaker extends MusicBeatState {
 								var noteFolder:String = Paths.modFolders(swagDirectory+"/images/notes/");
 								var noteModpackFolder:String = Paths.modFolders("Da Modpack/images/notes/");
 
-								if (!FileSystem.exists(noteModpackFolder)){
-									FileSystem.createDirectory(noteModpackFolder);
-								}
+								doCopyShit(noteFolder, noteModpackFolder, [json.noteStyle+".png", json.noteStyle+".xml", json.noteStyle+"ENDS.png", "noteSplashes-"+json.noteStyle+".png", "noteSplashes-"+json.noteStyle+".xml"]);
+							}
 
-								for (file in FileSystem.readDirectory(noteFolder))
+							// EVENT PUSHING
+							if (json.events != null && json.events != []){
+								var pushedEvents:Array<String> = [];
+
+								for (event in json.events) //Event Notes
 								{
-									var daInitPath:String = noteFolder + file;
-									var daModifiedPath:String = noteModpackFolder + file;
-
-									if (file == json.noteStyle+".png" || file == json.noteStyle+".xml" || file == json.noteStyle+"ENDS.png" || file == "noteSplashes-"+json.noteStyle+".png" || file == "noteSplashes-"+json.noteStyle+".xml"){
-										sys.io.File.copy(daInitPath, daModifiedPath);
-									}	
+									for (i in 0...event[1].length)
+									{
+										if (!pushedEvents.contains(Std.string(event[1][i][0]))){
+											pushedEvents.push(Std.string(event[1][i][0]));
+										}
+									}
 								}
+
+								var eventFolder:String = Paths.modFolders(swagDirectory+"/custom_events/");
+								var eventModpackFolder:String = Paths.modFolders("Da Modpack/custom_events/");
+
+								var evCopyArray:Array<String> = [];
+
+								for (ev in pushedEvents){
+
+									if(FileSystem.exists(Paths.modFolders("custom_events/"+ev+".lua")))
+									{
+										var openLua:ModchartState = new ModchartState(Paths.modFolders("custom_events/"+ev+".lua"), true);
+										openLua.call("onCreate", []);
+										openLua.call("onCreatePost", []);
+									}
+
+									evCopyArray.push(Std.string(ev + ".txt"));
+									evCopyArray.push(Std.string(ev + ".lua"));
+								}
+
+								trace(evCopyArray);
+
+								doCopyShit(eventFolder, eventModpackFolder, evCopyArray);
+							}
+
+							var pushedNoteTypes:Array<String> = [];
+						
+							// NOTE TYPE PUSHING
+							for (section in json.notes)
+							{
+								for (songNotes in section.sectionNotes)
+								{
+									if (songNotes[3] != "" && !pushedNoteTypes.contains(songNotes[3])){
+										pushedNoteTypes.push(songNotes[3]);
+									}
+								}
+							}
+
+							if (pushedNoteTypes.length > 0){
+								var ntCopyArray:Array<String> = [];
+
+								var noteTypeFolder:String = Paths.modFolders(swagDirectory+"/custom_notetypes/");
+								var noteTypeModpackFolder:String = Paths.modFolders("Da Modpack/custom_notetypes/");
+
+								for (nt in pushedNoteTypes){
+									if(FileSystem.exists(Paths.modFolders("custom_notetypes/"+nt+".lua")))
+									{
+										var openLua:ModchartState = new ModchartState(Paths.modFolders("custom_notetypes/"+nt+".lua"), true);
+										openLua.call("onCreate", []);
+										openLua.call("onCreatePost", []);
+									}
+
+									ntCopyArray.push(Std.string(nt + ".txt"));
+									ntCopyArray.push(Std.string(nt + ".lua"));
+								}
+
+								doCopyShit(noteTypeFolder, noteTypeModpackFolder, ntCopyArray);
 							}
 						}
 						if (file == 'arrowSwitches.txt')
@@ -293,7 +341,9 @@ class ModpackMaker extends MusicBeatState {
 							if (!FileSystem.exists(charModpackFolder)){
 								FileSystem.createDirectory(charModpackFolder);
 							}
-	
+
+							songIsBETADCIU = (characters.length >= 16);
+
 							for (i in 0...characters.length)
 							{
 								var data:Array<String> = characters[i].split(' ');
@@ -343,19 +393,7 @@ class ModpackMaker extends MusicBeatState {
 													}
 												}
 
-												if (!FileSystem.exists(daModpackFolder)){
-													FileSystem.createDirectory(daModpackFolder);
-												}
-
-												for (file in FileSystem.readDirectory(daFolder))
-												{
-													var daInitPath:String = daFolder + file;
-													var daModifiedPath:String = daModpackFolder + file;
-
-													if (file == killMe[killMe.length-1]+".png" || file == killMe[killMe.length-1]+".xml"){
-														sys.io.File.copy(daInitPath, daModifiedPath);
-													}	
-												}
+												doCopyShit(daFolder, daModpackFolder, [killMe[killMe.length-1]+".png", killMe[killMe.length-1]+".xml"]);
 											}
 										}
 
@@ -363,6 +401,7 @@ class ModpackMaker extends MusicBeatState {
 										{
 											var openLua:ModchartState = new ModchartState(charInitPath, true);
 											openLua.call("onCreate", []);
+											openLua.call("onCreatePost", []);
 										}
 
 										sys.io.File.copy(charInitPath, charModifiedPath);
@@ -448,23 +487,8 @@ class ModpackMaker extends MusicBeatState {
 															daModpackFolder +=  killMe[i] + "/";
 														}
 													}
-	
-													if (FileSystem.exists(daFolder))
-													{
-														if (!FileSystem.exists(daModpackFolder)){
-															FileSystem.createDirectory(daModpackFolder);
-														}
-		
-														for (file in FileSystem.readDirectory(daFolder))
-														{
-															var daInitPath:String = daFolder + file;
-															var daModifiedPath:String = daModpackFolder + file;
-		
-															if (file == killMe[killMe.length-1]+".png" || file == killMe[killMe.length-1]+".xml"){
-																sys.io.File.copy(daInitPath, daModifiedPath);
-															}	
-														}
-													}
+
+													doCopyShit(daFolder, daModpackFolder, [killMe[killMe.length-1]+".png", killMe[killMe.length-1]+".xml"]);
 												}
 											}
 										}
@@ -473,6 +497,7 @@ class ModpackMaker extends MusicBeatState {
 										{
 											var openLua:ModchartState = new ModchartState(stageInitPath, true, false);
 											openLua.call("onCreate", []);
+											openLua.call("onCreatePost", []);
 										}
 
 										sys.io.File.copy(stageInitPath, stageModifiedPath);
@@ -485,107 +510,188 @@ class ModpackMaker extends MusicBeatState {
 					sys.io.File.copy(initPath, modifiedPath);
 				}
 			}
+		}
 
-			if (luaImageList != null)
+		if (luaImageList != null)
+		{
+			for (image in luaImageList)
 			{
-				for (image in luaImageList)
-				{
-					var killMe:Array<String> = image.split('/');
+				var killMe:Array<String> = image.split('/');
 
-					var daFolder:String = Paths.modFolders(swagDirectory+"/images/");
-					var daModpackFolder:String = Paths.modFolders("Da Modpack/images/");
+				var daFolder:String = Paths.modFolders(swagDirectory+"/images/");
+				var daModpackFolder:String = Paths.modFolders("Da Modpack/images/");
 
-					if (killMe.length > 0){
-						for (i in 0...killMe.length-1) {
-							daFolder +=  killMe[i] + "/";
-							daModpackFolder +=  killMe[i] + "/";
-						}
-					}
-
-					if (!FileSystem.exists(daModpackFolder)){
-						FileSystem.createDirectory(daModpackFolder);
-					}
-
-					for (file in FileSystem.readDirectory(daFolder))
-					{
-						var daInitPath:String = daFolder + file;
-						var daModifiedPath:String = daModpackFolder + file;
-
-						if (file == killMe[killMe.length-1]+".png" || file == killMe[killMe.length-1]+".xml"){
-							sys.io.File.copy(daInitPath, daModifiedPath);
-						}	
+				if (killMe.length > 0){
+					for (i in 0...killMe.length-1) {
+						daFolder +=  killMe[i] + "/";
+						daModpackFolder +=  killMe[i] + "/";
 					}
 				}
 
-				luaImageList = [];	
+				doCopyShit(daFolder, daModpackFolder, [killMe[killMe.length-1]+".png", killMe[killMe.length-1]+".xml"]);
 			}
 
-			if (luaFontList != null)
+			luaImageList = [];	
+		}
+
+		if (luaFontList != null)
+		{
+			trace(luaFontList);
+
+			for (font in luaFontList)
 			{
-				for (font in luaFontList)
-				{
-					var killMe:Array<String> = font.split('/');
+				var killMe:Array<String> = font.split('/');
 
-					var daFolder:String = Paths.modFolders(swagDirectory+"/fonts/");
-					var daModpackFolder:String = Paths.modFolders("Da Modpack/fonts/");
+				var daFolder:String = Paths.modFolders(swagDirectory+"/fonts/");
+				var daModpackFolder:String = Paths.modFolders("Da Modpack/fonts/");
 
-					if (killMe.length > 0){
-						for (i in 0...killMe.length-1) {
-							daFolder +=  killMe[i] + "/";
-							daModpackFolder +=  killMe[i] + "/";
-						}
-					}
-
-					if (!FileSystem.exists(daModpackFolder)){
-						FileSystem.createDirectory(daModpackFolder);
-					}
-
-					for (file in FileSystem.readDirectory(daFolder))
-					{
-						var daInitPath:String = daFolder + file;
-						var daModifiedPath:String = daModpackFolder + file;
-
-						if (file == killMe[killMe.length-1] || file == killMe[killMe.length-1]){
-							sys.io.File.copy(daInitPath, daModifiedPath);
-						}	
+				if (killMe.length > 0){
+					for (i in 0...killMe.length-1) {
+						daFolder +=  killMe[i] + "/";
+						daModpackFolder +=  killMe[i] + "/";
 					}
 				}
 
-				luaFontList = [];	
+				doCopyShit(daFolder, daModpackFolder, [killMe[killMe.length-1]]);
 			}
 
-			if (luaSoundList != null)
+			luaFontList = [];	
+		}
+
+		if (luaSoundList != null)
+		{
+			trace(luaSoundList);
+			
+			for (sound in luaSoundList)
 			{
-				for (sound in luaSoundList)
-				{
-					var killMe:Array<String> = sound.split('/');
+				var killMe:Array<String> = sound.split('/');
 
-					var daFolder:String = Paths.modFolders(swagDirectory+"/sounds/");
-					var daModpackFolder:String = Paths.modFolders("Da Modpack/sounds/");
+				var daFolder:String = Paths.modFolders(swagDirectory+"/sounds/");
+				var daModpackFolder:String = Paths.modFolders("Da Modpack/sounds/");
 
-					if (killMe.length > 0){
-						for (i in 0...killMe.length-1) {
-							daFolder +=  killMe[i] + "/";
-							daModpackFolder +=  killMe[i] + "/";
-						}
-					}
-
-					if (!FileSystem.exists(daModpackFolder)){
-						FileSystem.createDirectory(daModpackFolder);
-					}
-
-					for (file in FileSystem.readDirectory(daFolder))
-					{
-						var daInitPath:String = daFolder + file;
-						var daModifiedPath:String = daModpackFolder + file;
-
-						if (file == killMe[killMe.length-1]+".ogg" || file == killMe[killMe.length-1]+".mp3"){
-							sys.io.File.copy(daInitPath, daModifiedPath);
-						}	
+				if (killMe.length > 0){
+					for (i in 0...killMe.length-1) {
+						daFolder +=  killMe[i] + "/";
+						daModpackFolder +=  killMe[i] + "/";
 					}
 				}
 
-				luaSoundList = [];	
+				doCopyShit(daFolder, daModpackFolder, [killMe[killMe.length-1]+".ogg", killMe[killMe.length-1]+".mp3"]);
+			}
+
+			luaSoundList = [];	
+		}
+
+		createWeekFile();
+	}
+
+	var songIsBETADCIU:Bool = false;
+
+	function createWeekFile(){
+		if (!FileSystem.exists(Paths.modFolders("Da Modpack/weeks"))){
+			FileSystem.createDirectory(Paths.modFolders("Da Modpack/weeks"));
+		}
+
+		var templateWeek:String = "";
+		var p2Icon:String = "bf";
+		var p2HC:Array<Int> = [0, 0, 0];
+		var daSongName = "tutorial";
+
+		if (songIsBETADCIU){
+			var folder:String = Paths.modFolders(swagDirectory + "/data/" + swagSongDirectory + "/");
+
+			for (file in FileSystem.readDirectory(folder)){
+				var initPath:String = folder + file;
+
+				if (file.endsWith("-hard.json") && file.startsWith(swagSongDirectory)){
+					var path:String = initPath;			
+					var rawJson:Dynamic;
+
+					rawJson = (FileSystem.exists(path) ?  File.getContent(path).trim() : Assets.getText(path).trim());
+
+					var json:Song.SwagSong = cast Json.parse(rawJson).song;
+
+					if (json.player2 != null){
+						var characterPath:String = 'images/characters/jsons/' + json.player2;
+
+						var path:String = Paths.jsonNew(characterPath);
+				
+						#if MODS_ALLOWED
+							if (FileSystem.exists(Paths.modFolders('characters/'+json.player2+'.json')) || Assets.exists(Paths.modFolders('characters/'+json.player2+'.json')))
+								path = Paths.modFolders('characters/'+json.player2+'.json');
+						#end
+				
+						if (!FileSystem.exists(path) && !Assets.exists(path))
+						{
+							trace('oh no missingno');
+							path = Paths.jsonNew('images/characters/jsons/' + Character.DEFAULT_CHARACTER); //If a character couldn't be found, change to bf just to prevent a crash
+						}
+				
+						var rawJson2:Dynamic;
+						
+						rawJson2 = (FileSystem.exists(path) ?  File.getContent(path) : Assets.getText(path));
+				
+						var json2:Character.CharacterFile = cast Json.parse(rawJson2);
+						
+						p2Icon = json2.healthicon;
+						p2HC = json2.healthbar_colors;
+					}
+
+					daSongName = json.song;
+				}
+			}
+
+			templateWeek = '{
+				"storyName": "WEEK FILE",
+				"hideFreeplay": false,
+				"weekBackground": "bruh",
+				"difficulties": "Normal, Hard",
+				"weekBefore": "tutorial",
+				"startUnlocked": true,
+				"weekCharacters": [
+					"",
+					"bf",
+					""
+				],
+				"songs": [
+					[
+						"' + daSongName +'",
+						"' + p2Icon +'",
+						' + p2HC +'
+					]
+				],
+				"hideStoryMode": false,
+				"weekName": "' + swagSongDirectory + ' BETADCIU"
+			}';
+
+			sys.io.File.saveContent(Paths.modFolders("Da Modpack/weeks/"+swagSongDirectory+"-betadciu.json"), templateWeek);
+		}
+		else{
+
+		}
+	}
+
+	function doCopyShit(daFolder:String, daModpackFolder:String, checkFiles:Array<String>){
+		if (FileSystem.exists(daFolder)){
+			if (!FileSystem.exists(daModpackFolder)){
+				FileSystem.createDirectory(daModpackFolder);
+			}
+
+			for (file in FileSystem.readDirectory(daFolder))
+			{
+				var daInitPath:String = daFolder + file;
+				var daModifiedPath:String = daModpackFolder + file;
+	
+				if (checkFiles != null && checkFiles.length >= 1){
+					for (daFile in checkFiles){
+						if (file == daFile){
+							sys.io.File.copy(daInitPath, daModifiedPath);
+						}
+					}
+				}
+				else{
+					sys.io.File.copy(daInitPath, daModifiedPath);
+				}
 			}
 		}
 	}

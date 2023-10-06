@@ -551,7 +551,7 @@ class StageEditorState extends MusicBeatState
 
 	function reloadObjectInfo(objName:String)
 	{
-		objectNameInputText.text = currentObject.graphic.key;
+		objectNameInputText.text = (currentObject.graphic.key != null ? currentObject.graphic.key : "NO IMAGE");
 		objectInputText.text = objName;
 		objectXStepper.value = currentObject.x;
 		objectYStepper.value = currentObject.y;
