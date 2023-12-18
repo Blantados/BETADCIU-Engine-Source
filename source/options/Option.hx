@@ -21,6 +21,8 @@ import flixel.input.keyboard.FlxKey;
 import flixel.graphics.FlxGraphic;
 import Controls;
 
+import objects.Alphabet;
+
 using StringTools;
 
 class Option

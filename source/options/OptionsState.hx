@@ -25,6 +25,8 @@ import flixel.input.keyboard.FlxKey;
 import flixel.graphics.FlxGraphic;
 import Controls;
 
+import objects.Alphabet;
+
 using StringTools;
 
 class OptionsState extends MusicBeatState
@@ -46,7 +48,7 @@ class OptionsState extends MusicBeatState
 			case 'Controls':
 				openSubState(new KeyBindMenu());
 			case 'Replays':
-				MusicBeatState.switchState(new LoadReplayState());
+				MusicBeatState.switchState(new states.LoadReplayState());
 			case 'Graphics':
 				openSubState(new options.GraphicsSettingsSubState());
 			case 'Visuals and UI':
@@ -57,7 +59,7 @@ class OptionsState extends MusicBeatState
 				LoadingState.loadAndSwitchState(new options.NoteOffsetState());
 			#if debug
 			case 'Modpack Maker':
-				LoadingState.loadAndSwitchState(new editors.ModpackMaker());
+				LoadingState.loadAndSwitchState(new states.editors.ModpackMaker());
 			#end
 		}
 	}
@@ -117,7 +119,7 @@ class OptionsState extends MusicBeatState
 
 		if (controls.BACK) {
 			FlxG.sound.play(Paths.sound('cancelMenu'));
-			MusicBeatState.switchState(new MainMenuState());
+			MusicBeatState.switchState(new states.MainMenuState());
 		}
 
 		if (controls.ACCEPT) {

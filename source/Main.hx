@@ -28,6 +28,8 @@ import sys.io.File;
 import sys.io.Process;
 #end
 
+import states.TitleState;
+
 using StringTools;
 
 class Main extends Sprite

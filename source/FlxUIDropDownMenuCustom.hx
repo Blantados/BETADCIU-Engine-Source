@@ -433,15 +433,15 @@ class FlxUIDropDownMenuCustom extends FlxUIGroup implements IFlxUIWidget impleme
 		#if FLX_MOUSE
 		if (dropPanel.visible)
 		{
-			// so I can scroll FASTER
+			// so I can scroll FASTER // so I can press FASTER
 			if(list.length > 1 && canScroll) {
-				if(FlxG.mouse.wheel > 0 || FlxG.keys.justPressed.UP) {
+				if(FlxG.mouse.wheel > 0 || FlxG.keys.pressed.UP) {
 					// Go up
 					currentScroll -= 1 * (FlxG.keys.pressed.ALT ? 50 : (FlxG.keys.pressed.SHIFT ? 10 : 1));
 					if(currentScroll < 0) currentScroll = 0;
 					updateButtonPositions();
 				}
-				else if (FlxG.mouse.wheel < 0 || FlxG.keys.justPressed.DOWN) {
+				else if (FlxG.mouse.wheel < 0 || FlxG.keys.pressed.DOWN) {
 					// Go down
 					currentScroll += 1 * (FlxG.keys.pressed.ALT ? 50 : (FlxG.keys.pressed.SHIFT ? 10 : 1));
 					if(currentScroll >= list.length) currentScroll = list.length-1;

@@ -12,12 +12,14 @@ import flixel.util.FlxTimer;
 import flixel.FlxSubState;
 import haxe.Json;
 import haxe.format.JsonParser;
-import Alphabet;
 #if sys
 import sys.FileSystem;
 import sys.io.File;
 #end
 import openfl.utils.Assets;
+
+import objects.Alphabet;
+import objects.TypedAlphabet;
 
 using StringTools;
 

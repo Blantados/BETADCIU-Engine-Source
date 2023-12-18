@@ -25,6 +25,9 @@ import flixel.input.keyboard.FlxKey;
 import flixel.graphics.FlxGraphic;
 import Controls;
 
+import objects.Alphabet;
+import objects.AttachedText;
+
 using StringTools;
 
 class BaseOptionsMenu extends MusicBeatSubstate

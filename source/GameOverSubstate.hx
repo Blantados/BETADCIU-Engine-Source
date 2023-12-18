@@ -182,20 +182,20 @@ class GameOverSubstate extends MusicBeatSubstate
 			}
 
 			if (PlayState.isStoryMode)
-				MusicBeatState.switchState(new StoryMenuState());
+				MusicBeatState.switchState(new states.StoryMenuState());
 			else if (PlayState.isBETADCIU)
 				if (CoolUtil.difficulties[0] == "Guest")
-					MusicBeatState.switchState(new GuestBETADCIUState());
+					MusicBeatState.switchState(new states.GuestBETADCIUState());
 				else
-					MusicBeatState.switchState(new BETADCIUState());
+					MusicBeatState.switchState(new states.BETADCIUState());
 			else if (PlayState.isBonus)
-				MusicBeatState.switchState(new BonusSongsState());
+				MusicBeatState.switchState(new states.BonusSongsState());
 			else if (PlayState.isNeonight)
-				MusicBeatState.switchState(new NeonightState());
+				MusicBeatState.switchState(new states.NeonightState());
 			else if (PlayState.isVitor)
-				MusicBeatState.switchState(new VitorState());
+				MusicBeatState.switchState(new states.VitorState());
 			else
-				MusicBeatState.switchState(new FreeplayState());
+				MusicBeatState.switchState(new states.FreeplayState());
 			PlayState.loadRep = false;
 
 			PlayState.instance.callOnLuas('onGameOverConfirm', [false]);

@@ -8,6 +8,8 @@ import flixel.FlxG;
 import openfl.display.FPS;
 import openfl.Lib;
 
+import objects.Alphabet;
+
 class OptionCategory
 {
 	private var _options:Array<Option> = new Array<Option>();
@@ -495,7 +497,7 @@ class ReplayOption extends Option
 	public override function press():Bool
 	{
 		trace("switch");
-		MusicBeatState.switchState(new LoadReplayState());
+		MusicBeatState.switchState(new states.LoadReplayState());
 		return false;
 	}
 

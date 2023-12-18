@@ -7,6 +7,8 @@ import flixel.graphics.FlxGraphic;
 import Controls;
 import openfl.Lib;
 
+import states.TitleState;
+
 class ClientPrefs {
 	public static var downscroll:Bool = false;
 	public static var middleScroll:Bool = false;

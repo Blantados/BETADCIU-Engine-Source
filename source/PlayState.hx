@@ -51,9 +51,9 @@ import openfl.filters.BlurFilter;
 import openfl.filters.ColorMatrixFilter;
 import animateatlas.AtlasFrameMaker;
 import openfl.utils.Assets as OpenFlAssets;
-import editors.ChartingState;
-import editors.CharacterEditorState;
-import editors.StageEditorState;
+import states.editors.ChartingState;
+import states.editors.CharacterEditorState;
+import states.editors.StageEditorState;
 import flixel.input.keyboard.FlxKey;
 import webm.WebmPlayer;
 import haxe.Exception;
@@ -100,8 +100,18 @@ import flixel.addons.plugin.screengrab.FlxScreenGrab; // all because one betadci
 import shaders.WiggleEffect;
 import shaders.WiggleEffect.WiggleEffectType;
 import MotionBlur;
+import objects.HealthIcon;
+
+import states.MainMenuState;
 
 using StringTools;
+
+#if VIDEOS_ALLOWED 
+#if (hxCodec >= "3.0.0") import hxcodec.flixel.FlxVideo as VideoHandler;
+#elseif (hxCodec >= "2.6.1") import hxcodec.VideoHandler as VideoHandler;
+#elseif (hxCodec == "2.6.0") import VideoHandler;
+#else import vlc.MP4Handler as VideoHandler; #end
+#end
 
 class PlayState extends MusicBeatState
 {
@@ -158,7 +168,7 @@ class PlayState extends MusicBeatState
 	public static var noteBools:Array<Bool> = [false, false, false, false];
 
 	public var tabiZoom:Bool = false;
-	public static var mania:Int = 0;
+	public var mania:Int = 0;
 
 	public var tordCam:Array<FlxPoint> = [new FlxPoint(391.2,-1094.15),new FlxPoint(290.9,-1094.15),new FlxPoint(450.9,-1094.15),new FlxPoint(374.9,-1174.15),new FlxPoint(570.9,-974.15)];
 
@@ -1227,7 +1237,7 @@ class PlayState extends MusicBeatState
 		persistentUpdate = true;
 		persistentDraw = true;
 		var realTimer = timer;
-		var textState = new TextSubState(realTimer, word);
+		var textState = new substates.TextSubState(realTimer, word);
 		textState.win = finishedWriting;
 		textState.lose = death;
 		textState.cameras = [camHUD];
@@ -2284,14 +2294,11 @@ class PlayState extends MusicBeatState
 		{
 			inCutscene = false;
 				
-			if (songLowercase == 'Ballistic' && showCutscene == true)
+			if (songLowercase == 'ballistic' && showCutscene)
 			{
-				strumLineNotes.visible = true;
-				scoreTxt.visible = true;
-				healthBarBG.visible = true;
-				healthBar.visible = true;
-				iconP1.visible = true;
-				iconP2.visible = true;
+				for (i in [strumLineNotes, scoreTxt, healthBarBG, healthBar, iconP1, iconP2]){
+					i.visible = true;
+				}
 			}
 
 			if (skipCountdown || startOnTime > 0) skipArrowStartTween = true;			
@@ -3077,7 +3084,7 @@ class PlayState extends MusicBeatState
 		if (FlxG.random.bool(0.1))
 		{
 			cancelMusicFadeTween();
-			MusicBeatState.switchState(new GitarooPause());
+			MusicBeatState.switchState(new states.GitarooPause());
 		}
 		else
 		{
@@ -3087,7 +3094,7 @@ class PlayState extends MusicBeatState
 			}
 
 			isPaused = true;
-			openSubState(new PauseSubState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
+			openSubState(new substates.PauseSubState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 		}
 
 		#if desktop
@@ -3313,34 +3320,34 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		if (generatedMusic && !inCutscene)
+		if (generatedMusic)
 		{
-			var fakeCrochet:Float = (60 / SONG.bpm) * 1000;
-
-			if (startedCountdown)
-			{
+			if (!inCutscene){
 				if (!cpuControlled){
 					keyShit();
-				}
-				else {
+				} else {
 					playerCharsDance();
 				}
 
-				var swagDownscroll:Bool = FlxG.save.data.downscroll;
+				if (notes.length > 0){
+					if (startedCountdown){
+						var fakeCrochet:Float = (60 / SONG.bpm) * 1000;
+						var swagDownscroll:Bool = FlxG.save.data.downscroll;
 				
-				//this just looks so much nicer
-				notes.forEachAlive(function(daNote:Note)
-				{
-					updateNote(daNote, fakeCrochet, swagDownscroll);
-				});	
-			}
-			else
-			{
-				notes.forEachAlive(function(daNote:Note)
-				{
-					daNote.canBeHit = false;
-					daNote.wasGoodHit = false;
-				});
+						//this just looks so much nicer
+						notes.forEachAlive(function(daNote:Note)
+						{
+							updateNote(daNote, fakeCrochet, swagDownscroll);
+						});	
+					}
+				}
+				else{
+					notes.forEachAlive(function(daNote:Note)
+					{
+						daNote.canBeHit = false;
+						daNote.wasGoodHit = false;
+					});
+				}
 			}
 		}
 
@@ -3518,6 +3525,7 @@ class PlayState extends MusicBeatState
 			daNote.visible = false;
 
 			daNote.kill();
+			trace("DOING 3");
 			notes.remove(daNote, true);
 			daNote.destroy();
 		}
@@ -3530,7 +3538,7 @@ class PlayState extends MusicBeatState
 
 		if (FlxG.keys.justPressed.SEVEN && !inCutscene){
 			if (FlxG.keys.pressed.SHIFT){
-				editors.ChartingState.lastSection = curSection;
+				ChartingState.lastSection = curSection;
 			}
 			openChartEditor();
 		}
@@ -3694,13 +3702,13 @@ class PlayState extends MusicBeatState
 						CustomFadeTransition.nextCamera = null;
 					}
 	
-					MusicBeatState.switchState(new StoryMenuState());
+					MusicBeatState.switchState(new states.StoryMenuState());
 	
 					if (SONG.validScore){
 						Highscore.saveWeekScore(WeekData.getWeekFileName(), campaignScore, storyDifficulty);
 					}
 
-					FlxG.save.data.weekCompleted = StoryMenuState.weekCompleted;
+					FlxG.save.data.weekCompleted = states.StoryMenuState.weekCompleted;
 					FlxG.save.flush();
 				}
 				else
@@ -3748,20 +3756,20 @@ class PlayState extends MusicBeatState
 				if (isBETADCIU)
 				{
 					if (CoolUtil.difficulties[0] == "Guest")
-						MusicBeatState.switchState(new GuestBETADCIUState());
+						MusicBeatState.switchState(new states.GuestBETADCIUState());
 					else
-						MusicBeatState.switchState(new BETADCIUState());
+						MusicBeatState.switchState(new states.BETADCIUState());
 				}
 				else 
 				{
 					if (isBonus)		
-						MusicBeatState.switchState(new BonusSongsState());
+						MusicBeatState.switchState(new states.BonusSongsState());
 					else if (isNeonight)
-						MusicBeatState.switchState(new NeonightState());
+						MusicBeatState.switchState(new states.NeonightState());
 					else if (isVitor)
-						MusicBeatState.switchState(new VitorState());
+						MusicBeatState.switchState(new states.VitorState());
 					else
-						MusicBeatState.switchState(new FreeplayState());
+						MusicBeatState.switchState(new states.FreeplayState());
 				}
 			}
 
@@ -4478,6 +4486,7 @@ class PlayState extends MusicBeatState
 		if (!note.isSustainNote)
 		{
 			note.kill();
+			trace("DOING 7");
 			notes.remove(note, true);
 			note.destroy();
 		}
@@ -4824,8 +4833,6 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	public var video:MP4Handler;
-
 	public function startVideo(name:String, ?skippable:Bool = true)
 	{
 		#if VIDEOS_ALLOWED
@@ -4839,36 +4846,44 @@ class PlayState extends MusicBeatState
 		#end
 		{
 			FlxG.log.warn('Couldnt find video file: ' + name);
-
-			if (luaArray.length >= 1)
-				callOnLuas('onVideoCompleted',[name]);
-			else
-				startAndEnd();
-
+			doVideoFinish(name);
 			return;
 		}
 
-		var video:MP4Handler = new MP4Handler(320, 240, true, skippable);
-		video.playVideo(filepath);
-		video.finishCallback = function()
-		{
-			if (luaArray.length >= 1)
-				callOnLuas('onVideoCompleted',[name]);
-			else
-				startAndEnd();
-			
-			return;
-		}
+		var video:VideoHandler = new VideoHandler();
+			#if (hxCodec >= "3.0.0")
+			// Recent versions
+			video.play(filepath);
+			video.onEndReached.add(function()
+			{
+				video.dispose();
+				doVideoFinish(name);
+				return;
+			}, true);
+			#else
+			// Older versions
+			video.playVideo(filepath);
+			video.finishCallback = function()
+			{
+				doVideoFinish(name);
+				return;
+			}
+			#end
 		#else
 		FlxG.log.warn('Platform not supported!');
-
-		if (luaArray.length >= 1)
-			callOnLuas('onVideoCompleted',[name]);
-		else
-			startAndEnd();
-
+		doVideoFinish(name);
 		return;
 		#end
+	}
+
+	function doVideoFinish(name:String){
+		clearNotesBefore(Conductor.songPosition);
+		inCutscene = false;
+		var ret:Dynamic = callOnLuas("onVideoCompleted", [name], false);
+	
+		if(ret != ModchartState.Function_Stop) {
+			startAndEnd();
+		}
 	}
 
 	#if (!flash && sys)
@@ -5272,7 +5287,7 @@ class PlayState extends MusicBeatState
 			swagNote.dType = section.dType;
 			swagNote.noteType = songNotes[3];
 			swagNote.noteSection = daSection;
-			if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
+			if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
 
 			var susLength:Float = swagNote.sustainLength;
 
@@ -5387,7 +5402,7 @@ class PlayState extends MusicBeatState
 				swagNote.dType = section.dType;
 				swagNote.noteType = songNotes[3];
 				swagNote.noteSection = daSection;
-				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
+				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
 
 				var susLength:Float = swagNote.sustainLength;
 

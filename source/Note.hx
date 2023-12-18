@@ -95,6 +95,7 @@ class Note extends FlxSprite
 	public static var posRest:Array<Int> = [0, 35, 70, 60, 20];
 	public var curSpeed:Float;
 	public var flipScroll:Bool = false; //just use false for upscroll
+	public var autoHit:Bool = false;
 	var pre:String;
 	var suf:String;
 

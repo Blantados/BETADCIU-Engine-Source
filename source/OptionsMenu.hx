@@ -16,6 +16,8 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import lime.utils.Assets;
 
+import objects.Alphabet;
+
 class OptionsMenu extends MusicBeatState
 {
 	public static var instance:OptionsMenu;
@@ -127,7 +129,7 @@ class OptionsMenu extends MusicBeatState
 		if (acceptInput)
 		{
 			if (controls.BACK && !isCat)
-				MusicBeatState.switchState(new MainMenuState());
+				MusicBeatState.switchState(new states.MainMenuState());
 			else if (controls.BACK)
 			{
 				isCat = false;

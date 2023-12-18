@@ -84,6 +84,10 @@ import openfl.display.ShaderParameterType;
 
 import shaders.ColorSwap;
 
+import objects.Alphabet;
+import objects.HealthIcon;
+import states.editors.ModpackMaker;
+
 using StringTools;
 
 class ModchartState 
@@ -1066,8 +1070,6 @@ class ModchartState
 	
 			set("hudZoom", PlayState.instance.camHUD.zoom);
 			set("camHudAngle", PlayState.instance.camHUD.angle);
-
-			set('playbackRate', PlayState.instance.playbackRate);
 		}
 
 		for (i in 0...4) {
@@ -1077,6 +1079,7 @@ class ModchartState
 			set('defaultOpponentStrumY' + i, 0);
 		}
 
+		set('playbackRate', 1);
 		set('score', 0);
 		set('misses', 0);
 		set('hits', 0);
@@ -1100,7 +1103,7 @@ class ModchartState
 				if (text4 == null) text4 = '';
 				if (text5 == null) text5 = '';
 
-				if (editors.ModpackMaker.inModpackMaker){
+				if (ModpackMaker.inModpackMaker){
 					trace('' + text1 + text2 + text3 + text4 + text5);
 				}
 				else{
@@ -1110,8 +1113,8 @@ class ModchartState
 			});
 			
 			Lua_helper.add_callback(lua, "makeLuaSprite", function(tag:String, image:String, x:Float, y:Float, ?antialiasing:Bool = true) {
-				if (editors.ModpackMaker.inModpackMaker && image != null && image.length > 0){
-					editors.ModpackMaker.luaImageList.push(image);
+				if (ModpackMaker.inModpackMaker && image != null && image.length > 0){
+					ModpackMaker.luaImageList.push(image);
 					return;
 				}
 
@@ -1141,8 +1144,8 @@ class ModchartState
 			});
 
 			Lua_helper.add_callback(lua, "makeAnimatedLuaSprite", function(tag:String, image:String, x:Float, y:Float,spriteType:String="sparrow") {
-				if (editors.ModpackMaker.inModpackMaker && image != null && image.length > 0){
-					editors.ModpackMaker.luaImageList.push(image);
+				if (ModpackMaker.inModpackMaker && image != null && image.length > 0){
+					ModpackMaker.luaImageList.push(image);
 					return;
 				}
 
@@ -1157,8 +1160,8 @@ class ModchartState
 			});
 
 			Lua_helper.add_callback(lua, "makeLuaBackdrop", function(tag:String, image:String, x:Float, y:Float, ?axes:String = "XY") {
-				if (editors.ModpackMaker.inModpackMaker && image != null && image.length > 0){
-					editors.ModpackMaker.luaImageList.push(image);
+				if (ModpackMaker.inModpackMaker && image != null && image.length > 0){
+					ModpackMaker.luaImageList.push(image);
 					return;
 				}
 
@@ -1189,8 +1192,8 @@ class ModchartState
 			});
 
 			Lua_helper.add_callback(lua, "makeHealthIcon", function(tag:String, character:String, player:Bool = false) {
-				if (editors.ModpackMaker.inModpackMaker){
-					editors.ModpackMaker.luaImageList.push('icons/icon-'+character);
+				if (ModpackMaker.inModpackMaker){
+					ModpackMaker.luaImageList.push('icons/icon-'+character);
 				}
 				else{
 					Paths.returnGraphic('icons/icon-'+character);
@@ -1198,8 +1201,8 @@ class ModchartState
 			});
 
 			Lua_helper.add_callback(lua, "loadGraphic", function(variable:String, image:String, ?gridX:Int, ?gridY:Int) {
-				if (editors.ModpackMaker.inModpackMaker){
-					editors.ModpackMaker.luaImageList.push(image);
+				if (ModpackMaker.inModpackMaker){
+					ModpackMaker.luaImageList.push(image);
 				}
 				else{
 					Paths.returnGraphic(image);
@@ -1212,8 +1215,8 @@ class ModchartState
 			});
 
 			Lua_helper.add_callback(lua, "precacheSound", function(name:String, ?path:String = "sounds") {
-				if (editors.ModpackMaker.inModpackMaker){
-					editors.ModpackMaker.luaSoundList.push(name);
+				if (ModpackMaker.inModpackMaker){
+					ModpackMaker.luaSoundList.push(name);
 				}
 				else{
 					Paths.returnSound(path, name);
@@ -1221,15 +1224,15 @@ class ModchartState
 			});
 
 			Lua_helper.add_callback(lua, "precacheFont", function(name:String) {
-				if (editors.ModpackMaker.inModpackMaker){
-					editors.ModpackMaker.luaFontList.push(name);
+				if (ModpackMaker.inModpackMaker){
+					ModpackMaker.luaFontList.push(name);
 				}
 				return name; // this doesn't actually preload the font.
 			});
 
 			Lua_helper.add_callback(lua, "precacheImage", function(name:String) {
-				if (editors.ModpackMaker.inModpackMaker){
-					editors.ModpackMaker.luaImageList.push(name);
+				if (ModpackMaker.inModpackMaker){
+					ModpackMaker.luaImageList.push(name);
 				}
 				else{
 					Paths.returnGraphic(name);
@@ -1273,15 +1276,15 @@ class ModchartState
 			});
 
 			Lua_helper.add_callback(lua, "setTextFont", function(tag:String, newFont:String) {
-				if (editors.ModpackMaker.inModpackMaker){
-					editors.ModpackMaker.luaFontList.push(newFont);
+				if (ModpackMaker.inModpackMaker){
+					ModpackMaker.luaFontList.push(newFont);
 				}
 			});
 
 			Lua_helper.add_callback(lua, "setShaderSampler2D", function(obj:String, prop:String, bitmapDataPath:String) {
 				#if (!flash && MODS_ALLOWED && sys)
-				if (editors.ModpackMaker.inModpackMaker){
-					editors.ModpackMaker.luaImageList.push(bitmapDataPath);
+				if (ModpackMaker.inModpackMaker){
+					ModpackMaker.luaImageList.push(bitmapDataPath);
 				}
 				else{
 					Paths.returnGraphic(bitmapDataPath);
@@ -1292,12 +1295,12 @@ class ModchartState
 			Lua_helper.add_callback(lua, "setProperty", function(variable:String, value:Dynamic) {
 				var killMe:Array<String> = variable.split('.');
 			
-				if (editors.ModpackMaker.inModpackMaker){
+				if (ModpackMaker.inModpackMaker){
 					if (variable.contains('altSuffix') || variable.contains('altPrefix')){
 						var checkFiles:Array<String> = ["intro1", "intro2", "intro3", "introGo"];
 						
 						for (snd in checkFiles){
-							editors.ModpackMaker.luaSoundList.push((variable.contains('altSuffix') ? snd + value : value + snd));
+							ModpackMaker.luaSoundList.push((variable.contains('altSuffix') ? snd + value : value + snd));
 						}
 					}
 				}
@@ -1306,8 +1309,8 @@ class ModchartState
 			});
 
 			Lua_helper.add_callback(lua, "playSound", function(sound:String, ?volume:Float = 1, ?tag:String = null) {
-				if (editors.ModpackMaker.inModpackMaker){
-					editors.ModpackMaker.luaSoundList.push(sound);
+				if (ModpackMaker.inModpackMaker){
+					ModpackMaker.luaSoundList.push(sound);
 				}
 			});
 
@@ -1322,8 +1325,8 @@ class ModchartState
 			
 			var otherCallbacks:Array<String> = ['makeGraphic', 'objectPlayAnimation', "makeLuaCharacter", "playAnim", "getMapKeys"];
 			var addCallbacks:Array<String> = ['addAnimationByPrefix', 'addAnimationByIndices', 'addAnimationByIndicesLoop', 'addLuaSprite', 'addLuaText', "addOffset", "addClipRect", "addAnimation"];
-			var setCallbacks:Array<String> = ['setScrollFactor', 'setObjectCamera', 'scaleObject', 'screenCenter', 'setTextSize', 'setTextBorder', 'setTextString', "setTextAlignment", "setTextColor", "setPropertyFromClass", "setBlendMode",];
-			var shaderCallbacks:Array<String> = ["runHaxeCode", "addHaxeLibrary", "initLuaShader", "setSpriteShader", "setShaderFloat", "setShaderFloatArray", "setShaderBool", "setShaderBoolArray"];
+			var setCallbacks:Array<String> = ['setScrollFactor', 'setObjectCamera', 'scaleObject', 'screenCenter', 'setTextSize', 'setTextBorder', 'setTextString', "setTextAlignment", "setTextColor", "setPropertyFromClass", "setBlendMode"];
+			var shaderCallbacks:Array<String> = ["runHaxeCode", "addHaxeLibrary", "initLuaShader", "setSpriteShader", "setShaderFloat", "setShaderFloatArray", "setShaderBool", "setShaderBoolArray", "setGlobalFromScript", "triggerEvent"];
 		
 			otherCallbacks = otherCallbacks.concat(addCallbacks);
 			otherCallbacks = otherCallbacks.concat(setCallbacks);
@@ -3333,6 +3336,20 @@ class ModchartState
 					luaTrace('doTweenColor: Couldnt find object: ' + vars, false, false, FlxColor.RED);
 				}
 			});
+
+			Lua_helper.add_callback(lua, "doTweenNum", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
+				if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
+				var penisExam:Dynamic = tweenShit(tag, vars);
+				if(penisExam != null) {
+					PlayState.instance.modchartTweens.set(tag, FlxTween.num(penisExam, value, duration, {ease: getFlxEaseByString(ease),
+						onComplete: function(twn:FlxTween) {
+							callOnCompleted("tween", tag);
+						}
+					}));
+				} else {
+					luaTrace('doTweenZoom: Couldnt find object: ' + vars, false, false, FlxColor.RED);
+				}
+			});
 	
 			Lua_helper.add_callback(lua, "startCountdown", function(variable:String) {
 				PlayState.instance.startCountdown();
@@ -3572,16 +3589,24 @@ class ModchartState
 				Reflect.getProperty(getInstance(), obj).remove(Reflect.getProperty(getInstance(), obj)[index]);
 			});
 	
-			Lua_helper.add_callback(lua, "getPropertyFromClass", function(classVar:String, variable:String) {
-				var killMe:Array<String> = variable.split('.');
-				if(killMe.length > 1) {
-					var coverMeInPiss:Dynamic = Reflect.getProperty(Type.resolveClass(classVar), killMe[0]);
-					for (i in 1...killMe.length-1) {
-						coverMeInPiss = Reflect.getProperty(coverMeInPiss, killMe[i]);
-					}
-					return Reflect.getProperty(coverMeInPiss, killMe[killMe.length-1]);
+			Lua_helper.add_callback(lua, "getPropertyFromClass", function(classVar:String, variable:String, ?allowMaps:Bool = false) {
+				var myClass:Dynamic = Type.resolveClass(classVar);
+
+				if(myClass == null)
+				{
+					luaTrace('getPropertyFromClass: Class $classVar not found', false, false, FlxColor.RED);
+					return null;
 				}
-				return Reflect.getProperty(Type.resolveClass(classVar), variable);
+
+				var split:Array<String> = variable.split('.');
+				if(split.length > 1) {
+					var obj:Dynamic = getVarInArray(myClass, split[0], allowMaps);
+					for (i in 1...split.length-1)
+						obj = getVarInArray(obj, split[i], allowMaps);
+
+					return getVarInArray(obj, split[split.length-1], allowMaps);
+				}
+				return getVarInArray(myClass, variable, allowMaps);
 			});
 			Lua_helper.add_callback(lua, "setPropertyFromClass", function(classVar:String, variable:String, value:Dynamic) {
 				var killMe:Array<String> = variable.split('.');
@@ -5052,7 +5077,8 @@ class ModchartState
 			//masking!
 			Lua_helper.add_callback(lua, "addClipRect", function(obj:String, x:Float, y:Float, width:Float, height:Float) {
 				var killMe:Array<String> = obj.split('.');
-				var object:Dynamic = getObjectDirectly(killMe[0]);
+				var object:FlxSprite = getObjectDirectly(killMe[0]);
+
 				if(killMe.length > 1) {
 					object = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 				}
@@ -5404,7 +5430,7 @@ class ModchartState
 		return false;
 	}
 
-	public static function getVarInArray(instance:Dynamic, variable:String):Any
+	public static function getVarInArray(instance:Dynamic, variable:String, ?allowMaps:Bool = false):Any
 	{
 		var shit:Array<String> = variable.split('[');
 		if(shit.length > 1)
