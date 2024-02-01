@@ -1,10 +1,6 @@
 package objects;
 
-import flixel.FlxG;
-import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
-import flixel.math.FlxMath;
-import flixel.util.FlxColor;
 
 class MenuItem extends FlxSprite
 {
@@ -16,7 +12,7 @@ class MenuItem extends FlxSprite
 		super(x, y);
 		loadGraphic(Paths.image(Paths.imageExists('storymenu/' + weekName) ? 'storymenu/' + weekName : "storymenu/week"));
 		//trace('Test added: ' + WeekData.getWeekNumber(weekNum) + ' (' + weekNum + ')');
-		antialiasing = ClientPrefs.globalAntialiasing;
+		antialiasing = ClientPrefs.data.antialiasing;
 	}
 
 	private var isFlashing:Bool = false;

@@ -1,30 +1,25 @@
 package states.editors;
 
-import Section.SwagSection;
-import Song.SwagSong;
+import backend.Section.SwagSection;
+import backend.Song.SwagSong;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.addons.transition.FlxTransitionableState;
-import flixel.util.FlxColor;
-import flixel.FlxSprite;
-import flixel.FlxG;
-import flixel.text.FlxText;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
-import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-import flixel.system.FlxSound;
 import flixel.util.FlxSort;
-import flixel.util.FlxTimer;
 import flixel.input.keyboard.FlxKey;
 import openfl.events.KeyboardEvent;
-import ModchartState;
+import luafiles.ModchartState;
 import lime.utils.Assets;
 
 #if sys
 import lime.media.AudioBuffer;
 import flash.media.Sound;
 #end
+
+import objects.StrumNote;
+import objects.Note;
+import objects.NoteSplash;
 
 using StringTools;
 

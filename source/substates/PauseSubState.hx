@@ -4,27 +4,12 @@ import openfl.Lib;
 #if windows
 import llua.Lua;
 #end
-import Controls.Control;
-import flixel.FlxG;
-import flixel.FlxSprite;
+import backend.Controls.Control;
 import flixel.FlxSubState;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.input.keyboard.FlxKey;
-import flixel.system.FlxSound;
-import flixel.text.FlxText;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
-import flixel.util.FlxColor;
 import flixel.util.FlxStringUtil;
-
-import objects.Alphabet;
-
-#if desktop
-import Sys;
-import sys.io.File;
-import sys.FileSystem;
-#end
 
 class PauseSubState extends MusicBeatSubstate
 {

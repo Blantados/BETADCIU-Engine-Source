@@ -1,20 +1,14 @@
 package states.editors;
 
-#if desktop
-import Discord.DiscordClient;
-#end
-import flixel.FlxG;
 import flixel.FlxObject;
-import flixel.FlxSprite;
 import flixel.FlxState;
-import flixel.FlxCamera;
 import flixel.input.keyboard.FlxKey;
 import flixel.addons.display.FlxGridOverlay;
-import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.graphics.FlxGraphic;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.addons.ui.FlxInputText;
+import flixel.addons.ui.FlxUIDropDownMenu;
 import flixel.addons.ui.FlxUI9SliceSprite;
 import flixel.addons.ui.FlxUI;
 import flixel.addons.ui.FlxUICheckBox;
@@ -28,22 +22,18 @@ import openfl.net.FileReference;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
 import haxe.Json;
-import Character;
 import flixel.system.debug.interaction.tools.Pointer.GraphicCursorCross;
 import lime.system.Clipboard;
 import flixel.animation.FlxAnimation;
 import lime.utils.Assets;
 import flixel.graphics.frames.FlxAtlasFrames;
 
-#if desktop
-import Sys;
-import sys.FileSystem;
-import sys.io.File;
-#end
-
 import objects.HealthIcon;
+import objects.Character;
+import objects.CharacterOffsets;
 
-import ModchartState;
+import luafiles.ModchartState;
+import luafiles.DebugLuaText;
 
 using StringTools;
 
@@ -484,7 +474,7 @@ class CharacterEditorState extends MusicBeatState
 			"scale": 1
 		}';
 
-	var charDropDown:FlxUIDropDownMenuCustom;
+	var charDropDown:FlxUIDropDownMenu;
 	function addSettingsUI() {
 		var tab_group = new FlxUI(null, UI_box);
 		tab_group.name = "Settings";
@@ -507,7 +497,7 @@ class CharacterEditorState extends MusicBeatState
 			updatePointerPos();
 		};
 
-		charDropDown = new FlxUIDropDownMenuCustom(10, 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(character:String)
+		charDropDown = new FlxUIDropDownMenu(10, 30, FlxUIDropDownMenu.makeStrIdLabelArray([''], true), function(character:String)
 		{
 			daAnim = characterList[Std.parseInt(character)];
 			check_player.checked = daAnim.startsWith('bf');
@@ -586,7 +576,7 @@ class CharacterEditorState extends MusicBeatState
 	var imageInputText:FlxUIInputText;
 	var healthIconInputText:FlxUIInputText;
 	var noteSkinInputText:FlxUIInputText;
-	var spriteTypeDropDown:FlxUIDropDownMenuCustom;
+	var spriteTypeDropDown:FlxUIDropDownMenu;
 
 	var singDurationStepper:FlxUINumericStepper;
 	var scaleStepper:FlxUINumericStepper;
@@ -694,7 +684,7 @@ class CharacterEditorState extends MusicBeatState
 			saveCharacter();
 		});
 
-		spriteTypeDropDown  = new FlxUIDropDownMenuCustom(15, playerPositionCameraXStepper.y, FlxUIDropDownMenuCustom.makeStrIdLabelArray(['SPARROW', 'PACKER', 'GENERICXML', 'JSON', 'TEXTURE']),
+		spriteTypeDropDown  = new FlxUIDropDownMenu(15, playerPositionCameraXStepper.y, FlxUIDropDownMenu.makeStrIdLabelArray(['SPARROW', 'PACKER', 'GENERICXML', 'JSON', 'TEXTURE']),
 		function(dataString:String)
 		{
 			char.spriteType = dataString.toLowerCase();
@@ -741,8 +731,8 @@ class CharacterEditorState extends MusicBeatState
 		UI_characterbox.addGroup(tab_group);
 	}
 
-	var ghostDropDown:FlxUIDropDownMenuCustom;
-	var animationDropDown:FlxUIDropDownMenuCustom;
+	var ghostDropDown:FlxUIDropDownMenu;
+	var animationDropDown:FlxUIDropDownMenu;
 	var animationInputText:FlxUIInputText;
 	var animationNameInputText:FlxUIInputText;
 	var animationIndicesInputText:FlxUIInputText;
@@ -767,7 +757,7 @@ class CharacterEditorState extends MusicBeatState
 
 		blockPressWhileTypingOnStepper.push(animationNameFramerate);
 
-		animationDropDown = new FlxUIDropDownMenuCustom(15, animationInputText.y - 55, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(pressed:String) {
+		animationDropDown = new FlxUIDropDownMenu(15, animationInputText.y - 55, FlxUIDropDownMenu.makeStrIdLabelArray([''], true), function(pressed:String) {
 			var selectedAnimation:Int = Std.parseInt(pressed);
 			var anim:AnimArray = char.animationsArray[selectedAnimation];
 			animationInputText.text = anim.anim;
@@ -780,7 +770,7 @@ class CharacterEditorState extends MusicBeatState
 		});
 		blockPressWhileScrolling.push(animationDropDown);
 
-		ghostDropDown = new FlxUIDropDownMenuCustom(animationDropDown.x + 150, animationDropDown.y, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(pressed:String) {
+		ghostDropDown = new FlxUIDropDownMenu(animationDropDown.x + 150, animationDropDown.y, FlxUIDropDownMenu.makeStrIdLabelArray([''], true), function(pressed:String) {
 			var selectedAnimation:Int = Std.parseInt(pressed);
 			ghostChar.visible = false;
 			char.alpha = 1;
@@ -1050,7 +1040,7 @@ class CharacterEditorState extends MusicBeatState
 		Paths.currentTrackedAssets.remove(daPath);
 		Paths.clearStoredMemory2(daPath, 'image');
 		
-		char.frames = (char.spriteType == "TEXTURE" ? animateatlas.AtlasFrameMaker.construct(char.imageFile) : Paths.getAtlasFromData(char.imageFile, char.spriteType));
+		char.frames = (char.isAnimateAtlas ? Paths.getAtlasFromData("characters/BOYFRIEND", char.spriteType) : Paths.getAtlasFromData(char.imageFile, char.spriteType));
 	
 		if(char.animationsArray != null && char.animationsArray.length > 0) {
 			for (anim in char.animationsArray) {
@@ -1308,8 +1298,8 @@ class CharacterEditorState extends MusicBeatState
 		}
 		if(anims.length < 1) anims.push('NO ANIMATIONS'); //Prevents crash
 
-		animationDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(anims, true));
-		ghostDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(ghostAnims, true));
+		animationDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(anims, true));
+		ghostDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(ghostAnims, true));
 		reloadGhost();
 	}
 
@@ -1393,7 +1383,7 @@ class CharacterEditorState extends MusicBeatState
 		characterList = CoolUtil.coolTextFile(Paths.txt('characterList'));
 		#end
 
-		charDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(characterList, true));
+		charDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(characterList, true));
 		charDropDown.selectedLabel = daAnim;
 	}
 
@@ -1425,7 +1415,7 @@ class CharacterEditorState extends MusicBeatState
 
 	private var blockPressWhileTypingOn:Array<FlxUIInputText> = [];
 	private var blockPressWhileTypingOnStepper:Array<FlxUINumericStepper> = [];
-	private var blockPressWhileScrolling:Array<FlxUIDropDownMenuCustom> = [];
+	private var blockPressWhileScrolling:Array<FlxUIDropDownMenu> = [];
 
 	override function update(elapsed:Float)
 	{

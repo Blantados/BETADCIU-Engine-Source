@@ -1,25 +1,17 @@
 package states.editors;
 
-#if desktop
-import Discord.DiscordClient;
-#end
-import flixel.FlxG;
 import flixel.FlxObject;
-import flixel.FlxSprite;
 import flixel.FlxState;
-import flixel.FlxCamera;
 import flixel.input.keyboard.FlxKey;
 import flixel.addons.display.FlxGridOverlay;
-import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.graphics.FlxGraphic;
-import flixel.text.FlxText;
-import flixel.util.FlxColor;
 import flixel.addons.ui.FlxInputText;
 import flixel.addons.ui.FlxUI9SliceSprite;
 import flixel.addons.ui.FlxUI;
 import flixel.addons.ui.FlxUICheckBox;
 import flixel.addons.ui.FlxUIInputText;
 import flixel.addons.ui.FlxUINumericStepper;
+import flixel.addons.ui.FlxUIDropDownMenu;
 import flixel.addons.ui.FlxUITabMenu;
 import flixel.addons.ui.FlxUITooltip.FlxUITooltipStyle;
 import flixel.ui.FlxButton;
@@ -28,20 +20,21 @@ import openfl.net.FileReference;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
 import haxe.Json;
-import Character;
 import flixel.system.debug.interaction.tools.Pointer.GraphicCursorCross;
 import lime.system.Clipboard;
 import flixel.animation.FlxAnimation;
 import lime.utils.Assets;
 import flixel.graphics.frames.FlxAtlasFrames;
 
-#if desktop
-import Sys;
-import sys.FileSystem;
-import sys.io.File;
-#end
+import luafiles.ModchartState;
+import luafiles.DebugLuaText;
 
-import ModchartState;
+import objects.Character;
+import objects.Character.CharacterFile;
+import backend.Song;
+import backend.Song.SwagSong;
+import backend.StageData;
+import backend.StageData.StageFile;
 
 using StringTools;
 
@@ -81,7 +74,7 @@ class ModpackMaker extends MusicBeatState {
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.color = 0xFFea71fd;
 		bg.screenCenter();
-		bg.antialiasing = ClientPrefs.globalAntialiasing;
+		bg.antialiasing = ClientPrefs.data.antialiasing;
 		add(bg);
 
 		var titleText:FlxText = new FlxText(50, 50, 0, 48);
@@ -132,10 +125,10 @@ class ModpackMaker extends MusicBeatState {
 	
 	private var blockPressWhileTypingOn:Array<FlxUIInputText> = [];
 	private var blockPressWhileTypingOnStepper:Array<FlxUINumericStepper> = [];
-	private var blockPressWhileScrolling:Array<FlxUIDropDownMenuCustom> = [];
+	private var blockPressWhileScrolling:Array<FlxUIDropDownMenu> = [];
 
-	var directoryDropDown:FlxUIDropDownMenuCustom;
-	var songDirectoryDropDown:FlxUIDropDownMenuCustom;
+	var directoryDropDown:FlxUIDropDownMenu;
+	var songDirectoryDropDown:FlxUIDropDownMenu;
 
 	var swagDirectory:String;
 	var swagSongDirectory:String;
@@ -145,14 +138,14 @@ class ModpackMaker extends MusicBeatState {
 		var tab_group = new FlxUI(null, UI_box);
 		tab_group.name = "Setup";
 
-		directoryDropDown = new FlxUIDropDownMenuCustom(15, 45, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(pressed:String) {
+		directoryDropDown = new FlxUIDropDownMenu(15, 45, FlxUIDropDownMenu.makeStrIdLabelArray([''], true), function(pressed:String) {
 			swagDirectory = directoryDropDown.selectedLabel;
 			Paths.currentModDirectory = swagDirectory;
 			reloadDirectoryDropDown("data");
 		});
 		blockPressWhileScrolling.push(directoryDropDown);
 
-		songDirectoryDropDown = new FlxUIDropDownMenuCustom(directoryDropDown.x + 170, 45, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(pressed:String) {
+		songDirectoryDropDown = new FlxUIDropDownMenu(directoryDropDown.x + 170, 45, FlxUIDropDownMenu.makeStrIdLabelArray([''], true), function(pressed:String) {
 			swagSongDirectory = songDirectoryDropDown.selectedLabel;
 		});
 		blockPressWhileScrolling.push(directoryDropDown);
@@ -223,7 +216,7 @@ class ModpackMaker extends MusicBeatState {
 
 							rawJson = (FileSystem.exists(path) ?  File.getContent(path).trim() : Assets.getText(path).trim());
 
-							var json:Song.SwagSong = cast Json.parse(rawJson).song;
+							var json:SwagSong = cast Json.parse(rawJson).song;
 
 							if (json.noteStyle != null && json.noteStyle.length > 0){
 								var noteFolder:String = Paths.modFolders(swagDirectory+"/images/notes/");
@@ -366,7 +359,7 @@ class ModpackMaker extends MusicBeatState {
 
 											rawJson = (FileSystem.exists(path) ?  File.getContent(path) : Assets.getText(path));
 		
-											var json:Character.CharacterFile = cast Json.parse(rawJson);
+											var json:CharacterFile = cast Json.parse(rawJson);
 
 											var imagePath:String = json.image;
 											var iconPath:String = "icons/icon-"+json.healthicon;
@@ -438,7 +431,7 @@ class ModpackMaker extends MusicBeatState {
 
 											rawJson = (FileSystem.exists(stageInitPath) ?  File.getContent(stageInitPath) : Assets.getText(stageInitPath));
 
-											var stageData:StageData.StageFile = cast Json.parse(rawJson);
+											var stageData:StageFile = cast Json.parse(rawJson);
 											
 											if (stageData.ratingSkin != null)
 											{
@@ -609,7 +602,7 @@ class ModpackMaker extends MusicBeatState {
 
 					rawJson = (FileSystem.exists(path) ?  File.getContent(path).trim() : Assets.getText(path).trim());
 
-					var json:Song.SwagSong = cast Json.parse(rawJson).song;
+					var json:SwagSong = cast Json.parse(rawJson).song;
 
 					if (json.player2 != null){
 						var characterPath:String = 'images/characters/jsons/' + json.player2;
@@ -631,7 +624,7 @@ class ModpackMaker extends MusicBeatState {
 						
 						rawJson2 = (FileSystem.exists(path) ?  File.getContent(path) : Assets.getText(path));
 				
-						var json2:Character.CharacterFile = cast Json.parse(rawJson2);
+						var json2:CharacterFile = cast Json.parse(rawJson2);
 						
 						p2Icon = json2.healthicon;
 						p2HC = json2.healthbar_colors;
@@ -645,7 +638,7 @@ class ModpackMaker extends MusicBeatState {
 				"storyName": "WEEK FILE",
 				"hideFreeplay": false,
 				"weekBackground": "bruh",
-				"difficulties": "Normal, Hard",
+				"difficulties": "Hard",
 				"weekBefore": "tutorial",
 				"startUnlocked": true,
 				"weekCharacters": [
@@ -733,7 +726,7 @@ class ModpackMaker extends MusicBeatState {
 					directories.push('NO DIRECTORIES'); //Prevents crash
 				}
 
-				songDirectoryDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(directories, true));
+				songDirectoryDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(directories, true));
 			default:
 			{
 				var directories:Array<String> = Paths.getModDirectories();
@@ -742,7 +735,7 @@ class ModpackMaker extends MusicBeatState {
 					directories.push('NO DIRECTORIES'); //Prevents crash
 				}
 
-				directoryDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(directories, true));
+				directoryDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(directories, true));
 			}
 		}
 		

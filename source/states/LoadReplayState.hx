@@ -1,22 +1,16 @@
 package states;
 
-import Controls.KeyboardScheme;
-import Controls.Control;
+import backend.Controls.KeyboardScheme;
+import backend.Controls.Control;
 import flash.text.TextField;
-import flixel.FlxG;
-import flixel.FlxSprite;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.input.keyboard.FlxKey;
-import flixel.math.FlxMath;
-import flixel.text.FlxText;
-import flixel.util.FlxColor;
 import lime.utils.Assets;
-#if sys
-import sys.io.File;
-#end
 
-import objects.Alphabet;
+import backend.Replay;
+
+import backend.Song;
 
 class LoadReplayState extends MusicBeatState
 {
@@ -139,7 +133,7 @@ class LoadReplayState extends MusicBeatState
 		super.update(elapsed);
 
 			if (controls.BACK)
-				FlxG.switchState(new OptionsMenu());
+				FlxG.switchState(new options.OptionsState());
 			if (controls.UP_P)
 				changeSelection(-1);
 			if (controls.DOWN_P)

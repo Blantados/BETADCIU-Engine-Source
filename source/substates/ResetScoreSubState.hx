@@ -1,12 +1,10 @@
 package substates;
 
-import flixel.FlxG;
-import flixel.FlxSprite;
 import flixel.FlxSubState;
-import flixel.util.FlxColor;
 
-import objects.Alphabet;
 import objects.HealthIcon;
+import backend.WeekData;
+import backend.Highscore;
 
 using StringTools;
 

@@ -1,32 +1,16 @@
 package states;
 
 import flash.text.TextField;
-import flixel.FlxG;
-import flixel.FlxSprite;
 import flixel.addons.display.FlxGridOverlay;
-import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.math.FlxMath;
-import flixel.text.FlxText;
-import flixel.util.FlxColor;
 import lime.utils.Assets;
-import flixel.system.FlxSound;
 import states.editors.ChartingState;
 
-import objects.Alphabet;
 import objects.HealthIcon;
 
-#if windows
-import Discord.DiscordClient;
-#end
-
-import WeekData;
-#if desktop
-import sys.FileSystem;
-#end
+import backend.WeekData;
+import backend.Song;
 
 import flixel.effects.FlxFlicker;
-import flixel.tweens.FlxTween;
-import flixel.util.FlxTimer;
 
 using StringTools;
 

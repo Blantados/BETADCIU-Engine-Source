@@ -1,7 +1,5 @@
 package states;
 
-import flixel.FlxG;
-import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.input.keyboard.FlxKey;
@@ -16,18 +14,11 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.FlxSound;
 import flixel.system.ui.FlxSoundTray;
-import flixel.text.FlxText;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
-import flixel.util.FlxColor;
-import flixel.util.FlxTimer;
 import lime.app.Application;
 import openfl.Assets;
-import objects.Alphabet;
 
-#if windows
-import Discord.DiscordClient;
-#end
+import backend.Highscore;
+import backend.PlayerSettings;
 
 #if cpp
 import sys.thread.Thread;
@@ -91,8 +82,8 @@ class TitleState extends MusicBeatState
 
 		FlxG.save.bind('funkin', 'ninjamuffin99');
 
-		KadeEngineData.initSave();
-		ClientPrefs.loadPrefs();
+		backend.KadeEngineData.initSave();
+		backend.ClientPrefs.loadPrefs();
 	
 		Highscore.load();
 

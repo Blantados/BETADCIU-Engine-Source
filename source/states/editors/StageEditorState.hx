@@ -1,21 +1,14 @@
 package states.editors;
 
-#if desktop
-import Discord.DiscordClient;
-#end
-import flixel.FlxG;
 import flixel.FlxObject;
-import flixel.FlxSprite;
 import flixel.FlxState;
-import flixel.FlxCamera;
 import flixel.input.keyboard.FlxKey;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.graphics.FlxGraphic;
-import flixel.text.FlxText;
-import flixel.util.FlxColor;
 import flixel.addons.ui.FlxInputText;
 import flixel.addons.ui.FlxUI9SliceSprite;
+import flixel.addons.ui.FlxUIDropDownMenu;
 import flixel.addons.ui.FlxUI;
 import flixel.addons.ui.FlxUICheckBox;
 import flixel.addons.ui.FlxUIInputText;
@@ -29,20 +22,18 @@ import flixel.math.FlxMath;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
 import haxe.Json;
-import Stage;
 import flixel.system.debug.interaction.tools.Pointer.GraphicCursorCross;
 import lime.system.Clipboard;
 import flixel.animation.FlxAnimation;
 import lime.utils.Assets;
 import flixel.graphics.frames.FlxAtlasFrames;
 
-#if desktop
-import Sys;
-import sys.FileSystem;
-import sys.io.File;
-#end
+import objects.Stage;
+import objects.Character;
+import objects.Boyfriend;
 
-import ModchartState;
+import luafiles.ModchartState;
+import luafiles.DebugLuaText;
 
 using StringTools;
 
@@ -207,7 +198,7 @@ class StageEditorState extends MusicBeatState
 				reloadObjectInfo(key);
 		}
 		
-		objectDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(objects, true));
+		objectDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(objects, true));
 	}
 
 	var positionXStepper:FlxUINumericStepper;
@@ -305,7 +296,7 @@ class StageEditorState extends MusicBeatState
 		UI_stagebox.addGroup(tab_group);
 	}
 
-	var objectDropDown:FlxUIDropDownMenuCustom;
+	var objectDropDown:FlxUIDropDownMenu;
 	var objectXStepper:FlxUINumericStepper;
 	var objectYStepper:FlxUINumericStepper;
 	var objectScaleXStepper:FlxUINumericStepper;
@@ -319,7 +310,7 @@ class StageEditorState extends MusicBeatState
 	var objectInputText:FlxUIInputText;
 	var objectNameInputText:FlxUIInputText;
 
-	var animationDropDown:FlxUIDropDownMenuCustom;
+	var animationDropDown:FlxUIDropDownMenu;
 	var animationInputText:FlxUIInputText;
 	var animationNameInputText:FlxUIInputText;
 	var animationIndicesInputText:FlxUIInputText;
@@ -330,7 +321,7 @@ class StageEditorState extends MusicBeatState
 		var tab_group = new FlxUI(null, UI_box);
 		tab_group.name = "Stage Objects";
 
-		objectDropDown = new FlxUIDropDownMenuCustom(15, 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray([""], true), function(pressed:String) {
+		objectDropDown = new FlxUIDropDownMenu(15, 30, FlxUIDropDownMenu.makeStrIdLabelArray([""], true), function(pressed:String) {
 			currentObject = changeSpriteClass(Stage.swagBacks[objectDropDown.selectedLabel]);
 			reloadObjectInfo(objectDropDown.selectedLabel);
 		});
@@ -356,7 +347,7 @@ class StageEditorState extends MusicBeatState
 		animationNameFramerate = new FlxUINumericStepper(animationInputText.x + 170, animationInputText.y, 1, 24, 0, 240, 0);
 		animationLoopCheckBox = new FlxUICheckBox(animationNameInputText.x + 170, animationNameInputText.y - 1, null, null, "Should it Loop?", 100);
 
-		animationDropDown = new FlxUIDropDownMenuCustom(15, animationInputText.y - 55, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(pressed:String) {
+		animationDropDown = new FlxUIDropDownMenu(15, animationInputText.y - 55, FlxUIDropDownMenu.makeStrIdLabelArray([''], true), function(pressed:String) {
 			if (currentObject.numFrames <= 1)
 				return;
 			
@@ -630,17 +621,17 @@ class StageEditorState extends MusicBeatState
 	
 		if(anims.length < 1) anims.push('NO ANIMATIONS'); //Prevents crash
 
-		animationDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(anims, true));
+		animationDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(anims, true));
 	}
 
 	var focusPlayer:Bool = false;
 
-	var stageDropDown:FlxUIDropDownMenuCustom;
+	var stageDropDown:FlxUIDropDownMenu;
 	function addSettingsUI() {
 		var tab_group = new FlxUI(null, UI_box);
 		tab_group.name = "Settings";
 
-		stageDropDown = new FlxUIDropDownMenuCustom(10, 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray([""], true), function(stage:String)
+		stageDropDown = new FlxUIDropDownMenu(10, 30, FlxUIDropDownMenu.makeStrIdLabelArray([""], true), function(stage:String)
 		{
 			daStage = stageList[Std.parseInt(stage)];
 			loadStage();
@@ -742,7 +733,7 @@ class StageEditorState extends MusicBeatState
 		stageList = CoolUtil.coolTextFile(Paths.txt("stageList"));
 		#end
 
-		stageDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(stageList, true));
+		stageDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(stageList, true));
 		stageDropDown.selectedLabel = daStage;
 	}
 

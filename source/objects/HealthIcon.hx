@@ -1,18 +1,9 @@
 package objects;
 
-import flixel.FlxSprite;
-
-#if windows
-import Sys;
-import sys.FileSystem;
-#end
-
 #if sys
-import sys.io.File;
 import haxe.io.Path;
 import openfl.utils.ByteArray;
 import flash.display.BitmapData;
-import sys.FileSystem;
 import openfl.utils.Assets as OpenFlAssets;
 import lime.utils.Assets;
 #end

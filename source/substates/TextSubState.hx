@@ -1,20 +1,12 @@
 package substates;
 
 import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
-import Controls.Control;
-import flixel.FlxG;
-import flixel.FlxSprite;
+import backend.Controls.Control;
 import flixel.FlxSubState;
 import flixel.addons.transition.FlxTransitionableState;
-import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.input.keyboard.FlxKey;
 import flixel.system.FlxSound;
-import flixel.text.FlxText;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
-import flixel.util.FlxColor;
 import flixel.effects.FlxFlicker;
-import flixel.FlxCamera;
 import flixel.addons.ui.FlxInputText;
 
 using StringTools;

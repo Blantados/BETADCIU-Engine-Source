@@ -1,22 +1,12 @@
 package states;
 
-import Controls.KeyboardScheme;
-import flixel.FlxG;
+import backend.Controls.KeyboardScheme;
 import flixel.FlxObject;
-import flixel.FlxSprite;
 import flixel.effects.FlxFlicker;
 import flixel.graphics.frames.FlxAtlasFrames;
-import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.text.FlxText;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
-import flixel.util.FlxColor;
 import lime.app.Application;
 import openfl.Lib;
 
-#if desktop
-import Discord.DiscordClient;
-#end
 
 using StringTools;
 
@@ -40,7 +30,7 @@ class MainMenuState extends MusicBeatState
 
 	public static var kadeEngineVer:String = "BETADCIU Engine";
 	public static var gameVer:String = "0.2.8";
-	public static var betadciuVer:String = "Version 1.7";
+	public static var betadciuVer:String = "Version 1.8";
 
 	var magenta:FlxSprite;
 	var camFollow:FlxObject;
