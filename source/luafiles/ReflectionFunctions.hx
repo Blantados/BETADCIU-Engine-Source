@@ -410,10 +410,11 @@ class ReflectionFunctions
 
 	static function checkForOldClassVars(classVar:String){
 		switch(classVar){
-			case "PlayState": classVar = "states.PlayState";
+			case "ClientPrefs": classVar = "backend.ClientPrefs";
+			case "Conductor": classVar = "backend.Conductor";
 			case "LoadingState": classVar = "states.LoadingState";
 			case "ModchartState": classVar = "luafiles.PlayState";
-			case "ClientPrefs": classVar = "backend.ClientPrefs";
+			case "PlayState": classVar = "states.PlayState";
 		}
 
 		return classVar;

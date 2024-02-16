@@ -140,7 +140,7 @@ class ModpackMaker extends MusicBeatState {
 
 		directoryDropDown = new FlxUIDropDownMenu(15, 45, FlxUIDropDownMenu.makeStrIdLabelArray([''], true), function(pressed:String) {
 			swagDirectory = directoryDropDown.selectedLabel;
-			Paths.currentModDirectory = swagDirectory;
+			Mods.currentModDirectory = swagDirectory;
 			reloadDirectoryDropDown("data");
 		});
 		blockPressWhileScrolling.push(directoryDropDown);

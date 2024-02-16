@@ -704,259 +704,83 @@ class Controls extends FlxActionSet
 	inline function get_U6_R() return _u6R.check();
 	inline function get_U7_R() return _u7R.check();
 
-	#if (haxe >= "4.0.0")
-	public function new(name, scheme = None)
+	public function new(name , #if (haxe >= "4.0.0") scheme = None #else scheme:KeyboardScheme = null #end)
 	{
 		super(name);
 
-		add(_up);
-		add(_left);
-		add(_right);
-		add(_down);
-		add(_upP);
-		add(_leftP);
-		add(_rightP);
-		add(_downP);
-		add(_upR);
-		add(_leftR);
-		add(_rightR);
-		add(_downR);
 		add(_accept);
 		add(_back);
 		add(_pause);
 		add(_reset);
 		add(_cheat);
 
-		add(_s1);
-		add(_s2);
-		add(_s3);
-		add(_s4);
-		add(_s5);
-		add(_s6);
+		var tap:FlxActionDigital = null;
+		var press:FlxActionDigital = null;
+		var release:FlxActionDigital = null;
 
-		add(_s1P);
-		add(_s2P);
-		add(_s3P);
-		add(_s4P);
-		add(_s5P);
-		add(_s6P);
+		for (i in ["_left", "_down", "_up", "_right"]){
+			tap = Reflect.getProperty(this, i);
+			press = Reflect.getProperty(this, i + "P");
+			release = Reflect.getProperty(this, i + "R");
 
-		add(_s1R);
-		add(_s2R);
-		add(_s3R);
-		add(_s4R);
-		add(_s5R);
-		add(_s6R);
+			add(tap);
+			add(press);
+			add(release);
+		}
 
-		add(_t1);
-		add(_t2);
-		add(_t3);
-		add(_t4);
-		add(_t5);
+		for (i in 0...9){
+			tap = Reflect.getProperty(this, "_n" + Std.string(i));
+			press = Reflect.getProperty(this, "_n" + Std.string(i) + "P");
+			release = Reflect.getProperty(this, "_n" + Std.string(i) + "R");
 
-		add(_t1P);
-		add(_t2P);
-		add(_t3P);
-		add(_t4P);
-		add(_t5P);
+			add(tap);
+			add(press);
+			add(release);
 
-		add(_t1R);
-		add(_t2R);
-		add(_t3R);
-		add(_t4R);
-		add(_t5R);
+			if (i >= 1 && i < 8){
+				tap = Reflect.getProperty(this, "_u" + Std.string(i));
+				press = Reflect.getProperty(this, "_u" + Std.string(i) + "P");
+				release = Reflect.getProperty(this, "_u" + Std.string(i) + "R");
+	
+				add(tap);
+				add(press);
+				add(release);
+			}
 
-		add(_n0);
-		add(_n1);
-		add(_n2);
-		add(_n3);
-		add(_n4);
-		add(_n5);
-		add(_n6);
-		add(_n7);
-		add(_n8);
+			if (i >= 1 && i < 7){
+				tap = Reflect.getProperty(this, "_s" + Std.string(i));
+				press = Reflect.getProperty(this, "_s" + Std.string(i) + "P");
+				release = Reflect.getProperty(this, "_s" + Std.string(i) + "R");
+	
+				add(tap);
+				add(press);
+				add(release);
+			}
+		
+			if (i >= 1 && i < 6){
+				tap = Reflect.getProperty(this, "_t" + Std.string(i));
+				press = Reflect.getProperty(this, "_t" + Std.string(i) + "P");
+				release = Reflect.getProperty(this, "_t" + Std.string(i) + "R");
 
-		add(_n0P);
-		add(_n1P);
-		add(_n2P);
-		add(_n3P);
-		add(_n4P);
-		add(_n5P);
-		add(_n6P);
-		add(_n7P);
-		add(_n8P);
-
-		add(_n0R);
-		add(_n1R);
-		add(_n2R);
-		add(_n3R);
-		add(_n4R);
-		add(_n5R);
-		add(_n6R);
-		add(_n7R);
-		add(_n8R);
-
-
-		add(_u1);
-		add(_u2);
-		add(_u3);
-		add(_u4);
-		add(_u5);
-		add(_u6);
-		add(_u7);
-
-		add(_u1P);
-		add(_u2P);
-		add(_u3P);
-		add(_u4P);
-		add(_u5P);
-		add(_u6P);
-		add(_u7P);
-
-		add(_u1R);
-		add(_u2R);
-		add(_u3R);
-		add(_u4R);
-		add(_u5R);
-		add(_u6R);
-		add(_u7R);
+				add(tap);
+				add(press);
+				add(release);
+			}
+		}
 
 		for (action in digitalActions)
 			byName[action.name] = action;
 
-		setKeyboardScheme(scheme, false);
-	}
-	#else
-	public function new(name, scheme:KeyboardScheme = null)
-	{
-		super(name);
-
-		add(_up);
-		add(_left);
-		add(_right);
-		add(_down);
-		add(_upP);
-		add(_leftP);
-		add(_rightP);
-		add(_downP);
-		add(_upR);
-		add(_leftR);
-		add(_rightR);
-		add(_downR);
-		add(_accept);
-		add(_back);
-		add(_pause);
-		add(_reset);
-		add(_cheat);
-
-		add(_s1);
-		add(_s2);
-		add(_s3);
-		add(_s4);
-		add(_s5);
-		add(_s6);
-
-		add(_s1P);
-		add(_s2P);
-		add(_s3P);
-		add(_s4P);
-		add(_s5P);
-		add(_s6P);
-
-		add(_s1R);
-		add(_s2R);
-		add(_s3R);
-		add(_s4R);
-		add(_s5R);
-		add(_s6R);
-
-		add(_t1);
-		add(_t2);
-		add(_t3);
-		add(_t4);
-		add(_t5);
-
-		add(_t1P);
-		add(_t2P);
-		add(_t3P);
-		add(_t4P);
-		add(_t5P);
-
-		add(_t1R);
-		add(_t2R);
-		add(_t3R);
-		add(_t4R);
-		add(_t5R);
-
-		add(_n0);
-		add(_n1);
-		add(_n2);
-		add(_n3);
-		add(_n4);
-		add(_n5);
-		add(_n6);
-		add(_n7);
-		add(_n8);
-
-		add(_n0P);
-		add(_n1P);
-		add(_n2P);
-		add(_n3P);
-		add(_n4P);
-		add(_n5P);
-		add(_n6P);
-		add(_n7P);
-		add(_n8P);
-
-		add(_n0R);
-		add(_n1R);
-		add(_n2R);
-		add(_n3R);
-		add(_n4R);
-		add(_n5R);
-		add(_n6R);
-		add(_n7R);
-		add(_n8R);
-
-
-		add(_u0);
-		add(_u1);
-		add(_u2);
-		add(_u3);
-		add(_u4);
-		add(_u5);
-		add(_u6);
-		add(_u7);
-		add(_u8);
-
-		add(_u0P);
-		add(_u1P);
-		add(_u2P);
-		add(_u3P);
-		add(_u4P);
-		add(_u5P);
-		add(_u6P);
-		add(_u7P);
-		add(_u8P);
-
-		add(_u0R);
-		add(_u1R);
-		add(_u2R);
-		add(_u3R);
-		add(_u4R);
-		add(_u5R);
-		add(_u6R);
-		add(_u7R);
-		add(_u8R);
-
-		for (action in digitalActions)
-			byName[action.name] = action;
-			
+		#if (haxe >= "4.0.0")	
 		if (scheme == null)
 			scheme = None;
+		#end
+
 		setKeyboardScheme(scheme, false);
+
+		keyboardBinds = ClientPrefs.keyBinds;
+		gamepadBinds = ClientPrefs.gamepadBinds;
 	}
-	#end
 
 	override function update()
 	{
@@ -1551,4 +1375,81 @@ class Controls extends FlxActionSet
 	{
 		return input.device == GAMEPAD && (deviceID == FlxInputDeviceID.ALL || input.deviceID == deviceID);
 	}
+
+	//Gamepad & Keyboard stuff
+	public var keyboardBinds:Map<String, Array<FlxKey>>;
+	public var gamepadBinds:Map<String, Array<FlxGamepadInputID>>;
+	public function justPressed(key:String)
+	{
+		var result:Bool = (FlxG.keys.anyJustPressed(keyboardBinds[key]) == true);
+		if(result) controllerMode = false;
+
+		return result || _myGamepadJustPressed(gamepadBinds[key]) == true;
+	}
+
+	public function pressed(key:String)
+	{
+		var result:Bool = (FlxG.keys.anyPressed(keyboardBinds[key]) == true);
+		if(result) controllerMode = false;
+
+		return result || _myGamepadPressed(gamepadBinds[key]) == true;
+	}
+
+	public function justReleased(key:String)
+	{
+		var result:Bool = (FlxG.keys.anyJustReleased(keyboardBinds[key]) == true);
+		if(result) controllerMode = false;
+
+		return result || _myGamepadJustReleased(gamepadBinds[key]) == true;
+	}
+
+	public var controllerMode:Bool = false;
+	private function _myGamepadJustPressed(keys:Array<FlxGamepadInputID>):Bool
+	{
+		if(keys != null)
+		{
+			for (key in keys)
+			{
+				if (FlxG.gamepads.anyJustPressed(key) == true)
+				{
+					controllerMode = true;
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	private function _myGamepadPressed(keys:Array<FlxGamepadInputID>):Bool
+	{
+		if(keys != null)
+		{
+			for (key in keys)
+			{
+				if (FlxG.gamepads.anyPressed(key) == true)
+				{
+					controllerMode = true;
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	private function _myGamepadJustReleased(keys:Array<FlxGamepadInputID>):Bool
+	{
+		if(keys != null)
+		{
+			for (key in keys)
+			{
+				if (FlxG.gamepads.anyJustReleased(key) == true)
+				{
+					controllerMode = true;
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	// IGNORE THESE
+	public static var instance:Controls;
 }

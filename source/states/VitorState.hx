@@ -109,7 +109,7 @@ class VitorState extends MusicBeatState
 			songText.targetY = i;
 			grpSongs.add(songText);
 
-			Paths.currentModDirectory = songs[i].folder;
+			Mods.currentModDirectory = songs[i].folder;
 			var icon:HealthIcon = new HealthIcon(songs[i].songCharacter);
 			icon.sprTracker = songText;
 
@@ -320,7 +320,7 @@ class VitorState extends MusicBeatState
 		}
 
 		iconArray[curSelected].alpha = 1;
-		Paths.currentModDirectory = songs[curSelected].folder;
+		Mods.currentModDirectory = songs[curSelected].folder;
 
 		for (item in grpSongs.members)
 		{

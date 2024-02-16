@@ -982,7 +982,7 @@ class ModchartState
 			set('songName', "");
 		}
 
-		set('currentModDirectory', Paths.currentModDirectory);
+		set('currentModDirectory', Mods.currentModDirectory);
 
 		var difficultyName:String = CoolUtil.difficulties[PlayState.storyDifficulty];
 		set('difficultyName', difficultyName);
@@ -1043,8 +1043,6 @@ class ModchartState
 		set('rating', 0);
 		set('ratingName', '');
 		set('ratingFC', '');
-
-		set('currentModDirectory', Paths.currentModDirectory);
 	
 		// callbacks
 
@@ -3544,6 +3542,18 @@ class ModchartState
 				return str.trim();
 			});
 
+			Lua_helper.add_callback(lua, "getNotes", function(y:Float)
+				{
+					Lua.newtable(lua);
+		
+					for (i in 0...PlayState.instance.notes.members.length)
+					{
+						var note = PlayState.instance.notes.members[i];
+						Lua.pushstring(lua, note.LuaNote.className);
+						Lua.rawseti(lua, -2, i);
+					}
+				});
+
 			// default strums
 	
 			Lua_helper.add_callback(lua, "getNotes", function(y:Float)
@@ -3745,6 +3755,26 @@ class ModchartState
 		(type.toLowerCase() == 'timer' ? PlayState.instance.modchartTimers.remove(tag) : PlayState.instance.modchartTweens.remove(tag));
 	}
 	
+	public static function findScript(scriptFile:String, ext:String = '.lua')
+	{
+		if(!scriptFile.endsWith(ext)) scriptFile += ext;
+		var preloadPath:String = Paths.getSharedPath(scriptFile);
+		#if MODS_ALLOWED
+		var path:String = Paths.modFolders(scriptFile);
+		if(FileSystem.exists(scriptFile))
+			return scriptFile;
+		else if(FileSystem.exists(path))
+			return path;
+
+		if(FileSystem.exists(preloadPath))
+		#else
+		if(Assets.exists(preloadPath))
+		#end
+		{
+			return preloadPath;
+		}
+		return null;
+	}
 }
 #end
 

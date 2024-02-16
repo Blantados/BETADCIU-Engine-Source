@@ -311,15 +311,15 @@ class WeekData {
 	}
 
 	public static function setDirectoryFromWeek(?data:WeekData = null) {
-		Paths.currentModDirectory = '';
+		Mods.currentModDirectory = '';
 		if(data != null && data.folder != null && data.folder.length > 0) {
-			Paths.currentModDirectory = data.folder;
+			Mods.currentModDirectory = data.folder;
 		}
 	}
 
 	public static function loadTheFirstEnabledMod()
 	{
-		Paths.currentModDirectory = '';
+		Mods.currentModDirectory = '';
 		
 		#if MODS_ALLOWED
 		if (FileSystem.exists("modsList.txt"))
@@ -332,7 +332,7 @@ class WeekData {
 				if (dat[1] == "1" && !foundTheTop)
 				{
 					foundTheTop = true;
-					Paths.currentModDirectory = dat[0];
+					Mods.currentModDirectory = dat[0];
 				}
 			}
 		}

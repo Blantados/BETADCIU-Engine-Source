@@ -1,5 +1,4 @@
 package states;
-
 import flixel.FlxState;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.input.keyboard.FlxKey;
@@ -16,9 +15,8 @@ import flixel.system.FlxSound;
 import flixel.system.ui.FlxSoundTray;
 import lime.app.Application;
 import openfl.Assets;
-
-import backend.Highscore;
-import backend.PlayerSettings;
+import objects.Alphabet;
+import flixel.addons.display.FlxBackdrop;
 
 #if cpp
 import sys.thread.Thread;
@@ -62,8 +60,7 @@ class TitleState extends MusicBeatState
 			trace("Loaded " + openfl.Assets.getLibrary("default").assetsLoaded + " assets (DEFAULT)");
 		}
 		
-		PlayerSettings.init();
-
+		backend.PlayerSettings.init();
 
 		#if windows
 		DiscordClient.initialize();
@@ -117,6 +114,7 @@ class TitleState extends MusicBeatState
 	var gfDance:FlxSprite;
 	var danceLeft:Bool = false;
 	var titleText:FlxSprite;
+	var titlestatebg:FlxBackdrop;
 
 	function startIntro()
 	{
@@ -150,11 +148,18 @@ class TitleState extends MusicBeatState
 		Conductor.changeBPM(110);
 		persistentUpdate = true;
 
-		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		// var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 		// bg.antialiasing = true;
 		// bg.setGraphicSize(Std.int(bg.width * 0.6));
 		// bg.updateHitbox();
-		add(bg);
+		// add(bg);
+
+		titlestatebg = new FlxBackdrop(Paths.image('titleGrid'), XY);
+		titlestatebg.velocity.set(200, 110);
+		titlestatebg.updateHitbox();
+		titlestatebg.alpha = 0.5;
+		titlestatebg.screenCenter(X);
+		add(titlestatebg);
 
 		logoBl = new FlxSprite(-150, 1500);
 		logoBl.frames = Paths.getSparrowAtlas('logoBumpin');
@@ -299,6 +304,10 @@ class TitleState extends MusicBeatState
 			transitioning = true;
 			// FlxG.sound.music.stop();
 
+			FlxTween.tween(titlestatebg, {"scale.x": 3, "scale.y": 3}, 2, {
+				ease: FlxEase.cubeOut
+			});
+
 			new FlxTimer().start(2, function(tmr:FlxTimer)
 			{
 				MusicBeatState.switchState(new SecretState());
@@ -383,12 +392,12 @@ class TitleState extends MusicBeatState
 				// credTextShit.screenCenter();
 				case 5:
 					if (Main.watermarks)
-						createCoolText(['Kade Engine', 'by']);
+						createCoolText(['BETADCIU Engine', 'by']);
 					else
 						createCoolText(['In Partnership', 'with']);
 				case 7:
 					if (Main.watermarks)
-						addMoreText('KadeDeveloper');
+						addMoreText('Blantados');
 					else
 					{
 						addMoreText('Newgrounds');

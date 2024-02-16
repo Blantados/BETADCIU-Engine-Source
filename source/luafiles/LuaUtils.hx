@@ -442,7 +442,7 @@ class LuaUtils
 			default:
 				spr.frames = Paths.getSparrowAtlas(image);
 		}
-	}
+	}	
 
 	public static function resetTextTag(tag:String) {
 		#if LUA_ALLOWED

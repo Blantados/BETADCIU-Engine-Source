@@ -1347,14 +1347,14 @@ class CharacterEditorState extends MusicBeatState
 		#if MODS_ALLOWED
 		characterList = ["bf"];
 
-		if (Paths.currentModDirectory != 'BETADCIU')
+		if (Mods.currentModDirectory != 'BETADCIU')
 		{
 			if (FileSystem.exists(Paths.modFolders('data/characterList.txt'))){
 				characterList = CoolUtil.coolTextFile2(Paths.modFolders('data/characterList.txt'));
 			}
 			
 			 //READDED
-			 var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Paths.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')];
+			 var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Mods.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')];
 			 for (i in 0...directories.length) {
 				 var directory:String = directories[i];
 				 if(FileSystem.exists(directory)) {

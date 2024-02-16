@@ -23,58 +23,54 @@ class VisualsUISubState extends BaseOptionsMenu
 		var option:Option = new Option('Note Splashes',
 			"If unchecked, hitting \"Sick!\" notes won't show particles.",
 			'noteSplashes',
-			'bool',
-			true);
+			'bool');
 		addOption(option);
 
 		var option:Option = new Option('Psych UI',
 			"If checked, changes the UI to resemble Psych Engine's.",
 			'psychUI',
-			'bool',
-			false);
+			'bool');
 		addOption(option);
 
 		var option:Option = new Option('Kade Song Position',
 			"If checked, enables Kade Engine's Song Bar. DO NOT USE WITH PSYCH UI!!!",
 			'songPosition',
-			'bool',
-			false);
+			'bool');
 		addOption(option);
 		
 		var option:Option = new Option('Time Bar:',
 			"What should the Time Bar display?",
 			'timeBarType',
 			'string',
-			'Time Left',
-			['Time Left', 'Time Elapsed', 'Song Name']);//, 'Disabled']);
+			['Time Left', 'Time Elapsed', 'Song Name', 'Disabled']);
 		addOption(option);
-
+		
 		/*var option:Option = new Option('Hide HUD',
 			'If checked, hides most HUD elements.',
 			'hideHud',
 			'bool',
-			false);
+			"false");
 		addOption(option);
 		
 		var option:Option = new Option('Flashing Lights',
 			"Uncheck this if you're sensitive to flashing lights!",
 			'flashing',
 			'bool',
-			true);
+			"true");
 		addOption(option);
 
 		var option:Option = new Option('Camera Zooms',
 			"If unchecked, the camera won't zoom in on a beat hit.",
 			'camZooms',
 			'bool',
-			true);
+			"true");
 		addOption(option);
 
 		var option:Option = new Option('Score Text Zoom on Hit',
 			"If unchecked, disables the Score text zooming\neverytime you hit a note.",
 			'scoreZoom',
 			'bool',
-			true);
+			"true");
 		addOption(option);
 
 		var option:Option = new Option('Health Bar Transparency',
@@ -93,16 +89,14 @@ class VisualsUISubState extends BaseOptionsMenu
 		var option:Option = new Option('FPS Counter',
 			'If unchecked, hides FPS Counter.',
 			'showFPS',
-			'bool',
-			true);
+			'bool');
 		addOption(option);
 		option.onChange = onChangeFPSCounter;
 
 		var option:Option = new Option('Rainbow FPS',
-		'If checked and FPS Counter is enabled, counter will have rainbow colors!',
-		'fpsRain',
-		'bool',
-		false);
+			'If checked and FPS Counter is enabled, counter will have rainbow colors!',
+			'fpsRain',
+			'bool');
 		addOption(option);
 		option.onChange = onChangeFPSRain;
 		#end
@@ -121,7 +115,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			'On Release builds, turn this on to check for updates when you start the game.',
 			'checkForUpdates',
 			'bool',
-			true);
+			"true");
 		addOption(option);
 		#end
 
@@ -129,7 +123,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			"If unchecked, Ratings and Combo won't stack, saving on System Memory and making them easier to read",
 			'comboStacking',
 			'bool',
-			true);
+			"true");
 		addOption(option);*/
 
 		super();

@@ -229,12 +229,12 @@ class DeprecatedFunctions
 		});
 
 		Lua_helper.add_callback(lua,"setDefaultCamZoom", function(zoomAmount:Float) {
-			luaTrace('setDefaultCamZoom is deprecated! Use setProperty("defaultCamZoom", "zoomAmount") instead.', false, true);
+			ModchartState.luaTrace('setDefaultCamZoom is deprecated! Use setProperty("defaultCamZoom", "zoomAmount") instead.', false, true);
 			PlayState.instance.defaultCamZoom = zoomAmount;
 		});
 
 		Lua_helper.add_callback(lua,"setHudZoom", function(zoomAmount:Float) {
-			luaTrace('setHudZoom is deprecated! Use setProperty("camHUD.zoom", "zoomAmount") instead.', false, true);
+			ModchartState.luaTrace('setHudZoom is deprecated! Use setProperty("camHUD.zoom", "zoomAmount") instead.', false, true);
 			PlayState.instance.camHUD.zoom = zoomAmount;
 		});
 	}

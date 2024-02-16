@@ -633,8 +633,8 @@ class ChartingState extends MusicBeatState
 		var reloadSong:FlxButton = new FlxButton(saveButton.x + 90, saveButton.y, "Reload Audio", function()
 		{
 			// will now also reload the song played in PlayState
-			var instPath = Paths.mods(Paths.currentModDirectory + '/songs/' + _song.song.toLowerCase() + Paths.SOUND_EXT);
-			var voicesPath = Paths.mods(Paths.currentModDirectory + '/songs/' + _song.song.toLowerCase() + Paths.SOUND_EXT);
+			var instPath = Paths.mods(Mods.currentModDirectory + '/songs/' + _song.song.toLowerCase() + Paths.SOUND_EXT);
+			var voicesPath = Paths.mods(Mods.currentModDirectory + '/songs/' + _song.song.toLowerCase() + Paths.SOUND_EXT);
 
 			for (key in Paths.currentTrackedSounds.keys())
 			{
@@ -1140,7 +1140,7 @@ class ChartingState extends MusicBeatState
 		}
 
 		#if desktop
-		var directories:Array<String> = [Paths.mods('custom_notetypes/'), Paths.mods(Paths.currentModDirectory + '/custom_notetypes/')];
+		var directories:Array<String> = [Paths.mods('custom_notetypes/'), Paths.mods(Mods.currentModDirectory + '/custom_notetypes/')];
 		for (i in 0...directories.length) {
 			var directory:String =  directories[i];
 			if(FileSystem.exists(directory)) {
@@ -1203,7 +1203,7 @@ class ChartingState extends MusicBeatState
 
 		#if MODS_ALLOWED
 		directories.push(Paths.mods('custom_events/'));
-		directories.push(Paths.mods(Paths.currentModDirectory + '/custom_events/'));
+		directories.push(Paths.mods(Mods.currentModDirectory + '/custom_events/'));
 		for(mod in Paths.getGlobalMods())
 			directories.push(Paths.mods(mod + '/custom_events/'));
 		#end
@@ -1964,7 +1964,7 @@ class ChartingState extends MusicBeatState
 			curSec = sec;
 
 			//-- so apparently psych 0.6.2 got rid of lengthInSteps which would cause older builds and other engines to not read the chart properly. this should fix it.
-			if(_song.notes[curSec].lengthInSteps != 16){
+			if(_song.notes[curSec].lengthInSteps == null){
 				trace('haha we found no lengthInSteps');
 				_song.notes[curSec].lengthInSteps = 16;
 			}
@@ -2257,7 +2257,100 @@ class ChartingState extends MusicBeatState
 		#end
 	}
 
-	function waveformData(buffer:AudioBuffer, bytes:Bytes, time:Float, endTime:Float, multiply:Float = 1, ?array:Array<Array<Array<Float>>>, ?steps:Float):Array<Array<Array<Float>>>
+	//because fuck runHaxeCode
+	public static function wavDataFuncs(funcName:String, daVar:Dynamic, ?args:Array<Dynamic>){
+		switch(funcName.toLowerCase()){
+			case "getuint16":
+				return daVar.getUInt16(args[0]);
+			case "tobytes":
+				return daVar.data.toBytes();
+		}
+
+		return null;
+	}
+
+	public static function returnWavData(buffer:AudioBuffer, curTime:Float = 0){
+		var newWavData:Array<Dynamic> = [null, null, null, null, null];
+	
+		newWavData[0] = buffer.sampleRate / 44100; // sampleMult
+		newWavData[1] = Std.int(curTime * 44.0875 * newWavData[0]); // index
+		newWavData[2] = 0;
+		newWavData[3] = 1;
+		newWavData[4] = buffer.data.toBytes();
+
+		return newWavData;
+	}
+
+
+	public static function updateWaveformSprite(daSprite:FlxSprite, daSound:FlxSound, songPos:Float) {
+		var newWavData:Array<Array<Array<Float>>> = [[[0], [0]], [[0], [0]]];
+
+		#if desktop
+		daSprite.makeGraphic(Std.int(GRID_SIZE * 8), Std.int(640), 0x00FFFFFF);
+		daSprite.pixels.fillRect(new Rectangle(0, 0, 320, 640), 0x00FFFFFF);
+
+		newWavData[0][0] = [];
+		newWavData[0][1] = [];
+		newWavData[1][0] = [];
+		newWavData[1][1] = [];
+
+		var steps:Int = Math.round(4 * 4);
+		var st:Float = songPos;
+		var et:Float = st + (Conductor.stepCrochet * steps);
+
+		var sound:FlxSound = daSound;
+		if (sound._sound != null && sound._sound.__buffer != null) {
+			var bytes:Bytes = sound._sound.__buffer.data.toBytes();
+
+			newWavData = waveformData(
+				sound._sound.__buffer,
+				bytes,
+				st,
+				et,
+				1,
+				newWavData,
+				Std.int(640)
+			);
+		}
+
+		// Draws
+		var gSize:Int = Std.int(GRID_SIZE * 8);
+		var hSize:Int = Std.int(gSize / 2);
+
+		var lmin:Float = 0;
+		var lmax:Float = 0;
+
+		var rmin:Float = 0;
+		var rmax:Float = 0;
+
+		var size:Float = 1;
+
+		var leftLength:Int = (
+			newWavData[0][0].length > newWavData[0][1].length ? newWavData[0][0].length : newWavData[0][1].length
+		);
+
+		var rightLength:Int = (
+			newWavData[1][0].length > newWavData[1][1].length ? newWavData[1][0].length : newWavData[1][1].length
+		);
+
+		var length:Int = leftLength > rightLength ? leftLength : rightLength;
+
+		var index:Int;
+		for (i in 0...length) {
+			index = i;
+
+			lmin = FlxMath.bound(((index < newWavData[0][0].length && index >= 0) ? newWavData[0][0][index] : 0) * (gSize / 1.12), -hSize, hSize) / 2;
+			lmax = FlxMath.bound(((index < newWavData[0][1].length && index >= 0) ? newWavData[0][1][index] : 0) * (gSize / 1.12), -hSize, hSize) / 2;
+
+			rmin = FlxMath.bound(((index < newWavData[1][0].length && index >= 0) ? newWavData[1][0][index] : 0) * (gSize / 1.12), -hSize, hSize) / 2;
+			rmax = FlxMath.bound(((index < newWavData[1][1].length && index >= 0) ? newWavData[1][1][index] : 0) * (gSize / 1.12), -hSize, hSize) / 2;
+
+			daSprite.pixels.fillRect(new Rectangle(hSize - (lmin + rmin), i * size, (lmin + rmin) + (lmax + rmax), size), FlxColor.BLUE);
+		}
+		#end
+	}
+
+	public static function waveformData(buffer:AudioBuffer, bytes:Bytes, time:Float, endTime:Float, multiply:Float = 1, ?array:Array<Array<Array<Float>>>, ?steps:Float):Array<Array<Array<Float>>>
 	{
 		#if (lime_cffi && !macro)
 		if (buffer == null || buffer.data == null) return [[[0], [0]], [[0], [0]]];
@@ -2863,14 +2956,14 @@ class ChartingState extends MusicBeatState
 		#if MODS_ALLOWED
 		characterList = ["bf"];
 
-		if (Paths.currentModDirectory != 'BETADCIU')
+		if (Mods.currentModDirectory != 'BETADCIU')
 		{
 			if (FileSystem.exists(Paths.modFolders('data/characterList.txt'))){
 				characterList = CoolUtil.coolTextFile2(Paths.modFolders('data/characterList.txt'));
 			}
 				
 			 //READDED
-			 var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Paths.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')];
+			 var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Mods.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')];
 			 for (i in 0...directories.length) {
 				 var directory:String = directories[i];
 				 if(FileSystem.exists(directory)) {

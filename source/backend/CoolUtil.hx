@@ -40,6 +40,10 @@ class CoolUtil
 
 	public static var difficulties:Array<String> = [];
 
+	inline public static function capitalize(text:String){
+		return text.charAt(0).toUpperCase() + text.substr(1).toLowerCase();
+	}
+		
 	public static function getDifficultyFilePath(num:Null<Int> = null)
 	{
 		if(num == null) num = PlayState.storyDifficulty;

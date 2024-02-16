@@ -24,51 +24,47 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		var option:Option = new Option('Controller Mode',
 			'Check this if you want to play with\na controller instead of using your Keyboard.',
 			'controllerMode',
-			'bool',
-			false);
+			'bool');
 		addOption(option);
 
 		//I'd suggest using "Downscroll" as an example for making your own option since it is the simplest here
 		var option:Option = new Option('Downscroll', //Name
 			'If checked, notes go Down instead of Up, simple enough.', //Description
 			'downscroll', //Save data variable name
-			'bool', //Variable type
-			false); //Default value	
+			'bool'); //Variable type
 		addOption(option);
 
 		var option:Option = new Option('Botplay', //Name
 			'If checked, song will auto play for you.', //Description
 			'botplay', //Save data variable name
-			'bool', //Variable type
-			false); //Default value
+			'bool'); //Variable type
 		addOption(option);
 
 		/*var option:Option = new Option('Middlescroll',
 			'If checked, your notes get centered.',
 			'middleScroll',
 			'bool',
-			false);
+			"false");
 		addOption(option);
 
 		var option:Option = new Option('Opponent Notes',
 			'If unchecked, opponent notes get hidden.',
 			'opponentStrums',
 			'bool',
-			true);
+			"true");
 		addOption(option);*/
 
 		var option:Option = new Option('Ghost Tapping',
 			"If checked, you won't get misses from pressing keys\nwhile there are no notes able to be hit.",
 			'ghostTapping',
-			'bool',
-			true);
+			'bool');
 		addOption(option);
 
 		/*var option:Option = new Option('Disable Reset Button',
 			"If checked, pressing Reset won't do anything.",
 			'noReset',
 			'bool',
-			false);
+			"false");
 		addOption(option);
 
 		var option:Option = new Option('Hitsound Volume',

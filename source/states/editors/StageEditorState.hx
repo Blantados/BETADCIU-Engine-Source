@@ -703,10 +703,10 @@ class StageEditorState extends MusicBeatState
 
 		#if MODS_ALLOWED
 		stageList = [];
-		if (Paths.currentModDirectory != 'BETADCIU')
+		if (Mods.currentModDirectory != 'BETADCIU')
 		{
 				//READDED
-				var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.currentModDirectory + '/stages/'), Paths.getPreloadPath('stages/')];
+				var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Mods.currentModDirectory + '/stages/'), Paths.getPreloadPath('stages/')];
 				for (i in 0...directories.length) {
 					var directory:String = directories[i];
 					if(FileSystem.exists(directory)) {

@@ -99,63 +99,7 @@ class Alphabet extends FlxSpriteGroup
 		this.text = newText;
 		return newText;
 	}
-
-	public function clearLetters()
-	{
-		var i:Int = letters.length;
-		while (i > 0)
-		{
-			--i;
-			var letter:AlphaCharacter = letters[i];
-			if(letter != null)
-			{
-				letter.kill();
-				letters.remove(letter);
-				letter.destroy();
-			}
-		}
-		letters = [];
-		rows = 0;
-	}
-
-	private function set_scaleX(value:Float)
-	{
-		if (value == scaleX) return value;
-
-		scale.x = value;
-		for (letter in letters)
-		{
-			if(letter != null)
-			{
-				letter.updateHitbox();
-				//letter.updateLetterOffset();
-				var ratio:Float = (value / letter.spawnScale.x);
-				letter.x = letter.spawnPos.x * ratio;
-			}
-		}
-		scaleX = value;
-		return value;
-	}
-
-	private function set_scaleY(value:Float)
-	{
-		if (value == scaleY) return value;
-
-		scale.y = value;
-		for (letter in letters)
-		{
-			if(letter != null)
-			{
-				letter.updateHitbox();
-				letter.updateLetterOffset();
-				var ratio:Float = (value / letter.spawnScale.y);
-				letter.y = letter.spawnPos.y * ratio;
-			}
-		}
-		scaleY = value;
-		return value;
-	}
-
+	
 	override function update(elapsed:Float)
 	{
 		if (isMenuItem)
@@ -241,6 +185,78 @@ class Alphabet extends FlxSpriteGroup
 
 		if(letters.length > 0) rows++;
 	}
+
+	
+	public function clearLetters()
+	{
+		var i:Int = letters.length;
+		while (i > 0)
+		{
+			--i;
+			var letter:AlphaCharacter = letters[i];
+			if(letter != null)
+			{
+				letter.kill();
+				letters.remove(letter);
+				remove(letter);
+			}
+		}
+		letters = [];
+		rows = 0;
+	}
+
+	public function setScale(newX:Float, newY:Null<Float> = null)
+	{
+		var lastX:Float = scale.x;
+		var lastY:Float = scale.y;
+		if(newY == null) newY = newX;
+		@:bypassAccessor
+			scaleX = newX;
+		@:bypassAccessor
+			scaleY = newY;
+
+		scale.x = newX;
+		scale.y = newY;
+		softReloadLetters(newX / lastX, newY / lastY);
+	}
+
+	private function set_scaleX(value:Float)
+	{
+		if (value == scaleX) return value;
+
+		var ratio:Float = value / scale.x;
+		scale.x = value;
+		scaleX = value;
+		softReloadLetters(ratio, 1);
+		return value;
+	}
+
+	private function set_scaleY(value:Float)
+	{
+		if (value == scaleY) return value;
+
+		var ratio:Float = value / scale.y;
+		scale.y = value;
+		scaleY = value;
+		softReloadLetters(1, ratio);
+		return value;
+	}
+
+	public function softReloadLetters(ratioX:Float = 1, ratioY:Null<Float> = null)
+	{
+		if(ratioY == null) ratioY = ratioX;
+
+		for (letter in letters)
+		{
+			if(letter != null)
+			{
+				letter.setupAlphaCharacter(
+					(letter.x - x) * ratioX + x,
+					(letter.y - y) * ratioY + y
+				);
+			}
+		}
+	}
 }
 
 
@@ -323,6 +339,8 @@ class AlphaCharacter extends FlxSprite
 
 	public var row:Int = 0;
 	public var rowWidth:Float = 0;
+	public var character:String = '?';
+
 	public function new(x:Float, y:Float, character:String, bold:Bool, parent:Alphabet)
 	{
 		super(x, y);
@@ -330,55 +348,61 @@ class AlphaCharacter extends FlxSprite
 		image = 'alphabet';
 		antialiasing = true;
 
-		var curLetter:Letter = allLetters.get('?');
-		var lowercase = character.toLowerCase();
-		if(allLetters.exists(lowercase)) curLetter = allLetters.get(lowercase);
+		setupAlphaCharacter(x, y, character, bold);
+		updateLetterOffset();
+	}
 
-		var suffix:String = '';
-		if(!bold)
+	public var curLetter:Letter = null;
+	public function setupAlphaCharacter(x:Float, y:Float, ?character:String = null, ?bold:Null<Bool> = null)
+	{
+		this.x = x;
+		this.y = y;
+
+		if(parent != null)
 		{
-			if(isTypeAlphabet(lowercase))
+			if(bold == null)
+				bold = parent.bold;
+			this.scale.x = parent.scaleX;
+			this.scale.y = parent.scaleY;
+		}
+		
+		if(character != null)
+		{
+			this.character = character;
+			curLetter = null;
+			var lowercase:String = this.character.toLowerCase();
+			if(allLetters.exists(lowercase)) curLetter = allLetters.get(lowercase);
+			else curLetter = allLetters.get('?');
+
+			var suffix:String = '';
+			if(!bold)
 			{
-				if(lowercase != character)
-					suffix = ' uppercase';
-				else
-					suffix = ' lowercase';
-			}
-			else
-			{
-				suffix = ' normal';
-				if(curLetter != null && curLetter.offsets != null)
+				if(isTypeAlphabet(lowercase))
 				{
-					letterOffset[0] = curLetter.offsets[0];
-					letterOffset[1] = curLetter.offsets[1];
+					if(lowercase != this.character)
+						suffix = ' uppercase';
+					else
+						suffix = ' lowercase';
 				}
+				else suffix = ' normal';
 			}
-		}
-		else
-		{
-			suffix = ' bold';
-			if(curLetter != null && curLetter.offsetsBold != null)
-			{
-				letterOffset[0] = curLetter.offsetsBold[0];
-				letterOffset[1] = curLetter.offsetsBold[1];
-			}
-		}
+			else suffix = ' bold';
 
-		var alphaAnim:String = lowercase;
-		if(curLetter != null && curLetter.anim != null) alphaAnim = curLetter.anim;
+			var alphaAnim:String = lowercase;
+			if(curLetter != null && curLetter.anim != null) alphaAnim = curLetter.anim;
 
-		var anim:String = alphaAnim + suffix;
-		animation.addByPrefix(anim, anim, 24);
-		animation.play(anim, true);
-		if(animation.curAnim == null)
-		{
-			if(suffix != ' bold') suffix = ' normal';
-			anim = 'question' + suffix;
+			var anim:String = alphaAnim + suffix;
 			animation.addByPrefix(anim, anim, 24);
 			animation.play(anim, true);
+			if(animation.curAnim == null)
+			{
+				if(suffix != ' bold') suffix = ' normal';
+				anim = 'question' + suffix;
+				animation.addByPrefix(anim, anim, 24);
+				animation.play(anim, true);
+			}
 		}
 		updateHitbox();
-		updateLetterOffset();
 	}
 
 	public static function isTypeAlphabet(c:String) // thanks kade
@@ -418,11 +442,32 @@ class AlphaCharacter extends FlxSprite
 
 	public function updateLetterOffset()
 	{
-		if (animation.curAnim == null) return;
-
-		if(!animation.curAnim.name.endsWith('bold'))
+		if (animation.curAnim == null)
 		{
-			offset.y += -(110 - height);
+			trace(character);
+			return;
 		}
+
+		var add:Float = 110;
+		if(animation.curAnim.name.endsWith('bold'))
+		{
+			if(curLetter != null && curLetter.offsetsBold != null)
+			{
+				letterOffset[0] = curLetter.offsetsBold[0];
+				letterOffset[1] = curLetter.offsetsBold[1];
+			}
+			add = 70;
+		}
+		else
+		{
+			if(curLetter != null && curLetter.offsets != null)
+			{
+				letterOffset[0] = curLetter.offsets[0];
+				letterOffset[1] = curLetter.offsets[1];
+			}
+		}
+		add *= scale.y;
+		offset.x += letterOffset[0] * scale.x;
+		offset.y += letterOffset[1] * scale.y - (add - height);
 	}
 }
