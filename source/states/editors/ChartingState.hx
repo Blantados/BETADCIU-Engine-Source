@@ -2257,7 +2257,7 @@ class ChartingState extends MusicBeatState
 		#end
 	}
 
-	//because fuck runHaxeCode
+	//these lag when running on lua for some bizarre reason
 	public static function wavDataFuncs(funcName:String, daVar:Dynamic, ?args:Array<Dynamic>){
 		switch(funcName.toLowerCase()){
 			case "getuint16":
@@ -2269,6 +2269,38 @@ class ChartingState extends MusicBeatState
 		return null;
 	}
 
+	public static function returnSampleLevelAtTime(buffer:AudioBuffer, curTime:Float = 0){
+		var sampleMult:Float = buffer.sampleRate / 44100;
+		var index:Int = Std.int(curTime * sampleMult);
+		var drawIndex:Int = 0;
+		var samplesPerRow = 1;
+		var waveBytes:Bytes = buffer.data.toBytes();
+
+		var min:Float = 0;
+		var max:Float = 0;
+		
+		var byte:Int = waveBytes.getUInt16(index * 4);
+
+		if (byte > 65535 / 2)
+			byte -= 65535;
+
+		var sample:Float = (byte / 65535);
+
+		if (sample > 0)
+		{
+			if (sample > max)
+				max = sample;
+		}
+		else if (sample < 0)
+		{
+			if (sample < min)
+				min = sample;
+		}
+
+		return max + min;
+	}
+
+	//so we did all the math in chartingstate.
 	public static function returnWavData(buffer:AudioBuffer, curTime:Float = 0){
 		var newWavData:Array<Dynamic> = [null, null, null, null, null];
 	
@@ -2280,6 +2312,7 @@ class ChartingState extends MusicBeatState
 
 		return newWavData;
 	}
+
 
 
 	public static function updateWaveformSprite(daSprite:FlxSprite, daSound:FlxSound, songPos:Float) {

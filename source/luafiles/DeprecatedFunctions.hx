@@ -20,8 +20,8 @@ class DeprecatedFunctions
 
 		Lua_helper.add_callback(lua, "objectPlayAnimation", function(obj:String, name:String, forced:Bool = false, ?startFrame:Int = 0) {
 			//ModchartState.luaTrace("objectPlayAnimation is deprecated! Use playAnim instead", false, true); // i still use this
-			if(PlayState.instance.getLuaObject(obj,false) != null) {
-				PlayState.instance.getLuaObject(obj,false).animation.play(name, forced, false, startFrame);
+			if(LuaUtils.getObjectDirectly(obj) != null) {
+				LuaUtils.getObjectDirectly(obj).animation.play(name, forced, false, startFrame);
 				return true;
 			}
 

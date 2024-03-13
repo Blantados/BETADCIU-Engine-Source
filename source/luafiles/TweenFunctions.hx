@@ -24,6 +24,7 @@ class TweenFunctions
 		Lua_helper.add_callback(lua, "doTweenZoom", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
 			oldTweenFunction(tag, vars, {zoom: value}, duration, ease, 'doTweenZoom');
 		});
+
 		Lua_helper.add_callback(lua, "cancelTween", function(tag:String) {
 			LuaUtils.cancelTween(tag);
 		});

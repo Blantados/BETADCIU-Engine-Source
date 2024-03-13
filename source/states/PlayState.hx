@@ -3169,9 +3169,6 @@ class PlayState extends MusicBeatState
 	public var paused:Bool = false;
 	public var startedCountdown:Bool = false;
 	public var canPause:Bool = true;
-	public var spookyText:FlxText;
-	public var spookyRendered:Bool = false;
-	public var spookySteps:Int = 0;
 	public var nps:Int = 0;
 	public var maxNPS:Int = 0;
 
@@ -3213,14 +3210,14 @@ class PlayState extends MusicBeatState
 		paused = true;
 		pauseCameraEffects = true;
 
-		// 1 / 1000 chance for Gitaroo Man easter egg
-		if (FlxG.random.bool(0.1))
+		// I finally got tired with it
+		/*if (FlxG.random.bool(0.1))
 		{
 			cancelMusicFadeTween();
 			MusicBeatState.switchState(new states.GitarooPause());
 		}
 		else
-		{
+		{*/
 			if(FlxG.sound.music != null) {
 				FlxG.sound.music.pause();
 				vocals.pause();
@@ -3228,7 +3225,7 @@ class PlayState extends MusicBeatState
 
 			isPaused = true;
 			openSubState(new substates.PauseSubState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
-		}
+		//}
 
 		#if desktop
 		DiscordClient.changePresence(detailsPausedText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
