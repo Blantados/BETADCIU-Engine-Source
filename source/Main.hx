@@ -107,7 +107,7 @@ class Main extends Sprite
 		fpsCounter = new FPS(10, 3, 0xFFFFFF);
 		addChild(fpsCounter);
 		Lib.current.stage.align = "tl";
-		Lib.current.stage.scaleMode = StageScaleMode.SHOW_ALL;
+		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
 		var daBool:Bool = FlxG.save.data.fps || FlxG.save.data.showFPS;
 		toggleFPS(daBool);
 		#end
