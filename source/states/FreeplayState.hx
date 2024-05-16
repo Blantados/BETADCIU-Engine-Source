@@ -54,11 +54,22 @@ class FreeplayState extends MusicBeatState
 		PlayState.isStoryMode = false;
 
 		if (FlxG.sound.music.volume == 0 || !FlxG.sound.music.playing)
-		{
-			FlxG.sound.music.volume = 1;
-			FlxG.sound.playMusic(Paths.music('newMenu'));
-		}
-
+			{
+				FlxG.sound.music.volume = 1;
+				FlxG.sound.playMusic(Paths.music('songSelect'));
+			}
+	
+			if (FlxG.sound.music.playing || MainMenuState.mainMusic)
+			{
+				FlxG.sound.playMusic(Paths.music('songSelect'));
+				MainMenuState.mainMusic = false;
+			}
+			if (!FlxG.sound.music.playing || MainMenuState.mainMusic == false)
+			{
+				FlxG.sound.playMusic(Paths.music('songSelect'));
+				MainMenuState.mainMusic = false;
+			}
+	
 		for (i in 0...WeekData.weeksList.length) {
 			var leWeek:WeekData = WeekData.weeksLoaded.get(WeekData.weeksList[i]);
 			var leSongs:Array<String> = [];
@@ -113,6 +124,10 @@ class FreeplayState extends MusicBeatState
 		{
 			var songText:Alphabet = new Alphabet(90, 320, songs[i].songName, true);
 			songText.isMenuItem = true;
+			songText.isFreeplayItem = true;
+			songText.screenCenter(X); 			
+			songText.changeX = false;
+			//songText.x = songText.x -50;//nvm.
 			songText.targetY = i;
 			grpSongs.add(songText);
 

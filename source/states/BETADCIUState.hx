@@ -39,6 +39,8 @@ class BETADCIUState extends MusicBeatState
 	public static var canMove:Bool = true;
 	public var warning:Bool = false;
 	var extras:FlxSprite;
+	var neonight:FlxSprite;
+	var vitor:FlxSprite;
 	var blackScreen:FlxSprite;
 
 	var bg:FlxSprite;
@@ -91,10 +93,16 @@ class BETADCIUState extends MusicBeatState
 	
 		WeekData.setDirectoryFromWeek();
 
+		if (!FlxG.sound.music.playing || MainMenuState.mainMusic)
+		{
+			FlxG.sound.playMusic(Paths.music('songSelect'));
+			MainMenuState.mainMusic = false;
+		}	
+
 		if (FlxG.sound.music.volume == 0 || !FlxG.sound.music.playing)
 		{
 			FlxG.sound.music.volume = 1;
-			FlxG.sound.playMusic(Paths.music('newMenu'));
+			FlxG.sound.playMusic(Paths.music('songSelect'));
 		}
 
 		Main.isMegalo = false;
@@ -140,6 +148,9 @@ class BETADCIUState extends MusicBeatState
 		{
 			var songText:Alphabet = new Alphabet(90, 320, songs[i].songName, true);
 			songText.isMenuItem = true;
+			songText.isFreeplayItem = true;
+			songText.screenCenter(X); 			
+			songText.changeX = false;
 			songText.targetY = i;
 			grpSongs.add(songText);
 
@@ -190,17 +201,37 @@ class BETADCIUState extends MusicBeatState
 		changeSelection();
 		changeDiff();
 
-		extras = new FlxSprite(scoreText.x + 50, 600).loadGraphic(Paths.image('extras'), true, 360, 110);
+		extras = new FlxSprite(1064, 720-66).loadGraphic(Paths.image('extras'), true, 360, 110);
 		extras.animation.add('idle', [0]);
 		extras.animation.add('hover', [1]);
 		extras.scrollFactor.set();
-		extras.setGraphicSize(Std.int(extras.width * 0.8));
+		extras.setGraphicSize(Std.int(extras.width * 0.6));
 		extras.updateHitbox();
+		extras.antialiasing = true;
 		add(extras);
 
-		blackScreen = new FlxSprite(-100, -100).makeGraphic(Std.int(FlxG.width * 0.5), Std.int(FlxG.height * 0.5), FlxColor.BLACK);
+		neonight = new FlxSprite(1064, 720-132).loadGraphic(Paths.image('neonight'), true, 360, 110);
+		neonight.animation.add('idle', [0]);
+		neonight.animation.add('hover', [1]);
+		neonight.scrollFactor.set();
+		neonight.setGraphicSize(Std.int(neonight.width * 0.6));
+		neonight.updateHitbox();
+		neonight.antialiasing = true;
+		add(neonight);
+
+		vitor = new FlxSprite(1064, 720-198).loadGraphic(Paths.image('vitor'), true, 360, 110);
+		vitor.animation.add('idle', [0]);
+		vitor.animation.add('hover', [1]);
+		vitor.scrollFactor.set();
+		vitor.setGraphicSize(Std.int(vitor.width * 0.6));
+		vitor.updateHitbox();
+		vitor.antialiasing = true;
+		add(vitor);
+
+		blackScreen = new FlxSprite(-100, -100).makeGraphic(Std.int(FlxG.width * 1), Std.int(FlxG.height * 0.5), FlxColor.BLACK);
 		blackScreen.screenCenter();
 		blackScreen.scrollFactor.set();
+		blackScreen.alpha = 0.6;
 		blackScreen.visible = false;
 		add(blackScreen);
 
@@ -256,14 +287,14 @@ class BETADCIUState extends MusicBeatState
 			inMain = false;
 
 			var daText = new FlxText(0, 0, 0, "No BETADCIUs Detected! \n Press enter to return to main menu.", 48);
-			daText.setFormat(Paths.font("vcr.ttf"), 48, FlxColor.WHITE, CENTER);
+			daText.setFormat(Paths.font("phantomMuff.ttf"), 48, FlxColor.WHITE, CENTER);
 			daText.screenCenter();
 			daText.x += 20;
 			daText.y -= 100;
 			add(daText);
 
 			var daText2 = new FlxText(0, 0, Std.int(FlxG.width * 0.45), "Press enter to return to the main menu.", 44);
-			daText2.setFormat(Paths.font("vcr.ttf"), 44, FlxColor.WHITE, CENTER);
+			daText2.setFormat(Paths.font("phantomMuff.ttf"), 44, FlxColor.WHITE, CENTER);
 			daText2.screenCenter();
 			daText2.y += 100;
 			add(daText2);
@@ -364,15 +395,43 @@ class BETADCIUState extends MusicBeatState
 			extras.animation.play('hover');
 			if (FlxG.mouse.justPressed && canMove)
 			{
-				blackScreen.visible = true;
-				enterText.visible = true;
-				passwordText.visible = true;
-				canMove = false;
+				//blackScreen.visible = true;
+				//enterText.visible = true;
+				//passwordText.visible = true;
+				//canMove = false;
+
+				MusicBeatState.switchState(new GuestBETADCIUState());
 			}
 		}
 		else if (!FlxG.mouse.overlaps(extras))
 		{
 			extras.animation.play('idle');
+		}
+
+		if (FlxG.mouse.overlaps(neonight))
+		{
+			neonight.animation.play('hover');
+			if (FlxG.mouse.justPressed && canMove)
+			{
+				MusicBeatState.switchState(new NeonightState());
+			}
+		}
+		else if (!FlxG.mouse.overlaps(neonight))
+		{
+			neonight.animation.play('idle');
+		}
+
+		if (FlxG.mouse.overlaps(vitor))
+		{
+			vitor.animation.play('hover');
+			if (FlxG.mouse.justPressed && canMove)
+			{
+				MusicBeatState.switchState(new VitorState());
+			}
+		}
+		else if (!FlxG.mouse.overlaps(vitor))
+		{
+			vitor.animation.play('idle');
 		}
 
 		if (passwordText.visible == true)

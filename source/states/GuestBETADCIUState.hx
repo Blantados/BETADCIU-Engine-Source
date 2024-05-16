@@ -121,6 +121,7 @@ class GuestBETADCIUState extends MusicBeatState
 		{
 			var songText:Alphabet = new Alphabet(90, 320, songs[i].songName, true);
 			songText.isMenuItem = true;
+			songText.isFreeplayItem = true;
 			songText.targetY = i;
 			grpSongs.add(songText);
 
@@ -221,9 +222,10 @@ class GuestBETADCIUState extends MusicBeatState
  
 		if (warning)
 		{
-			var blackScreen = new FlxSprite(-100, -100).makeGraphic(Std.int(FlxG.width * 0.5), Std.int(FlxG.height * 0.5), FlxColor.BLACK);
+			var blackScreen = new FlxSprite(-100, -100).makeGraphic(Std.int(FlxG.width * 1), Std.int(FlxG.height * 0.5), FlxColor.BLACK);
 			blackScreen.screenCenter();
 			blackScreen.scrollFactor.set();
+			blackScreen.alpha = 0.6;
 			blackScreen.visible = false;
 			add(blackScreen);
 
@@ -231,14 +233,14 @@ class GuestBETADCIUState extends MusicBeatState
 			canMove = false;
 
 			var daText = new FlxText(0, 0, 0, "No BETADCIUs Detected! \n Press enter to return to main menu.", 48);
-			daText.setFormat(Paths.font("vcr.ttf"), 48, FlxColor.WHITE, CENTER);
+			daText.setFormat(Paths.font("phantomMuff.ttf"), 48, FlxColor.WHITE, CENTER);
 			daText.screenCenter();
 			daText.x += 20;
 			daText.y -= 100;
 			add(daText);
 
 			var daText2 = new FlxText(0, 0, Std.int(FlxG.width * 0.45), "Press enter to return to the main menu.", 44);
-			daText2.setFormat(Paths.font("vcr.ttf"), 44, FlxColor.WHITE, CENTER);
+			daText2.setFormat(Paths.font("phantomMuff.ttf"), 44, FlxColor.WHITE, CENTER);
 			daText2.screenCenter();
 			daText2.y += 100;
 			add(daText2);
@@ -332,7 +334,7 @@ class GuestBETADCIUState extends MusicBeatState
 		var accepted = controls.ACCEPT && !FlxG.keys.pressed.ALT;
 
 		if (warning && accepted)
-			MusicBeatState.switchState(new MainMenuState());
+			MusicBeatState.switchState(new BETADCIUState());
 
 		if (upP && canMove)
 		{
@@ -345,7 +347,7 @@ class GuestBETADCIUState extends MusicBeatState
 
 		if (controls.BACK && canMove)
 		{
-			MusicBeatState.switchState(new MainMenuState());
+			MusicBeatState.switchState(new BETADCIUState());
 		}
 
 		if (accepted && canMove)

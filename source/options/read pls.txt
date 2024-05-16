@@ -1,0 +1,1 @@
+apparently the "Uncache Characters" option is crashing so you can just remove it or fix it

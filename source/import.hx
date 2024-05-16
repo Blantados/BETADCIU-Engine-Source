@@ -42,6 +42,7 @@ import flixel.system.FlxSound;
 #end
 
 import flixel.FlxG;
+import flixel.FlxBasic;
 import flixel.FlxSprite;
 import flixel.FlxCamera;
 import flixel.math.FlxMath;

@@ -11,9 +11,9 @@ import lime.utils.Assets;
 import backend.HelperFunctions;
 import backend.PlayerSettings;
 
-class OptionsMenu extends MusicBeatState
+class OptionsMenuKade extends MusicBeatState
 {
-	public static var instance:OptionsMenu;
+	public static var instance:OptionsMenuKade;
 
 	var selector:FlxText;
 	var curSelected:Int = 0;

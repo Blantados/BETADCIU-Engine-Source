@@ -153,6 +153,10 @@ class ChartingState extends MusicBeatState
 
 	var tipTextGroup:FlxTypedGroup<FlxText>;
 
+	var lilStage:FlxSprite;
+	var lilBf:FlxSprite;
+	var lilOpp:FlxSprite;
+
 	override function create()
 	{
 		curSec = lastSection;
@@ -193,6 +197,37 @@ class ChartingState extends MusicBeatState
 		bg.scrollFactor.set();
 		bg.color = 0xFF222222;
 		add(bg);
+
+		lilStage = new FlxSprite(32, 432).loadGraphic(Paths.image("chartEditor/lilStage"));
+		lilStage.scrollFactor.set();
+		add(lilStage);
+
+		lilBf = new FlxSprite(32, 432).loadGraphic(Paths.image("chartEditor/lilBf"), true, 300, 256);
+		lilBf.animation.add("idle", [0, 1], 12, true);
+		lilBf.animation.add("0", [3, 4, 5], 12, false);
+		lilBf.animation.add("1", [6, 7, 8], 12, false);
+		lilBf.animation.add("2", [9, 10, 11], 12, false);
+		lilBf.animation.add("3", [12, 13, 14], 12, false);
+		lilBf.animation.add("yeah", [17, 20, 23], 12, false);
+		lilBf.animation.play("idle");
+		lilBf.animation.finishCallback = function(name:String){
+			lilBf.animation.play(name, true, false, lilBf.animation.getByName(name).numFrames - 2);
+		}
+		lilBf.scrollFactor.set();
+		add(lilBf);
+
+		lilOpp = new FlxSprite(32, 432).loadGraphic(Paths.image("chartEditor/lilOpp"), true, 300, 256);
+		lilOpp.animation.add("idle", [0, 1], 12, true);
+		lilOpp.animation.add("0", [3, 4, 5], 12, false);
+		lilOpp.animation.add("1", [6, 7, 8], 12, false);
+		lilOpp.animation.add("2", [9, 10, 11], 12, false);
+		lilOpp.animation.add("3", [12, 13, 14], 12, false);
+		lilOpp.animation.play("idle");
+		lilOpp.animation.finishCallback = function(name:String){
+			lilOpp.animation.play(name, true, false, lilOpp.animation.getByName(name).numFrames - 2);
+		}
+		lilOpp.scrollFactor.set();
+		add(lilOpp);
 
 		gridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * ((keys * 2) + 1), GRID_SIZE * _song.notes[curSec].lengthInSteps);
 		gridBG.x -= GRID_SIZE;
@@ -423,6 +458,7 @@ class ChartingState extends MusicBeatState
 	var sliderRate:FlxUISlider;
 
 	var check_warnings:FlxUICheckBox = null;
+	var lilBuddiesBox:FlxUICheckBox;
 
 	function addChartingUI():Void
 	{
@@ -516,6 +552,15 @@ class ChartingState extends MusicBeatState
 		tab_group_chart.add(sliderRate);
 		#end
 
+		lilBuddiesBox = new FlxUICheckBox(10, 205, null, null, "Lil' Buddies", 100);
+		lilBuddiesBox.checked = true;
+		lilBuddiesBox.callback = function()
+		{
+			lilBf.visible = lilBuddiesBox.checked;
+			lilOpp.visible = lilBuddiesBox.checked;
+			lilStage.visible = lilBuddiesBox.checked;
+		};
+
 		tab_group_chart.add(check_writing_notes);
 
 		tab_group_chart.add(new FlxText(130, oldBpmInputText.y - 30, 0, 'Old BPM (Fits chart from this \nBPM to Song BPM)'));
@@ -530,6 +575,7 @@ class ChartingState extends MusicBeatState
 		tab_group_chart.add(check_mute_inst);
 		tab_group_chart.add(check_mute_vocals);
 		tab_group_chart.add(check_warnings);
+		tab_group_chart.add(lilBuddiesBox);
 		#if desktop
 		tab_group_chart.add(waveformUseInstrumental);
 		tab_group_chart.add(waveformUseVoices);
@@ -624,9 +670,7 @@ class ChartingState extends MusicBeatState
 		var saveButton:FlxButton = new FlxButton(110, 8, "Save", function()
 		{
 			//if the song is playing and you have autoPause disabled, it'll crash.
-			FlxG.sound.music.pause();
-			vocals.pause();
-
+			pauseMusic();	
 			saveLevel();
 		});
 
@@ -677,9 +721,7 @@ class ChartingState extends MusicBeatState
 		var saveEvents:FlxButton = new FlxButton(110, reloadSongJson.y, 'Save Events', function ()
 		{
 			//if the song is playing and you have autoPause disabled, it'll crash.
-			FlxG.sound.music.pause();
-			vocals.pause();
-			
+			pauseMusic();		
 			saveEvents();
 		});
 
@@ -1371,8 +1413,7 @@ class ChartingState extends MusicBeatState
 
 		FlxG.sound.list.add(vocals);
 
-		FlxG.sound.music.pause();
-		vocals.pause();
+		pauseMusic();
 
 		Conductor.songPosition = sectionStartTime();
 		FlxG.sound.music.time = Conductor.songPosition;
@@ -1806,15 +1847,16 @@ class ChartingState extends MusicBeatState
 			
 			if (FlxG.keys.justPressed.SPACE)
 			{
-				if (FlxG.sound.music.playing)
-				{
-					FlxG.sound.music.pause();
-					vocals.pause();
+				if (FlxG.sound.music.playing){
+					pauseMusic();
 				}
 				else
 				{
 					vocals.play();
 					FlxG.sound.music.play();
+
+					lilBf.animation.play("idle");
+					lilOpp.animation.play("idle");
 				}
 			}
 
@@ -1828,9 +1870,7 @@ class ChartingState extends MusicBeatState
 
 			if (FlxG.mouse.wheel != 0)
 			{
-				FlxG.sound.music.pause();
-				vocals.pause();
-
+				pauseMusic();
 				FlxG.sound.music.time -= (FlxG.mouse.wheel * Conductor.stepCrochet * 0.4);
 				vocals.time = FlxG.sound.music.time;
 			}
@@ -1839,9 +1879,7 @@ class ChartingState extends MusicBeatState
 			{
 				if (FlxG.keys.pressed.W || FlxG.keys.pressed.S)
 				{
-					FlxG.sound.music.pause();
-					vocals.pause();
-
+					pauseMusic();
 					var daTime:Float = 700 * FlxG.elapsed;
 
 					if (FlxG.keys.pressed.W)
@@ -1858,8 +1896,7 @@ class ChartingState extends MusicBeatState
 			{
 				if (FlxG.keys.justPressed.W || FlxG.keys.justPressed.S)
 				{
-					FlxG.sound.music.pause();
-					vocals.pause();
+					pauseMusic();
 
 					var daTime:Float = Conductor.stepCrochet * 2;
 
@@ -1891,6 +1928,31 @@ class ChartingState extends MusicBeatState
 			+ curStep
 			+ "\nCurBeat: " 
 			+ curBeat;
+
+		curRenderedNotes.forEach(function(x:Note) {
+
+			var editorBFNote = x.mustPress;
+			
+			if(x.y < strumLine.y && !x.extraData.get("playedEditorClick") && FlxG.sound.music.playing){
+				if(editorBFNote){
+					//if(bfClick.checked){ FlxG.sound.play(Paths.sound("tick"), 0.6); }
+					lilBf.animation.play("" + (x.noteData % 4), true);
+				}
+				else if(!editorBFNote){
+					//if(opClick.checked){ FlxG.sound.play(Paths.sound("tick"), 0.6); }
+					lilOpp.animation.play("" + (x.noteData % 4), true);
+				}
+			}
+
+			if(x.y > strumLine.y && !x.extraData.get("playedEditorClick")){
+				x.extraData.set("playedEditorClick", false);
+			}
+
+			if(x.y < strumLine.y && !x.extraData.get("playedEditorClick")){
+				x.extraData.set("playedEditorClick", true);
+			}
+		});
+
 		super.update(elapsed);
 	}
 
@@ -1936,9 +1998,7 @@ class ChartingState extends MusicBeatState
 	function resetSection(songBeginning:Bool = false):Void
 	{
 		updateGrid();
-
-		FlxG.sound.music.pause();
-		vocals.pause();
+		pauseMusic();
 
 		// Basically old shit from changeSection???
 		FlxG.sound.music.time = sectionStartTime();
@@ -1971,8 +2031,7 @@ class ChartingState extends MusicBeatState
 
 			if (updateMusic)
 			{
-				FlxG.sound.music.pause();
-				vocals.pause();
+				pauseMusic();
 
 				FlxG.sound.music.time = sectionStartTime();
 				vocals.time = FlxG.sound.music.time;
@@ -3026,6 +3085,17 @@ class ChartingState extends MusicBeatState
 		#end
 
 		return characterList;
+	}
+
+	function pauseMusic()
+	{
+		FlxG.sound.music.pause();
+		if (vocals != null){
+			vocals.pause();
+		}
+
+		lilBf.animation.play("idle");
+		lilOpp.animation.play("idle");
 	}
 
 	function onSaveComplete(_):Void

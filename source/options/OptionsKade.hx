@@ -91,7 +91,7 @@ class DFJKOption extends KadeOption
 
 	public override function press():Bool
 	{
-		OptionsMenu.instance.openSubState(new KeyBindMenu());
+		OptionsMenuKade.instance.openSubState(new KeyBindMenu());
 		return false;
 	}
 

@@ -49,7 +49,7 @@ class MainMenuState extends MusicBeatState
 	var curoffset:Float = 100;
 	var scale:Float = 0.85;
 
-	var firstTime:Bool = true;
+	public static var firstTime:Bool = true;
 
 	override function create()
 	{
@@ -81,6 +81,9 @@ class MainMenuState extends MusicBeatState
 		bg.screenCenter();
 		bg.antialiasing = true;
 		add(bg);
+
+		camFollow = new FlxObject(700, 94, 1, 1);
+		add(camFollow);
 
 		if (firstTime)
 		{
@@ -123,12 +126,20 @@ class MainMenuState extends MusicBeatState
 			//menuItem.screenCenter(X);
 			menuItems.add(menuItem);
 
-			FlxTween.tween(menuItem,{y: 60 + (i * 170) + offset},1 + (i * 0.25) ,{ease: FlxEase.expoInOut, onComplete: function(flxTween:FlxTween) 
+			if (finishedFunnyMove)
+			{
+				menuItem.y = 60 + (i * 170) + offset;
+				finishedFunnyMove = true; 
+				//changeItem();
+			}
+			else
+			{
+				FlxTween.tween(menuItem,{y: 60 + (i * 170) + offset},1 + (i * 0.25) ,{ease: FlxEase.expoInOut, onComplete: function(flxTween:FlxTween) 
 				{ 
 					finishedFunnyMove = true; 
 					changeItem();
 				}});
-
+			}
 		}
 
 		FlxG.camera.follow(camFollow, null, 0.06 * (120 / (cast (Lib.current.getChildAt(0), Main)).getFPS()));
@@ -241,41 +252,41 @@ class MainMenuState extends MusicBeatState
 								switch (daChoice)
 								{
 									case 'betadciu':
-										finishedFunnyMove = false;
+										//finishedFunnyMove = false;
 										MusicBeatState.switchState(new BETADCIUState());
 										trace("BETADCIU Menu Selected");
 
 									case 'story mode':
-										finishedFunnyMove = false;
+										//finishedFunnyMove = false;
 										MusicBeatState.switchState(new StoryMenuState());
 										trace("Story Mode Menu Selected");
 
 									case 'bonus songs':
-										finishedFunnyMove = false;
+										//finishedFunnyMove = false;
 										MusicBeatState.switchState(new BonusSongsState());
 										trace("Bonus Songs Menu Selected");
 
 									case 'neonight':
-										finishedFunnyMove = false;
+										//finishedFunnyMove = false;
 										MusicBeatState.switchState(new NeonightState());
 										trace("Neonight Menu Selected");
 
 									case 'vitor':
-										finishedFunnyMove = false;
+										//finishedFunnyMove = false;
 										MusicBeatState.switchState(new VitorState());
 										trace("Vitor Menu Selected");
 									
 									case 'options':
-										finishedFunnyMove = false;
+										//finishedFunnyMove = false;
 										MusicBeatState.switchState(new options.OptionsState());
 
 									case 'extras':
-										finishedFunnyMove = false;
+										//finishedFunnyMove = false;
 										MusicBeatState.switchState(new GuestBETADCIUState());
 										trace("Extras Menu Selected");
 
 									case 'freeplay':
-										finishedFunnyMove = false;
+										//finishedFunnyMove = false;
 										MusicBeatState.switchState(new FreeplayState());
 										trace("Freeplay Menu Selected");
 

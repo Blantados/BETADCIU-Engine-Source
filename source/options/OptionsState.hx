@@ -1,5 +1,7 @@
 package options;
 
+import states.MainMenuState;
+
 import flash.text.TextField;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.group.FlxGroup.FlxTypedGroup;
@@ -10,23 +12,27 @@ import flixel.util.FlxSave;
 import haxe.Json;
 import flixel.input.keyboard.FlxKey;
 import flixel.graphics.FlxGraphic;
+import flixel.addons.display.FlxBackdrop;
 
 using StringTools;
 
 class OptionsState extends MusicBeatState
 {
 	#if debug
-	var options:Array<String> = ['Controls', 'Graphics', 'Visuals and UI', 'Gameplay', "Replays", "Modpack Maker"];
+	var options:Array<String> = ['BETADCIU', 'Controls', 'Graphics', 'Visuals and UI', 'Gameplay',"Legacy Options Menu", "Modpack Maker"];
 	#else
-	var options:Array<String> = ['Controls', 'Graphics', 'Visuals and UI', 'Gameplay', "Replays"];
+	var options:Array<String> = ['BETADCIU', 'Controls', 'Graphics', 'Visuals and UI', 'Gameplay'];
 	#end
 	
 	private var grpOptions:FlxTypedGroup<Alphabet>;
 	private static var curSelected:Int = 0;
 	public static var menuBG:FlxSprite;
-
+	
 	function openSelectedSubstate(label:String) {
 		switch(label) {
+			case 'BETADCIU':
+				openSubState(new options.BETADCIUOptionsSubState());
+				// trace('in BETADCIU Options menu');
 			case 'Note Colors':
 				openSubState(new options.NotesSubState());
 			case 'Controls':
@@ -41,10 +47,12 @@ class OptionsState extends MusicBeatState
 				openSubState(new options.GameplaySettingsSubState());
 			case 'Adjust Delay and Combo':
 				LoadingState.loadAndSwitchState(new options.NoteOffsetState());
-			#if debug
+			case 'Legacy Options Menu':
+				MusicBeatState.switchState(new options.OptionsMenuKade());
+			// #if debug
 			case 'Modpack Maker':
 				LoadingState.loadAndSwitchState(new states.editors.ModpackMaker());
-			#end
+			// #end
 		}
 	}
 
@@ -64,6 +72,15 @@ class OptionsState extends MusicBeatState
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		add(bg);
 
+		var titlestatebg:FlxBackdrop;
+		
+		titlestatebg = new FlxBackdrop(Paths.image('titleGrid'), XY);
+		titlestatebg.velocity.set(200, 110);
+		titlestatebg.updateHitbox();
+		titlestatebg.alpha = 0.5;
+		titlestatebg.screenCenter(X);
+		add(titlestatebg);
+
 		grpOptions = new FlxTypedGroup<Alphabet>();
 		add(grpOptions);
 
@@ -82,6 +99,23 @@ class OptionsState extends MusicBeatState
 
 		changeSelection();
 		ClientPrefs.saveSettings();
+
+		if (FlxG.sound.music.volume == 0 || !FlxG.sound.music.playing)
+			{
+				FlxG.sound.music.volume = 1;
+				FlxG.sound.playMusic(Paths.music('songSelect'));
+			}
+	
+			if (FlxG.sound.music.playing || MainMenuState.mainMusic)
+			{
+				FlxG.sound.playMusic(Paths.music('songSelect'));
+				MainMenuState.mainMusic = false;
+			}
+			if (!FlxG.sound.music.playing || MainMenuState.mainMusic == false)
+			{
+				FlxG.sound.playMusic(Paths.music('songSelect'));
+				MainMenuState.mainMusic = false;
+			}	
 
 		super.create();
 	}

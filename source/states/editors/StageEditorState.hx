@@ -108,6 +108,8 @@ class StageEditorState extends MusicBeatState
 		FlxG.cameras.add(camMenu, false);
 		FlxG.cameras.setDefaultDrawTarget(camEditor, true);
 
+		CustomFadeTransition.nextCamera = camMenu;
+
 		luaDebugGroup = new FlxTypedGroup<DebugLuaText>();
 		add(luaDebugGroup);
 		luaDebugGroup.cameras = [camMenu];

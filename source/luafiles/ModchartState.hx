@@ -1826,13 +1826,15 @@ class ModchartState
 	
 			// hud/camera
 
-			Lua_helper.add_callback(lua, "setHealthBarColors", function(leftHex:String, rightHex:String) {
-				var left:FlxColor = Std.parseInt(leftHex);
-				if(!leftHex.startsWith('0x')) left = Std.parseInt('0xff' + leftHex);
-				var right:FlxColor = Std.parseInt(rightHex);
-				if(!rightHex.startsWith('0x')) right = Std.parseInt('0xff' + rightHex);
-	
-				PlayState.instance.healthBar.createFilledBar(left, right);
+			Lua_helper.add_callback(lua, "setHealthBarColors", function(left:String, right:String) {
+				var left_color:Null<FlxColor> = null;
+				var right_color:Null<FlxColor> = null;
+				if (left != null && left != '')
+					left_color = CoolUtil.colorFromString(left);
+				if (right != null && right != '')
+					right_color = CoolUtil.colorFromString(right);
+
+				PlayState.instance.healthBar.createFilledBar(left_color, right_color);
 				PlayState.instance.healthBar.updateBar();
 			});
 	
@@ -3715,7 +3717,7 @@ class ModchartState
 		var shader:Dynamic = null;
 		
 		if (Std.isOfType(target, FlxCamera)){
-			var daFilters = (target._filters != null) ? target._filters : [];
+			var daFilters = (target.filters != null) ? target.filters : [];
 			
 			if (swagShader != null && swagShader.length > 0){
 				var arr:Array<String> = PlayState.instance.runtimeShaders.get(swagShader);

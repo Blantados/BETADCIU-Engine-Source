@@ -27,6 +27,7 @@ class Alphabet extends FlxSpriteGroup
 	public var letters:Array<AlphaCharacter> = [];
 
 	public var isMenuItem:Bool = false;
+	public var isFreeplayItem:Bool = false;
 	public var targetY:Int = 0;
 	public var changeX:Bool = true;
 	public var changeY:Bool = true;
@@ -125,6 +126,7 @@ class Alphabet extends FlxSpriteGroup
 	}
 
 	private static var Y_PER_ROW:Float = 85;
+	private static var maxLineWidth:Float = 960;
 
 	private function createLetters(newText:String)
 	{
@@ -164,6 +166,14 @@ class Alphabet extends FlxSpriteGroup
 					if(!bold) off = 2;
 					xPos += letter.width + (letter.letterOffset[0] + off) * scaleX;
 					rowData[rows] = xPos;
+
+					if (xPos >= maxLineWidth && isFreeplayItem) { // Check if adding letter exceeds max line width
+						xPos = maxLineWidth/3;
+						//xPos = letters.length * maxLineWidth / 3840; // trying to center this shit
+						rows++;
+						letter.x = xPos - 48;
+						letter.y += letter.height + 20;
+					}
 
 					add(letter);
 					letters.push(letter);

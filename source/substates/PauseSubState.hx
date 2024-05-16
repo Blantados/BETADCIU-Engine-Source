@@ -194,9 +194,9 @@ class PauseSubState extends MusicBeatSubstate
 				case "Resume":
 					close();
 				case "Restart Song":
-					restartSong(false, false);
+					restartSong(true, false);
 				case "Restart with Cutscene":
-					restartSong(false, true);
+					restartSong(true, true);
 				case "Leave Charting Mode":
 					restartSong();
 					PlayState.chartingMode = false;
@@ -204,7 +204,7 @@ class PauseSubState extends MusicBeatSubstate
 					if(curTime < Conductor.songPosition)
 					{
 						PlayState.startOnTime = curTime;
-						restartSong(true);
+						restartSong(false, false);
 					}
 					else
 					{
@@ -273,7 +273,7 @@ class PauseSubState extends MusicBeatSubstate
 		super.close();
 	}
 
-	public static function restartSong(?noTrans:Bool = false, ?cutscene:Bool = false)
+	public static function restartSong(?useTransition:Bool = true, ?cutscene:Bool = false)
 	{
 		PlayState.instance.paused = true; // For lua
 		PlayState.showCutscene = cutscene;
@@ -281,19 +281,15 @@ class PauseSubState extends MusicBeatSubstate
 
 		PlayState.instance.callOnLuas('onExitSong', []); // so that it also affects when restarting
 
-		if (!cutscene && !noTrans)
+		if (!cutscene && useTransition)
 			LoadingState.loadAndSwitchState(new states.CustomLoading());
 		else
 		{	
-			if(noTrans)
-			{
+			if (!useTransition){
 				FlxTransitionableState.skipNextTransOut = true;
-				FlxG.resetState();
 			}
-			else
-			{
-				MusicBeatState.resetState();
-			}
+			
+			MusicBeatState.resetState();
 		}
 	}
 

@@ -72,6 +72,7 @@ class BETADCIUSecretState extends MusicBeatState
 		{
 			var songText:Alphabet = new Alphabet(90, 320, songs[i].songName, true);
 			songText.isMenuItem = true;
+			songText.isFreeplayItem = true;
 			songText.targetY = i;
 			grpSongs.add(songText);
 

@@ -35,6 +35,8 @@ import objects.CharacterOffsets;
 import luafiles.ModchartState;
 import luafiles.DebugLuaText;
 
+import animateatlas.AtlasFrameMaker;
+
 using StringTools;
 
 /**
@@ -79,12 +81,14 @@ class CharacterEditorState extends MusicBeatState
 
 	var cameraFollowPointer:FlxSprite;
 	var healthBarBG:FlxSprite;
+	public static var inCharEditor:Bool = false;
 
 	var anims = null;
 
 	override function create()
 	{
 		FlxG.sound.playMusic(Paths.music('kawaruslow'), 0.7);
+		inCharEditor = true;
 
 		camEditor = new FlxCamera();
 		camHUD = new FlxCamera();
@@ -96,6 +100,8 @@ class CharacterEditorState extends MusicBeatState
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camMenu, false);
 		FlxG.cameras.setDefaultDrawTarget(camEditor, true);
+
+		CustomFadeTransition.nextCamera = camMenu;
 
 		luaDebugGroup = new FlxTypedGroup<DebugLuaText>();
 		add(luaDebugGroup);
@@ -842,8 +848,14 @@ class CharacterEditorState extends MusicBeatState
 			if(indices != null && indices.length > 0) {
 				if (newAnim.name == "") //texture atlas
 					char.animation.add(newAnim.anim, newAnim.indices, newAnim.fps, newAnim.loop);
-				else
+				else{
 					char.animation.addByIndices(newAnim.anim, newAnim.name, newAnim.indices, "", newAnim.fps, newAnim.loop);
+
+					if (char.useAtlas){
+						char.atlasChar.anim.addByAnimIndices(newAnim.anim, newAnim.indices, newAnim.fps);
+					}
+				}
+					
 			} else {
 				char.animation.addByPrefix(newAnim.anim, newAnim.name, newAnim.fps, newAnim.loop);
 			}
@@ -1044,7 +1056,19 @@ class CharacterEditorState extends MusicBeatState
 		Paths.currentTrackedAssets.remove(daPath);
 		Paths.clearStoredMemory2(daPath, 'image');
 		
-		char.frames = (char.isAnimateAtlas ? Paths.getAtlasFromData("characters/BOYFRIEND", char.spriteType) : Paths.getAtlasFromData(char.imageFile, char.spriteType));
+		if (!char.useAtlas){	
+			char.frames = Paths.getAtlasFromData(char.imageFile, char.spriteType);
+		}
+		else{
+			char.frames = Paths.getAtlasFromData("characters/blank", "SPARROW");
+
+			remove(char.atlasChar);
+			char.atlasChar.destroy();
+			#if flxanimate
+			char.atlasChar = new FlxAnimate(char.x, char.y, Paths.getPath("images/" + char.imageFile, TEXT, null, true));
+			#end
+			add(char.atlasChar);
+		}
 	
 		if(char.animationsArray != null && char.animationsArray.length > 0) {
 			for (anim in char.animationsArray) {
@@ -1192,6 +1216,11 @@ class CharacterEditorState extends MusicBeatState
 			if(memb != null) {
 				memb.kill();
 				charLayer.remove(memb);
+
+				if(memb.useAtlas){
+					remove(memb.atlasChar);
+					memb.atlasChar.destroy();
+				}
 				memb.destroy();
 			}
 			--i;
@@ -1229,6 +1258,10 @@ class CharacterEditorState extends MusicBeatState
 		}
 
 		char.setPosition(char.positionArray[0] + OFFSET_X + 100, char.positionArray[1]);
+		
+		if (char.useAtlas){
+			add(char.atlasChar);
+		}
 
 		/* THIS FUNCTION WAS USED TO PUT THE .TXT OFFSETS INTO THE .JSON
 
@@ -1537,6 +1570,7 @@ class CharacterEditorState extends MusicBeatState
 			if (FlxG.keys.justPressed.ESCAPE) {
 				MusicBeatState.switchState(new PlayState());
 				FlxG.mouse.visible = false;
+				inCharEditor = false;
 				return;
 			}
 			
@@ -1649,10 +1683,11 @@ class CharacterEditorState extends MusicBeatState
 					}
 				}
 
-				updateTextColors();
+				updateTextColors(); 
 			}
 		}
-		camMenu.zoom = FlxG.camera.zoom;
+
+		//camMenu.zoom = FlxG.camera.zoom;
 		ghostChar.setPosition(char.x, char.y);
 		super.update(elapsed);
 	}

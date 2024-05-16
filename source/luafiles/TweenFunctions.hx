@@ -38,6 +38,10 @@ class TweenFunctions
 		Lua_helper.add_callback(lua, "doTweenColor", function(tag:String, vars:String, targetColor:String, duration:Float, ease:String) {
 			var spr:Dynamic = LuaUtils.tweenPrepare(tag, vars);
 			if(spr != null) {
+				if (Std.isOfType(spr, objects.Character)){
+					Reflect.setProperty(spr, "doMissThing", 'false');
+				}
+
 				var curColor:FlxColor = spr.color;
 				curColor.alphaFloat = spr.alpha;
 				game.modchartTweens.set(tag, FlxTween.color(spr, duration, curColor, CoolUtil.colorFromString(targetColor), {ease: LuaUtils.getTweenEaseByString(ease),
@@ -55,6 +59,10 @@ class TweenFunctions
 			if (game != null){duration = duration / game.playbackRate;}
 			var spr:Dynamic = LuaUtils.tweenPrepare(tag, vars);
 			if(spr != null) {
+				if (Std.isOfType(spr, objects.Character)){
+					Reflect.setProperty(spr, "doMissThing", 'false');
+				}
+
 				game.modchartTweens.set(tag, FlxTween.color(spr, duration, initColor, finalColor, {
 					onComplete: function(twn:FlxTween) {
 						ModchartState.callOnCompleted("tween", tag);

@@ -47,7 +47,7 @@ class ShaderFunctions
 				var daShader:FlxRuntimeShader = new FlxRuntimeShader(arr[0], arr[1]); 
 
 				if (Std.isOfType(leObj, FlxCamera)){
-					var daFilters = (leObj._filters != null && keepOtherShaders) ? leObj._filters : [];
+					var daFilters = (leObj.filters != null && keepOtherShaders) ? leObj.filters : [];
 					
 					daFilters.push(new ShaderFilter(daShader));
 
@@ -81,9 +81,9 @@ class ShaderFunctions
 						var daFilters = [];
 						var swagFilters = [];
 
-						if (leObj._filters != null){
-							daFilters = leObj._filters;
-							swagFilters = leObj._filters;
+						if (leObj.filters != null){
+							daFilters = leObj.filters;
+							swagFilters = leObj.filters;
 						}
 
 						var arr:Array<String> = PlayState.instance.runtimeShaders.get(shader);

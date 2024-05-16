@@ -13,6 +13,8 @@ import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 
+import flixel.addons.display.FlxBackdrop;
+
 import objects.Character;
 import objects.Stage;
 
@@ -40,6 +42,8 @@ class CustomLoading extends MusicBeatState
     var bar:FlxBar;
 
     var bg:FlxSprite;
+    var titlestatebg:FlxBackdrop;
+
     public var isABETADCIU:Bool = false;
 
 	override function create()
@@ -52,6 +56,13 @@ class CustomLoading extends MusicBeatState
         bg = new FlxSprite().loadGraphic(Paths.image('menuBGTemplate2'));
         bg.color = FlxG.random.color();
         add(bg);
+
+        titlestatebg = new FlxBackdrop(Paths.image('titleGrid'), XY);
+		titlestatebg.velocity.set(200, 110);
+		titlestatebg.updateHitbox();
+		titlestatebg.alpha = 0.4;
+		titlestatebg.screenCenter(X);
+		add(titlestatebg);
 
         var songLowercase = StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase();
 		switch (songLowercase) {
@@ -89,11 +100,11 @@ class CustomLoading extends MusicBeatState
                 suf = '-guest';	
         }
 
-        text = new FlxText(25, FlxG.height / 2 + 275,0,"Loading "+ PlayState.SONG.song + (isABETADCIU ? " BETADCIU..." : "..."));
-        text.size = 48;
-        text.alignment = FlxTextAlign.LEFT;
+        text = new FlxText(25, FlxG.height / 2 + 175,FlxG.width - 100,"Loading "+ PlayState.SONG.song + (isABETADCIU ? " But Every Turn A Different Cover is Used..." : "..."),32);
+        text.size = 32;
+        text.alignment = FlxTextAlign.CENTER;
         text.borderColor = FlxColor.BLACK;
-		text.borderSize = 4;
+		text.borderSize = 3;
 		text.borderStyle = FlxTextBorderStyle.OUTLINE;
     
         kadeLogo = new FlxSprite(FlxG.width / 2, FlxG.height / 2).loadGraphic(Paths.image('KadeEngineLogo'));

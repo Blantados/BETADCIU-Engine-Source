@@ -1106,6 +1106,7 @@ class PlayState extends MusicBeatState
 		playerSingAnimations = singAnimations;
 
 		setOnLuas("mustHitSection", PlayState.SONG.notes[curSection].mustHitSection); //just so we can check the first section
+		setOnLuas('gfSection', SONG.notes[curSection].gfSection); //forgot to check this one too.
 		callOnScripts('start', []);			
 		callOnScripts('onCreate', []); //psych	
 
@@ -3411,8 +3412,8 @@ class PlayState extends MusicBeatState
 				var dunceNote:Note = unspawnNotes[0];
 				notes.add(dunceNote);
 
-				//callOnLuas('onSpawnNote', [notes.members.indexOf(dunceNote), dunceNote.noteData, dunceNote.noteType, dunceNote.isSustainNote]);
-				//callOnHScript('onSpawnNote', [dunceNote]);
+				callOnLuas('onSpawnNote', [notes.members.indexOf(dunceNote), dunceNote.noteData, dunceNote.noteType, dunceNote.isSustainNote]);
+				callOnHScript('onSpawnNote', [dunceNote]);
 
 				/*if (isDetected && executeModchart)
 				{
@@ -5160,7 +5161,7 @@ class PlayState extends MusicBeatState
 			FlxG.camera.follow(camFollowPos, LOCKON, 1);
 		}
 		else{
-			FlxG.camera.follow(camFollow, LOCKON, (cameraSpeed*0.04) * playbackRate * (30 / Main.getFPSStatic()) * (120 / Main.getFPSStatic()));			
+			adjustCamFollow();	
 		} 
 
 		FlxG.camera.focusOn((cameraSystem.toLowerCase() == "psych" ? camFollow : camFollow.getPosition()));
