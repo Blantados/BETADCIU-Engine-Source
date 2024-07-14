@@ -79,6 +79,9 @@ import states.TitleState;
 	public var fpsRain:Bool = false;
 	public var cursing:Bool = true;
 	public var violence:Bool = true;
+	public var stageChange:Bool = true;
+	public var uncacheCharacterSwitch:Bool = false;
+	public var showNextSection:Bool = false;
 
 	public var botplay:Bool = false;
 	public var songPosition:Bool = false;

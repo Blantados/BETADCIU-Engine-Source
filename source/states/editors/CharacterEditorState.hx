@@ -495,6 +495,9 @@ class CharacterEditorState extends MusicBeatState
 			char.flipX = !char.flipX;
 			reloadBGs();
 			char.flipAnims();
+			
+			char.playAnim(char.animation.name, true);
+			
 			ghostChar.flipX = char.flipX;
 
 			updateTextColors();
@@ -1232,12 +1235,16 @@ class CharacterEditorState extends MusicBeatState
 		ghostChar.alpha = 0.6;
 
 		char = new Character(0, 0, daAnim, !isDad);
+		char.debugMode = true;
+		char.loadCharacter(daAnim, !isDad); //fixes the offset issues
+
 		anims = char.animationsArray;
 
 		if(anims[0] != null) {
 			char.playAnim(anims[0].anim, true);
 		}
-		char.debugMode = true;
+
+
 
 		charLayer.add(ghostChar);
 		charLayer.add(char);
@@ -1257,7 +1264,8 @@ class CharacterEditorState extends MusicBeatState
 			fixTheDamnOffsets();
 		}
 
-		char.setPosition(char.positionArray[0] + OFFSET_X + 100, char.positionArray[1]);
+		var posArrToCheck = isDad ? char.positionArray : char.playerPositionArray;
+		char.setPosition(posArrToCheck[0] + OFFSET_X + 100, posArrToCheck[1]);
 		
 		if (char.useAtlas){
 			add(char.atlasChar);

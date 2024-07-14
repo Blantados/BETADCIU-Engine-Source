@@ -241,6 +241,7 @@ class PlayState extends MusicBeatState
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
 
 	public var camZooming:Bool = false;
+	public var autoCamZoom:Bool = true;
 	public var psychCamZooming:Bool = false;
 	public var camZoomingMult:Float = 1;
 	public var camZoomingDecay:Float = 1;
@@ -560,21 +561,14 @@ class PlayState extends MusicBeatState
 		add(luaDebugGroup);
 		luaDebugGroup.cameras = [camOther];
 		
-		if(FlxG.save.data.distractions && SONG.stage == 'garage'){
-			camGame.setFilters(filters);
-			camGame.filtersEnabled = true;
-			camHUD.setFilters(camfilters);
-			camHUD.filtersEnabled = true;
-		}
-
 		persistentUpdate = true;
 		persistentDraw = true;
 
 		if (SONG == null)
 			SONG = Song.loadFromJson('tutorial', 'tutorial');
 		
-		mania = SONG.mania;
-		isMania = (SONG.mania > 0);
+		//mania = SONG.mania;
+		//isMania = (SONG.mania > 0);
 
 		isDetected = (SONG.song.toLowerCase() == 'detected');
 
@@ -1093,10 +1087,10 @@ class PlayState extends MusicBeatState
 			
 		if (executeModchart)
 			luaArray.insert(0, new ModchartState(Paths.lua(songLowercase  + "/modchart" + suf)));
-
+	
 		switch (mania)
 		{
-			case 1: singAnimations = ['singLEFT', 'singUP', 'singRIGHT', 'singLEFT', 'singDOWN', 'singRIGHT'];	
+			case 1: singAnimations = ['singLEFT', 'singDOWN', 'singRIGHT', 'singLEFT', 'singUP', 'singRIGHT'];	
 			case 2: singAnimations = ['singLEFT', 'singDOWN', 'singUP', 'singRIGHT', 'singUP', 'singLEFT', 'singDOWN', 'singUP', 'singRIGHT'];
 			case 3: singAnimations = ['singLEFT', 'singDOWN', 'singUP', 'singUP', 'singRIGHT'];			
 			case 4: singAnimations = ['singLEFT', 'singUP', 'singRIGHT', 'singUP', 'singLEFT', 'singDOWN', 'singRIGHT'];
@@ -1704,7 +1698,7 @@ class PlayState extends MusicBeatState
 		return !result;
 	}
 
-	public function triggerEventNote(eventName:String, value1:String, value2:String) {
+	public function triggerEventNote(eventName:String, value1:String, value2:String, ?value3:String = "") {
 		switch(eventName) {
 			case 'Hey!':
 				var value:Int = 2;
@@ -1742,6 +1736,7 @@ class PlayState extends MusicBeatState
 
 			case 'Change Stage':
 				ModchartState.changeStage(value1);
+				setCameraOffsets(); // never noticed these weren't set again because i rarely use stage camera offsets
 
 			case 'Add Camera Zoom':
 				if(FlxG.save.data.camzoom && FlxG.camera.zoom < 1.35) {
@@ -1826,28 +1821,23 @@ class PlayState extends MusicBeatState
 					}
 				}
 			case 'Set Property':
-				var killMe:Array<String> = value1.split('.');
+				try
+				{
+					var split:Array<String> = value1.split('.');
 
-				if (value1.contains('velocity.')){
-					if (PlayState.instance != null){value2 = Std.string(Std.parseInt(value2)*playbackRate);}
-				}
-
-				if(killMe.length > 1) {
-					if (Std.isOfType(LuaUtils.getObjectDirectly(killMe[0]), Character) && killMe[killMe.length-1] == 'color')
-					{
-						var killMeh:Array<String> = [killMe[0], 'doMissThing'];
-						if(killMeh.length > 1) {
-							var coverMeInPiss:Dynamic = Reflect.getProperty(this, killMeh[0]);
-							for (i in 1...killMeh.length-1) {
-								coverMeInPiss = Reflect.getProperty(coverMeInPiss, killMeh[i]);
-							}
-							Reflect.setProperty(coverMeInPiss, killMeh[killMeh.length-1], 'false');
-						}
+					if (value1.contains('velocity.')){
+						if (PlayState.instance != null){value2 = Std.string(Std.parseInt(value2)*playbackRate);}
 					}
 
-					LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(killMe), killMe[killMe.length-1], value2);
-				} else {
-					LuaUtils.setVarInArray(this, value1, value2);
+					if(split.length > 1) {
+						LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split), split[split.length-1], value2);
+					} else {
+						LuaUtils.setVarInArray(this, value1, value2);
+					}
+				}
+				catch(e:Dynamic)
+				{
+					addTextToDebug('ERROR ("Set Property" Event) - ' + e.message.substr(0, e.message.indexOf('\n')), FlxColor.RED);
 				}
 			case 'Change Character':
 				switch(value1.toLowerCase().trim()) {
@@ -2723,21 +2713,24 @@ class PlayState extends MusicBeatState
 		FlxG.sound.music.onComplete = songOutro;
 		vocals.play();
 
-		if (ClientPrefs.data.psychUI && startOnTime <= 0)
+		if (ClientPrefs.data.psychUI)
 		{
-			FlxTween.tween(timeBar, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
-			FlxTween.tween(timeTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
-			FlxTween.tween(timeBarBG, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
+			if (startOnTime <= 0){
+				FlxTween.tween(timeBar, {alpha: 1}, 0.5 / playbackRate, {ease: FlxEase.circOut});
+				FlxTween.tween(timeTxt, {alpha: 1}, 0.5 / playbackRate, {ease: FlxEase.circOut});
+				FlxTween.tween(timeBarBG, {alpha: 1}, 0.5 / playbackRate, {ease: FlxEase.circOut});
+			}else{
+				timeBar.alpha = 1;
+				timeTxt.alpha = 1;
+				timeBarBG.alpha = 1;
+			}	
 		}
 
 			
-		if(startOnTime > 0)
-		{
+		if(startOnTime > 0){
 			setSongTime(startOnTime - 500);
-			timeBar.alpha = 1;
-			timeTxt.alpha = 1;
-			timeBarBG.alpha = 1;
 		}
+		
 		startOnTime = 0;
 
 		if(paused) {
@@ -2826,7 +2819,7 @@ class PlayState extends MusicBeatState
 				vocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(Paths.voices(PlayState.SONG.song));
 		}		
 		else
-			vocals = FlxG.sound.list.recycle(FlxSound);
+			vocals = new FlxSound();
 
 		trace('loaded vocals');
 
@@ -3383,7 +3376,7 @@ class PlayState extends MusicBeatState
 			// Conductor.lastSongPos = FlxG.sound.music.time;
 		}
 
-		if (camZooming)
+		if (camZooming && autoCamZoom)
 		{
 			var zoomValue:Float = CoolUtil.boundTo(1 - (elapsed * 3.125 * camZoomingDecay * playbackRate * (psychCamZooming ? 1 : 2)), 0, 1); // the * 2 makes it closer to kade's 0.95
 
@@ -3607,7 +3600,7 @@ class PlayState extends MusicBeatState
 					}
 				}else 
 				{
-					if (!daNote.ignoreNote && !daNote.burning && !daNote.blackStatic){
+					if ((!daNote.ignoreNote && !daNote.burning && !daNote.blackStatic && !daNote.blockHit) || daNote.autoHit){
 						goodNoteHit(daNote);	
 					}
 				}
@@ -4147,6 +4140,7 @@ class PlayState extends MusicBeatState
 	var downHold:Bool = false;
 	var rightHold:Bool = false;
 	var leftHold:Bool = false;	
+	public var strumsBlocked:Array<Bool> = [false, false, false, false];
 
 	private function keyShit():Void // I've invested in emma stocks
 	{
@@ -4205,7 +4199,7 @@ class PlayState extends MusicBeatState
 			
 			notes.forEachAlive(function(daNote:Note)
 			{
-				if (daNote.canBeHit && daNote.mustPress && !daNote.tooLate && !daNote.wasGoodHit)
+				if (daNote.canBeHit && daNote.mustPress && !daNote.tooLate && !daNote.wasGoodHit && !daNote.blockHit)
 				{
 					if (!directionsAccounted[daNote.noteData])
 					{
@@ -4258,7 +4252,7 @@ class PlayState extends MusicBeatState
 				{
 					for (shit in 0...pressArray.length)
 						{ // if a direction is hit that shouldn't be
-							if (pressArray[shit] && !directionList.contains(shit) && !writing)
+							if (pressArray[shit] && !directionList.contains(shit) && !writing && strumsBlocked[shit] != true)
 							{
 								interupt = true;
 								noteMiss(shit, null);
@@ -4267,7 +4261,7 @@ class PlayState extends MusicBeatState
 				}
 				for (coolNote in possibleNotes)
 				{
-					if (pressArray[coolNote.noteData])
+					if (pressArray[coolNote.noteData] && strumsBlocked[coolNote.noteData] != true)
 					{
 						if (mashViolations != 0)
 							mashViolations--;
@@ -4306,7 +4300,7 @@ class PlayState extends MusicBeatState
 		{
 			playerStrums.forEach(function(spr:StrumNote)
 			{
-				if (pressArray[spr.ID] && spr.animation.curAnim.name != 'confirm')
+				if (pressArray[spr.ID] && spr.animation.curAnim.name != 'confirm' && strumsBlocked[spr.ID] != true)
 				{
 					spr.playAnim('pressed');
 					spr.resetAnim = 0;
@@ -5270,7 +5264,7 @@ class PlayState extends MusicBeatState
 
 		if (FlxG.save.data.camzoom)
 		{
-			if (camZooming && FlxG.camera.zoom < 1.35 && curBeat % 4 == 0 && !inCutscene)
+			if (camZooming && autoCamZoom && FlxG.camera.zoom < 1.35 && curBeat % 4 == 0 && !inCutscene)
 			{
 				FlxG.camera.zoom += 0.015 * camZoomingMult;
 				camHUD.zoom += 0.03 * camZoomingMult;
@@ -5555,7 +5549,8 @@ class PlayState extends MusicBeatState
 			strumTime: event[0] + ClientPrefs.data.noteOffset,
 			event: event[1][i][0],
 			value1: event[1][i][1],
-			value2: event[1][i][2]
+			value2: event[1][i][2],
+			value3: event[1][i][3]
 		};
 		eventNotes.push(subEvent);
 		eventPushed(subEvent);

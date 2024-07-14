@@ -2284,6 +2284,14 @@ class ModchartState
 				//The string does absolutely nothing
 				//PlayState.instance.defaultCamFollow = true;
 			});
+
+			Lua_helper.add_callback(lua,"cameraSnap", function(camera:String, x:Float, y:Float) {
+				PlayState.instance.isCameraOnForcedPos = true;
+				
+				var camPosition:FlxObject = new FlxObject(0, 0, 1, 1);
+				camPosition.setPosition(x, y);
+				LuaUtils.cameraFromString(camera).focusOn(camPosition.getPosition());
+			});
 	
 			Lua_helper.add_callback(lua,"stopCameraEffects", function(id:String) { //how convenient
 				LuaUtils.cameraFromString(id).stopFX();
@@ -2821,10 +2829,12 @@ class ModchartState
 			});
 	
 			//idk if I wanna add events. alright I added the ones that are usable without that much tinkering.
-			Lua_helper.add_callback(lua, "triggerEvent", function(name:String, arg1:Dynamic, arg2:Dynamic) {
+			Lua_helper.add_callback(lua, "triggerEvent", function(name:String, arg1:Dynamic, arg2:Dynamic, ?arg3:Dynamic = "") {
 				var value1:String = arg1;
 				var value2:String = arg2;
-				PlayState.instance.triggerEventNote(name, value1, value2);
+				var value3:String = arg3;
+				
+				PlayState.instance.triggerEventNote(name, value1, value2, value3);
 			});
 	
 			Lua_helper.add_callback(lua, "arrayContains", function(obj:String, value:Dynamic) {
@@ -2863,7 +2873,7 @@ class ModchartState
 				}
 	
 				var killMe:Array<String> = obj.split('.');
-				var object:FlxSprite = changeSpriteClass(LuaUtils.getObjectDirectly(killMe[0]));
+				var object:FlxBasic = LuaUtils.getObjectDirectly(killMe[0]);
 				if(killMe.length > 1) {
 					object = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(killMe), killMe[killMe.length-1]);
 				}
@@ -3058,13 +3068,10 @@ class ModchartState
 				if(spr != null) spr.makeGraphic(width, height, CoolUtil.colorFromString(color));
 			});
 	
-			Lua_helper.add_callback(lua, "addAnimationByIndices", function(obj:String, name:String, prefix:String, indices:String, framerate:Int = 24) {
-				return addAnimByIndices(obj, name, prefix, indices, framerate, false);
+			Lua_helper.add_callback(lua, "addAnimationByIndices", function(obj:String, name:String, prefix:String, indices:Any, framerate:Int = 24, loop:Bool = false) {
+				return LuaUtils.addAnimByIndices(obj, name, prefix, indices, framerate, loop);
 			});
-			Lua_helper.add_callback(lua, "addAnimationByIndicesLoop", function(obj:String, name:String, prefix:String, indices:String, framerate:Int = 24) {
-				return addAnimByIndices(obj, name, prefix, indices, framerate, true);
-			});
-	
+
 			Lua_helper.add_callback(lua, "addAnimationByPrefix", function(obj:String, name:String, prefix:String, framerate:Int = 24, loop:Bool = true) {
 				if(LuaUtils.getObjectDirectly(obj)!=null) {
 					var cock:FlxSprite = LuaUtils.getObjectDirectly(obj);

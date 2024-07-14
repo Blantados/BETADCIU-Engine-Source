@@ -254,10 +254,22 @@ class CoolUtil
 	{
 		var hideChars = ~/[\t\n\r]/;
 		var color:String = hideChars.split(color).join('').trim();
-		if(color.startsWith('0x')) color = color.substring(color.length - 6);
+		var alpha:Float = 1;
+
+		if(color.startsWith('0x')){
+			//alpha stuff
+			if (color.length == 10){
+				var alphaHex:String = color.substr(2, 2);
+				alpha = Std.parseInt("0x" + alphaHex) / 255.0;
+			}
+			
+			color = color.substring(color.length - 6);
+		}
 
 		var colorNum:Null<FlxColor> = FlxColor.fromString(color);
 		if(colorNum == null) colorNum = FlxColor.fromString('#$color');
+		colorNum.alphaFloat = alpha;
+
 		return colorNum != null ? colorNum : FlxColor.WHITE;
 	}
 

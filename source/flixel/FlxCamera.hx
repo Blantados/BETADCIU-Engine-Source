@@ -1277,7 +1277,7 @@ class FlxCamera extends FlxBasic
 			}
 			else
 			{
-				//Got used to FlxG.updateFramerate / 60 but still wanted the formula to be changed
+				//Got used to FlxG.updateFramerate / 60 
 				scroll.x += (_scrollTarget.x - scroll.x) * followLerp * (FlxG.updateFramerate / 60);
 				scroll.y += (_scrollTarget.y - scroll.y) * followLerp * (FlxG.updateFramerate / 60);
 			}

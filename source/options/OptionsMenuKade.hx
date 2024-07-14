@@ -122,7 +122,7 @@ class OptionsMenuKade extends MusicBeatState
 		if (acceptInput)
 		{
 			if (controls.BACK && !isCat)
-				MusicBeatState.switchState(new states.MainMenuState());
+				MusicBeatState.switchState(new options.OptionsState());
 			else if (controls.BACK)
 			{
 				isCat = false;

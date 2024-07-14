@@ -30,7 +30,10 @@ typedef SwagSong =
 	var bfNoteStyle:String;
 	var stage:String;
 	var validScore:Bool;
+
+	@:optional
 	var mania:Int;
+	var keys:Int; // because i want it to be more straight forward
 }
 
 class Song
@@ -50,6 +53,7 @@ class Song
 	public var bfNoteStyle:String = 'normal';
 	public var stage:String = '';
 	public var mania:Int = 0;
+	public var keys:Int = 4;
 
 	public function new(song, notes, bpm)
 	{

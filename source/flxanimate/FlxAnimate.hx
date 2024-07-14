@@ -13,7 +13,6 @@ import flxanimate.animate.*;
 import flxanimate.zip.Zip;
 import openfl.Assets;
 import haxe.io.BytesInput;
-import flixel.system.FlxSound;
 import flixel.FlxG;
 import flxanimate.data.AnimationData;
 import flixel.FlxSprite;

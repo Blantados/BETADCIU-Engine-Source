@@ -40,6 +40,12 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			'bool'); //Variable type
 		addOption(option);
 
+		var option:Option = new Option('Show Next Section', //Name
+			'If checked, will show the current and next section in ChartingState.', //Description
+			'showNextSection', //Save data variable name
+			'bool'); //Variable type
+		addOption(option);
+
 		/*var option:Option = new Option('Middlescroll',
 			'If checked, your notes get centered.',
 			'middleScroll',

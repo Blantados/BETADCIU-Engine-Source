@@ -81,7 +81,7 @@ class Character extends FunkinSprite
 	public var doMissThing:Bool = false;
 	public var iconColor:String;
 	public var trailColor:String;
-	public var curColor:FlxColor;
+	public var curColor:FlxColor = 0xFFFFFFFF;
 
 	public var holdTimer:Float = 0;
 
@@ -266,7 +266,7 @@ class Character extends FunkinSprite
 					gameOverCharacter = json.gameover_character;
 				}
 				
-				positionArray = (isPlayer && json.playerposition != null ? json.playerposition : json.position);
+				positionArray = ((!debugMode && isPlayer && json.playerposition != null) ? json.playerposition : json.position);
 				playerPositionArray = (json.playerposition != null ?  json.playerposition : json.position);
 				cameraPosition = (isPlayer && json.player_camera_position != null ? json.player_camera_position : json.camera_position);
 				playerCameraPosition = (json.player_camera_position != null ? json.player_camera_position : json.camera_position);
@@ -316,14 +316,14 @@ class Character extends FunkinSprite
 					
 						var swagOffsets:Array<Int> = offsets;
 
-						if (isPlayer && playerOffsets != null && playerOffsets.length > 1){
+						if (!debugMode && isPlayer && playerOffsets != null && playerOffsets.length > 1){
 							swagOffsets = playerOffsets;
 						}
 
 						if(swagOffsets != null && swagOffsets.length > 1) {
 							addOffset(anim.anim, swagOffsets[0], swagOffsets[1]);
-						}
-
+						}	
+						
 						if(playerOffsets != null && playerOffsets.length > 1) {
 							addPlayerOffset(anim.anim, playerOffsets[0], playerOffsets[1]);
 						}
@@ -598,7 +598,7 @@ class Character extends FunkinSprite
 		animation.play(AnimName, Force, Reversed, Frame);
 
 		if (missed)
-			color = 0xCFAFFF;
+			color = curColor + 0xFFCFAFFF;
 		else if (color != curColor && doMissThing)
 			color = curColor;
 
@@ -609,7 +609,7 @@ class Character extends FunkinSprite
 		
 		if (debugMode)
 		{
-			if (animOffsets.exists(AnimName) && !isPlayer || animPlayerOffsets.exists(AnimName) && isPlayer)
+			if ((animOffsets.exists(AnimName) && !isPlayer) || (animPlayerOffsets.exists(AnimName) && isPlayer))
 				offset.set(daOffset[0] * daZoom, daOffset[1] * daZoom);
 			else
 				offset.set(0, 0);
@@ -680,19 +680,17 @@ class Character extends FunkinSprite
 
 	public function flipAnims()
 	{
-		var animSuf:Array<String> = ["", "miss", "-alt", "-alt2", "-loop"];
+		//rewrote it
+		for (anim in animationsArray){
+			if (anim.anim.contains("singRIGHT")){
+				var animSplit:Array<String> = anim.anim.split('singRIGHT');
 
-		if (curCharacter.contains('9key')){
-			animSuf.push("2");
-		}
-
-		for (i in 0...animSuf.length)
-		{
-			if (animation.getByName('singRIGHT' + animSuf[i]) != null && animation.getByName('singLEFT' + animSuf[i]) != null)
-			{
-				var oldRight = animation.getByName('singRIGHT' + animSuf[i]).frames;
-				animation.getByName('singRIGHT' + animSuf[i]).frames = animation.getByName('singLEFT' + animSuf[i]).frames;
-				animation.getByName('singLEFT' + animSuf[i]).frames = oldRight;
+				if (animation.getByName('singRIGHT' + animSplit[1]) != null && animation.getByName('singLEFT' + animSplit[1]) != null)
+				{
+					var oldRight = animation.getByName('singRIGHT' + animSplit[1]).frames;
+					animation.getByName('singRIGHT' + animSplit[1]).frames = animation.getByName('singLEFT' + animSplit[1]).frames;
+					animation.getByName('singLEFT' + animSplit[1]).frames = oldRight;
+				}
 			}
 		}
 	}
@@ -719,5 +717,11 @@ class Character extends FunkinSprite
 		var theArray:Array<Int> = generateIndicesAtPoint(currentIndex, amount);
 		currentIndex += amount;
 		return theArray;
+	}
+
+	override function set_color(Color:FlxColor):Int
+	{
+		curColor = Color;
+		return super.set_color(Color);
 	}
 }

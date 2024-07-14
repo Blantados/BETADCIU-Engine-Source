@@ -17,7 +17,7 @@ class StrumNote extends FlxSprite
 	public var downScroll:Bool = false;//plan on doing scroll directions soon -bb
 	public var isMania:Bool = false;
 	public var mania:Int = 0;
-	public var daStyle = 'style';
+	public var daStyle = "style";
 	public var sustainReduce:Bool = true;
 	
 	private var player:Int;
@@ -25,6 +25,7 @@ class StrumNote extends FlxSprite
 	public var luaObject:LuaReceptor;
 	public var modifiedByLua:Bool = false;
 	public var modAngle:Float = 0; // The angle set by modcharts
+	public var separateSheets:Bool = false;
 	
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
@@ -69,81 +70,91 @@ class StrumNote extends FlxSprite
 		
 		switch (style)
 		{
-			case 'pixel':// | 'pixel-corrupted' | 'neon' | 'doki-pixel':
-				loadGraphic(Paths.image('notes/arrows-pixels'+suf), true, 17, 17);
+			case "pixel":// | "pixel-corrupted" | "neon" | "doki-pixel":
+				loadGraphic(Paths.image("notes/arrows-pixels"+suf), true, 17, 17);
 				
-				animation.add('green', [6]);
-				animation.add('red', [7]);
-				animation.add('blue', [5]);
-				animation.add('purplel', [4]);
+				animation.add("green", [6]);
+				animation.add("red", [7]);
+				animation.add("blue", [5]);
+				animation.add("purplel", [4]);
 
 				setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 				antialiasing = false;
 				
-				animation.add('static', [0 + noteData]);
-				animation.add('pressed', [4 + noteData, 8 + noteData], 12, false);
-				animation.add('confirm', [12 + noteData, 16 + noteData], 24, false);
+				animation.add("static", [0 + noteData]);
+				animation.add("pressed", [4 + noteData, 8 + noteData], 12, false);
+				animation.add("confirm", [12 + noteData, 16 + noteData], 24, false);
 				
-			case 'noStrums':
-				loadGraphic(Paths.image('notes/noStrums'), true, 17, 17);
-				animation.add('green', [0]);
-				animation.add('red', [0]);
-				animation.add('blue', [0]);
-				animation.add('purple', [0]);
+			case "noStrums":
+				loadGraphic(Paths.image("notes/noStrums"), true, 17, 17);
+				animation.add("green", [0]);
+				animation.add("red", [0]);
+				animation.add("blue", [0]);
+				animation.add("purple", [0]);
 
 				setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 				antialiasing = false;
 
 				
-				animation.add('static', [0]);
-				animation.add('pressed', [0], 12, false);
-				animation.add('confirm', [0], 24, false);
+				animation.add("static", [0]);
+				animation.add("pressed", [0], 12, false);
+				animation.add("confirm", [0], 24, false);
 
-			/*case 'pixel-combined':
-				loadGraphic(Paths.image('notes/arrows-pixelscombined'), true, 17, 17);
-				animation.add('green', [6]);
-				animation.add('red', [7]);
-				animation.add('blue', [5]);
-				animation.add('purplel', [4]);
+			/*case "pixel-combined":
+				loadGraphic(Paths.image("notes/arrows-pixelscombined"), true, 17, 17);
+				animation.add("green", [6]);
+				animation.add("red", [7]);
+				animation.add("blue", [5]);
+				animation.add("purplel", [4]);
 
 				setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 				antialiasing = false;
 
-				animation.add('static', [0 + noteData]);
-				animation.add('pressed', [4 + noteData, 8 + noteData], 12, false);
-				animation.add('confirm', [12 + noteData, 16 + noteData], 24, false);
+				animation.add("static", [0 + noteData]);
+				animation.add("pressed", [4 + noteData, 8 + noteData], 12, false);
+				animation.add("confirm", [12 + noteData, 16 + noteData], 24, false);
 
-			case 'guitar':
-				frames = Paths.getSparrowAtlas('notes/GH_NOTES');
+			case "guitar":
+				frames = Paths.getSparrowAtlas("notes/GH_NOTES");
 
 				antialiasing = true;
 
-				var pPre:Array<String> = ['left', 'down', 'up', 'right'];
+				var pPre:Array<String> = ["left", "down", "up", "right"];
 
-				animation.addByPrefix('static', pPre[noteData] + 'NoteBaby');
-				animation.addByPrefix('pressed', pPre[noteData] + ' press', 24, false);
-				animation.addByPrefix('confirm', pPre[noteData] + ' confirm', 24, false);*/
+				animation.addByPrefix("static", pPre[noteData] + "NoteBaby");
+				animation.addByPrefix("pressed", pPre[noteData] + " press", 24, false);
+				animation.addByPrefix("confirm", pPre[noteData] + " confirm", 24, false);*/
 				
 			default:
-				if (Assets.exists(Paths.image('notes/'+style)))
+				if (Assets.exists(Paths.image("notes/"+style)))
 				{
-					frames = Paths.getSparrowAtlas('notes/'+style);
+					frames = Paths.getSparrowAtlas("notes/"+style);
 	
 					if (frames == null)
 					{
 						if (isMania)
-							frames = Paths.getSparrowAtlas('notes/shaggyNotes');
-						else
-							frames = Paths.getSparrowAtlas('notes/NOTE_assets');
+							frames = Paths.getSparrowAtlas("notes/shaggyNotes");
+						else{
+							if (Assets.exists(Paths.image("notes/normal/notes_strumline"))){
+								separateSheets = true;
+								frames = Paths.getSparrowAtlas("notes/normal/notes_strumline");
+							}
+						}
 					}
 
 					addAnims();
 				}
 				else
 				{
-					if (FileSystem.exists(Paths.modsImages('notes/'+style)))
-						style = 'notes/'+style;
-					
+					if (FileSystem.exists(Paths.modsImages("notes/"+daStyle+"/notes_strumline"))){
+						style = "notes/" + daStyle + "/notes_strumline";
+						separateSheets = true;
+					}
+
+					if (FileSystem.exists(Paths.modsImages("notes/"+style))){
+						style = "notes/"+style;
+					}
+						
 					if (FileSystem.exists(Paths.modsImages(style)))
 					{
 						if (!Paths.currentTrackedAssets.exists(style))
@@ -171,9 +182,17 @@ class StrumNote extends FlxSprite
 					if (frames == null)
 					{
 						if (isMania)
-							frames = Paths.getSparrowAtlas('notes/shaggyNotes');
-						else
-							frames = Paths.getSparrowAtlas('notes/NOTE_assets');
+							frames = Paths.getSparrowAtlas("notes/shaggyNotes");
+						else{
+							/*if (Assets.exists(Paths.image("notes/normal/notes_strumline"))){
+								separateSheets = true;
+								frames = Paths.getSparrowAtlas("notes/normal/notes_strumline");
+							}
+							else{
+								frames = Paths.getSparrowAtlas(mania > 0 ? "notes/shaggyNotes" : "notes/NOTE_assets");
+							}*/
+							frames = Paths.getSparrowAtlas(mania > 0 ? "notes/shaggyNotes" : "notes/NOTE_assets");
+						}
 
 						addAnims();
 					}
@@ -193,22 +212,22 @@ class StrumNote extends FlxSprite
 	public var isPixel:Bool = false;
 
 	public function addAnims(?pixel:Bool = false)
-	{
+	{	
 		if (pixel)
 		{
 			isPixel = true;
 
-			animation.add('green', [6]);
-			animation.add('red', [7]);
-			animation.add('blue', [5]);
-			animation.add('purple', [4]);
+			animation.add("green", [6]);
+			animation.add("red", [7]);
+			animation.add("blue", [5]);
+			animation.add("purple", [4]);
 
 			setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 			antialiasing = false;
 			
-			animation.add('static', [0 + noteData]);
-			animation.add('pressed', [4 + noteData, 8 + noteData], 12, false);
-			animation.add('confirm', [12 + noteData, 16 + noteData], 24, false);
+			animation.add("static", [0 + noteData]);
+			animation.add("pressed", [4 + noteData, 8 + noteData], 12, false);
+			animation.add("confirm", [12 + noteData, 16 + noteData], 24, false);
 		}
 		else
 		{
@@ -217,35 +236,47 @@ class StrumNote extends FlxSprite
 			antialiasing = true;
 			setGraphicSize(Std.int(width * Note.noteScale));
 	
-			var nSuf:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
-			var pPre:Array<String> = ['left', 'down', 'up', 'right'];
-			switch (mania)
-			{
-				case 1:
-					nSuf = ['LEFT', 'UP', 'RIGHT', 'LEFT', 'DOWN', 'RIGHT'];
-					pPre = ['left', 'up', 'right', 'yel', 'down', 'dark'];
-				case 2:
-					nSuf = ['LEFT', 'DOWN', 'UP', 'RIGHT', 'SPACE', 'LEFT', 'DOWN', 'UP', 'RIGHT'];
-					pPre = ['left', 'down', 'up', 'right', 'white', 'yel', 'violet', 'black', 'dark'];
-					x -= Note.tooMuch;
-				case 3:
-					nSuf = ['LEFT', 'DOWN', 'SPACE', 'UP', 'RIGHT'];
-					pPre = ['left', 'down', 'white', 'up', 'right'];
-				case 4:
-					nSuf = ['LEFT', 'UP', 'RIGHT', 'SPACE', 'LEFT', 'DOWN', 'RIGHT'];
-					pPre = ['left', 'up', 'right', 'white', 'yel', 'down', 'dark'];
+			if (separateSheets){
+				var dirArr:Array<String> = ["Left", "Down", "Up", "Right"];
+
+				animation.addByPrefix("static", "static" + dirArr[noteData]);
+				animation.addByPrefix("pressed", "press" + dirArr[noteData], 24, false);
+				animation.addByPrefix("confirm", "confirm" + dirArr[noteData], 24, false);
 			}
-			
-			animation.addByPrefix('static', 'arrow' + nSuf[noteData]);
-			animation.addByPrefix('pressed', pPre[noteData] + ' press', 24, false);
-			animation.addByPrefix('confirm', pPre[noteData] + ' confirm', 24, false);
+			else{	
+				var nSuf:Array<String> = ["LEFT", "DOWN", "UP", "RIGHT"];
+				var pPre:Array<String> = ["left", "down", "up", "right"];
+
+				switch (mania)
+				{
+					case 1:
+						nSuf = ["LEFT", "UP", "RIGHT", "LEFT", "DOWN", "RIGHT"];
+						pPre = ["left", "up", "right", "yel", "down", "dark"];
+					case 2:
+						nSuf = ["LEFT", "DOWN", "UP", "RIGHT", "SPACE", "LEFT", "DOWN", "UP", "RIGHT"];
+						pPre = ["left", "down", "up", "right", "white", "yel", "violet", "black", "dark"];
+						x -= Note.tooMuch;
+					case 3:
+						nSuf = ["LEFT", "DOWN", "SPACE", "UP", "RIGHT"];
+						pPre = ["left", "down", "white", "up", "right"];
+					case 4:
+						nSuf = ["LEFT", "UP", "RIGHT", "SPACE", "LEFT", "DOWN", "RIGHT"];
+						pPre = ["left", "up", "right", "white", "yel", "down", "dark"];
+				}
+				
+				animation.addByPrefix("static", "arrow" + nSuf[noteData]);
+				animation.addByPrefix("pressed", pPre[noteData] + " press", 24, false);
+				animation.addByPrefix("confirm", pPre[noteData] + " confirm", 24, false);
+			}
 		}
 	}
 
 	public function postAddedToGroup() {
-		playAnim('static');
+		playAnim("static");
 		x += Note.swagWidth * noteData;
-		x += 50;
+		if(!separateSheets){
+			x += 50;
+		}
 		x += ((FlxG.width / 2) * player);
 		ID = noteData;
 	}
@@ -258,12 +289,12 @@ class StrumNote extends FlxSprite
 		if(resetAnim > 0) {
 			resetAnim -= elapsed;
 			if(resetAnim <= 0) {
-				playAnim('static');
+				playAnim("static");
 				resetAnim = 0;
 			}
 		}
 		//if(animation.curAnim != null){ //my bad i was upset
-		if(animation.curAnim.name == 'confirm' && !isPixel) {
+		if(animation.curAnim.name == "confirm" && !isPixel) {
 			centerOrigin();
 		//}
 		}	
@@ -276,7 +307,7 @@ class StrumNote extends FlxSprite
 		centerOffsets();
 		centerOrigin();
 		
-		if(animation.curAnim.name == 'confirm' && !isPixel)
+		if(animation.curAnim.name == "confirm" && !isPixel)
 			centerOrigin();
 	}
 }
