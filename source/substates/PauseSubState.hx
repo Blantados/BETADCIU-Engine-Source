@@ -20,11 +20,7 @@ class PauseSubState extends MusicBeatSubstate
 	var curSelected:Int = 0;
 
 	var pauseMusic:FlxSound;
-	var perSongOffset:FlxText;
-	
-	var offsetChanged:Bool = false;
-	var songLowercase:String;
-
+	var practiceText:FlxText;
 	var skipTimeText:FlxText;
 	var skipTimeTracker:Alphabet;
 	var curTime:Float = Math.max(0, Conductor.songPosition);
@@ -54,16 +50,8 @@ class PauseSubState extends MusicBeatSubstate
 		}
 		menuItems = menuItemsOG;
 
-		// pre lowercasing the song name (update)
-		songLowercase = StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase();
-		switch (songLowercase) {
-			case 'dad-battle': songLowercase = 'dadbattle';
-			case 'philly-nice': songLowercase = 'philly';
-			case 'scary-swings': songLowercase = 'scary swings';
-			case 'my-sweets': songLowercase = 'my sweets';
-		}
-
-		pauseMusic = new FlxSound().loadEmbedded(Paths.music('breakfast'), true, true);
+		var pauseSong:String = getPauseSong();
+		pauseMusic = new FlxSound().loadEmbedded(Paths.music(pauseSong), true, true);
 		pauseMusic.volume = 0;
 		pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length / 2)));
 
@@ -88,6 +76,30 @@ class PauseSubState extends MusicBeatSubstate
 		levelDifficulty.updateHitbox();
 		add(levelDifficulty);
 
+		var blueballedTxt:FlxText = new FlxText(20, 15 + 64, 0, "Blueballed: " + PlayState.deathCounter, 32);
+		blueballedTxt.scrollFactor.set();
+		blueballedTxt.setFormat(Paths.font('vcr.ttf'), 32);
+		blueballedTxt.updateHitbox();
+		add(blueballedTxt);
+
+		practiceText = new FlxText(20, 15 + 101, 0, "PRACTICE MODE", 32);
+		practiceText.scrollFactor.set();
+		practiceText.setFormat(Paths.font('vcr.ttf'), 32);
+		practiceText.x = FlxG.width - (practiceText.width + 20);
+		practiceText.updateHitbox();
+		practiceText.visible = PlayState.instance.stopDeath;
+		add(practiceText);
+
+		var chartingText:FlxText = new FlxText(20, 15 + 101, 0, "CHARTING MODE", 32);
+		chartingText.scrollFactor.set();
+		chartingText.setFormat(Paths.font('vcr.ttf'), 32);
+		chartingText.x = FlxG.width - (chartingText.width + 20);
+		chartingText.y = FlxG.height - (chartingText.height + 20);
+		chartingText.updateHitbox();
+		chartingText.visible = PlayState.chartingMode;
+		add(chartingText);
+
+		blueballedTxt.alpha = 0;
 		levelDifficulty.alpha = 0;
 		levelInfo.alpha = 0;
 
@@ -97,25 +109,31 @@ class PauseSubState extends MusicBeatSubstate
 
 		levelInfo.x = FlxG.width - (levelInfo.width + 20);
 		levelDifficulty.x = FlxG.width - (levelDifficulty.width + 20);
+		blueballedTxt.x = FlxG.width - (blueballedTxt.width + 20);
 
 		FlxTween.tween(bg, {alpha: 0.6}, 0.4, {ease: FlxEase.quartInOut});
 		FlxTween.tween(levelInfo, {alpha: 1, y: 20}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.3});
 		FlxTween.tween(levelDifficulty, {alpha: 1, y: levelDifficulty.y + 5}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.5});
+		FlxTween.tween(blueballedTxt, {alpha: 1, y: blueballedTxt.y + 5}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.7});
 
 		grpMenuShit = new FlxTypedGroup<Alphabet>();
 		add(grpMenuShit);
-		perSongOffset = new FlxText(5, FlxG.height - 18, 0, "Additive Offset (Left, Right): " + PlayState.songOffset + " - Description - " + 'Adds value to global offset, per song.', 12);
-		perSongOffset.scrollFactor.set();
-		perSongOffset.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		
-		#if cpp
-			add(perSongOffset);
-		#end
 
 		changeSelection();
 
 		regenMenu();
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+	}
+
+	public static var songName:String = null;
+
+	function getPauseSong()
+	{
+		var formattedSongName:String = (songName != null ? Paths.formatToSongPath(songName) : '');
+		var formattedPauseMusic:String = Paths.formatToSongPath(ClientPrefs.data.pauseMusic);
+		if(formattedSongName == 'none' || (formattedSongName != 'none' && formattedPauseMusic == 'none')) return null;
+
+		return (formattedSongName != '') ? formattedSongName : formattedPauseMusic;
 	}
 
 	var holdTime:Float = 0;
@@ -134,16 +152,6 @@ class PauseSubState extends MusicBeatSubstate
 		var leftP = controls.LEFT_P;
 		var rightP = controls.RIGHT_P;
 		var accepted = controls.ACCEPT;
-		var oldOffset:Float = 0;
-
-		songLowercase = StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase();
-		switch (songLowercase) {
-			case 'dad-battle': songLowercase = 'dadbattle';
-			case 'philly-nice': songLowercase = 'philly';
-			case 'scary-swings': songLowercase = 'scary swings';
-			case 'my-sweets': songLowercase = 'my sweets';
-		}
-		var songPath = 'assets/data/' + songLowercase + '/';
 
 		if (upP)
 		{
@@ -194,9 +202,9 @@ class PauseSubState extends MusicBeatSubstate
 				case "Resume":
 					close();
 				case "Restart Song":
-					restartSong(true, false);
+					restartSong(true, false, true);
 				case "Restart with Cutscene":
-					restartSong(true, true);
+					restartSong(true, true, false);
 				case "Leave Charting Mode":
 					restartSong();
 					PlayState.chartingMode = false;
@@ -204,7 +212,7 @@ class PauseSubState extends MusicBeatSubstate
 					if(curTime < Conductor.songPosition)
 					{
 						PlayState.startOnTime = curTime;
-						restartSong(false, false);
+						restartSong(false, false, false);
 					}
 					else
 					{
@@ -218,6 +226,10 @@ class PauseSubState extends MusicBeatSubstate
 				case "End Song":
 					close();
 					PlayState.instance.endSong();
+				case 'Toggle Practice Mode':
+					PlayState.instance.stopDeath = !PlayState.instance.stopDeath;//using stopDeath for this bc the practice mode does literally the same thing
+					PlayState.changedDifficulty = true;
+					practiceText.visible = PlayState.instance.stopDeath;	
 				case 'Toggle Botplay':
 					FlxG.save.data.botplay = !FlxG.save.data.botplay;
 				case "Exit to menu":
@@ -273,7 +285,7 @@ class PauseSubState extends MusicBeatSubstate
 		super.close();
 	}
 
-	public static function restartSong(?useTransition:Bool = true, ?cutscene:Bool = false)
+	public static function restartSong(?useTransition:Bool = true, ?cutscene:Bool = false, ?preloadAgain:Bool = true)
 	{
 		PlayState.instance.paused = true; // For lua
 		PlayState.showCutscene = cutscene;
@@ -283,6 +295,8 @@ class PauseSubState extends MusicBeatSubstate
 
 		if (!cutscene && useTransition)
 			LoadingState.loadAndSwitchState(new states.CustomLoading());
+		else if (!cutscene && useTransition && !preloadAgain)
+			MusicBeatState.resetState();
 		else
 		{	
 			if (!useTransition){

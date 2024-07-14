@@ -27,9 +27,9 @@ class MainMenuState extends MusicBeatState
 	var menuItems:FlxTypedGroup<FlxSprite>;
 
 	#if !switch
-	var optionShit:Array<String> = ['betadciu', 'bonus songs', 'story mode', 'freeplay', 'donate', 'options'];
+	var optionShit:Array<String> = ['betadciu', 'bonus songs', 'story mode', 'freeplay', 'credits', 'donate', 'options'];
 	#else
-	var optionShit:Array<String> = ['betadciu', 'bonus songs', 'story mode', 'freeplay'];
+	var optionShit:Array<String> = ['betadciu', 'bonus songs', 'story mode', 'freeplay', 'credits'];
 	#end
 
 	var newGaming:FlxText;
@@ -40,7 +40,7 @@ class MainMenuState extends MusicBeatState
 
 	public static var kadeEngineVer:String = "BETADCIU Engine";
 	public static var gameVer:String = "0.2.8";
-	public static var betadciuVer:String = "1.8";
+	public static var betadciuVer:String = "1.8.1";
 
 	var bg:FlxSprite;
 	var magenta:FlxSprite;
@@ -252,44 +252,28 @@ class MainMenuState extends MusicBeatState
 								switch (daChoice)
 								{
 									case 'betadciu':
-										//finishedFunnyMove = false;
 										MusicBeatState.switchState(new BETADCIUState());
 										trace("BETADCIU Menu Selected");
 
 									case 'story mode':
-										//finishedFunnyMove = false;
 										MusicBeatState.switchState(new StoryMenuState());
 										trace("Story Mode Menu Selected");
 
 									case 'bonus songs':
-										//finishedFunnyMove = false;
 										MusicBeatState.switchState(new BonusSongsState());
 										trace("Bonus Songs Menu Selected");
 
-									case 'neonight':
-										//finishedFunnyMove = false;
-										MusicBeatState.switchState(new NeonightState());
-										trace("Neonight Menu Selected");
+									case 'credits':
+										MusicBeatState.switchState(new CreditsState());
+										trace("Credits Menu Selected");
 
-									case 'vitor':
-										//finishedFunnyMove = false;
-										MusicBeatState.switchState(new VitorState());
-										trace("Vitor Menu Selected");
-									
 									case 'options':
-										//finishedFunnyMove = false;
 										MusicBeatState.switchState(new options.OptionsState());
-
-									case 'extras':
-										//finishedFunnyMove = false;
-										MusicBeatState.switchState(new GuestBETADCIUState());
-										trace("Extras Menu Selected");
+										trace("options Menu Selected");
 
 									case 'freeplay':
-										//finishedFunnyMove = false;
 										MusicBeatState.switchState(new FreeplayState());
 										trace("Freeplay Menu Selected");
-
 								}
 							});
 						}
@@ -322,7 +306,7 @@ class MainMenuState extends MusicBeatState
 			{
 				spr.animation.play('selected');
 
-				if (spr.ID < 6)
+				if (spr.ID < 7)
 					camFollow.setPosition(700, spr.getGraphicMidpoint().y);
 					//trace(spr.getGraphicMidpoint().y);
 			}

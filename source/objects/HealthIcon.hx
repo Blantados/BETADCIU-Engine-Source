@@ -66,6 +66,7 @@ class HealthIcon extends FlxSprite
 
 		animation.add(char, animArray, 0, false, isPlayer);
 		animation.play(char);
+		this.char = char;//silly icon name fix, idk if this will break something but i can remove later if does
 	}
 
 	public function swapOldIcon(char:String) 

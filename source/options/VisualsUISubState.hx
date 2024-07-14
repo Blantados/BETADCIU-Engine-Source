@@ -42,7 +42,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			"What should the Time Bar display?",
 			'timeBarType',
 			'string',
-			['Time Left', 'Time Elapsed', 'Song Name', 'Disabled']);
+			['Time Left', 'Time Elapsed', 'Song Name', 'Song Name And Time', 'Disabled']);
 		addOption(option);
 		
 		/*var option:Option = new Option('Hide HUD',
@@ -66,12 +66,11 @@ class VisualsUISubState extends BaseOptionsMenu
 			"true");
 		addOption(option);
 
-		var option:Option = new Option('Score Text Zoom on Hit',
+		*/var option:Option = new Option('Score Text Zoom on Hit',
 			"If unchecked, disables the Score text zooming\neverytime you hit a note.",
 			'scoreZoom',
-			'bool',
-			"true");
-		addOption(option);
+			'bool');
+		addOption(option);/*
 
 		var option:Option = new Option('Health Bar Transparency',
 			'How much transparent should the health bar and icons be.',
@@ -93,24 +92,23 @@ class VisualsUISubState extends BaseOptionsMenu
 		addOption(option);
 		option.onChange = onChangeFPSCounter;
 
-		var option:Option = new Option('Rainbow FPS',
+		/*var option:Option = new Option('Rainbow FPS', //this option is isn't even working so i'll just comment it
 			'If checked and FPS Counter is enabled, counter will have rainbow colors!',
 			'fpsRain',
 			'bool');
 		addOption(option);
-		option.onChange = onChangeFPSRain;
+		option.onChange = onChangeFPSRain;*/
 		#end
 		
-		/*var option:Option = new Option('Pause Screen Song:',
+		var option:Option = new Option('Pause Screen Song:',
 			"What song do you prefer for the Pause Screen?",
 			'pauseMusic',
 			'string',
-			'Tea Time',
 			['None', 'Breakfast', 'Tea Time']);
 		addOption(option);
 		option.onChange = onChangePauseMusic;
 		
-		#if CHECK_FOR_UPDATES
+		/*#if CHECK_FOR_UPDATES
 		var option:Option = new Option('Check for Updates',
 			'On Release builds, turn this on to check for updates when you start the game.',
 			'checkForUpdates',

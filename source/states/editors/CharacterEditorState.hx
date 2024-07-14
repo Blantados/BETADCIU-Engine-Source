@@ -167,7 +167,7 @@ class CharacterEditorState extends MusicBeatState
 
 		for (i in 0...tipTextArray.length-1)
 		{
-			var tipText:FlxText = new FlxText(FlxG.width - 320, FlxG.height - 15 - 16 * (tipTextArray.length - i), 300, tipTextArray[i], 12);
+			var tipText:FlxText = new FlxText(FlxG.width - 320, FlxG.height - 13 * (tipTextArray.length - i), 300, tipTextArray[i], 12);
 			tipText.cameras = [camHUD];
 			tipText.setFormat(null, 12, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
 			tipText.scrollFactor.set();
@@ -1059,16 +1059,26 @@ class CharacterEditorState extends MusicBeatState
 		Paths.currentTrackedAssets.remove(daPath);
 		Paths.clearStoredMemory2(daPath, 'image');
 		
-		if (!char.useAtlas){	
+		var canUseAtlas:Bool = false;
+
+		#if flxanimate
+		var animToFind:String = Paths.getPath('images/' + char.imageFile + '/Animation.json', TEXT, null, true);
+		if (#if MODS_ALLOWED FileSystem.exists(animToFind) || #end Assets.exists(animToFind)){
+			canUseAtlas = true;
+		}
+		#end
+		
+		if (!canUseAtlas){	
 			char.frames = Paths.getAtlasFromData(char.imageFile, char.spriteType);
 		}
 		else{
 			char.frames = Paths.getAtlasFromData("characters/blank", "SPARROW");
 
 			remove(char.atlasChar);
-			char.atlasChar.destroy();
+			char.destroyAtlas();
 			#if flxanimate
 			char.atlasChar = new FlxAnimate(char.x, char.y, Paths.getPath("images/" + char.imageFile, TEXT, null, true));
+			char.atlasChar.showPivot = false;
 			#end
 			add(char.atlasChar);
 		}
@@ -1422,7 +1432,7 @@ class CharacterEditorState extends MusicBeatState
 						 var path = haxe.io.Path.join([directory, file]);
 						 if (!sys.FileSystem.isDirectory(path) && file.endsWith('.json')) {
 							 var charToCheck:String = file.substr(0, file.length - 5);
-							 if(!charsLoaded.exists(charToCheck)) {
+							 if(!characterList.contains(charToCheck)) {
 								 characterList.push(charToCheck);
 								 charsLoaded.set(charToCheck, true);
 							 }

@@ -1,5 +1,6 @@
 package luafiles;
 
+import luafiles.LuaUtils.LuaTweenOptions;
 import objects.StrumNote;
 
 class TweenFunctions
@@ -23,6 +24,37 @@ class TweenFunctions
 		});
 		Lua_helper.add_callback(lua, "doTweenZoom", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
 			oldTweenFunction(tag, vars, {zoom: value}, duration, ease, 'doTweenZoom');
+		});
+
+		
+		Lua_helper.add_callback(lua, "startTween", function(tag:String, vars:String, values:Any = null, duration:Float, options:Any = null) {
+			var penisExam:Dynamic = LuaUtils.tweenPrepare(tag, vars);
+			if(penisExam != null) {
+				if(values != null) {
+					var myOptions:LuaTweenOptions = LuaUtils.getLuaTween(options);
+					game.modchartTweens.set(tag, FlxTween.tween(penisExam, values, duration, {
+						type: myOptions.type,
+						ease: myOptions.ease,
+						startDelay: myOptions.startDelay,
+						loopDelay: myOptions.loopDelay,
+
+						onUpdate: function(twn:FlxTween) {
+							if(myOptions.onUpdate != null) game.callOnLuas(myOptions.onUpdate, [tag, vars]);
+						},
+						onStart: function(twn:FlxTween) {
+							if(myOptions.onStart != null) game.callOnLuas(myOptions.onStart, [tag, vars]);
+						},
+						onComplete: function(twn:FlxTween) {
+							if(myOptions.onComplete != null) game.callOnLuas(myOptions.onComplete, [tag, vars]);
+							if(twn.type == FlxTweenType.ONESHOT || twn.type == FlxTweenType.BACKWARD) game.modchartTweens.remove(tag);
+						}
+					}));
+				} else {
+					ModchartState.luaTrace('startTween: No values on 2nd argument!', false, false, FlxColor.RED);
+				}
+			} else {
+				ModchartState.luaTrace('startTween: Couldnt find object: ' + vars, false, false, FlxColor.RED);
+			}
 		});
 
 		Lua_helper.add_callback(lua, "cancelTween", function(tag:String) {

@@ -9,6 +9,7 @@ import flixel.FlxState;
 import openfl.Assets;
 import openfl.Lib;
 import openfl.display.FPS;
+import debug.FPSCounter;
 import openfl.display.Sprite;
 import openfl.events.Event;
 import openfl.display.StageScaleMode;
@@ -101,10 +102,16 @@ class Main extends Sprite
 		
 		game = new FlxGame(gameWidth, gameHeight, initialState, #if (flixel < "5.0.0") zoom, #end framerate, framerate, skipSplash, startFullscreen);
 
+		// FlxG.game._customSoundTray wants just the class, it calls new from
+		// create() in there, which gets called when it's added to stage
+		// which is why it needs to be added before addChild(game) here
+		@:privateAccess
+		game._customSoundTray = options.FunkinSoundTray;	
+
 		addChild(game);
 
 		#if !mobile
-		fpsCounter = new FPS(10, 3, 0xFFFFFF);
+		fpsCounter = new FPSCounter(3, 3, 0xFFFFFF);
 		addChild(fpsCounter);
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
@@ -156,7 +163,7 @@ class Main extends Sprite
 	
 	var game:FlxGame;
 
-	public static var fpsCounter:FPS;
+	public static var fpsCounter:FPSCounter;
 
 	public function toggleFPS(fpsEnabled:Bool):Void {
 		fpsCounter.visible = fpsEnabled;

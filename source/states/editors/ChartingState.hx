@@ -249,7 +249,7 @@ class ChartingState extends MusicBeatState
 		add(gridLayer);
 
 		waveformSprite = new FlxSprite(GRID_SIZE, 0).makeGraphic(FlxG.width, FlxG.height, 0x00FFFFFF);
-		waveformSprite.x -= 41;//lol
+		waveformSprite.x -= 40;//oopsie
 		add(waveformSprite);
 
 		curRenderedNotes = new FlxTypedGroup<Note>();

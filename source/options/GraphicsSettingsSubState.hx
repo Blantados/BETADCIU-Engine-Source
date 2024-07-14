@@ -90,19 +90,25 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 
 	function onChangeFramerate()
 	{
-		FlxG.save.data.fpsCap = ClientPrefs.data.framerate;
+		var framerate = ClientPrefs.data.framerate;
+		var fpsCap = ClientPrefs.data.fpsCap;
 
-		(cast (Lib.current.getChildAt(0), Main)).setFPSCap(ClientPrefs.data.framerate);
+		fpsCap = framerate;
+		FlxG.save.data.fpsCap = framerate;
+		FlxG.save.flush();
+		ClientPrefs.saveSettings();//i didn't find any other way to make this engine work with this.
+		//trace(ClientPrefs.data.framerate);
 
-		if(ClientPrefs.data.framerate > FlxG.drawFramerate)
+		openfl.Lib.current.stage.frameRate = framerate;
+		Main.curFPS = framerate;
+
+		if(framerate > FlxG.drawFramerate)
 		{
-			FlxG.updateFramerate = ClientPrefs.data.framerate;
-			FlxG.drawFramerate = ClientPrefs.data.framerate;
-		}
-		else
-		{
-			FlxG.drawFramerate = ClientPrefs.data.framerate;
-			FlxG.updateFramerate = ClientPrefs.data.framerate;
+			FlxG.updateFramerate = framerate;
+			FlxG.drawFramerate = framerate;
+		}else{
+			FlxG.drawFramerate = framerate;
+			FlxG.updateFramerate = framerate;
 		}
 	}
 }

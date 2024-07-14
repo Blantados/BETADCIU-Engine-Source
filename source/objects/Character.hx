@@ -40,6 +40,7 @@ typedef CharacterFile = {
 	var flip_x:Bool;
 	var no_antialiasing:Bool;
 	var healthbar_colors:Array<Int>;
+	var vocals_file:String;
 	var noteSkin:String;
 	var isPlayerChar:Bool;
 
@@ -103,6 +104,7 @@ class Character extends FunkinSprite
 	public var noAntialiasing:Bool = false;
 	public var originalFlipX:Bool = false;
 	public var healthColorArray:Array<Int> = [255, 0, 0];
+	public var vocalsFile:String = '';
 	public var positionArray:Array<Float> = [0, 0];
 	public var playerPositionArray:Array<Float> = [0, 0];
 	public var cameraPosition:Array<Float> = [0, 0];
@@ -278,6 +280,7 @@ class Character extends FunkinSprite
 					healthColorArray = json.healthbar_colors;
 				}
 					
+				vocalsFile = json.vocals_file != null ? json.vocals_file : '';
 				colorPreString = FlxColor.fromRGB(healthColorArray[0], healthColorArray[1], healthColorArray[2]);
 				colorPreCut = colorPreString.toHexString();
 				iconColor = colorPreCut.substring(2);
@@ -724,4 +727,16 @@ class Character extends FunkinSprite
 		curColor = Color;
 		return super.set_color(Color);
 	}
+
+	public override function destroy()
+	{
+		super.destroy();
+		destroyAtlas();
+	}
+	
+	public function destroyAtlas()
+	{
+		if (atlasChar != null)
+			atlasChar = FlxDestroyUtil.destroy(atlasChar);
+	}	
 }

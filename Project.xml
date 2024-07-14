@@ -52,6 +52,8 @@
 
 	<classpath name="source" />
 
+	<assets path="assets/shared/images" />
+	
 	<assets path="assets/preload" rename="assets" exclude="*.ogg" if="web"/>
 	<assets path="assets/preload" rename="assets" exclude="*.mp3" unless="web"/>
 	

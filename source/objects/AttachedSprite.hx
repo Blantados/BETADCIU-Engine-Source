@@ -1,4 +1,4 @@
-package;
+package objects;
 
 import flixel.FlxSprite;
 import flixel.FlxG;
@@ -25,7 +25,13 @@ class AttachedSprite extends FlxSprite
 			animation.addByPrefix('idle', anim, 24, loop);
 			animation.play('idle');
 		} else if(file != null) {
-			loadGraphic(Paths.image(file));
+			if(FileSystem.exists(Paths.getSharedPath('images/$file.png'))){//shared check...
+				loadGraphic(Paths.getSharedPath('images/$file.png'));//shared check...
+				//trace(Paths.getSharedPath('images/$file.png'));
+			}else{
+				loadGraphic(Paths.image(file));
+				//trace(Paths.image(file));
+			}
 		}
 		antialiasing = FlxG.save.data.antialiasing;
 		scrollFactor.set();
