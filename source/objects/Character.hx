@@ -1,4 +1,4 @@
-package objects;
+	package objects;
 
 import flixel.animation.FlxBaseAnimation;
 import flixel.graphics.frames.FlxAtlasFrames;
