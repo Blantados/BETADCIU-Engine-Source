@@ -161,6 +161,13 @@ class ClientPrefs {
 	}
 
 	public static function loadPrefs() {
+		if(FlxG.save.data.fpsCap == null && FlxG.save.data.framerate == null) {
+			var framerate = 120;
+			FlxG.save.data.framerate = framerate;
+			FlxG.save.data.fpsCap = framerate;
+			FlxG.save.flush();
+		}
+
 		// values I couldn't add to the array since they have different save data names and var names
 		if(FlxG.save.data.fps != null) {
 			data.showFPS = FlxG.save.data.fps;
