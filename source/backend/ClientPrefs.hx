@@ -206,10 +206,11 @@ class ClientPrefs {
 
 		if(FlxG.save.data.volume != null){
 			FlxG.sound.volume = FlxG.save.data.volume;
-		}
+		}else FlxG.sound.volume = 1;
+
 		if (FlxG.save.data.mute != null){
 			FlxG.sound.muted = FlxG.save.data.mute;
-		}
+		}else FlxG.sound.muted = false;
 		
 		for (key in Reflect.fields(data)){
 			if (key != 'gameplaySettings' && Reflect.hasField(FlxG.save.data, key))

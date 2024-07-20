@@ -1361,6 +1361,15 @@ class ModchartState
 				LuaUtils.cameraFromString(camera).filtersEnabled = bool;
 			});
 	
+			Lua_helper.add_callback(lua, "setVar", function(varName:String, value:Dynamic) {
+				PlayState.instance.variables.set(varName, value);
+				return value;
+			});
+			
+			Lua_helper.add_callback(lua, "getVar", function(varName:String) {
+				return PlayState.instance.variables.get(varName);
+			});	
+	
 			Lua_helper.add_callback(lua, "addLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false, ?traceMsg:Bool = true) { //would be dope asf. 
 				var cervix = luaFile + ".lua";
 				var doPush = false;

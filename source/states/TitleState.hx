@@ -60,6 +60,9 @@ class TitleState extends MusicBeatState
 			trace("Loaded " + openfl.Assets.getLibrary("default").assetsLoaded + " assets (DEFAULT)");
 		}
 		
+		openfl.Lib.current.stage.frameRate = 120;//oop
+		Main.curFPS = Std.int(120);//sie.
+		
 		backend.PlayerSettings.init();
 
 		#if windows
