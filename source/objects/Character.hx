@@ -573,12 +573,10 @@ class Character extends FunkinSprite
 		{
 			AnimName = AnimName.substr(0, AnimName.length - 4);
 
-			if (doMissThing)
+			if (doMissThing){
 				missed = true;
+			}
 		}
-
-		if (AnimName.endsWith('miss') && curCharacter == 'bf-sky' && doMissThing)
-			missed = true;
 
 		if (animation.getByName(AnimName) == null) // if it's STILL null, just play idle, and if you REALLY messed up, it'll look in the xml for a valid anim
 		{
@@ -600,10 +598,15 @@ class Character extends FunkinSprite
 
 		animation.play(AnimName, Force, Reversed, Frame);
 
-		if (missed)
-			color = curColor + 0xFFCFAFFF;
-		else if (color != curColor && doMissThing)
+		if (missed){
+			var realCurColor = curColor;
+			color = CoolUtil.blendColors(curColor, 0xFFCFAFFF);
+			curColor = realCurColor;
+		}
+		else if (color != curColor && doMissThing){
 			color = curColor;
+		}
+			
 
 		var daOffset = animOffsets.get(AnimName);
 

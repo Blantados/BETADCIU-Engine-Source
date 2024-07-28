@@ -45,6 +45,7 @@ import openfl.utils.AssetType;
 import openfl.events.KeyboardEvent;
 import openfl.geom.Matrix;
 import openfl.geom.Rectangle;
+import openfl.display.Sprite;
 
 import lime.utils.Assets;
 import lime.graphics.Image;

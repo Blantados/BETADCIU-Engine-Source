@@ -65,6 +65,7 @@ class StrumNote extends FlxSprite
 	public function loadNoteAnims(style:String, ?first:Bool = false)
 	{
 		daStyle = style;
+		separateSheets = false;
 		
 		var suf:String = "";
 		
@@ -184,14 +185,13 @@ class StrumNote extends FlxSprite
 						if (isMania)
 							frames = Paths.getSparrowAtlas("notes/shaggyNotes");
 						else{
-							/*if (Assets.exists(Paths.image("notes/normal/notes_strumline"))){
+							if (Assets.exists(Paths.image("notes/normal/notes_strumline"))){
 								separateSheets = true;
 								frames = Paths.getSparrowAtlas("notes/normal/notes_strumline");
 							}
 							else{
 								frames = Paths.getSparrowAtlas(mania > 0 ? "notes/shaggyNotes" : "notes/NOTE_assets");
-							}*/
-							frames = Paths.getSparrowAtlas(mania > 0 ? "notes/shaggyNotes" : "notes/NOTE_assets");
+							}
 						}
 
 						addAnims();
@@ -274,9 +274,7 @@ class StrumNote extends FlxSprite
 	public function postAddedToGroup() {
 		playAnim("static");
 		x += Note.swagWidth * noteData;
-		if(!separateSheets){
-			x += 50;
-		}
+		x += 50;
 		x += ((FlxG.width / 2) * player);
 		ID = noteData;
 	}
@@ -307,7 +305,13 @@ class StrumNote extends FlxSprite
 		centerOffsets();
 		centerOrigin();
 		
-		if(animation.curAnim.name == "confirm" && !isPixel)
+		if(animation.curAnim.name == "confirm" && !isPixel){
 			centerOrigin();
+		}
+
+		if (separateSheets && !isPixel){
+			offset.x += 32;
+			offset.y += 20;
+		}
 	}
 }

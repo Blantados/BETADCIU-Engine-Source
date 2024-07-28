@@ -166,6 +166,25 @@ class CoolUtil
 		return Std.string(daTxt);
 	}
 
+	public static function blendColors(bgColor: Int, ovColor: Int): Int {
+        var a_bg = (bgColor >> 24) & 0xFF;
+        var r_bg = (bgColor >> 16) & 0xFF;
+        var g_bg = (bgColor >> 8) & 0xFF;
+        var b_bg = bgColor & 0xFF;
+        
+        var a_ov = (ovColor >> 24) & 0xFF;
+        var r_ov = (ovColor >> 16) & 0xFF;
+        var g_ov = (ovColor >> 8) & 0xFF;
+        var b_ov = ovColor & 0xFF;
+
+        var alpha = a_ov + (a_bg * (255 - a_ov) / 255);
+        var red = r_ov * (a_ov / 255) + r_bg * (1 - (a_ov / 255));
+        var green = g_ov * (a_ov / 255) + g_bg * (1 - (a_ov / 255));
+        var blue = b_ov * (a_ov / 255) + b_bg * (1 - (a_ov / 255));
+
+        return (Std.int(alpha) << 24) | (Std.int(red) << 16) | (Std.int(green) << 8) | Std.int(blue);
+    }
+
 	public static function difficultyString():String
 	{
 		var guestNumber:Int = 0;

@@ -384,6 +384,7 @@ class Note extends FlxSprite
 	function loadNoteAnims(daStyle:String, ?sustainNote:Bool = false) 
 	{
 		var initialStyle:String = daStyle;
+		separateSheets = false;
 
 		switch (daStyle)
 		{
