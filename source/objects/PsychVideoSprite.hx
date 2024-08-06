@@ -1,10 +1,11 @@
 package objects;
 
+import hxvlc.flixel.FlxVideoSprite as VideoSprite;
 //Borrowed from Sonic Legacy for Free 4 Pirates
 
 //i wanted a few things -data
 //also srs moment fuck hxcodec its given me so many headaches. you was good in the past but we moved on bud!
-class PsychVideoSprite extends FlxVideoSprite
+class PsychVideoSprite extends VideoSprite
 {
     public static var heldVideos:Array<PsychVideoSprite> = [];
 

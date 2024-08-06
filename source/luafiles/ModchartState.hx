@@ -14,6 +14,7 @@ import openfl.display.BitmapData;
 import lime.app.Application;
 import flixel.FlxBasic;
 import flixel.FlxObject;
+import flixel.addons.transition.FlxTransitionableState;
 import flixel.math.FlxPoint;
 import flixel.effects.FlxFlicker;
 import flixel.addons.effects.FlxTrail;
@@ -55,6 +56,15 @@ import openfl.display.ShaderParameterType;
 import objects.*;
 import states.editors.ModpackMaker;
 
+//bruh.
+import states.StoryMenuState;
+import states.GuestBETADCIUState;
+import states.BETADCIUState;
+import states.BonusSongsState;
+import states.NeonightState;
+import states.VitorState;
+import states.FreeplayState;
+
 import backend.Song;
 import backend.Highscore;
 
@@ -68,6 +78,8 @@ import luafiles.ModchartSprite;
 import luafiles.ModchartText;
 import luafiles.ModchartText.*;
 import luafiles.CustomSubstate;
+
+import substates.PauseSubState;
 
 using StringTools;
 
@@ -696,6 +708,7 @@ class ModchartState
 		if (FlxG.save.data.uncacheCharacterSwitch && !dontDestroy)
 			Paths.clearStoredMemory2(bfPath);
 
+		PlayState.instance.setOnScripts('boyfriendName', PlayState.instance.boyfriend.curCharacter);
 		PlayState.instance.startCharacterLua(PlayState.instance.boyfriend.curCharacter);
 	}
 
@@ -774,6 +787,7 @@ class ModchartState
 		if (FlxG.save.data.uncacheCharacterSwitch && !dontDestroy && daCurChar != PlayState.instance.dad.curCharacter)
 			Paths.clearStoredMemory2(dadPath);
 
+		PlayState.instance.setOnScripts('dadName', PlayState.instance.dad.curCharacter);
 		PlayState.instance.startCharacterLua(PlayState.instance.dad.curCharacter);
 	}
 
@@ -810,6 +824,7 @@ class ModchartState
 		if (FlxG.save.data.uncacheCharacterSwitch && !dontDestroy)
 			Paths.clearStoredMemory2(gfPath);
 
+		PlayState.instance.setOnScripts('gfName', PlayState.instance.gf.curCharacter);
 		PlayState.instance.startCharacterLua(PlayState.instance.gf.curCharacter);
 	}
 
@@ -964,6 +979,8 @@ class ModchartState
 		set('songLength', FlxG.sound.music.length);
 		set('seenCutscene', PlayState.seenCutscene);
 		set('scriptName', scriptName);
+
+		set('shadersEnabled', ClientPrefs.data.shaders);
 
 		if (PlayState.SONG != null)
 		{
@@ -1398,7 +1415,7 @@ class ModchartState
 							if(luaInstance.scriptName == cervix)
 							{
 								if(traceMsg)
-									luaTrace('The script "' + cervix + '" is already running!');
+									luaTrace('The lua script "' + cervix + '" is already running!');
 	
 								return;
 							}
@@ -1409,6 +1426,42 @@ class ModchartState
 				}
 				luaTrace("addLuaScript: Script doesn't exist!", false, false, FlxColor.RED);
 			});
+
+			Lua_helper.add_callback(lua, "addHScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false, ?traceMsg:Bool = true) { //I wonder if this will cause a crash -- future me here. okay it didn't.
+				var cervix = luaFile + ".hx";
+				var scriptFound = false;
+				if(FileSystem.exists(FileSystem.absolutePath("assets/shared/"+cervix))) {
+					cervix = FileSystem.absolutePath("assets/shared/"+cervix);
+					scriptFound = true;
+				}
+				else if (FileSystem.exists(Paths.modFolders(cervix)))
+				{
+					cervix = Paths.modFolders(cervix);
+					scriptFound = true;
+				}
+				else {
+					cervix = Paths.getPreloadPath(cervix);
+					if(FileSystem.exists(cervix)) {
+						scriptFound = true;
+					}
+				}
+
+				if(scriptFound)
+				{
+					if(!ignoreAlreadyRunning)
+						for (script in PlayState.instance.hscriptArray)
+							if(script.origin == cervix)
+							{
+								if(traceMsg) luaTrace('The hscript script "' + cervix + '" is already running!');
+								return;
+							}
+
+					PlayState.instance.initHScript(cervix);
+					return;
+				}
+				luaTrace("addHScript: Script doesn't exist!", false, false, FlxColor.RED);
+			});
+
 			Lua_helper.add_callback(lua, "removeLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) { //would be dope asf. 
 				var cervix = luaFile + ".lua";
 				var doPush = false;
@@ -1457,6 +1510,42 @@ class ModchartState
 					return;
 				}
 				luaTrace("removeLuaScript: Script doesn't exist!", false, false, FlxColor.RED);
+			});
+
+			Lua_helper.add_callback(lua, "removeHScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) { //would be dope asf. 
+				var cervix = luaFile + ".hx";
+				var scriptFound = false;
+				if(FileSystem.exists(FileSystem.absolutePath("assets/shared/"+cervix))) {
+					cervix = FileSystem.absolutePath("assets/shared/"+cervix);
+					scriptFound = true;
+				}
+				else if (FileSystem.exists(Paths.modFolders(cervix)))
+				{
+					cervix = Paths.modFolders(cervix);
+					scriptFound = true;
+				}
+				else {
+					cervix = Paths.getPreloadPath(cervix);
+					if(FileSystem.exists(cervix)) {
+						scriptFound = true;
+					}
+				}
+	
+				if(scriptFound)
+				{
+					if(!ignoreAlreadyRunning)
+					{
+						for (script in PlayState.instance.hscriptArray)
+							if(script.origin == cervix)
+							{
+								//trace('Closing script ' + (script.origin != null ? script.origin : luaFile));
+								script.destroy();
+								return;
+							}
+					}
+					return;
+				} 
+				luaTrace("removeHScript: Script doesn't exist!", false, false, FlxColor.RED);
 			});
 	
 			//because the regular close function isn't working for me
@@ -1846,6 +1935,18 @@ class ModchartState
 				PlayState.instance.healthBar.createFilledBar(left_color, right_color);
 				PlayState.instance.healthBar.updateBar();
 			});
+
+			Lua_helper.add_callback(lua, "setTimeBarColors", function(left:String, right:String) {
+				var left_color:Null<FlxColor> = null;
+				var right_color:Null<FlxColor> = null;
+				if (left != null && left != '')
+					left_color = CoolUtil.colorFromString(left);
+				if (right != null && right != '')
+					right_color = CoolUtil.colorFromString(right);
+				
+				PlayState.instance.timeBar.createFilledBar(left_color, right_color);
+				PlayState.instance.timeBar.updateBar();
+			});	
 	
 			Lua_helper.add_callback(lua,"getDominantColor", function(sprite:String){
 				var shit:Dynamic = LuaUtils.getObjectDirectly(sprite);
@@ -1991,6 +2092,24 @@ class ModchartState
 						theSound.pause();
 						theSound.time = value;
 						if(wasResumed) theSound.play();
+					}
+				}
+			});
+
+			Lua_helper.add_callback(lua, "getSoundPitch", function(tag:String) {
+				if(tag != null && tag.length > 0 && PlayState.instance.modchartSounds.exists(tag)) {
+					return PlayState.instance.modchartSounds.get(tag).pitch;
+				}
+				return 0;
+			});
+			Lua_helper.add_callback(lua, "setSoundPitch", function(tag:String, value:Float, doPause:Bool = false) {
+				if(tag != null && tag.length > 0 && PlayState.instance.modchartSounds.exists(tag)) {
+					var theSound:FlxSound = PlayState.instance.modchartSounds.get(tag);
+					if(theSound != null) {
+						var wasResumed:Bool = theSound.playing;
+						if (doPause) theSound.pause();
+						theSound.pitch = value;
+						if (doPause && wasResumed) theSound.play();
 					}
 				}
 			});
@@ -2204,6 +2323,15 @@ class ModchartState
 				c.setRGB(r, g, b);
 				LuaUtils.cameraFromString(camera).fade(c, d, f);
 			});
+
+			Lua_helper.add_callback(lua, "cameraSetTarget", function(target:String) {
+				var isDad:Bool = false;
+				if(target == 'dad') {
+					isDad = true;
+				}
+				PlayState.instance.moveCamera(isDad);
+				return isDad;
+			});	
 	
 			Lua_helper.add_callback(lua, "cameraShake", function(camera:String, intensity:Float, duration:Float) {
 				if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
@@ -2515,6 +2643,26 @@ class ModchartState
 					default: shit.screenCenter(XY);	
 				}					
 			});
+
+			Lua_helper.add_callback(lua, "objectsOverlap", function(obj1:String, obj2:String) {
+				var namesArray:Array<String> = [obj1, obj2];
+				var objectsArray:Array<FlxSprite> = [];
+				for (i in 0...namesArray.length)
+				{
+					var real = PlayState.instance.getLuaObject(namesArray[i]);
+					if(real!=null) {
+						objectsArray.push(real);
+					} else {
+						objectsArray.push(Reflect.getProperty(LuaUtils.getTargetInstance(), namesArray[i]));
+					}
+				}
+	
+				if(!objectsArray.contains(null) && FlxG.overlap(objectsArray[0], objectsArray[1]))
+				{
+					return true;
+				}
+				return false;
+			});	
 			
 			Lua_helper.add_callback(lua,"playActorAnimation", function(obj:String,anim:String,force:Bool = false,reverse:Bool = false, ?frame:Int = 0) {
 				var char:Character = LuaUtils.getObjectDirectly(obj);
@@ -2831,10 +2979,107 @@ class ModchartState
 				return true;
 				#end
 			});
-	
+
+			Lua_helper.add_callback(lua, "makeVideoSprite", function(tag:String, videoFile:String, ?x:Float, ?y:Float, ?camera:String, ?shouldLoop:Bool, ?muted:Bool) {
+                // I hate you FlxVideoSprite....
+                #if VIDEOS_ALLOWED
+                tag = tag.replace('.', '');
+                LuaUtils.resetSpriteTag(tag);
+                var leVSprite:PsychVideoSprite = null;
+                if(FileSystem.exists(Paths.video(videoFile)) && videoFile != null && videoFile.length > 0) {
+
+                    leVSprite = new PsychVideoSprite();
+                    leVSprite.addCallback('onFormat',()->{
+                        leVSprite.setPosition(x,y);
+                        leVSprite.cameras = [LuaUtils.cameraFromString(camera)];
+                    });
+                    leVSprite.addCallback('onEnd',()->{
+                        if (Stage.instance.swagBacks.exists(tag)) {
+                            Stage.instance.swagBacks.get(tag).destroy();
+                            Stage.instance.swagBacks.remove(tag);
+                        }
+
+                        if (PlayState.instance.modchartSprites.exists(tag)) {
+                            PlayState.instance.modchartSprites.get(tag).destroy();
+                            PlayState.instance.modchartSprites.remove(tag);
+                        }
+                            
+                        PlayState.instance.callOnLuas('onVideoFinished', [tag]);
+                    });
+                    var options:Array<String> = [];
+                    if (shouldLoop) options.push(PsychVideoSprite.looping);
+                    if (muted) options.push(PsychVideoSprite.muted);
+
+                    leVSprite.load(Paths.video(videoFile), options);
+                    leVSprite.antialiasing = true;
+                    leVSprite.play();
+
+                    if (isStageLua && !preloading){
+                        Stage.instance.swagBacks.set(tag, leVSprite);
+                    }
+                    else{
+                        PlayState.instance.modchartSprites.set(tag, leVSprite);
+                    }
+                
+                } else {
+                    luaTrace('makeVideoSprite: The video file "' + videoFile + '" cannot be found!', FlxColor.RED);
+                    return;
+                }
+                leVSprite.active = true;
+                #else
+                luaTrace('Nuh Uh!!... - Platform not supported!');
+                #end
+            });
+
 			Lua_helper.add_callback(lua, "endSong", function(hmm:String) {
 				PlayState.instance.KillNotes();
 				PlayState.instance.endSong();
+			});
+
+			Lua_helper.add_callback(lua, "restartSong", function(?skipTransition:Bool = false,?cutscene:Bool = false,?preloadAgain:Bool = false) {
+				PlayState.instance.persistentUpdate = false;
+				FlxG.camera.followLerp = 0;
+				if(skipTransition == true) PauseSubState.restartSong(false,cutscene,preloadAgain);
+				else PauseSubState.restartSong(skipTransition,cutscene,preloadAgain);
+				return true;
+			});
+
+			Lua_helper.add_callback(lua, "exitSong", function(?skipTransition:Bool = false) {
+				if(skipTransition)
+				{
+					FlxTransitionableState.skipNextTransIn = true;
+					FlxTransitionableState.skipNextTransOut = true;
+				}
+
+				if(PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
+
+				if (PlayState.isBETADCIU){
+					if (CoolUtil.difficulties[0] == "Guest")
+						MusicBeatState.switchState(new states.GuestBETADCIUState());
+					else
+						MusicBeatState.switchState(new states.BETADCIUState());
+				}else{
+					if (PlayState.isBonus)		
+						MusicBeatState.switchState(new states.BonusSongsState());
+					else if (PlayState.isNeonight)
+						MusicBeatState.switchState(new states.NeonightState());
+					else if (PlayState.isVitor)
+						MusicBeatState.switchState(new states.VitorState());
+					else
+						MusicBeatState.switchState(new states.FreeplayState());
+				}
+
+				#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
+	
+				PlayState.changedDifficulty = false;
+				PlayState.chartingMode = false;
+				PlayState.instance.transitioning = true;
+				FlxG.camera.followLerp = 0;
+
+				FlxTransitionableState.skipNextTransIn = false;//visual bug fix
+				FlxTransitionableState.skipNextTransOut = false;//visual bug fix
+
+				return true;
 			});
 	
 			//idk if I wanna add events. alright I added the ones that are usable without that much tinkering.
@@ -3588,6 +3833,7 @@ class ModchartState
 
 			#if desktop DiscordClient.addLuaCallbacks(lua); #end
 			#if hscript HScript.implement(this); #end
+			#if flxanimate FlxAnimateFunctions.implement(this); #end
 			ReflectionFunctions.implement(this);
 			TweenFunctions.implement(this);
 			TextFunctions.implement(this);

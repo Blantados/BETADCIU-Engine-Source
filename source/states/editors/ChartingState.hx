@@ -143,6 +143,7 @@ class ChartingState extends MusicBeatState
 	var gridBlackLine:FlxSprite;
 	var gridBlackLine2:FlxSprite;
 	var vocals:FlxSound;
+	var opponentVocals:FlxSound = null;
 
 	var leftIcon:HealthIcon;
 	var rightIcon:HealthIcon;
@@ -374,6 +375,9 @@ class ChartingState extends MusicBeatState
 		add(nextRenderedSustains);
 		add(nextRenderedNotes);
 
+		add(nextRenderedSustains);
+		add(nextRenderedNotes);
+
 		//loadEvents(); // it doesn't load the events unless I do this
 		updateGrid();
 
@@ -538,6 +542,7 @@ class ChartingState extends MusicBeatState
 					vol = 0;
 
 				vocals.volume = vol;
+				if(opponentVocals != null) opponentVocals.volume = vol;
 			}
 		};
 
@@ -1287,7 +1292,7 @@ class ChartingState extends MusicBeatState
 		eventPushedMap = null;
 		#end
 
-		descText = new FlxText(20, 230, 0, eventStuff[0][0]);
+		descText = new FlxText(20, 210, 0, eventStuff[0][0]);
 
 		var leEvents:Array<String> = [];
 		for (i in 0...eventStuff.length) {
@@ -1429,13 +1434,41 @@ class ChartingState extends MusicBeatState
 		else
 			FlxG.sound.playMusic(Paths.inst(daSong), 0.6);
 
-		// WONT WORK FOR TUTORIAL OR TEST SONG!!! REDO LATER
-		if (FileSystem.exists(Paths.voices2(daSong)))
-			vocals = new FlxSound().loadEmbedded(Sound.fromFile(Paths.voices2(daSong)));
-		else
-			vocals = new FlxSound().loadEmbedded(Paths.voices(daSong));
+        try
+		{
+			var playerVocals = Paths.voices(daSong, (characterData.vocalsP1 == null || characterData.vocalsP1.length < 1) ? 'Player' : characterData.vocalsP1);
+			if (!Assets.exists(playerVocals)) playerVocals = null;
 
+			var playerVocals2 = Paths.voices2(daSong, (characterData.vocalsP1 == null || characterData.vocalsP1.length < 1) ? 'Player' : characterData.vocalsP1);
+			if (!FileSystem.exists(playerVocals2)) playerVocals2 = null;
+
+			if (!Assets.exists(playerVocals))
+				if (FileSystem.exists(playerVocals2)) vocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(Paths.currentTrackedSounds.exists(playerVocals2) ? Paths.currentTrackedSounds.get(playerVocals2) : Sound.fromFile(playerVocals2));
+			else if (!FileSystem.exists(playerVocals2))
+				if (Assets.exists(playerVocals)) vocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(playerVocals);
+
+			if(playerVocals == null && playerVocals2 == null){ //don't talk to me.
+				if (!Assets.exists(Paths.voices(PlayState.SONG.song))){
+					if (Paths.currentTrackedSounds.exists(Paths.voices2(PlayState.SONG.song)))
+						vocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(Paths.currentTrackedSounds.get(Paths.voices2(PlayState.SONG.song)));
+					else
+						vocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(Sound.fromFile(Paths.voices2(PlayState.SONG.song)));
+				}else
+					vocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(Paths.voices(PlayState.SONG.song));
+			}
+
+			var oppVocals = Paths.voices(daSong, (characterData.vocalsP2 == null || characterData.vocalsP2.length < 1) ? 'Opponent' : characterData.vocalsP2);
+			var oppVocals2 = Paths.voices2(daSong, (characterData.vocalsP2 == null || characterData.vocalsP2.length < 1) ? 'Opponent' : characterData.vocalsP2);
+
+			if (!Assets.exists(oppVocals))
+				if (FileSystem.exists(oppVocals2)) opponentVocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(Paths.currentTrackedSounds.exists(oppVocals2) ? Paths.currentTrackedSounds.get(oppVocals2) : Sound.fromFile(oppVocals2));
+			else
+				if (Assets.exists(oppVocals)) opponentVocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(oppVocals);
+		}
+		catch(e:Dynamic) {}
+	
 		FlxG.sound.list.add(vocals);
+		FlxG.sound.list.add(opponentVocals);
 
 		pauseMusic();
 
@@ -1450,11 +1483,16 @@ class ChartingState extends MusicBeatState
 				vocals.pause();
 				vocals.time = 0;
 			}
+			if(opponentVocals != null) {
+				opponentVocals.pause();
+				opponentVocals.time = 0;
+			}
 			changeSection();
 			curSec = 0;
 			updateGrid();
 			updateSectionUI();
 			vocals.play();
+			if (opponentVocals != null)opponentVocals.play();
 		};
 	}
 
@@ -1515,6 +1553,7 @@ class ChartingState extends MusicBeatState
 					updateGrid();
 				case "song_vocalvol":
 					vocals.volume = Math.max(nums.value, 0.1);
+					if (opponentVocals != null)opponentVocals.volume = Math.max(nums.value, 0.1);
 				case "section_dtype":
 					_song.notes[curSec].dType = Std.int(nums.value);
 					updateGrid();
@@ -1671,6 +1710,8 @@ class ChartingState extends MusicBeatState
 			Conductor.songPosition = FlxG.sound.music.time;
 		else if (vocals != null)
 			Conductor.songPosition = vocals.time;
+		else if (opponentVocals != null)
+			Conductor.songPosition = opponentVocals.time;
 		else
 			Conductor.songPosition = FlxG.sound.music.time; // it went back again?
 
@@ -1747,6 +1788,7 @@ class ChartingState extends MusicBeatState
 
 		FlxG.sound.music.pitch = playbackSpeed;
 		vocals.pitch = playbackSpeed;
+		if (opponentVocals != null)opponentVocals.pitch = playbackSpeed;
 
 
 		FlxG.watch.addQuick('daBeat', curBeat);
@@ -1811,6 +1853,7 @@ class ChartingState extends MusicBeatState
 				PlayState.SONG = _song;
 				FlxG.sound.music.stop();
 				vocals.stop();
+				if (opponentVocals != null) opponentVocals.stop();
 
 				if (FlxG.keys.pressed.SHIFT){
 					PlayState.startOnTime = Conductor.songPosition;
@@ -1891,6 +1934,7 @@ class ChartingState extends MusicBeatState
 				else
 				{
 					vocals.play();
+					if (opponentVocals != null)opponentVocals.play();
 					FlxG.sound.music.play();
 
 					lilBf.animation.play("idle");
@@ -1911,6 +1955,7 @@ class ChartingState extends MusicBeatState
 				pauseMusic();
 				FlxG.sound.music.time -= (FlxG.mouse.wheel * Conductor.stepCrochet * 0.4);
 				vocals.time = FlxG.sound.music.time;
+				if (opponentVocals != null)opponentVocals.time = FlxG.sound.music.time;
 			}
 
 			if (!FlxG.keys.pressed.SHIFT)
@@ -1933,6 +1978,7 @@ class ChartingState extends MusicBeatState
 						FlxG.sound.music.time += daTime;
 
 					vocals.time = FlxG.sound.music.time;
+					if (opponentVocals != null)opponentVocals.time = FlxG.sound.music.time;
 				}
 			}
 			else
@@ -1951,6 +1997,7 @@ class ChartingState extends MusicBeatState
 						FlxG.sound.music.time += daTime;
 
 					vocals.time = FlxG.sound.music.time;
+					if (opponentVocals != null)opponentVocals.time = FlxG.sound.music.time;
 				}
 			}
 		}
@@ -2141,6 +2188,7 @@ class ChartingState extends MusicBeatState
 		}
 
 		vocals.time = FlxG.sound.music.time;
+		if (opponentVocals != null)opponentVocals.time = FlxG.sound.music.time;
 		updateCurStep();
 
 		updateGrid();
@@ -2166,6 +2214,7 @@ class ChartingState extends MusicBeatState
 
 				FlxG.sound.music.time = sectionStartTime();
 				vocals.time = FlxG.sound.music.time;
+				if (opponentVocals != null)opponentVocals.time = FlxG.sound.music.time;
 				updateCurStep();
 			}
 
@@ -2197,6 +2246,48 @@ class ChartingState extends MusicBeatState
 		stepperSectionBPM.value = sec.bpm;
 
 		updateHeads();
+	}
+
+	var characterData:Dynamic = {
+		vocalsP1: null,
+		vocalsP2: null
+	};
+
+	function updateJsonData():Void
+	{
+		for (i in 1...3)
+		{
+			var data:CharacterFile = loadCharacterFile(Reflect.field(_song, 'player$i'));
+			Reflect.setField(characterData, 'vocalsP$i', data.vocals_file != null ? data.vocals_file : '');
+		}
+	}
+
+	var characterFailed:Bool = false;
+	function loadCharacterFile(char:String):CharacterFile {
+		characterFailed = false;
+		var characterPath:String = 'characters/' + char + '.json';
+		#if MODS_ALLOWED
+		var path:String = Paths.modFolders(characterPath);
+		if (!FileSystem.exists(path)) {
+			path = Paths.getSharedPath(characterPath);
+		}
+
+		if (!FileSystem.exists(path))
+		#else
+		var path:String = Paths.getSharedPath(characterPath);
+		if (!OpenFlAssets.exists(path))
+		#end
+		{
+			path = Paths.getSharedPath('characters/' + Character.DEFAULT_CHARACTER + '.json'); //If a character couldn't be found, change him to BF just to prevent a crash
+			characterFailed = true;
+		}
+
+		#if MODS_ALLOWED
+		var rawJson = File.getContent(path);
+		#else
+		var rawJson = OpenFlAssets.getText(path);
+		#end
+		return cast Json.parse(rawJson);
 	}
 
 	function updateHeads():Void
@@ -3328,8 +3419,6 @@ class ChartingState extends MusicBeatState
 				}
 			}
 		}
-				
-		
 		#else
 		noteStyleList = CoolUtil.coolTextFile(Paths.txt('noteStyleList'));
 		#end
@@ -3342,6 +3431,9 @@ class ChartingState extends MusicBeatState
 		FlxG.sound.music.pause();
 		if (vocals != null){
 			vocals.pause();
+		}
+		if (opponentVocals != null){
+			opponentVocals.pause();
 		}
 
 		lilBf.animation.play("idle");

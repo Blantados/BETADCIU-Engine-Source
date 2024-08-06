@@ -129,6 +129,7 @@ using StringTools;
 #elseif (hxCodec >= "2.6.1") import hxcodec.VideoHandler as VideoHandler;
 #elseif (hxCodec == "2.6.0") import VideoHandler;
 #else import vlc.MP4Handler as VideoHandler; #end
+import objects.PsychVideoSprite;
 #end
 
 class PlayState extends MusicBeatState
@@ -203,6 +204,7 @@ class PlayState extends MusicBeatState
 	#end
 
 	public var vocals:FlxSound;
+	public var opponentVocals:FlxSound;
 	public var inst:FlxSound;
 
 	public var dad:Character;
@@ -1110,8 +1112,8 @@ class PlayState extends MusicBeatState
 
 		playerSingAnimations = singAnimations;
 
-		setOnLuas("mustHitSection", PlayState.SONG.notes[curSection].mustHitSection); //just so we can check the first section
-		setOnLuas('gfSection', SONG.notes[curSection].gfSection); //forgot to check this one too.
+		setOnScripts("mustHitSection", PlayState.SONG.notes[curSection].mustHitSection); //just so we can check the first section
+		setOnScripts('gfSection', SONG.notes[curSection].gfSection); //forgot to check this one too.
 		callOnScripts('start', []);			
 		callOnScripts('onCreate', []); //psych	
 
@@ -1296,6 +1298,7 @@ class PlayState extends MusicBeatState
 				paused = true;
 				
 				vocals.stop();
+				opponentVocals.stop();
 				FlxG.sound.music.stop();
 
 				var daX = boyfriend.getScreenPosition().x;
@@ -1367,14 +1370,14 @@ class PlayState extends MusicBeatState
 			if (SONG.notes[curSection].changeBPM)
 			{
 				Conductor.changeBPM(SONG.notes[curSection].bpm);
-				setOnLuas('curBpm', Conductor.bpm);
-				setOnLuas('crochet', Conductor.crochet);
-				setOnLuas('stepCrochet', Conductor.stepCrochet);
+				setOnScripts('curBpm', Conductor.bpm);
+				setOnScripts('crochet', Conductor.crochet);
+				setOnScripts('stepCrochet', Conductor.stepCrochet);
 			}
 
-			setOnLuas("mustHitSection", SONG.notes[curSection].mustHitSection);
+			setOnScripts("mustHitSection", SONG.notes[curSection].mustHitSection);
 			//setOnLuas('altAnim', SONG.notes[curSection].altAnim);
-			setOnLuas('gfSection', SONG.notes[curSection].gfSection);
+			setOnScripts('gfSection', SONG.notes[curSection].gfSection);
 		}
 		
 		setOnScripts('curSection', curSection);
@@ -2440,6 +2443,7 @@ class PlayState extends MusicBeatState
 
 		FlxG.sound.music.pause();
 		vocals.pause();
+		opponentVocals.pause();
 
 		FlxG.sound.music.time = time;
 		FlxG.sound.music.play();
@@ -2449,9 +2453,13 @@ class PlayState extends MusicBeatState
 		if (Conductor.songPosition <= vocals.length)
 		{
 			vocals.time = time;
+			opponentVocals.time = time;
+
 			FlxG.sound.music.pitch = playbackRate;
+			opponentVocals.pitch = playbackRate;
 		}
 		vocals.play();
+		opponentVocals.play();
 	
 		songTime = time;
 	}
@@ -2484,21 +2492,21 @@ class PlayState extends MusicBeatState
 			generateStaticArrows(1, boyfriend.noteSkin, !skipArrowStartTween, daStartAlpha);	
 
 			for (i in 0...playerStrums.length) {
-				setOnLuas('defaultPlayerStrumX' + i, playerStrums.members[i].x);
-				setOnLuas('defaultPlayerStrumY' + i, playerStrums.members[i].y);
+				setOnScripts('defaultPlayerStrumX' + i, playerStrums.members[i].x);
+				setOnScripts('defaultPlayerStrumY' + i, playerStrums.members[i].y);
 			}
 			for (i in 0...opponentStrums.length) {
-				setOnLuas('defaultOpponentStrumX' + i, opponentStrums.members[i].x);
-				setOnLuas('defaultOpponentStrumY' + i, opponentStrums.members[i].y);
+				setOnScripts('defaultOpponentStrumX' + i, opponentStrums.members[i].x);
+				setOnScripts('defaultOpponentStrumY' + i, opponentStrums.members[i].y);
 			}
 
 			//kade engine
-			for (i in 0...strumLineNotes.length){
+			for (i in 0...strumLineNotes.length){//I wonder if someone still uses this...
 				var member = PlayState.instance.strumLineNotes.members[i];
-				setOnLuas("defaultStrum" + i + "X", Math.floor(member.x));
-				setOnLuas("defaultStrum" + i + "Y", Math.floor(member.y));
-				setOnLuas("defaultStrum" + i + "Angle", Math.floor(member.angle));
-				setOnLuas("defaultStrum" + i + "Alpha", Math.floor(member.alpha));
+				setOnScripts("defaultStrum" + i + "X", Math.floor(member.x));
+				setOnScripts("defaultStrum" + i + "Y", Math.floor(member.y));
+				setOnScripts("defaultStrum" + i + "Angle", Math.floor(member.angle));
+				setOnScripts("defaultStrum" + i + "Alpha", Math.floor(member.alpha));
 			}
 		
 			callOnScripts('onStartCountdown', null, true);
@@ -2744,6 +2752,7 @@ class PlayState extends MusicBeatState
 		FlxG.sound.music.pitch = playbackRate;
 		FlxG.sound.music.onComplete = songOutro;
 		vocals.play();
+		opponentVocals.play();
 
 		if (ClientPrefs.data.psychUI)
 		{
@@ -2769,6 +2778,7 @@ class PlayState extends MusicBeatState
 			//trace('Oopsie doopsie! Paused sound');
 			FlxG.sound.music.pause();
 			vocals.pause();
+			opponentVocals.pause();
 		}
 
 		// Song duration in a float, useful for the time left feature
@@ -2838,7 +2848,7 @@ class PlayState extends MusicBeatState
 
 		curSong = songData.song;
 
-		if (SONG.needsVoices)
+		/*if (SONG.needsVoices) //If the new system glitches out for some reason I'll just re-enable this
 		{
 			if (!Assets.exists(Paths.voices(PlayState.SONG.song)))
 			{
@@ -2851,13 +2861,54 @@ class PlayState extends MusicBeatState
 				vocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(Paths.voices(PlayState.SONG.song));
 		}		
 		else
-			vocals = new FlxSound();
+			vocals = new FlxSound();*/
+
+		vocals = new FlxSound();
+		opponentVocals = new FlxSound();
+        try
+        {
+            if (SONG.needsVoices)//WHY THERES SO MANY VOICES FUNCTIONS
+            {
+                var playerVocals = Paths.voices(songData.song, (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile);
+                if (!Assets.exists(playerVocals)) playerVocals = null;
+
+                var playerVocals2 = Paths.voices2(songData.song, (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile);
+                if (!FileSystem.exists(playerVocals2)) playerVocals2 = null;
+
+                if (!Assets.exists(playerVocals))
+                    if (FileSystem.exists(playerVocals2)) vocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(Paths.currentTrackedSounds.exists(playerVocals2) ? Paths.currentTrackedSounds.get(playerVocals2) : Sound.fromFile(playerVocals2));
+                else if (!FileSystem.exists(playerVocals2))
+                    if (Assets.exists(playerVocals)) vocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(playerVocals);
+
+				if(playerVocals == null && playerVocals2 == null){ //don't talk to me.
+					if (!Assets.exists(Paths.voices(PlayState.SONG.song))){
+						if (Paths.currentTrackedSounds.exists(Paths.voices2(PlayState.SONG.song)))
+							vocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(Paths.currentTrackedSounds.get(Paths.voices2(PlayState.SONG.song)));
+						else
+							vocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(Sound.fromFile(Paths.voices2(PlayState.SONG.song)));
+					}else
+						vocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(Paths.voices(PlayState.SONG.song));
+				}
+
+                var oppVocals = Paths.voices(songData.song, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile);
+                var oppVocals2 = Paths.voices2(songData.song, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile);
+
+                if (!Assets.exists(oppVocals))
+                    if (FileSystem.exists(oppVocals2)) opponentVocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(Paths.currentTrackedSounds.exists(oppVocals2) ? Paths.currentTrackedSounds.get(oppVocals2) : Sound.fromFile(oppVocals2));
+                else
+                    if (Assets.exists(oppVocals)) opponentVocals = FlxG.sound.list.recycle(FlxSound).loadEmbedded(oppVocals);
+            }
+        }
+        catch(e:Dynamic) {}
+
 
 		trace('loaded vocals');
 
-		vocals.looped = false;
-		vocals.pitch = playbackRate;
-		FlxG.sound.list.add(vocals);
+        vocals.looped = false;
+        vocals.pitch = playbackRate;
+        opponentVocals.pitch = playbackRate;
+        FlxG.sound.list.add(vocals);
+        FlxG.sound.list.add(opponentVocals);
 
 		notes = new FlxTypedGroup<Note>();
 		add(notes);
@@ -3115,6 +3166,7 @@ class PlayState extends MusicBeatState
 			{
 				FlxG.sound.music.pause();
 				vocals.pause();
+				opponentVocals.pause();
 			}
 
 			#if desktop
@@ -3166,6 +3218,10 @@ class PlayState extends MusicBeatState
 			for (timer in modchartTimers) {
 				timer.active = true;
 			}
+
+			#if VIDEOS_ALLOWED
+			PsychVideoSprite.globalResume();
+			#end
 			
 			callOnScripts('onResume');
 		}
@@ -3177,6 +3233,7 @@ class PlayState extends MusicBeatState
 	public function resyncVocals():Void
 	{
 		vocals.pause();
+		opponentVocals.pause();
 
 		FlxG.sound.music.play();
 		FlxG.sound.music.pitch = playbackRate;
@@ -3186,10 +3243,17 @@ class PlayState extends MusicBeatState
 			vocals.time = Conductor.songPosition;
 			vocals.pitch = playbackRate;
 		}
+
+		if (Conductor.songPosition <= opponentVocals.length)
+		{
+			opponentVocals.time = Conductor.songPosition;
+			opponentVocals.pitch = playbackRate;
+		}	
 		vocals.play();
+		opponentVocals.play();
 
 		#if desktop
-		DiscordClient.changePresence(detailsText + " " + SONG.song + " (" + storyDifficultyText + ") " + Ratings.GenerateLetterRank(accuracy), "\nAcc: " + HelperFunctions.truncateFloat(accuracy, 2) + "% | Score: " + songScore + " | songMisses: " + songMisses  , iconRPC);
+		DiscordClient.changePresence(detailsText + " " + SONG.song + " (" + storyDifficultyText + ") " + Ratings.GenerateLetterRank(accuracy), "\nAccuracy: " + HelperFunctions.truncateFloat(accuracy, 2) + "% | Score: " + songScore + " | Misses: " + songMisses  , iconRPC);
 		#end
 	}
 
@@ -3248,7 +3312,12 @@ class PlayState extends MusicBeatState
 			if(FlxG.sound.music != null) {
 				FlxG.sound.music.pause();
 				vocals.pause();
+				opponentVocals.pause();
 			}
+
+			#if VIDEOS_ALLOWED
+			PsychVideoSprite.globalPause();
+			#end
 
 			isPaused = true;
 			openSubState(new substates.PauseSubState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
@@ -3292,10 +3361,10 @@ class PlayState extends MusicBeatState
 		#if desktop
 		if (songStarted)
 		{
-			setOnLuas('songPos',Conductor.songPosition);
-			setOnLuas('hudZoom', camHUD.zoom);
-			setOnLuas('cameraZoom',FlxG.camera.zoom);
-			callOnLuas('update', [elapsed]);
+			setOnScripts('songPos',Conductor.songPosition);
+			setOnScripts('hudZoom', camHUD.zoom);
+			setOnScripts('cameraZoom',FlxG.camera.zoom);
+			callOnScripts('update', [elapsed]);
 
 			if (luaWiggles != [])
 			{
@@ -3750,6 +3819,8 @@ class PlayState extends MusicBeatState
 		FlxG.sound.music.volume = 0;
 		vocals.volume = 0;
 		vocals.pause();
+		opponentVocals.volume = 0;
+		opponentVocals.pause();
 		canPause = false;
 		updateTime = false;
 		endingSong = true;
@@ -4472,9 +4543,10 @@ class PlayState extends MusicBeatState
 	
 	function updateAccuracy(?badHit:Bool = false) 
 	{
-		setOnLuas('score', songScore);
-		setOnLuas('misses', songMisses);
-		setOnLuas('hits', songHits);
+		setOnScripts('score', songScore);
+		setOnScripts('misses', songMisses);
+		setOnScripts('hits', songHits);
+		setOnScripts('combo', combo);
 
 		var ret:Dynamic = callOnScripts('onRecalculateRating', null, true);
 
@@ -4503,9 +4575,9 @@ class PlayState extends MusicBeatState
 
 		callOnScripts('onUpdateScore', [badHit]);
 		
-		setOnLuas('rating', ratingPercent);
-		setOnLuas('ratingName', ratingName);
-		setOnLuas('ratingFC', ratingFC);
+		setOnScripts('rating', ratingPercent);
+		setOnScripts('ratingName', ratingName);
+		setOnScripts('ratingFC', ratingFC);
 	}
 
 	function getKeyPresses(note:Note):Int
@@ -4626,6 +4698,7 @@ class PlayState extends MusicBeatState
 			time += 0.15;
 		}
 
+		if(opponentVocals.length <= 0) vocals.volume = 1;
 		StrumPlayAnim(true, Std.int(Math.abs(note.noteData)), time);
 		note.hitByOpponent = true;
 
@@ -4901,6 +4974,7 @@ class PlayState extends MusicBeatState
 				usedTimeTravel = true;
 				FlxG.sound.music.pause();
 				vocals.pause();
+				opponentVocals.pause();
 				Conductor.songPosition = skipExactly;
 				notes.forEachAlive(function(daNote:Note)
 				{
@@ -4922,6 +4996,8 @@ class PlayState extends MusicBeatState
 				FlxG.sound.music.play();
 				vocals.time = Conductor.songPosition;
 				vocals.play();
+				opponentVocals.time = Conductor.songPosition;
+				opponentVocals.play();
 				new FlxTimer().start(0.5, function(tmr:FlxTimer)
 					{
 						usedTimeTravel = false;
@@ -4935,6 +5011,7 @@ class PlayState extends MusicBeatState
 				usedTimeTravel = true;
 				FlxG.sound.music.pause();
 				vocals.pause();
+				opponentVocals.pause();
 				Conductor.songPosition += 10000 * multiplier;
 				notes.forEachAlive(function(daNote:Note)
 				{
@@ -4956,6 +5033,8 @@ class PlayState extends MusicBeatState
 				FlxG.sound.music.play();
 				vocals.time = Conductor.songPosition;
 				vocals.play();
+				opponentVocals.time = Conductor.songPosition;
+				opponentVocals.play();
 				new FlxTimer().start(0.5, function(tmr:FlxTimer)
 					{
 						usedTimeTravel = false;
@@ -5158,12 +5237,13 @@ class PlayState extends MusicBeatState
 		if(generatedMusic)
 		{
 			if(vocals != null) vocals.pitch = value;
+			if(opponentVocals != null) opponentVocals.pitch = value;
 			FlxG.sound.music.pitch = value;
 		}
 		playbackRate = value;
 		FlxG.animationTimeScale = value;
 		//Conductor.safeZoneOffset = (FlxG.save.data.safeFrames / 60) * 1000 * value;
-		setOnLuas('playbackRate', playbackRate);
+		setOnScripts('playbackRate', playbackRate);
 		adjustCamFollow();
 
 		return value;
@@ -5308,7 +5388,7 @@ class PlayState extends MusicBeatState
 			notes.sort(FlxSort.byY, (FlxG.save.data.downscroll ? FlxSort.ASCENDING : FlxSort.DESCENDING));
 		}
 
-		setOnLuas('curBeat',curBeat);
+		setOnScripts('curBeat',curBeat);
 		callOnScripts('beatHit', [curBeat]);
 		callOnScripts('onBeatHit', [curBeat]);
 

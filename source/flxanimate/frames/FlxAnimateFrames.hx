@@ -42,10 +42,10 @@ class FlxAnimateFrames extends FlxAtlasFrames
      * @param Path          Where the Sprites are, normally you use it once when calling FlxAnimate already
      * @return              new sliced limbs for you to use ;)
      */
-    public static function fromTextureAtlas(Path:String):FlxAtlasFrames
+     public static function fromTextureAtlas(Path:String):FlxAtlasFrames
     {
         var frames:FlxAnimateFrames = new FlxAnimateFrames();
-                
+        
         if (zip != null || haxe.io.Path.extension(Path) == "zip")
         {
             #if html5
@@ -54,9 +54,9 @@ class FlxAnimateFrames extends FlxAtlasFrames
             #end
             var imagemap:Map<String, Bytes> = new Map();
             var jsonMap:Map<String, AnimateAtlas> = new Map();
-            var thing = (zip != null) ? zip :  Zip.unzip(Zip.readZip(Assets.exists(Path) ? Assets.getBytes(Path) : File.getBytes(Path)));
-			for (list in thing)
-			{
+            var thing = (zip != null) ? zip :  Zip.unzip(Zip.readZip(#if sys sys.io.File.getBytes(Path) #else Assets.getBytes(Path) #end));
+            for (list in thing)
+            {
                 if (haxe.io.Path.extension(list.fileName) == "json")
                 {
                     jsonMap.set(list.fileName,haxe.Json.parse(StringTools.replace(list.data.toString(), String.fromCharCode(0xFEFF), "")));
@@ -66,7 +66,7 @@ class FlxAnimateFrames extends FlxAtlasFrames
                     var name = list.fileName.split("/");
                     imagemap.set(name[name.length - 1], list.data);
                 }
-			}
+            }
             // Assuming the json has the same stuff as the image stuff
             for (curJson in jsonMap)
             {
@@ -75,7 +75,7 @@ class FlxAnimateFrames extends FlxAtlasFrames
                 {
                     for (sprites in curJson.ATLAS.SPRITES)
                     {
-                        frames.pushFrame(textureAtlasHelper(curImage, sprites.SPRITE, curJson.meta));
+                        frames.pushFrame(textureAtlasHelper(FlxG.bitmap.add(curImage), sprites.SPRITE, curJson.meta));
                     }
                 }
                 else
@@ -85,63 +85,84 @@ class FlxAnimateFrames extends FlxAtlasFrames
         }
         else
         {
-            if (Assets.exists('$Path/spritemap.json') || FileSystem.exists('$Path/spritemap.json'))
+            #if sys
+            var texts = sys.FileSystem.readDirectory(Path).filter((text) -> text.startsWith('spritemap') && text.toLowerCase().endsWith('.json'));
+            for(i in 0...texts.length) texts[i] = '$Path/' + texts[i];
+            #else
+            var texts = Assets.list(TEXT).filter((text) -> StringTools.startsWith(text, '$Path/spritemap'));
+            #end
+            if (texts.length > 1)
             {
-                var isAssets = Assets.exists('$Path/spritemap.json');
-                var curJson:AnimateAtlas = haxe.Json.parse(StringTools.replace((isAssets ? Assets.getText('$Path/spritemap.json') : File.getContent('$Path/spritemap.json')), String.fromCharCode(0xFEFF), ""));
-                var curSpritemap = isAssets ? Assets.getBitmapData('$Path/${curJson.meta.image}') : BitmapData.fromFile('$Path/${curJson.meta.image}');
-                if (curSpritemap != null)
+                texts.sort(function (a, b)
                 {
-                    var graphic = FlxG.bitmap.add(curSpritemap);
-                    var spritemapFrames = FlxAtlasFrames.findFrame(graphic);
-                    if (spritemapFrames == null)
-                    {
-                        spritemapFrames = new FlxAnimateFrames();
-                        for (curSprite in curJson.ATLAS.SPRITES)
-                        {
-                            spritemapFrames.pushFrame(textureAtlasHelper(graphic.bitmap,curSprite.SPRITE, curJson.meta));
-                        }
-                    }
-                    graphic.addFrameCollection(spritemapFrames);
-                    frames.concatFrames(spritemapFrames);
-                }
-                else
-                    FlxG.log.error('the image called "${curJson.meta.image}" does not exist in Path $Path, maybe you changed the image Path somewhere else?');
-            }
-            var i = 1;
+                    var an = Std.parseInt(haxe.io.Path.withoutDirectory(a).charAt(9));
+                    var bn = Std.parseInt(haxe.io.Path.withoutDirectory(b).charAt(9));
+                    if (Math.isNaN(an) || Math.isNaN(bn))
+                        return 0;
 
-            while (Assets.exists('$Path/spritemap$i.json') || FileSystem.exists('$Path/spritemap$i.json'))
-            {
-                var isAssets = Assets.exists('$Path/spritemap$i.json');
-                var curJson:AnimateAtlas = haxe.Json.parse(StringTools.replace((isAssets ? Assets.getText('$Path/spritemap$i.json') : File.getContent('$Path/spritemap$i.json')), String.fromCharCode(0xFEFF), ""));
-                trace("JSON FOR PATH " + Path + " IS: \n" + curJson);
-                var curSpritemap = (isAssets ? Assets.getBitmapData('$Path/${curJson.meta.image}') : BitmapData.fromFile('$Path/${curJson.meta.image}'));
-                if (curSpritemap != null)
-                {
-                    var graphic = FlxG.bitmap.add(curSpritemap);
-                    var spritemapFrames = FlxAtlasFrames.findFrame(graphic);
-                    if (spritemapFrames == null)
-                    {
-                        spritemapFrames = new FlxAnimateFrames();
-                        for (curSprite in curJson.ATLAS.SPRITES)
-                        {
-                            spritemapFrames.pushFrame(textureAtlasHelper(graphic.bitmap,curSprite.SPRITE, curJson.meta));
-                        }
-                    }
-                    graphic.addFrameCollection(spritemapFrames);
-                    frames.concatFrames(spritemapFrames);
-                }
-                else
-                    FlxG.log.error('the image called "${curJson.meta.image}" does not exist in Path $Path, maybe you changed the image Path somewhere else?');
-                i++;
+                    return an - bn;
+                });
             }
-        }
-        if (frames.frames == [])
-        {
-            FlxG.log.error("the Frames parsing couldn't parse any of the frames, it's completely empty! \n Maybe you misspelled the Path?");
-            return null;
+            var spritemaps:Array<{image:BitmapData, json:AnimateAtlas}> = [];
+            for (text in texts)
+            {
+                #if sys
+                var txt = sys.io.File.getContent(text);
+                #else
+                var txt = Assets.getText(text);
+                #end
+                if (txt.charCodeAt(0) == 0xFEFF)
+                    txt = txt.substring(1);
+                var json:AnimateAtlas = haxe.Json.parse(txt);
+
+                #if sys
+                spritemaps.push({image: BitmapData.fromFile('$Path/${json.meta.image}'), json: json});
+                #else
+                spritemaps.push({image: Assets.getBitmapData('$Path/${json.meta.image}'), json: json});
+                #end
+            }
+            
+            for (spritemap in spritemaps)
+            {
+                if (spritemap.image == null)
+                {
+                    FlxG.log.error('the image called "${spritemap.json.meta.image}" does not exist in Path $Path, maybe you changed the image Path somewhere else?');
+                    continue;
+                }
+            
+                var graphic = FlxG.bitmap.add(spritemap.image);
+                var spritemapFrames = FlxAtlasFrames.findFrame(graphic);
+                if (spritemapFrames == null)
+                {
+                    spritemapFrames = new FlxAnimateFrames();
+                    for (curSprite in spritemap.json.ATLAS.SPRITES)
+                    {
+                        spritemapFrames.pushFrame(textureAtlasHelper(graphic, curSprite.SPRITE, spritemap.json.meta));
+                    }
+                }
+                graphic.addFrameCollection(spritemapFrames);
+                frames.animateConcat(spritemapFrames);
+            }
+
+            if (frames.frames == [])
+            {
+                FlxG.log.error("the Frames parsing couldn't parse any of the frames, it's completely empty! \n Maybe you misspelled the Path?");
+                return null;
+            }
         }
         return frames;
+    }
+
+    public function animateConcat(frames:FlxFramesCollection)
+    {
+        if (parents.indexOf(frames.parent) == -1)
+            parents.push(frames.parent);
+        for (frame in frames.frames)
+        {
+            this.frames.push(frame);
+            framesHash.set(frame.name, frame);
+        }
+        return this;
     }
 
     public function concatFrames(frames:FlxFramesCollection)
@@ -154,6 +175,37 @@ class FlxAnimateFrames extends FlxAtlasFrames
             framesHash.set(frame.name, frame);
         }
     }
+
+    /**
+     * 
+     * @param Data the Json/XML file content/string
+     * @param Image the image which the file is referencing **WARNING:** if you set the path as a json, it's obligatory to set the image!
+     * @return A new instance of `FlxAtlasFrames`
+     */
+     public static function fromAnimateAtlas(Data:AnimateAtlas, Image:FlxGraphicAsset):FlxAnimateFrames
+    {
+        var frames:FlxAnimateFrames = new FlxAnimateFrames();
+        var graphic = FlxG.bitmap.add(Image);
+        var spritemapFrames = FlxAtlasFrames.findFrame(graphic);
+        if (spritemapFrames == null)
+        {
+            spritemapFrames = new FlxAnimateFrames();
+            for (curSprite in Data.ATLAS.SPRITES)
+            {
+                spritemapFrames.pushFrame(textureAtlasHelper(graphic, curSprite.SPRITE, Data.meta));
+            }
+        }
+        graphic.addFrameCollection(spritemapFrames);
+        frames.animateConcat(spritemapFrames);
+
+        if (frames.frames == [])
+        {
+            trace("the Frames parsing couldn't parse any of the frames, it's completely empty! \n Maybe you misspelled the Path?");
+            return null;
+        }
+        return frames;
+    }
+
     /**
      * Sparrow spritesheet format parser with support of both of the versions and making the image completely optional to you.
      * @param Path The direction of the Xml you want to parse.
@@ -479,24 +531,24 @@ class FlxAnimateFrames extends FlxAtlasFrames
         Frames.addAtlasFrame(frameRect, sourceSize, offset, name, angle);
     }
 
-    static function textureAtlasHelper(SpriteMap:BitmapData, limb:AnimateSpriteData, curMeta:Meta)
+    static function textureAtlasHelper(SpriteMap:FlxGraphic, limb:AnimateSpriteData, curMeta:Meta)
     {
+        
         var width = (limb.rotated) ? limb.h : limb.w;
         var height = (limb.rotated) ? limb.w : limb.h;
-        var sprite = new BitmapData(width, height, true, 0);
-        var matrix = new FlxMatrix(1,0,0,1,-limb.x,-limb.y);
-        if (limb.rotated)
-        {
-            matrix.rotateByNegative90();
-            matrix.translate(0, height);
-        }
-        sprite.draw(SpriteMap, matrix);
-    
+
         @:privateAccess
-        var curFrame = new FlxFrame(FlxG.bitmap.add(sprite));
+        var curFrame = new FlxFrame(SpriteMap);
+
         curFrame.name = limb.name;
         curFrame.sourceSize.set(width, height);
-        curFrame.frame = new FlxRect(0,0, width, height);
+        curFrame.frame = new FlxRect(limb.x, limb.y, limb.w, limb.h);
+
+        if (limb.rotated)
+        {
+            curFrame.angle = ANGLE_NEG_90;
+        }
+
         return curFrame;
     }
     

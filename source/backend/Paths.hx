@@ -250,38 +250,35 @@ class Paths
 		return FileSystem.absolutePath('assets/songs/${songLowercase}/'+pre+'Inst'+suf+'.$SOUND_EXT');
 	}
 
-	inline static public function voices2(song:String, ?library:String)
+	inline static public function voices2(song:String, postfix:String = null, ?library:String/*this library shit is even used?*/)
 	{
 		var songLowercase = StringTools.replace(song, " ", "-").toLowerCase();
-		switch (songLowercase) {
-			case 'dad-battle': songLowercase = 'dadbattle';
-			case 'philly-nice': songLowercase = 'philly';
-		}
 
 		var pre:String = "";
 		var suf:String = "";
 
 		if (Main.noCopyright && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Voices'+'Alt'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'VoicesAlt'))))
 			suf = 'Alt';		
-		if (PlayState.isNeonight)
-			suf = 'NN';
-		if (PlayState.isVitor)		
-			suf = 'V';
-		if (PlayState.isBETADCIU && CoolUtil.difficulties[0] == "Guest" && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Voices'+'Guest'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'VoicesGuest'))))		
-			suf = 'Guest';
-		if (PlayState.isBETADCIU && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Voices'+'BETADCIU'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'VoicesBETADCIU'))))
-			suf = 'BETADCIU';
+        if (PlayState.isNeonight)
+            suf = 'NN';
+        if (PlayState.isVitor)        
+            suf = 'V';
+        if (PlayState.isBETADCIU && CoolUtil.difficulties[0] == "Guest" && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Voices'+'Guest'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'VoicesGuest'))))        
+            suf = 'Guest';
+        if (PlayState.isBETADCIU && (Assets.exists('songs:assets/songs/${songLowercase}/'+'Voices'+'BETADCIU'+'.$SOUND_EXT') || FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'VoicesBETADCIU'))))
+            suf = 'BETADCIU';
+        if (postfix != null) suf += '-' + postfix;
 
-		if (FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'Voices'+suf)))
-		{
-			returnSound('songs', '${songLowercase}/'+pre+'Voices'+suf);
-			return Paths.modsSounds('songs', '${songLowercase}/'+pre+'Voices'+suf);
-		}
-			
-		return FileSystem.absolutePath('assets/songs/${songLowercase}/'+pre+'Voices'+suf+'.$SOUND_EXT');
-	}
+        if (FileSystem.exists(Paths.modsSounds('songs', '${songLowercase}/'+pre+'Voices'+suf)))
+        {
+            returnSound('songs', '${songLowercase}/'+pre+'Voices'+suf);
+            return Paths.modsSounds('songs', '${songLowercase}/'+pre+'Voices'+suf);
+        }
+            
+        return FileSystem.absolutePath('assets/songs/${songLowercase}/'+pre+'Voices'+suf+'.$SOUND_EXT');
+    }
 
-	inline static public function voices(song:String)
+	inline static public function voices(song:String, ?postfix:String = null)
 	{
 		var songLowercase = StringTools.replace(song, " ", "-").toLowerCase();
 			switch (songLowercase) {
@@ -299,11 +296,10 @@ class Paths
 			suf = 'V';
 		if (PlayState.isBETADCIU && CoolUtil.difficulties[0] == "Guest")		
 			suf = 'Guest';
-		if (PlayState.isBETADCIU && (songLowercase == 'kaboom' || songLowercase == 'triple-trouble'))		
+		if (PlayState.isBETADCIU)		
 			suf = 'BETADCIU';
-		if (Main.isMegalo && songLowercase == 'hill-of-the-void')		
-			suf = 'Megalo';
-
+		if (postfix != null) suf += '-' + postfix;
+	
 		return 'songs:assets/songs/${songLowercase}/'+pre+'Voices'+suf+'.$SOUND_EXT';
 	}
 
@@ -951,6 +947,78 @@ class Paths
 			}
 		}
 		return list;
+	}
+	#end
+
+	#if flxanimate
+	public static function loadAnimateAtlas(spr:FlxAnimate, folderOrImg:Dynamic, spriteJson:Dynamic = null, animationJson:Dynamic = null)
+	{
+		var changedAnimJson = false;
+		var changedAtlasJson = false;
+		var changedImage = false;
+		
+		if(spriteJson != null)
+		{
+			changedAtlasJson = true;
+			spriteJson = File.getContent(spriteJson);
+		}
+
+		if(animationJson != null) 
+		{
+			changedAnimJson = true;
+			animationJson = File.getContent(animationJson);
+		}
+
+		// is folder or image path
+		if(Std.isOfType(folderOrImg, String))
+		{
+			var originalPath:String = folderOrImg;
+			for (i in 0...10)
+			{
+				var st:String = '$i';
+				if(i == 0) st = '';
+
+				if(!changedAtlasJson)
+				{
+					spriteJson = getTextFromFile('images/$originalPath/spritemap$st.json');
+					if(spriteJson != null)
+					{
+						trace('found Sprite Json');
+						changedImage = true;
+						changedAtlasJson = true;
+						folderOrImg = returnGraphic('$originalPath/spritemap$st');
+						break;
+					}
+				}
+				else if(fileExists('images/$originalPath/spritemap$st.png', IMAGE))
+				{
+					trace('found Sprite PNG');
+					changedImage = true;
+					folderOrImg = returnGraphic('$originalPath/spritemap$st');
+					break;
+				}
+			}
+
+			if(!changedImage)
+			{
+				trace('Changing folderOrImg to FlxGraphic');
+				changedImage = true;
+				folderOrImg = returnGraphic(originalPath);
+			}
+
+			if(!changedAnimJson)
+			{
+				trace('found Animation Json');
+				changedAnimJson = true;
+				animationJson = getTextFromFile('images/$originalPath/Animation.json');
+			}
+		}
+		
+		trace(folderOrImg);
+		//trace(spriteJson);
+		//trace(animationJson);
+
+		spr.loadAtlasEx(folderOrImg, spriteJson, animationJson);
 	}
 	#end
 }

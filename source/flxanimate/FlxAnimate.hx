@@ -22,6 +22,7 @@ import flixel.math.FlxMatrix;
 import openfl.geom.ColorTransform;
 import flixel.math.FlxMath;
 import flixel.FlxBasic;
+import flixel.system.FlxAssets.FlxGraphicAsset;
 
 typedef Settings = {
 	?ButtonSettings:Map<String, flxanimate.animate.FlxAnim.ButtonSettings>,
@@ -91,6 +92,72 @@ class FlxAnimate extends FlxSprite
 		anim._loadAtlas(atlasSetting(Path));
 		frames = FlxAnimateFrames.fromTextureAtlas(Path);
 	}
+
+	public function loadAtlasEx(img:FlxGraphicAsset, pathOrStr:String = null, myJson:Dynamic = null)
+	{
+		var animJson:AnimAtlas = null;
+		if(myJson is String)
+		{
+			var trimmed:String = pathOrStr.trim();
+			trimmed = trimmed.substr(trimmed.length - 5).toLowerCase();
+
+			if(trimmed == '.json') myJson = sys.io.File.getContent(myJson); //is a path
+			animJson = cast haxe.Json.parse(_removeBOM(myJson));
+		}
+		else animJson = cast myJson;
+
+		var isXml:Null<Bool> = null;
+		var myData:Dynamic = pathOrStr;
+
+		var trimmed:String = pathOrStr.trim();
+		trimmed = trimmed.substr(trimmed.length - 5).toLowerCase();
+
+		if(trimmed == '.json') //Path is json
+		{
+			myData = sys.io.File.getContent(pathOrStr);
+			isXml = false;
+		}
+		else if (trimmed.substr(1) == '.xml') //Path is xml
+		{
+			myData = sys.io.File.getContent(pathOrStr);
+			isXml = true;
+		}
+		myData = _removeBOM(myData);
+
+		// Automatic if everything else fails
+		switch(isXml)
+		{
+			case true:
+				myData = Xml.parse(myData);
+			case false:
+				myData = haxe.Json.parse(myData);
+			case null:
+				try
+				{
+					myData = haxe.Json.parse(myData);
+					isXml = false;
+					//trace('JSON parsed successfully!');
+				}
+				catch(e)
+				{
+					myData = Xml.parse(myData);
+					isXml = true;
+					//trace('XML parsed successfully!');
+				}
+		}
+
+		anim._loadAtlas(animJson);
+		if(!isXml) frames = FlxAnimateFrames.fromAnimateAtlas(cast myData, img);
+		else frames = FlxAnimateFrames.fromSparrow(cast myData, img);
+		origin = anim.curInstance.symbol.transformationPoint;
+	}
+
+	function _removeBOM(str:String) //Removes BOM byte order indicator
+	{
+		if (str.charCodeAt(0) == 0xFEFF) str = str.substr(1); //myData = myData.substr(2);
+		return str;
+	}
+
 	/**
 	 * the function `draw()` renders the symbol that `anim` has currently plus a pivot that you can toggle on or off.
 	 */
