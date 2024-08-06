@@ -1115,7 +1115,7 @@ class PlayState extends MusicBeatState
 		setOnScripts("mustHitSection", PlayState.SONG.notes[curSection].mustHitSection); //just so we can check the first section
 		setOnScripts('gfSection', SONG.notes[curSection].gfSection); //forgot to check this one too.
 		callOnScripts('start', []);			
-		callOnScripts('onCreate', []); //psych	
+		callOnLuas('onCreate', []); //psych	-- I forgot that making this a callOnScripts calls onCreate twice on hscripts mb
 
 		if ((isStoryMode || showCutscene))
 		{
