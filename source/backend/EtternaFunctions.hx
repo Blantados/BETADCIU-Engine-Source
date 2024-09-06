@@ -62,25 +62,27 @@ class EtternaFunctions
         return (getNotes() * 350);
     }
 
-    public static function wife3(maxms:Float, ts:Float)
-    {
-        var max_points = 1.0;
-        var miss_weight = -5.5;
-        var ridic= 5 * ts;
-        var max_boo_weight = 180 * ts;
-        var ts_pow = 0.75;
-        var zero = 65 * (Math.pow(ts,ts_pow));
-        var power = 2.5;
-        var dev = 22.7 * (Math.pow(ts,ts_pow));
-    
-        if (maxms <= ridic) // anything below this (judge scaled) threshold is counted as full pts
-            return max_points;
-        else if (maxms <= zero) // ma/pa region, exponential
-                return max_points * erf((zero - maxms) / dev);
-        else if (maxms <= max_boo_weight)// cb region, linear
-            return (maxms - zero) * miss_weight / (max_boo_weight - zero);
-        else
-            return miss_weight;
-    }
+    public static function wife3(maxms:Float, ts:Float)//code updated to kade 1.8 version, 𝘪 𝘥𝘰𝘯'𝘵 𝘳𝘦𝘢𝘭𝘭𝘺 𝘬𝘯𝘰𝘸 𝘪𝘧 𝘵𝘩𝘪𝘴 𝘸𝘪𝘭𝘭 𝘤𝘩𝘢𝘯𝘨𝘦 𝘢𝘯𝘺𝘵𝘩𝘪𝘯𝘨 𝘵𝘣𝘩
+	{
+        var playbackRate = PlayState.instance.playbackRate;
+
+		var max_points = 1.0;
+		var miss_weight = -5.5;
+		var ridic = 5 * ts;
+		var max_boo_weight = 166 * (ts / playbackRate);
+		var ts_pow = 0.75;
+		var zero = 65 * (Math.pow(ts, ts_pow));
+		var power = 2.5;
+		var dev = 22.7 * (Math.pow(ts, ts_pow));
+
+		if (maxms <= ridic) // anything below this (judge scaled) threshold is counted as full pts
+			return max_points;
+		else if (maxms <= zero) // ma/pa region, exponential
+			return max_points * erf((zero - maxms) / dev);
+		else if (maxms <= max_boo_weight) // cb region, linear
+			return (maxms - zero) * miss_weight / (max_boo_weight - zero);
+		else
+			return miss_weight;
+	}
 
 }

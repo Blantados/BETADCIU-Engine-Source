@@ -91,10 +91,7 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 	function onChangeFramerate()
 	{
 		var framerate = ClientPrefs.data.framerate;
-		var fpsCap = ClientPrefs.data.fpsCap;
 
-		fpsCap = framerate;
-		FlxG.save.data.fpsCap = framerate;
 		FlxG.save.flush();
 		ClientPrefs.saveSettings();//i didn't find any other way to make this engine work with this.
 		//trace(ClientPrefs.data.framerate);

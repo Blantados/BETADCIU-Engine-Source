@@ -4,7 +4,7 @@ import flixel.FlxG;
 
 class Ratings
 {
-    public static function GenerateLetterRank(accuracy:Float) // generate a letter ranking
+    /*public static function GenerateLetterRank(accuracy:Float) // generate a letter ranking
     {
         var ranking:String = "N/A";
 
@@ -88,9 +88,9 @@ class Ratings
             ranking = "N/A";
             
         return ranking;
-    }
+    }*/
 
-    public static function GenerateLetterRankPsych(accuracy:Float) // bcuz yes
+    public static function GenerateLetterRank(accuracy:Float) // bcuz yes
     {
         var ranking:String = "N/A";
 

@@ -246,8 +246,6 @@ class PauseSubState extends MusicBeatSubstate
 						FlxG.save.data.downscroll = false;
 					}
 					PlayState.loadRep = false;
-					if (FlxG.save.data.fpsCap > 290)
-						(cast (Lib.current.getChildAt(0), Main)).setFPSCap(290);
 					
 					if (PlayState.isStoryMode){
 						MusicBeatState.switchState(new states.StoryMenuState());

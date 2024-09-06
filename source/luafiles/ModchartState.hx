@@ -972,7 +972,6 @@ class ModchartState
 
 		set("difficulty", PlayState.storyDifficulty);
 		set("curBpm", Conductor.bpm);
-		set("fpsCap", FlxG.save.data.fpsCap);
 		set("downscroll", FlxG.save.data.downscroll);
 		set("flashing", FlxG.save.data.flashing);
 		set("distractions", FlxG.save.data.distractions);
@@ -1348,31 +1347,6 @@ class ModchartState
 				}
 				return false;
 			});
-
-			// custom substate
-			Lua_helper.add_callback(lua, "openCustomSubstate", function(name:String, pauseGame:Bool = false) {
-				if(pauseGame)
-				{
-					PlayState.instance.persistentUpdate = false;
-					PlayState.instance.persistentDraw = true;
-					PlayState.instance.paused = true;
-					if(FlxG.sound.music != null) {
-						FlxG.sound.music.pause();
-						PlayState.instance.vocals.pause();
-					}
-				}
-				PlayState.instance.openSubState(new CustomSubstate(name));
-			});
-
-			Lua_helper.add_callback(lua, "closeCustomSubstate", function() {
-				if(CustomSubstate.instance != null)
-				{
-					PlayState.instance.closeSubState();
-					CustomSubstate.instance = null;
-					return true;
-				}
-				return false;
-			});
 	
 			Lua_helper.add_callback(lua, "toggleCamFilter", function(bool:Bool, camera:String = '') {
 				LuaUtils.cameraFromString(camera).filtersEnabled = bool;
@@ -1597,6 +1571,15 @@ class ModchartState
 	
 				return runningScripts;
 			});
+
+			Lua_helper.add_callback(lua, "getRunningHScripts", function(){
+				var runningScripts:Array<String> = [];
+				for (idx in 0...PlayState.instance.hscriptArray.length)
+					runningScripts.push(PlayState.instance.hscriptArray[idx].scriptFile);
+	
+	
+				return runningScripts;
+			});
 	
 			Lua_helper.add_callback(lua, "callOnLuas", function(?funcName:String, ?args:Array<Dynamic>, ignoreStops=false, ignoreSelf=true, ?exclusions:Array<String>){
 				if(funcName==null){
@@ -1614,6 +1597,20 @@ class ModchartState
 				Lua.pop(lua, 1);
 				if(ignoreSelf && !exclusions.contains(daScriptName))exclusions.push(daScriptName);
 				PlayState.instance.callOnLuas(funcName, args, ignoreStops, exclusions);
+			});
+
+			Lua_helper.add_callback(lua, "callOnHScript", function(funcName:String, ?args:Array<Dynamic> = null, ?ignoreStops=false, ?ignoreSelf:Bool = true, ?excludeScripts:Array<String> = null, ?excludeValues:Array<Dynamic> = null) {
+				if(excludeScripts == null) excludeScripts = [];
+				if(ignoreSelf && !excludeScripts.contains(scriptName)) excludeScripts.push(scriptName);
+				PlayState.instance.callOnHScript(funcName, args, ignoreStops, excludeScripts, excludeValues);
+				return true;
+			});
+
+			Lua_helper.add_callback(lua, "callOnScripts", function(funcName:String, ?args:Array<Dynamic> = null, ?ignoreStops=false, ?ignoreSelf:Bool = true, ?excludeScripts:Array<String> = null, ?excludeValues:Array<Dynamic> = null) {
+				if(excludeScripts == null) excludeScripts = [];
+				if(ignoreSelf && !excludeScripts.contains(scriptName)) excludeScripts.push(scriptName);
+				PlayState.instance.callOnScripts(funcName, args, ignoreStops, excludeScripts, excludeValues);
+				return true;
 			});
 	
 			Lua_helper.add_callback(lua, "callScript", function(?luaFile:String, ?funcName:String, ?args:Array<Dynamic>){
@@ -1774,7 +1771,19 @@ class ModchartState
 				if(ignoreSelf && !exclusions.contains(scriptName)) exclusions.push(scriptName);
 				PlayState.instance.setOnLuas(varName, arg, exclusions);
 			});
-	
+
+			Lua_helper.add_callback(lua, "setOnHScript", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null) {
+				if(exclusions == null) exclusions = [];
+				if(ignoreSelf && !exclusions.contains(scriptName)) exclusions.push(scriptName);
+				PlayState.instance.setOnHScript(varName, arg, exclusions);
+			});
+
+			Lua_helper.add_callback(lua, "setOnScripts", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null) { //why not.
+				if(exclusions == null) exclusions = [];
+				if(ignoreSelf && !exclusions.contains(scriptName)) exclusions.push(scriptName);
+				PlayState.instance.setOnScripts(varName, arg, exclusions);
+			});
+
 			Lua_helper.add_callback(lua,"animationSwap", function(char:String, anim1:String, anim2:String) {
 				var shit = LuaUtils.getObjectDirectly(char);
 	
@@ -2980,7 +2989,7 @@ class ModchartState
 				#end
 			});
 
-			Lua_helper.add_callback(lua, "makeVideoSprite", function(tag:String, videoFile:String, ?x:Float, ?y:Float, ?camera:String, ?shouldLoop:Bool, ?muted:Bool) {
+			Lua_helper.add_callback(lua, "makeVideoSprite", function(tag:String, videoFile:String, ?x:Float, ?y:Float, ?camera:String="camGame", ?shouldLoop:Bool=false, ?muted:Bool=true) {
                 // I hate you FlxVideoSprite....
                 #if VIDEOS_ALLOWED
                 tag = tag.replace('.', '');
@@ -3834,6 +3843,7 @@ class ModchartState
 			#if desktop DiscordClient.addLuaCallbacks(lua); #end
 			#if hscript HScript.implement(this); #end
 			#if flxanimate FlxAnimateFunctions.implement(this); #end
+			SpriteGroupFunctions.implement(this);
 			ReflectionFunctions.implement(this);
 			TweenFunctions.implement(this);
 			TextFunctions.implement(this);

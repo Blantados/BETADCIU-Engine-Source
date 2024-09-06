@@ -24,7 +24,6 @@ import states.TitleState;
 	public var lowQuality:Bool = false;
 	public var shaders:Bool = true;
 	public var framerate:Int = 120;
-	public var fpsCap:Int = 120;
 	public var camZooms:Bool = true;
 	public var hideHud:Bool = false;
 	public var noteOffset:Int = 0;
@@ -74,7 +73,7 @@ import states.TitleState;
 	public var useGL:Bool = false;
 	public var poltatoPC:Bool = false;
 	public var controllerMode:Bool = false;
-	public var psychUI:Bool = false;
+	public var psychUI:Bool = true;//the option no longer exists, but I'll leave it here just to avoid breaking some scripts
 	public var noteSplashes:Bool = true;
 	public var fpsRain:Bool = false;
 	public var cursing:Bool = true;
@@ -84,7 +83,8 @@ import states.TitleState;
 	public var showNextSection:Bool = true;
 
 	public var botplay:Bool = false;
-	public var songPosition:Bool = false;
+	public var accType:String = 'Simple';
+	//public var songPosition:Bool = false;
 }
 
 class ClientPrefs {
@@ -140,11 +140,8 @@ class ClientPrefs {
 	}
 
 	public static function saveSettings() {
-		FlxG.save.data.fps = data.showFPS;
 		FlxG.save.data.showFPS = data.showFPS;
 		FlxG.save.data.noteSplash = data.noteSplashes;
-		data.fpsCap = data.framerate;
-		FlxG.save.data.fpsCap = data.framerate;
 		FlxG.save.data.ghost = data.ghostTapping;
 		
 		for (key in Reflect.fields(data)){
@@ -161,41 +158,35 @@ class ClientPrefs {
 	}
 
 	public static function loadPrefs() {
-		if(FlxG.save.data.fpsCap == null && FlxG.save.data.framerate == null) {
-			var framerate = 120;
-			FlxG.save.data.framerate = framerate;
-			FlxG.save.data.fpsCap = framerate;
-			FlxG.save.flush();
+		if(FlxG.save.data.psychUI != null || FlxG.save.data.psychUI == false){
+			data.psychUI == true;//forcing it to true so it doesn't break scripts
+			FlxG.save.data.psychUI == true;//forcing it to true so it doesn't break scripts
 		}
 
-		// values I couldn't add to the array since they have different save data names and var names
-		if(FlxG.save.data.fps != null) {
-			data.showFPS = FlxG.save.data.fps;
-			if(Main.fpsCounter != null) {
-				Main.fpsCounter.visible = data.showFPS;
-			}
+		if(FlxG.save.data.framerate == null) {
+			final refreshRate:Int = FlxG.stage.application.window.displayMode.refreshRate;
+			data.framerate = Std.int(FlxMath.bound(refreshRate, 60, 240));
+		} else data.framerate = FlxG.save.data.framerate;
+
+		if(Main.fpsCounter != null) {
+			Main.fpsCounter.visible = data.showFPS;
 		}
+
 		if(FlxG.save.data.noteSplash != null) {
 			data.noteSplashes = FlxG.save.data.noteSplash;
 		}
 		
-		if(FlxG.save.data.fpsCap != null) {
-			var framerate = data.framerate;
-			framerate = FlxG.save.data.framerate;
-
-			openfl.Lib.current.stage.frameRate = framerate;
-			Main.curFPS = framerate;	
-
-			FlxG.save.data.fpsCap = framerate;
-			if(framerate > FlxG.drawFramerate) {
-				FlxG.updateFramerate = framerate;
-				FlxG.drawFramerate = framerate;
-			} else {
-				FlxG.drawFramerate = framerate;
-				FlxG.updateFramerate = framerate;
-			}
+		if(data.framerate > FlxG.drawFramerate)
+		{
+			FlxG.updateFramerate = data.framerate;
+			FlxG.drawFramerate = data.framerate;
 		}
-
+		else
+		{
+			FlxG.drawFramerate = data.framerate;
+			FlxG.updateFramerate = data.framerate;
+		}
+	
 		if(FlxG.save.data.ghost != null) {
 			data.ghostTapping = FlxG.save.data.ghost;
 		}

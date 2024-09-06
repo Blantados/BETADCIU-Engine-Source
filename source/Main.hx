@@ -106,7 +106,7 @@ class Main extends Sprite
 		// create() in there, which gets called when it's added to stage
 		// which is why it needs to be added before addChild(game) here
 		@:privateAccess
-		game._customSoundTray = options.FunkinSoundTray;	
+		game._customSoundTray = objects.FunkinSoundTray;	
 
 		addChild(game);
 
@@ -115,7 +115,7 @@ class Main extends Sprite
 		addChild(fpsCounter);
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
-		var daBool:Bool = FlxG.save.data.fps || FlxG.save.data.showFPS;
+		var daBool:Bool = FlxG.save.data.showFPS;
 		toggleFPS(daBool);
 		#end
 
@@ -139,7 +139,7 @@ class Main extends Sprite
 
 	static function resetSpriteCache(sprite:Sprite):Void {
 		@:privateAccess {
-		        sprite.__cacheBitmap = null;
+		    sprite.__cacheBitmap = null;
 			sprite.__cacheBitmapData = null;
 		}
 	}
@@ -172,18 +172,6 @@ class Main extends Sprite
 	public function changeFPSColor(color:FlxColor)
 	{
 		fpsCounter.textColor = color;
-	}
-
-	public function setFPSCap(cap:Float)
-	{
-		openfl.Lib.current.stage.frameRate = cap;
-		
-		curFPS = Std.int(cap);
-	}
-
-	public function getFPSCap():Float
-	{
-		return openfl.Lib.current.stage.frameRate;
 	}
 
 	public function getFPS():Float

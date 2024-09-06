@@ -389,6 +389,8 @@ class Character extends FunkinSprite
 
 	override function update(elapsed:Float)
 	{
+		if (atlasChar != null) atlasChar.update(elapsed);
+
 		if (!debugMode && !isAnimationNull())
 		{
 			if(heyTimer > 0)

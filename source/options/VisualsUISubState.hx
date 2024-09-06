@@ -26,7 +26,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			'bool');
 		addOption(option);
 
-		var option:Option = new Option('Psych UI',
+		/*var option:Option = new Option('Psych UI',
 			"If checked, changes the UI to resemble Psych Engine's.",
 			'psychUI',
 			'bool');
@@ -36,7 +36,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			"If checked, enables Kade Engine's Song Bar. DO NOT USE WITH PSYCH UI!!!",
 			'songPosition',
 			'bool');
-		addOption(option);
+		addOption(option);*/
 		
 		var option:Option = new Option('Time Bar:',
 			"What should the Time Bar display?",
@@ -59,14 +59,13 @@ class VisualsUISubState extends BaseOptionsMenu
 			"true");
 		addOption(option);
 
-		var option:Option = new Option('Camera Zooms',
+		*/var option:Option = new Option('Camera Zooms',
 			"If unchecked, the camera won't zoom in on a beat hit.",
 			'camZooms',
-			'bool',
-			"true");
+			'bool');
 		addOption(option);
 
-		*/var option:Option = new Option('Score Text Zoom on Hit',
+		var option:Option = new Option('Score Text Zoom on Hit',
 			"If unchecked, disables the Score text zooming\neverytime you hit a note.",
 			'scoreZoom',
 			'bool');

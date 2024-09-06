@@ -455,10 +455,14 @@ class BETADCIUState extends MusicBeatState
 		var shiftMult:Int = 1;
 		if(FlxG.keys.pressed.SHIFT) shiftMult = 3;
 
-		if (upP && inMain && canMove)
+		if (upP && inMain && canMove){
 			changeSelection(-shiftMult);
-		if (downP && inMain && canMove)
+			changeDiff();
+		}
+		if (downP && inMain && canMove){
 			changeSelection(shiftMult);
+			changeDiff();
+		}
 
 		if (controls.BACK && inMain && canMove)
 		{

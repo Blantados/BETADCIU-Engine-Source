@@ -25,9 +25,6 @@ class KadeEngineData
 		if (FlxG.save.data.songPosition == null)
 			FlxG.save.data.songPosition = false;
 
-		if (FlxG.save.data.fps == null)
-			FlxG.save.data.fps = false;
-
 		if (FlxG.save.data.changedHit == null)
 		{
 			FlxG.save.data.changedHitX = -1;
@@ -37,11 +34,6 @@ class KadeEngineData
 
 		if (FlxG.save.data.fpsRain == null)
 			FlxG.save.data.fpsRain = false;
-
-		/*if (FlxG.save.data.fpsCap == null)
-			FlxG.save.data.fpsCap = 120;
-		if (FlxG.save.data.fpsCap > 285 || FlxG.save.data.fpsCap < 60)
-			FlxG.save.data.fpsCap = 120; // baby proof so you can't hard lock ur copy of kade engine*/
 		
 		if (FlxG.save.data.scrollSpeed == null)
 			FlxG.save.data.scrollSpeed = 1;
@@ -90,7 +82,5 @@ class KadeEngineData
 		options.KeyBinds.keyCheck();
 
 		Main.watermarks = FlxG.save.data.watermark;
-
-		//(cast (Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
 	}
 }

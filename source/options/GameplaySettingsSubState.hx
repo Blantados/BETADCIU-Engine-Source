@@ -27,6 +27,14 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			'bool');
 		addOption(option);
 
+		var option:Option = new Option('Accuracy Type:',
+		"Change how accuracy is calculated.\n(Accurate = Simple, Complex = Milisecond Based)",
+		'accType',
+		'string',
+		['Simple', 'Complex']);
+		addOption(option);
+		option.onChange = onChangeAccuracyType;
+
 		//I'd suggest using "Downscroll" as an example for making your own option since it is the simplest here
 		var option:Option = new Option('Downscroll', //Name
 			'If checked, notes go Down instead of Up, simple enough.', //Description
@@ -66,14 +74,13 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			'bool');
 		addOption(option);
 
-		/*var option:Option = new Option('Disable Reset Button',
+		var option:Option = new Option('Disable Reset Button',
 			"If checked, pressing Reset won't do anything.",
 			'noReset',
-			'bool',
-			"false");
+			'bool');
 		addOption(option);
 
-		var option:Option = new Option('Hitsound Volume',
+		/*var option:Option = new Option('Hitsound Volume',
 			'Funny notes does \"Tick!\" when you hit them."',
 			'hitsoundVolume',
 			'percent',
@@ -142,6 +149,12 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		addOption(option);*/
 
 		super();
+	}
+
+	function onChangeAccuracyType()
+	{
+		if(ClientPrefs.data.accType == 'Simple') FlxG.save.data.accuracyMod = 1;
+		else if(ClientPrefs.data.accType == 'Complex') FlxG.save.data.accuracyMod = 0;
 	}
 
 	function onChangeHitsoundVolume()

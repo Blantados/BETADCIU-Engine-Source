@@ -206,9 +206,10 @@ class Paths
 		return sound(key + FlxG.random.int(min, max), library);
 	}
 
-	inline static public function music(key:String, ?library:String)
+	inline static public function music(key:String, ?library:String):Sound
 	{
-		return getPath('music/$key.$SOUND_EXT', MUSIC, library);
+		var file:Sound = returnSound('music', key, library);
+		return file;
 	}
 
 	inline static public function video(key:String, ?library:String)

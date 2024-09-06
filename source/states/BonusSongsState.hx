@@ -384,10 +384,14 @@ class BonusSongsState extends MusicBeatState
 		if (warning && accepted)
 			MusicBeatState.switchState(new MainMenuState());
 		
-		if (upP && canMove)
+		if (upP && canMove){
 			changeSelection(-shiftMult);
-		if (downP && canMove)
+			changeDiff();
+		}
+		if (downP && canMove){
 			changeSelection(shiftMult);
+			changeDiff();
+		}
 
 		if (controls.LEFT_P && canMove)
 			changeDiff(-1);

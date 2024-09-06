@@ -1,4 +1,4 @@
-package options;
+package objects;
 
 import flixel.system.ui.FlxSoundTray;
 import flixel.tweens.FlxTween;

@@ -252,10 +252,14 @@ class FreeplayState extends MusicBeatState
 		var shiftMult:Int = 1;
 		if(FlxG.keys.pressed.SHIFT) shiftMult = 3;
 
-		if (upP && canMove)
+		if (upP && canMove){
 			changeSelection(-shiftMult);
-		if (downP && canMove)
+			changeDiff();
+		}
+		if (downP && canMove){
 			changeSelection(shiftMult);
+			changeDiff();
+		}
 
 		if (controls.LEFT_P && canMove)
 			changeDiff(-1);
