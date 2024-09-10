@@ -169,6 +169,7 @@ class ClientPrefs {
 		} else data.framerate = FlxG.save.data.framerate;
 
 		if(Main.fpsCounter != null) {
+			data.showFPS = FlxG.save.data.showFPS;
 			Main.fpsCounter.visible = data.showFPS;
 		}
 
