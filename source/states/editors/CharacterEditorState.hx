@@ -778,7 +778,7 @@ class CharacterEditorState extends MusicBeatState
 			animationLoopCheckBox.checked = anim.loop;
 			animationNameFramerate.value = anim.fps;
 
-			var indicesStr:String = anim.indices.toString();
+			var indicesStr:String = (anim.indices != null ? anim.indices.toString() : "");
 			animationIndicesInputText.text = indicesStr.substr(1, indicesStr.length - 2);
 		});
 		blockPressWhileScrolling.push(animationDropDown);
