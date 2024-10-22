@@ -183,7 +183,7 @@ class Character extends FunkinSprite
 
 				var rawJson:Dynamic;
 
-				(FileSystem.exists(path) ? rawJson = File.getContent(path) : rawJson = Assets.getText(path));
+				rawJson =  (FileSystem.exists(path) ? File.getContent(path) : Assets.getText(path));
 				
 				var json:CharacterFile = cast Json.parse(rawJson);
 

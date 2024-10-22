@@ -21,6 +21,17 @@ typedef EventNote = {
 	value3:String
 }
 
+typedef NoteAnimArray = {
+	var anim:String;
+	var offsets:Array<Int>;
+
+	@:optional
+	var name:String;
+	var fps:Int;
+	var loop:Bool;
+	var indices:Array<Int>;
+}
+
 class Note extends FlxSprite
 {
 	public var extraData:Map<String, Dynamic> = new Map<String, Dynamic>();
@@ -138,7 +149,9 @@ class Note extends FlxSprite
 	public var texture(default, set):String = null;
 
 	private function set_texture(value:String):String {
-		reloadNote(value);
+		if(texture != value) reloadNote(value);
+
+		texture = value;
 		return value;
 	}
 
@@ -249,8 +262,8 @@ class Note extends FlxSprite
 
 			offsetX -= width / 2;
 
-			if (isPixel || separateSheets)
-				offsetX += 33;
+			if(isPixel){offsetX += 33;}
+			if(separateSheets){offsetX += 33;}
 
 			if (prevNote.isSustainNote)
 			{
@@ -419,104 +432,98 @@ class Note extends FlxSprite
 				}
 
 			default:
-				if (Assets.exists(Paths.image("notes/"+daStyle))){
-					frames = Paths.getSparrowAtlas("notes/"+daStyle);
+				var separateNotePath = Paths.image("notes/" + daStyle + "/notes");
 
-					if (frames == null){
-						frames = Paths.getSparrowAtlas((mania > 0 ? "notes/shaggyNotes" : "notes/NOTE_assets"));
-					}
-						
-					addAnims();
+				if (Assets.exists(separateNotePath) || FileSystem.exists(separateNotePath)){
+					daStyle = "notes/" + daStyle + "/notes";
+					separateSheets = true;
 				}
-				else
+
+				var defaultNotePath = Paths.image("notes/" + daStyle);
+
+				if (Assets.exists(defaultNotePath) || FileSystem.exists(defaultNotePath)){
+					daStyle = "notes/" + daStyle;
+				}
+					
+				var stylePath = Paths.image(daStyle);
+
+				if (Assets.exists(stylePath) || FileSystem.exists(stylePath))
 				{
-					if (FileSystem.exists(Paths.modsImages("notes/"+daStyle+"/notes"))){
-						daStyle = "notes/" + daStyle + "/notes";
-						separateSheets = true;
-					}
-
-					if (FileSystem.exists(Paths.modsImages("notes/"+daStyle))){
-						daStyle = "notes/"+daStyle;
-					}
-						
-					if (FileSystem.exists(Paths.modsImages(daStyle)))
+					if (!Assets.exists(Paths.xmlNew("images/" + daStyle)) && !FileSystem.exists(Paths.xmlNew("images/" + daStyle)))
 					{
-						if (!FileSystem.exists(Paths.modsXml(daStyle)))
-						{
-							if (isSustainNote)
-							{		
-								var rawPic2:Dynamic = Paths.returnGraphic(daStyle+"ENDS");
+						if (isSustainNote)
+						{		
+							var rawPic2:Dynamic = Paths.returnGraphic(daStyle + (separateSheets ? "_hold": "ENDS"));
 
-								loadGraphic(rawPic2);
+							loadGraphic(rawPic2);
 
-								width = width / 4;
-								height = height / 2;	
+							width = width / 4;
+							height = height / 2;	
 
-								originalHeightForCalcs = 3;
+							originalHeightForCalcs = 3;
 
-								loadGraphic(rawPic2, true, Math.floor(width), Math.floor(height));
-							}
-							else{
-								var rawPic:Dynamic = Paths.returnGraphic(daStyle);
-								loadGraphic(rawPic);
-
-								width = width / 4;
-								height = height / 5;
-
-								loadGraphic(rawPic, true, Math.floor(width), Math.floor(height));
-							}
-								
-
-							addAnims(true);
+							loadGraphic(rawPic2, true, Math.floor(width), Math.floor(height));
 						}
-						else
-						{
-							if (separateSheets){
-								if(isSustainNote){
-									var rawPic:Dynamic = Paths.returnGraphic(daStyle + "_hold");
-									loadGraphic(rawPic, true, 52, 87);
-								}else{
-									frames = Paths.getSparrowAtlas(daStyle);
-								}
-							}
-							else{
+						else{
+							var rawPic:Dynamic = Paths.returnGraphic(daStyle);
+							loadGraphic(rawPic);
+
+							width = width / 4;
+							height = height / 5;
+
+							loadGraphic(rawPic, true, Math.floor(width), Math.floor(height));
+						}
+							
+
+						addAnims(true);
+					}
+					else
+					{
+						if (separateSheets){
+							if(isSustainNote){
+								var rawPic:Dynamic = Paths.returnGraphic(daStyle + "_hold");
+								loadGraphic(rawPic, true, 52, 87);
+							}else{
 								frames = Paths.getSparrowAtlas(daStyle);
 							}
-
-							addAnims();
 						}
+						else{
+							frames = Paths.getSparrowAtlas(daStyle);
+						}
+
+						addAnims();
 					}
+				}
 
-					if (frames == null)
+				if (frames == null)
+				{
+					if (isPixel)
 					{
-						if (isPixel)
-						{
-							if (isSustainNote)
-								loadGraphic(Paths.image("notes/arrowEnds"), true, 7, 6);
-							else
-								loadGraphic(Paths.image("notes/arrows-pixels"), true, 17, 17);
-			
-							addAnims(true);
-						}
+						if (isSustainNote)
+							loadGraphic(Paths.image("notes/arrowEnds"), true, 7, 6);
 						else
-						{
-							//testing weekend note implementation
-							if (Assets.exists(Paths.image("notes/normal/notes")) && mania <= 0){
-								separateSheets = true;
-								
-								if(isSustainNote){
-									var rawPic:Dynamic = Paths.returnGraphic("notes/normal/notes_hold");
-									loadGraphic(rawPic, true, 52, 87);
-								}else{
-									frames = Paths.getSparrowAtlas("notes/normal/notes");
-								}
-							}
-							else{
-								frames = Paths.getSparrowAtlas(mania > 0 ? "notes/shaggyNotes" : "notes/NOTE_assets");
-							}
+							loadGraphic(Paths.image("notes/arrows-pixels"), true, 17, 17);
+		
+						addAnims(true);
+					}
+					else
+					{
+						//testing weekend note implementation
+						if (Assets.exists(Paths.image("notes/normal/notes")) && mania <= 0){
+							separateSheets = true;
 							
-							addAnims();
+							if(isSustainNote){
+								var rawPic:Dynamic = Paths.returnGraphic("notes/normal/notes_hold");
+								loadGraphic(rawPic, true, 52, 87);
+							}else{
+								frames = Paths.getSparrowAtlas("notes/normal/notes");
+							}
 						}
+						else{
+							frames = Paths.getSparrowAtlas(mania > 0 ? "notes/shaggyNotes" : "notes/NOTE_assets");
+						}
+						
+						addAnims();
 					}
 				}
 		}

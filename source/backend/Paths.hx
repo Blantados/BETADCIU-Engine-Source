@@ -593,6 +593,7 @@ class Paths
 		{
 			if(FileSystem.exists(pathsToCheck[i]) || Assets.exists(pathsToCheck[i])) {
 				path = pathsToCheck[i];
+				break;
 			}
 		}
 		

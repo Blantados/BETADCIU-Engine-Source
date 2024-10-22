@@ -6,9 +6,17 @@ import lime.utils.Assets;
 
 import shaders.ColorSwap;
 
+import haxe.Json;
+import haxe.format.JsonParser;
+
 using StringTools;	
 
-class StrumNote extends FlxSprite
+typedef StrumNoteFile = {
+	var strumAnimations:Array<Note.NoteAnimArray>;
+	var strumOffset:Array<Float>;
+}
+
+class StrumNote extends FunkinSprite
 {
 	private var colorSwap:ColorSwap;
 	public var resetAnim:Float = 0;
@@ -19,6 +27,7 @@ class StrumNote extends FlxSprite
 	public var mania:Int = 0;
 	public var daStyle = "style";
 	public var sustainReduce:Bool = true;
+	public var strumOffset:Array<Float> = [0, 0];
 	
 	private var player:Int;
 
@@ -29,7 +38,9 @@ class StrumNote extends FlxSprite
 	
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
-		reloadNote(value);
+		if(texture != value) reloadNote(value);
+
+		texture = value;
 		return value;
 	}
 
@@ -67,6 +78,10 @@ class StrumNote extends FlxSprite
 		daStyle = style;
 		separateSheets = false;
 		
+		for (key in animOffsets.keys()) {
+			animOffsets.remove(key);
+		}
+
 		var suf:String = "";
 		
 		switch (style)
@@ -127,75 +142,79 @@ class StrumNote extends FlxSprite
 				animation.addByPrefix("confirm", pPre[noteData] + " confirm", 24, false);*/
 				
 			default:
-				if (Assets.exists(Paths.image("notes/"+style)))
-				{
-					frames = Paths.getSparrowAtlas("notes/"+style);
-	
-					if (frames == null)
-					{
-						if (isMania)
-							frames = Paths.getSparrowAtlas("notes/shaggyNotes");
-						else{
-							if (Assets.exists(Paths.image("notes/normal/notes_strumline"))){
-								separateSheets = true;
-								frames = Paths.getSparrowAtlas("notes/normal/notes_strumline");
+				var separateStrumPath = Paths.image("notes/" + daStyle + "/notes_strumline");
+			
+				if (Assets.exists(separateStrumPath) || FileSystem.exists(separateStrumPath)){
+					style = "notes/" + daStyle + "/notes_strumline";
+					separateSheets = true;
+
+					var strumJsonPath = Paths.jsonNew("images/notes/" + daStyle + "/" + daStyle);
+
+					if (Assets.exists(strumJsonPath) || FileSystem.exists(strumJsonPath)){
+						var rawJson:Dynamic = (FileSystem.exists(strumJsonPath) ? File.getContent(strumJsonPath) : Assets.getText(strumJsonPath));
+						var json:StrumNoteFile = cast Json.parse(rawJson);
+						
+						var animationsArray = json.strumAnimations;
+
+						if(animationsArray != null && animationsArray.length > 0) {
+							for (anim in animationsArray) {
+								addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
 							}
+						}
+						/*var jsonStrumOffset = json.strumOffset;
+						strumOffset = (jsonStrumOffset != null, jsonStrumOffset : [0, 0]);*/
+					}
+				}
+
+				var defaultStrumPath = Paths.image("notes/"+style);
+
+				if (Assets.exists(defaultStrumPath) || FileSystem.exists(defaultStrumPath)){
+					style = "notes/" + style;
+				}
+					
+				var stylePath = Paths.image(style);
+
+				if (Assets.exists(stylePath) || FileSystem.exists(stylePath))
+				{					
+					if (!Paths.currentTrackedAssets.exists(style)){
+						Paths.cacheImage(style);
+					}
+				
+					var rawPic:Dynamic = Paths.currentTrackedAssets.get(style);
+					var xmlPath:String = Paths.xmlNew('images/' + style);
+					
+					if (!Assets.exists(xmlPath) && !FileSystem.exists(xmlPath))
+					{
+						loadGraphic(rawPic);
+
+						width = width / 4;
+						height = height / 5;
+
+						loadGraphic(rawPic, true, Math.floor(width), Math.floor(height));
+						addAnims(true);
+					}
+					else
+					{
+						frames = Paths.getSparrowAtlas(style);
+						addAnims();
+					}
+				}
+
+				if (frames == null)
+				{
+					if (isMania)
+						frames = Paths.getSparrowAtlas("notes/shaggyNotes");
+					else{
+						if (Assets.exists(Paths.image("notes/normal/notes_strumline"))){
+							separateSheets = true;
+							frames = Paths.getSparrowAtlas("notes/normal/notes_strumline");
+						}
+						else{
+							frames = Paths.getSparrowAtlas(mania > 0 ? "notes/shaggyNotes" : "notes/NOTE_assets");
 						}
 					}
 
 					addAnims();
-				}
-				else
-				{
-					if (FileSystem.exists(Paths.modsImages("notes/"+daStyle+"/notes_strumline"))){
-						style = "notes/" + daStyle + "/notes_strumline";
-						separateSheets = true;
-					}
-
-					if (FileSystem.exists(Paths.modsImages("notes/"+style))){
-						style = "notes/"+style;
-					}
-						
-					if (FileSystem.exists(Paths.modsImages(style)))
-					{
-						if (!Paths.currentTrackedAssets.exists(style))
-							Paths.cacheImage(style);
-
-						var rawPic:Dynamic = Paths.currentTrackedAssets.get(style);
-
-						if (!FileSystem.exists(Paths.modsXml(style)))
-						{
-							loadGraphic(rawPic);
-
-							width = width / 4;
-							height = height / 5;
-
-							loadGraphic(rawPic, true, Math.floor(width), Math.floor(height));
-							addAnims(true);
-						}
-						else
-						{
-							frames = Paths.getSparrowAtlas(style);
-							addAnims();
-						}
-					}
-
-					if (frames == null)
-					{
-						if (isMania)
-							frames = Paths.getSparrowAtlas("notes/shaggyNotes");
-						else{
-							if (Assets.exists(Paths.image("notes/normal/notes_strumline"))){
-								separateSheets = true;
-								frames = Paths.getSparrowAtlas("notes/normal/notes_strumline");
-							}
-							else{
-								frames = Paths.getSparrowAtlas(mania > 0 ? "notes/shaggyNotes" : "notes/NOTE_assets");
-							}
-						}
-
-						addAnims();
-					}
 				}
 		}
 
@@ -205,8 +224,10 @@ class StrumNote extends FlxSprite
 			updateHitbox();
 		}
 
-		if (first)
+		if (first){
 			updateHitbox();
+		}
+			
 	}
 
 	public var isPixel:Bool = false;
@@ -313,5 +334,10 @@ class StrumNote extends FlxSprite
 			offset.x += 32;
 			offset.y += 20;
 		}
+
+		var daOffsets = getAnimOffset(anim);
+		
+		offset.x += daOffsets[0];
+		offset.y += daOffsets[1];
 	}
 }

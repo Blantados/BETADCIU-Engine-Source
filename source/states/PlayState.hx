@@ -1878,11 +1878,11 @@ class PlayState extends MusicBeatState
 		
 		if(doPush)
 		{
-			trace (name +' has lua!');
 			for (lua in luaArray)
 			{
 				if(lua.scriptName == luaFile) return;
 			}
+			trace (name +' has lua!');
 			luaArray.push(new ModchartState(luaFile));
 		}
 		#end
@@ -3061,14 +3061,10 @@ class PlayState extends MusicBeatState
 			xPos.push(babyArrow.x);
 			yPos.push(babyArrow.y);
 
-			if (isMania)
+			if (isMania){
 				babyArrow.x -= Note.posRest[mania];
+			}
 			
-			opponentStrums.forEach(function(spr:FlxSprite)
-			{					
-				spr.centerOffsets(); //CPU arrows start out slightly off-center
-			});
-
 			strumLineNotes.add(babyArrow);
 			babyArrow.postAddedToGroup();
 		}
@@ -3111,7 +3107,7 @@ class PlayState extends MusicBeatState
 	{
 		if (paused)
 		{
-			if (FlxG.sound.music != null && !startingSong){
+			if (FlxG.sound.music != null && !startingSong && Conductor.songPosition <= vocals.length){
 				resyncVocals();
 			}
 

@@ -1,79 +1,79 @@
 {
 	"animations": [
 		{
+			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"loop": false,
-			"fps": 24,
 			"anim": "idle",
-			"indices": [],
-			"name": "Darnell Idle",
+			"fps": 24,
 			"playerOffsets": [
 				0,
 				0
-			]
+			],
+			"name": "Darnell Idle",
+			"indices": []
 		},
 		{
-			"offsets": [
-				-36,
-				74
-			],
 			"loop": false,
-			"fps": 24,
+			"offsets": [
+				23,
+				71
+			],
 			"anim": "singUP",
-			"indices": [],
-			"name": "Darnell pose up",
+			"fps": 24,
 			"playerOffsets": [
 				-36,
 				74
-			]
+			],
+			"name": "Darnell pose up",
+			"indices": []
 		},
 		{
-			"offsets": [
-				20,
-				-50
-			],
 			"loop": false,
-			"fps": 24,
+			"offsets": [
+				14,
+				-47
+			],
 			"anim": "singDOWN",
-			"indices": [],
-			"name": "Darnell Pose Down",
+			"fps": 24,
 			"playerOffsets": [
 				20,
 				-50
-			]
+			],
+			"name": "Darnell Pose Down",
+			"indices": []
 		},
 		{
-			"offsets": [
-				31,
-				3
-			],
 			"loop": false,
-			"fps": 24,
+			"offsets": [
+				44,
+				-18
+			],
 			"anim": "singLEFT",
-			"indices": [],
-			"name": "Darnell pose right",
+			"fps": 24,
 			"playerOffsets": [
 				31,
 				3
-			]
+			],
+			"name": "Darnell pose right",
+			"indices": []
 		},
 		{
-			"offsets": [
-				-17,
-				-20
-			],
 			"loop": false,
-			"fps": 24,
+			"offsets": [
+				17,
+				4
+			],
 			"anim": "singRIGHT",
-			"indices": [],
-			"name": "darnell pose left",
+			"fps": 24,
 			"playerOffsets": [
 				-17,
 				-20
-			]
+			],
+			"name": "darnell pose left",
+			"indices": []
 		}
 	],
 	"no_antialiasing": false,
