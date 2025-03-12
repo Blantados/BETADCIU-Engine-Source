@@ -72,6 +72,8 @@ import states.editors.ChartingState;
 import states.editors.CharacterEditorState;
 import states.editors.StageEditorState;
 
+import objects.ABotSpeaker;
+
 #if !flash 
 import flixel.addons.display.FlxRuntimeShader;
 #end
