@@ -6,13 +6,13 @@ function onCreate()
 	addLuaSprite('bg', false);
 
 	makeLuaSprite('stageFront', 'stagefront', -650, 600);
-	setGraphicSize('stageFront', 1.1)
+	scaleObject('stageFront', 1.1, 1.1)
 	--setProperty('stageFront.scale.x', 1.1)
 	--setProperty('stageFront.scale.y', 1.1)
 	addLuaSprite('stageFront', false);
 
 	makeLuaSprite('stageCurtains', 'stagecurtains', -500, -300);
-	setGraphicSize('stageCurtains', 0.9)
+	scaleObject('stageCurtains', 0.9, 0.9)
 	--setProperty('stageCurtains.scale.x', 0.9)
 	--setProperty('stageCurtains.scale.y', 0.9)
 	addLuaSprite('stageCurtains', 2);
