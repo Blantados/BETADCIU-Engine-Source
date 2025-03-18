@@ -141,6 +141,22 @@ class Paths
 		return getPath('$key.lua', TEXT, library);
 	}
 
+	inline static public function hx(key:String,?library:String)
+	{
+		if(FileSystem.exists(Paths.modFolders('data/' + key + '.hx')))
+			return Paths.modFolders('data/' + key + '.hx');
+
+		return getPath('data/$key.hx', TEXT, library);
+	}
+
+	inline static public function hx2(key:String,?library:String)
+	{
+		if(FileSystem.exists(Paths.modFolders(key +'.hx')))
+			return Paths.modFolders(key +'.hx');
+
+		return getPath('$key.hx', TEXT, library);
+	}
+
 	inline static public function stageLua(key:String,?library:String)
 	{
 		if(FileSystem.exists(Paths.modFolders('stages/' + key + '.lua')) || Assets.exists(Paths.modFolders('stages/' + key + '.lua'))){

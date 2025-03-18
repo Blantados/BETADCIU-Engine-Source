@@ -27,6 +27,7 @@ import flixel.tweens.misc.ColorTween;
 import flash.media.Sound;
 import lime.media.AudioBuffer;
 import flixel.util.FlxSpriteUtil;
+import objects.ABotSpeaker;
 
 import flixel.system.FlxAssets.FlxShader;
 import openfl.display.Shader;
