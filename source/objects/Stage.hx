@@ -720,6 +720,19 @@ class Stage extends MusicBeatState
 				swagBacks['phillyCars2'] = phillyCars2;
 				toAdd.push(phillyCars2);
 
+				if (curStage == 'phillyStreetsErect'){
+					var mist4 = new FlxBackdrop(Paths.image(pre+'/mistBack', suf), X, 0, 0);
+					mist4.setPosition(-650, -100);
+					mist4.scrollFactor.set(0.8, 0.8);
+					mist4.blend = "add";
+					mist4.color = 0xFF5c5c5c;
+					mist4.alpha = 1;
+					mist4.velocity.x = 40;
+					mist4.scale.set(0.7, 0.7);
+					swagBacks['mist4'] = mist4;
+					toAdd.push(mist4);
+				}
+
 				var phillyTraffic = new FlxSprite(1840, 608);
 				phillyTraffic.frames = Paths.getSparrowAtlas(pre+'/phillyTraffic', suf);
 				phillyTraffic.scrollFactor.set(0.9, 1);
@@ -736,7 +749,7 @@ class Stage extends MusicBeatState
 				toAdd.push(phillyTrafficLightmap);
 
 				if (curStage == 'phillyStreetsErect'){
-					var mist3 = new FlxBackdrop(Paths.image(pre+'/mistMid', suf), X, 0, 0);
+					var mist3 = new FlxBackdrop(Paths.image(pre+'/mistMid', suf), X);
 					mist3.setPosition(-650, -100);
 					mist3.scrollFactor.set(0.95, 0.95);
 					mist3.blend = "add";
@@ -746,17 +759,6 @@ class Stage extends MusicBeatState
 					mist3.scale.set(0.8, 0.8);
 					swagBacks['mist3'] = mist3;
 					toAdd.push(mist3);
-
-					var mist4 = new FlxBackdrop(Paths.image(pre+'/mistBack', suf), X, 0, 0);
-					mist4.setPosition(-650, -100);
-					mist4.scrollFactor.set(0.8, 0.8);
-					mist4.blend = "add";
-					mist4.color = 0xFF5c5c5c;
-					mist4.alpha = 1;
-					mist4.velocity.x = 40;
-					mist4.scale.set(0.7, 0.7);
-					swagBacks['mist4'] = mist4;
-					toAdd.push(mist4);
 
 					var gray1 = new FlxSprite(88, 317).loadGraphic(Paths.image(pre+'/greyGradient', suf));
 					gray1.scrollFactor.set(1, 1);
@@ -778,41 +780,43 @@ class Stage extends MusicBeatState
 				swagBacks['phillyForeground'] = phillyForeground;
 				toAdd.push(phillyForeground);
 
-				var spraycanPile = new FlxSprite(920, 1045).loadGraphic(Paths.image('SpraycanPile', suf));
-				spraycanPile.scrollFactor.set(1, 1);
-				layInFront[1].push(spraycanPile);
-				toAdd.push(spraycanPile);
+				if(curStage == 'phillyStreets'){
+					var spraycanPile = new FlxSprite(920, 1045).loadGraphic(Paths.image('SpraycanPile', suf));
+					spraycanPile.scrollFactor.set(1, 1);
+					swagBacks['spraycanPile'] = spraycanPile;
+					toAdd.push(spraycanPile);
+				}
 
 				if (curStage == 'phillyStreetsErect'){
-					var mist0 = new FlxBackdrop(Paths.image(pre+'/mistMid', suf), X, 0, 0);
+					var mist0 = new FlxBackdrop(Paths.image(pre+'/mistMid', suf), X);
 					mist0.setPosition(-650, -100);
 					mist0.scrollFactor.set(1.2, 1.2);
 					mist0.blend = "add";
 					mist0.color = 0xFF5c5c5c;
 					mist0.alpha = 0.6;
 					mist0.velocity.x = 172;
-					layInFront[2].push(mist0);
 					swagBacks['mist0'] = mist0;
+					layInFront[2].push(mist0);
 
-					var mist1 = new FlxBackdrop(Paths.image(pre+'/mistMid', suf), X, 0, 0);
+					var mist1 = new FlxBackdrop(Paths.image(pre+'/mistMid', suf), X);
 					mist1.setPosition(-650, -100);
 					mist1.scrollFactor.set(1.1, 1.1);
 					mist1.blend = "add";
 					mist1.color = 0xFF5c5c5c;
 					mist1.alpha = 0.6;
 					mist1.velocity.x = 150;
-					layInFront[2].push(mist1);
 					swagBacks['mist1'] = mist1;
+					layInFront[2].push(mist1);
 				
-					var mist2 = new FlxBackdrop(Paths.image(pre+'/mistBack', suf), X, 0, 0);
+					var mist2 = new FlxBackdrop(Paths.image(pre+'/mistBack', suf), X);
 					mist2.setPosition(-650, -100);
 					mist2.scrollFactor.set(1.2, 1.2);
 					mist2.blend = "add";
 					mist2.color = 0xFF5c5c5c;
 					mist2.alpha = 0.8;
 					mist2.velocity.x = -80;
-					layInFront[2].push(mist2);
 					swagBacks['mist2'] = mist2;
+					layInFront[2].push(mist2);
 				}
 
 				//if (ClientPrefs.data.shaders) setupRainShader();
@@ -945,6 +949,16 @@ class Stage extends MusicBeatState
 				moveTank();
 			case 'phillyStreets' | 'phillyStreetsErect': 
 				swagBacks['scrollingSky'].x -= elapsed * 22;
+
+				if (curStage == 'phillyStreetsErect'){
+					_timer += elapsed;
+					swagBacks['mist0'].y = 660 + (Math.sin(_timer*0.35)*70);
+					swagBacks['mist1'].y = 500 + (Math.sin(_timer*0.3)*80);
+					swagBacks['mist2'].y = 540 + (Math.sin(_timer*0.4)*60);
+					swagBacks['mist3'].y = 230 + (Math.sin(_timer*0.3)*70);
+					swagBacks['mist4'].y = 170 + (Math.sin(_timer*0.35)*50);
+					swagBacks['mist5'].y = -80 + (Math.sin(_timer*0.08)*100);
+				}
 
 				/*/
 				var remappedIntensityValue:Float = FlxMath.remapToRange(Conductor.songPosition, 0, (FlxG.sound.music != null ? FlxG.sound.music.length : 0),
