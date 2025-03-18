@@ -66,6 +66,11 @@
       "version": null
     },
     {
+      "name": "funkin.vis",
+      "type": "haxelib",
+      "version": null
+    },
+    {
       "name": "discord_rpc",
       "type": "git",
       "dir": null,
