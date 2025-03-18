@@ -784,7 +784,7 @@ class Stage extends MusicBeatState
 					var spraycanPile = new FlxSprite(920, 1045).loadGraphic(Paths.image('SpraycanPile', suf));
 					spraycanPile.scrollFactor.set(1, 1);
 					swagBacks['spraycanPile'] = spraycanPile;
-					toAdd.push(spraycanPile);
+					layInFront[1].push(spraycanPile);
 				}
 
 				if (curStage == 'phillyStreetsErect'){
