@@ -869,6 +869,7 @@ class ModchartState
     {
 		// for detected
 		//instance = this;
+		this.isStageLua = isStageLua;
 
 		lua = LuaL.newstate();
 		LuaL.openlibs(lua);
@@ -884,11 +885,10 @@ class ModchartState
 			path = FileSystem.absolutePath(path);
 		}
 			
-		if (PlayState.instance != null && PlayState.instance.isDetected)
+		if(PlayState.instance == FlxG.state && PlayState.instance.isDetected)
 			shownNotes = [];
 
 		this.preloading = preloading;
-
 		scriptName = path.trim();
 
 		var myFolder:Array<String> = this.scriptName.split('/');
@@ -1035,7 +1035,7 @@ class ModchartState
 		set("playDadSing", true);
 		set("playBFSing", true);
 
-		if (PlayState.instance != null)
+		if(PlayState.instance == FlxG.state)
 		{
 			set("hudWidth", PlayState.instance.camHUD.width);
 			set("hudHeight", PlayState.instance.camHUD.height);
@@ -2027,7 +2027,7 @@ class ModchartState
 				}
 			});
 			Lua_helper.add_callback(lua, "soundFadeIn", function(tag:String, duration:Float, fromValue:Float = 0, toValue:Float = 1) {
-				if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
+				if(PlayState.instance == FlxG.state){duration = duration / PlayState.instance.playbackRate;}
 
 				if(tag == null || tag.length < 1) {
 					FlxG.sound.music.fadeIn(duration, fromValue, toValue);
@@ -2037,7 +2037,7 @@ class ModchartState
 				
 			});
 			Lua_helper.add_callback(lua, "soundFadeOut", function(tag:String, duration:Float, toValue:Float = 0) {
-				if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
+				if(PlayState.instance == FlxG.state){duration = duration / PlayState.instance.playbackRate;}
 				
 				if(tag == null || tag.length < 1) {
 					FlxG.sound.music.fadeOut(duration, toValue);
@@ -2343,21 +2343,21 @@ class ModchartState
 			});	
 	
 			Lua_helper.add_callback(lua, "cameraShake", function(camera:String, intensity:Float, duration:Float) {
-				if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
+				if(PlayState.instance == FlxG.state){duration = duration / PlayState.instance.playbackRate;}
 				LuaUtils.cameraFromString(camera).shake(intensity, duration);
 			});
 	
 			Lua_helper.add_callback(lua, "objectShake", function(camera:String, intensity:Float, duration:Float) {
-				if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
+				if(PlayState.instance == FlxG.state){duration = duration / PlayState.instance.playbackRate;}
 				LuaUtils.getObjectDirectly(camera).shake(intensity, duration);
 			});
 			
 			Lua_helper.add_callback(lua, "cameraFlash", function(camera:String, color:String, duration:Float,forced:Bool) {
-				if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
+				if(PlayState.instance == FlxG.state){duration = duration / PlayState.instance.playbackRate;}
 				LuaUtils.cameraFromString(camera).flash(CoolUtil.colorFromString(color), duration,null,forced);
 			});
 			Lua_helper.add_callback(lua, "cameraFade", function(camera:String, color:String, duration:Float,forced:Bool, ?fadeOut:Bool = false) {
-				if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
+				if(PlayState.instance == FlxG.state){duration = duration / PlayState.instance.playbackRate;}
 				LuaUtils.cameraFromString(camera).fade(CoolUtil.colorFromString(color), duration,fadeOut,null,forced);
 			});
 	
@@ -2710,7 +2710,7 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua,"flickerSprite", function (id:String, duration:Float, interval:Float) {
-				if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
+				if(PlayState.instance == FlxG.state){duration = duration / PlayState.instance.playbackRate;}
 				var shit:Dynamic = LuaUtils.getObjectDirectly(id);
 				FlxFlicker.flicker(shit, duration, interval);
 			});
@@ -3013,7 +3013,7 @@ class ModchartState
                             PlayState.instance.modchartSprites.remove(tag);
                         }
                             
-                        PlayState.instance.callOnLuas('onVideoFinished', [tag]);
+                        PlayState.instance.callOnLuas('onVideoCompleted', [tag]);
                     });
                     var options:Array<String> = [];
                     if (shouldLoop) options.push(PsychVideoSprite.looping);
@@ -3160,7 +3160,7 @@ class ModchartState
 			});
 	
 			Lua_helper.add_callback(lua, "runTimer", function(tag:String, time:Float = 1, loops:Int = 1) {
-				if (PlayState.instance != null){time = time / PlayState.instance.playbackRate;}
+				if(PlayState.instance == FlxG.state){time = time / PlayState.instance.playbackRate;}
 				LuaUtils.cancelTimer(tag);
 				PlayState.instance.modchartTimers.set(tag, new FlxTimer().start(time, function(tmr:FlxTimer) {
 					if(tmr.finished) {
@@ -3851,6 +3851,10 @@ class ModchartState
 			CustomSubstate.implement(this);
 			ShaderFunctions.implement(this);
 			DeprecatedFunctions.implement(this);
+
+			/*if (isStageLua){
+				isStageLua = false;
+			}*/
 		}
     }
 

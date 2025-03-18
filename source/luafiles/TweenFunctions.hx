@@ -1,7 +1,7 @@
 package luafiles;
 
 import luafiles.LuaUtils.LuaTweenOptions;
-import objects.StrumNote;
+import objects.*;
 
 class TweenFunctions
 {

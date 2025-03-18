@@ -618,53 +618,56 @@ class ChartingState extends MusicBeatState
 	function shiftNotes(measure:Int = 0, step:Int = 0, ms:Int = 0):Void
 	{
 		var newSong = [];
-
+	
+		// Calculate the time to shift
 		var millisecadd = (((measure * 4) + step / 4) * (60000 / _song.bpm)) + ms;
 		var totaladdsection = Std.int((millisecadd / (60000 / _song.bpm) / 4));
 		trace(millisecadd, totaladdsection);
-		if (millisecadd > 0)
+	
+		// Copy sections before curSec without modification
+		for (daSection in 0...curSec)
 		{
-			for (i in 0...totaladdsection)
-			{
-				newSong.unshift(newSection());
-			}
+			newSong.push(_song.notes[daSection]); // Directly copy unmodified sections
 		}
-		for (daSection1 in 0..._song.notes.length)
+	
+		for (daSection in curSec..._song.notes.length)
 		{
-			newSong.push(newSection(16, _song.notes[daSection1].mustHitSection, _song.notes[daSection1].altAnim, _song.notes[daSection1].bfAltAnim));
-		}
-
-		for (daSection in 0...(_song.notes.length))
-		{
-			var aimtosetsection = daSection + Std.int((totaladdsection));
+			var aimtosetsection = daSection + totaladdsection;
 			if (aimtosetsection < 0)
 				aimtosetsection = 0;
+	
+			while (newSong.length <= aimtosetsection)
+			{
+				newSong.push(newSection());
+			}
+	
 			newSong[aimtosetsection].mustHitSection = _song.notes[daSection].mustHitSection;
-			updateHeads();
 			newSong[aimtosetsection].altAnim = _song.notes[daSection].altAnim;
 			newSong[aimtosetsection].bfAltAnim = _song.notes[daSection].bfAltAnim;
-			// trace("section "+daSection);
-			for (daNote in 0...(_song.notes[daSection].sectionNotes.length))
+	
+			for (daNote in _song.notes[daSection].sectionNotes)
 			{
-				var newtiming = _song.notes[daSection].sectionNotes[daNote][0] + millisecadd;
+				var newtiming = daNote[0] + millisecadd;
 				if (newtiming < 0)
-				{
 					newtiming = 0;
-				}
+	
 				var futureSection = Math.floor(newtiming / 4 / (60000 / _song.bpm));
-				_song.notes[daSection].sectionNotes[daNote][0] = newtiming;
-				newSong[futureSection].sectionNotes.push(_song.notes[daSection].sectionNotes[daNote]);
-
-				// newSong.notes[daSection].sectionNotes.remove(_song.notes[daSection].sectionNotes[daNote]);
+	
+				while (newSong.length <= futureSection)
+				{
+					newSong.push(newSection());
+				}
+	
+				newSong[futureSection].sectionNotes.push([newtiming, daNote[1], daNote[2]]);
 			}
 		}
-		// trace("DONE BITCH");
+	
 		_song.notes = newSong;
 		updateGrid();
 		updateSectionUI();
 		updateNoteUI();
 	}
-
+	
 	var characters:Array<String>;
 	var stages:Array<String>;
 	var noteStyles:Array<String>;
@@ -2974,7 +2977,7 @@ class ChartingState extends MusicBeatState
 		return GRID_SIZE * beats * 4 * (_song.notes[curSec].lengthInSteps / 16) * value + gridBG.y;
 	}
 
-	private function addSection(lengthInSteps:Int = 16, sectionBeats:Int = 4):Void
+	private function addSection(lengthInSteps:Int = 16, ?sectionBeats:Int = 4):Void
 	{
 		var sec:SwagSection = {
 			sectionBeats: sectionBeats,
@@ -3003,12 +3006,12 @@ class ChartingState extends MusicBeatState
 			lengthInSteps: lengthInSteps,
 			bpm: _song.bpm,
 			changeBPM: false,
-			mustHitSection: true,
+			mustHitSection: mustHitSection,
 			gfSection: false,
 			sectionNotes: [],
 			typeOfSection: 0,
-			altAnim: false,
-			bfAltAnim: false,
+			altAnim: altAnim,
+			bfAltAnim: bfAltAnim,
 			dadCrossfade: false,
 			bfCrossfade: false,
 			dType: 0

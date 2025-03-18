@@ -833,6 +833,11 @@ class Paths
 		return daThing;
 	}
 
+	inline static public function fileExists2(key:String)
+	{
+		return (Assets.exists(key) || FileSystem.exists(key));
+	}
+
 	static public function getAtlasFromData(key:String, data:String = "SPARROW")
 	{
 		switch (data.toLowerCase())
