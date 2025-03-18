@@ -1,0 +1,241 @@
+{
+	"animations": [
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"loop": false,
+			"fps": 24,
+			"anim": "danceLeft",
+			"playerOffsets": [
+				0,
+				0
+			],
+			"indices": [
+				0,
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14
+			],
+			"name": "Idle"
+		},
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"loop": false,
+			"fps": 24,
+			"anim": "danceRight",
+			"playerOffsets": [
+				0,
+				0
+			],
+			"indices": [
+				15,
+				16,
+				17,
+				18,
+				19,
+				20,
+				21,
+				22,
+				23,
+				24,
+				25,
+				26,
+				27,
+				28,
+				29
+			],
+			"name": "Idle"
+		},
+		{
+			"offsets": [
+				-119,
+				55
+			],
+			"loop": false,
+			"fps": 24,
+			"anim": "combo50",
+			"playerOffsets": [
+				-119,
+				55
+			],
+			"indices": [],
+			"name": "ComboCheer"
+		},
+		{
+			"offsets": [
+				17,
+				-5
+			],
+			"loop": false,
+			"fps": 24,
+			"anim": "laughCutscene",
+			"playerOffsets": [
+				17,
+				-5
+			],
+			"indices": [
+				0,
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				7,
+				8,
+				9,
+				10,
+				11,
+				7,
+				8,
+				9,
+				10,
+				11,
+				7,
+				8,
+				9,
+				10,
+				11,
+				7,
+				8,
+				9,
+				10,
+				11,
+				7,
+				8,
+				9,
+				10,
+				11
+			],
+			"name": "Laugh0"
+		},
+		{
+			"offsets": [
+				-41,
+				-15
+			],
+			"loop": false,
+			"fps": 24,
+			"anim": "combo100",
+			"playerOffsets": [
+				-41,
+				-15
+			],
+			"indices": [
+				0,
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				4,
+				5,
+				6,
+				4,
+				5,
+				6,
+				4,
+				5,
+				6
+			],
+			"name": "ComboFawn0"
+		},
+		{
+			"offsets": [
+				0,
+				52
+			],
+			"loop": false,
+			"fps": 24,
+			"anim": "raiseKnife",
+			"playerOffsets": [
+				0,
+				52
+			],
+			"indices": [],
+			"name": "KnifeRaise0"
+		},
+		{
+			"offsets": [
+				-99,
+				52
+			],
+			"loop": false,
+			"fps": 24,
+			"anim": "idleKnife",
+			"playerOffsets": [
+				-99,
+				52
+			],
+			"indices": [],
+			"name": "KnifeIdle0"
+		},
+		{
+			"offsets": [
+				133,
+				52
+			],
+			"loop": false,
+			"fps": 24,
+			"anim": "lowerKnife",
+			"playerOffsets": [
+				133,
+				52
+			],
+			"indices": [],
+			"name": "KnifeLower0"
+		}
+	],
+	"no_antialiasing": false,
+	"image": "characters/Nene",
+	"position": [
+		56,
+		-11
+	],
+	"player_camera_position": [
+		0,
+		0
+	],
+	"spriteType": "SPARROW",
+	"playerposition": [
+		56,
+		-11
+	],
+	"healthicon": "face",
+	"flip_x": false,
+	"healthbar_colors": [
+		161,
+		161,
+		161
+	],
+	"camera_position": [
+		0,
+		0
+	],
+	"noteSkin": null,
+	"sing_duration": 6.1,
+	"isPlayerChar": false,
+	"scale": 1
+}

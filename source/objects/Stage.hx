@@ -6,6 +6,7 @@ import flixel.addons.effects.chainable.FlxWaveEffect;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.animation.FlxBaseAnimation;
 import flixel.addons.display.FlxBackdrop;
+import flixel.addons.display.FlxTiledSprite;
 import flixel.math.FlxRandom;
 import flixel.FlxObject;
 import openfl.display.BlendMode;
@@ -20,12 +21,17 @@ import flixel.graphics.FlxGraphic;
 import openfl.Lib;
 import lime.utils.Assets;
 
+import flixel.math.FlxPoint;
+
 import shaders.Shaders;
 import backend.StageData;
 import luafiles.ModchartState;
 
 import objects.BackgroundDancer;
 import objects.BackgroundGirls;
+
+import shaders.RainShader;
+import objects.ABotSpeaker;
 
 using StringTools;
 
@@ -79,6 +85,21 @@ class Stage extends MusicBeatState
 	var tankX:Int = 400;
 	var tankSpeed:Float = FlxG.random.float(5, 7);
 	var tankAngle:Float = FlxG.random.float(-90, 45);
+
+	//Philly Streets Stuff
+
+	//var scrollingSky:FlxTiledSprite;
+	var rainShader:RainShader;
+	var rainFilter:Bool = false;
+	//var rainShaderStartIntensity:Float = 0.1; // you can change the rain Intensity example: "setProperty("Stage.rainShaderStartIntensity", 0.4)"
+	//var rainShaderEndIntensity:Float = 0.2;
+	var _timer:Float = 0;
+	var lightsStop:Bool = false;
+	var lastChange:Int = 0;
+	var changeInterval:Int = 8;
+	var carWaiting:Bool = false;
+	var carInterruptable:Bool = true;
+	var car2Interruptable:Bool = true;
 	
 	public var altSuffix:String = '';
 	public var altPrefix:String = '';
@@ -601,6 +622,211 @@ class Stage extends MusicBeatState
 				gfYOffset = -80;
 				dadXOffset = -80;
 			}
+
+			case 'phillyStreets' | 'phillyStreetsErect':
+			{
+				camZoom = 0.77;
+
+				switch (daStage)
+				{
+					case 'phillyStreets':
+						pre = 'phillyStreets';
+					case 'phillyStreetsErect':
+						pre = 'phillyStreets/erect';
+				}
+
+				suf = 'weekend1';
+				
+				var skyImage = Paths.image(pre+'/phillySkybox', suf);
+
+				//var scrollingSky = new FlxTiledSprite(skyImage, skyImage.width + 400, skyImage.height, true, false); //this FlxTiledSprite don't fucking work
+
+				var scrollingSky = new FlxBackdrop(skyImage, X, 0, 0);
+				scrollingSky.antialiasing = ClientPrefs.data.antialiasing;
+				scrollingSky.setPosition(-650, -375);
+				scrollingSky.scrollFactor.set(0.1, 0.1);
+				scrollingSky.scale.set(0.65, 0.65);
+				swagBacks['scrollingSky'] = scrollingSky;
+				toAdd.push(scrollingSky);
+
+				var phillySkyline = new FlxSprite(-545, -273).loadGraphic(Paths.image(pre+'/phillySkyline', suf));
+				phillySkyline.scrollFactor.set(0.2, 0.2);
+				swagBacks['phillySkyline'] = phillySkyline;
+				toAdd.push(phillySkyline);
+
+				var phillyForegroundCity = new FlxSprite(625, 94).loadGraphic(Paths.image(pre+'/phillyForegroundCity', suf));
+				phillyForegroundCity.scrollFactor.set(0.3, 0.3);
+				swagBacks['phillyForegroundCity'] = phillyForegroundCity;
+				toAdd.push(phillyForegroundCity);
+
+				if (curStage == 'phillyStreetsErect'){
+					var mist5 = new FlxBackdrop(Paths.image(pre+'/mistMid', suf), X);
+					mist5.setPosition(-650, -100);
+					mist5.scrollFactor.set(0.5, 0.5);
+					mist5.blend = "add";
+					mist5.color = 0xFF5c5c5c;
+					mist5.alpha = 1;
+					mist5.velocity.x = 20;
+					mist5.scale.set(1.1, 1.1);
+					swagBacks['mist5'] = mist5;
+					toAdd.push(mist5);
+				}
+
+				var phillyConstruction = new FlxSprite(1800, 364).loadGraphic(Paths.image(pre+'/phillyConstruction', suf));
+				phillyConstruction.scrollFactor.set(0.7, 1);
+				swagBacks['phillyConstruction'] = phillyConstruction;
+				toAdd.push(phillyConstruction);
+
+				var phillyHighwayLights = new FlxSprite(284, 305).loadGraphic(Paths.image(pre+'/phillyHighwayLights', suf));
+				phillyHighwayLights.scrollFactor.set(1, 1);
+				swagBacks['phillyHighwayLights'] = phillyHighwayLights;
+				toAdd.push(phillyHighwayLights);
+				
+				var phillyHighwayLightsLightmap = new FlxSprite(284, 305).loadGraphic(Paths.image('phillyStreets/phillyHighwayLights_lightmap', suf));
+				phillyHighwayLightsLightmap.scrollFactor.set(1, 1);
+				phillyHighwayLightsLightmap.blend = "add";
+				phillyHighwayLightsLightmap.alpha = 0.6;
+				swagBacks['phillyHighwayLightsLightmap'] = phillyHighwayLightsLightmap;
+				toAdd.push(phillyHighwayLightsLightmap);
+
+				var phillyHighway = new FlxSprite(139, 209).loadGraphic(Paths.image(pre+'/phillyHighway', suf));
+				phillyHighway.scrollFactor.set(1, 1);
+				swagBacks['phillyHighway'] = phillyHighway;
+				toAdd.push(phillyHighway);
+
+				var phillySmog = new FlxSprite(-6, 245).loadGraphic(Paths.image(pre+'/phillySmog', suf));
+				phillySmog.scrollFactor.set(0.8, 1);
+				swagBacks['phillySmog'] = phillySmog;
+				toAdd.push(phillySmog);
+
+				var phillyCars = new FlxSprite(1200, 818);
+				phillyCars.frames = Paths.getSparrowAtlas(pre+'/phillyCars', suf);
+				phillyCars.scrollFactor.set(0.9, 1);
+				phillyCars.animation.addByPrefix('car1', 'car1', 24, false);
+				phillyCars.animation.addByPrefix('car2', 'car2', 24, false);
+				phillyCars.animation.addByPrefix('car3', 'car3', 24, false);
+				phillyCars.animation.addByPrefix('car4', 'car4', 24, false);
+				swagBacks['phillyCars'] = phillyCars;
+				toAdd.push(phillyCars);
+
+				var phillyCars2 = new FlxSprite(1200, 818);
+				phillyCars2.frames = Paths.getSparrowAtlas(pre+'/phillyCars', suf);
+				phillyCars2.scrollFactor.set(0.9, 1);
+				phillyCars2.animation.addByPrefix('car1', 'car1', 24, false);
+				phillyCars2.animation.addByPrefix('car2', 'car2', 24, false);
+				phillyCars2.animation.addByPrefix('car3', 'car3', 24, false);
+				phillyCars2.animation.addByPrefix('car4', 'car4', 24, false);
+				phillyCars2.flipX = true;
+				swagBacks['phillyCars2'] = phillyCars2;
+				toAdd.push(phillyCars2);
+
+				var phillyTraffic = new FlxSprite(1840, 608);
+				phillyTraffic.frames = Paths.getSparrowAtlas(pre+'/phillyTraffic', suf);
+				phillyTraffic.scrollFactor.set(0.9, 1);
+				phillyTraffic.animation.addByPrefix('redtogreen', 'redtogreen', 24, false);
+				phillyTraffic.animation.addByPrefix('greentored', 'greentored', 24, false);
+				swagBacks['phillyTraffic'] = phillyTraffic;
+				toAdd.push(phillyTraffic);
+
+				var phillyTrafficLightmap = new FlxSprite(1840, 608).loadGraphic(Paths.image(pre+'/phillyTraffic_lightmap', suf));
+				phillyTrafficLightmap.scrollFactor.set(0.9, 1);
+				phillyTrafficLightmap.blend = "add";
+				phillyTrafficLightmap.alpha = 0.6;
+				swagBacks['phillyTrafficLightmap'] = phillyTrafficLightmap;
+				toAdd.push(phillyTrafficLightmap);
+
+				if (curStage == 'phillyStreetsErect'){
+					var mist3 = new FlxBackdrop(Paths.image(pre+'/mistMid', suf), X, 0, 0);
+					mist3.setPosition(-650, -100);
+					mist3.scrollFactor.set(0.95, 0.95);
+					mist3.blend = "add";
+					mist3.color = 0xFF5c5c5c;
+					mist3.alpha = 0.5;
+					mist3.velocity.x = -50;
+					mist3.scale.set(0.8, 0.8);
+					swagBacks['mist3'] = mist3;
+					toAdd.push(mist3);
+
+					var mist4 = new FlxBackdrop(Paths.image(pre+'/mistBack', suf), X, 0, 0);
+					mist4.setPosition(-650, -100);
+					mist4.scrollFactor.set(0.8, 0.8);
+					mist4.blend = "add";
+					mist4.color = 0xFF5c5c5c;
+					mist4.alpha = 1;
+					mist4.velocity.x = 40;
+					mist4.scale.set(0.7, 0.7);
+					swagBacks['mist4'] = mist4;
+					toAdd.push(mist4);
+
+					var gray1 = new FlxSprite(88, 317).loadGraphic(Paths.image(pre+'/greyGradient', suf));
+					gray1.scrollFactor.set(1, 1);
+					gray1.alpha = 0.3;
+					gray1.blend = "add";
+					swagBacks['gray1'] = gray1;
+					toAdd.push(gray1);
+		
+					var gray2 = new FlxSprite(88, 317).loadGraphic(Paths.image(pre+'/greyGradient', suf));
+					gray2.scrollFactor.set(1, 1);
+					gray2.alpha = 0.8;
+					gray2.blend = "multiply";
+					swagBacks['gray2'] = gray2;
+					toAdd.push(gray2);
+				}
+
+				var phillyForeground = new FlxSprite(88, 317).loadGraphic(Paths.image(pre+'/phillyForeground', suf));
+				phillyForeground.scrollFactor.set(1, 1);
+				swagBacks['phillyForeground'] = phillyForeground;
+				toAdd.push(phillyForeground);
+
+				var spraycanPile = new FlxSprite(920, 1045).loadGraphic(Paths.image('SpraycanPile', suf));
+				spraycanPile.scrollFactor.set(1, 1);
+				swagBacks['spraycanPile'] = spraycanPile;
+				toAdd.push(spraycanPile);
+
+				if (curStage == 'phillyStreetsErect'){
+					var mist0 = new FlxBackdrop(Paths.image(pre+'/mistMid', suf), X, 0, 0);
+					mist0.setPosition(-650, -100);
+					mist0.scrollFactor.set(1.2, 1.2);
+					mist0.blend = "add";
+					mist0.color = 0xFF5c5c5c;
+					mist0.alpha = 0.6;
+					mist0.velocity.x = 172;
+					layInFront[2].push(mist0);
+					swagBacks['mist0'] = mist0;
+
+					var mist1 = new FlxBackdrop(Paths.image(pre+'/mistMid', suf), X, 0, 0);
+					mist1.setPosition(-650, -100);
+					mist1.scrollFactor.set(1.1, 1.1);
+					mist1.blend = "add";
+					mist1.color = 0xFF5c5c5c;
+					mist1.alpha = 0.6;
+					mist1.velocity.x = 150;
+					layInFront[2].push(mist1);
+					swagBacks['mist1'] = mist1;
+				
+					var mist2 = new FlxBackdrop(Paths.image(pre+'/mistBack', suf), X, 0, 0);
+					mist2.setPosition(-650, -100);
+					mist2.scrollFactor.set(1.2, 1.2);
+					mist2.blend = "add";
+					mist2.color = 0xFF5c5c5c;
+					mist2.alpha = 0.8;
+					mist2.velocity.x = -80;
+					layInFront[2].push(mist2);
+					swagBacks['mist2'] = mist2;
+				}
+
+				//if (ClientPrefs.data.shaders) setupRainShader();
+
+				bfXOffset = 1160;
+				bfYOffset = 350;
+				gfXOffset = 775;
+				gfYOffset = 270;
+				dadXOffset = 550;
+				dadYOffset = 330;
+
+				boyfriendCameraOffset = [-90, 0]; 
+				opponentCameraOffset = [55, -50];
+			}
 			default:
 			{
 				//lua stages boi
@@ -682,6 +908,22 @@ class Stage extends MusicBeatState
 		}
 	}
 
+	/*/
+	function setupRainShader()
+	{
+		rainShader = new RainShader();
+		rainShader.scale = FlxG.height / 200;
+
+		rainShader.intensity = rainShaderStartIntensity;
+
+		if (curStage == 'phillyStreetsErect'){
+			rainShader.rainColor = 0xFFa8adb5;
+		}
+		
+		PlayState.instance.camGame.setFilters([new ShaderFilter(rainShader)]);
+	}
+	/*/
+
 	override public function update(elapsed:Float)
 	{
 		super.update(elapsed);
@@ -701,6 +943,16 @@ class Stage extends MusicBeatState
 				}
 			case 'tank':
 				moveTank();
+			case 'phillyStreets' | 'phillyStreetsErect': 
+				swagBacks['scrollingSky'].x -= elapsed * 22;
+
+				/*/
+				var remappedIntensityValue:Float = FlxMath.remapToRange(Conductor.songPosition, 0, (FlxG.sound.music != null ? FlxG.sound.music.length : 0),
+				rainShaderStartIntensity, rainShaderEndIntensity);
+				rainShader.intensity = remappedIntensityValue;
+				rainShader.updateViewInfo(FlxG.width, FlxG.height, FlxG.camera);
+				rainShader.update(elapsed);
+				/*/
 		}
 
 		if (isCustomStage && !preloading && isLuaStage)
@@ -823,6 +1075,19 @@ class Stage extends MusicBeatState
 
 					phillyCityLights.members[curLight].visible = true;
 				}
+			case "phillyStreets" | "phillyStreetsErect":
+				if (FlxG.random.bool(10) && curBeat != (lastChange + changeInterval) && carInterruptable == true)
+					{
+						if(lightsStop == false)
+							driveCar(swagBacks['phillyCars']);
+						else
+							driveCarLights(swagBacks['phillyCars']);
+					}
+			
+					if(FlxG.random.bool(10) && curBeat != (lastChange + changeInterval) && car2Interruptable == true && lightsStop == false)
+						driveCarBack(swagBacks['phillyCars2']);
+			
+					if (curBeat == (lastChange + changeInterval)) changeLights(curBeat);
 		}
 	}
 
@@ -931,6 +1196,162 @@ class Stage extends MusicBeatState
 			});
 		}
 	}
+
+	// Cars from phillyStreets Stuff
+
+	function changeLights(beat:Int):Void
+		{
+			lastChange = beat;
+			lightsStop = !lightsStop;
+	
+			if(lightsStop)
+			{
+				swagBacks['phillyTraffic'].animation.play('greentored');
+				changeInterval = 20;
+			}
+			else
+			{
+				swagBacks['phillyTraffic'].animation.play('redtogreen');
+				changeInterval = 30;
+	
+				if(carWaiting == true) finishCarLights(swagBacks['phillyCars']);
+			}
+		}
+	
+		function finishCarLights(sprite:FlxSprite):Void
+		{
+			carWaiting = false;
+			var duration:Float = FlxG.random.float(1.8, 3);
+			var rotations:Array<Int> = [-5, 18];
+			var offset:Array<Float> = [306.6, 168.3];
+			var startdelay:Float = FlxG.random.float(0.2, 1.2);
+	
+			var path:Array<FlxPoint> = [
+				FlxPoint.get(1950 - offset[0] - 80, 980 - offset[1] + 15),
+				FlxPoint.get(2400 - offset[0], 980 - offset[1] - 50),
+				FlxPoint.get(3102 - offset[0], 1127 - offset[1] + 40)
+			];
+	
+			FlxTween.angle(sprite, rotations[0], rotations[1], duration, {ease: FlxEase.sineIn, startDelay: startdelay});
+			FlxTween.quadPath(sprite, path, duration, true, {ease: FlxEase.sineIn, startDelay: startdelay, onComplete: function(_) carInterruptable = true});
+		}
+	
+		function driveCarLights(sprite:FlxSprite):Void
+		{
+			carInterruptable = false;
+			FlxTween.cancelTweensOf(sprite);
+			var variant:Int = FlxG.random.int(1,4);
+			sprite.animation.play('car' + variant);
+			var extraOffset = [0, 0];
+			var duration:Float = 2;
+	
+			switch(variant)
+			{
+				case 1:
+					duration = FlxG.random.float(1, 1.7);
+				case 2:
+					extraOffset = [20, -15];
+					duration = FlxG.random.float(0.9, 1.5);
+				case 3:
+					extraOffset = [30, 50];
+					duration = FlxG.random.float(1.5, 2.5);
+				case 4:
+					extraOffset = [10, 60];
+					duration = FlxG.random.float(1.5, 2.5);
+			}
+			var rotations:Array<Int> = [-7, -5];
+			var offset:Array<Float> = [306.6, 168.3];
+			sprite.offset.set(extraOffset[0], extraOffset[1]);
+	
+			var path:Array<FlxPoint> = [
+				FlxPoint.get(1500 - offset[0] - 20, 1049 - offset[1] - 20),
+				FlxPoint.get(1770 - offset[0] - 80, 994 - offset[1] + 10),
+				FlxPoint.get(1950 - offset[0] - 80, 980 - offset[1] + 15)
+			];
+	
+			FlxTween.angle(sprite, rotations[0], rotations[1], duration, {ease: FlxEase.cubeOut} );
+			FlxTween.quadPath(sprite, path, duration, true, {ease: FlxEase.cubeOut, onComplete: function(_)
+			{
+				carWaiting = true;
+				if(lightsStop == false) finishCarLights(swagBacks['phillyCars']);
+			}});
+		}
+		
+		function driveCar(sprite:FlxSprite):Void
+		{
+			carInterruptable = false;
+			FlxTween.cancelTweensOf(sprite);
+			var variant:Int = FlxG.random.int(1,4);
+			sprite.animation.play('car' + variant);
+	
+			var extraOffset = [0, 0];
+			var duration:Float = 2;
+			switch(variant)
+			{
+				case 1:
+					duration = FlxG.random.float(1, 1.7);
+				case 2:
+					extraOffset = [20, -15];
+					duration = FlxG.random.float(0.6, 1.2);
+				case 3:
+					extraOffset = [30, 50];
+					duration = FlxG.random.float(1.5, 2.5);
+				case 4:
+					extraOffset = [10, 60];
+					duration = FlxG.random.float(1.5, 2.5);
+			}
+	
+			var offset:Array<Float> = [306.6, 168.3];
+			sprite.offset.set(extraOffset[0], extraOffset[1]);
+	
+			var rotations:Array<Int> = [-8, 18];
+			var path:Array<FlxPoint> = [
+					FlxPoint.get(1570 - offset[0], 1049 - offset[1] - 30),
+					FlxPoint.get(2400 - offset[0], 980 - offset[1] - 50),
+					FlxPoint.get(3102 - offset[0], 1127 - offset[1] + 40)
+			];
+	
+			FlxTween.angle(sprite, rotations[0], rotations[1], duration);
+			FlxTween.quadPath(sprite, path, duration, true, {onComplete: function(_) carInterruptable = true});
+		}
+	
+		function driveCarBack(sprite:FlxSprite):Void
+		{
+			car2Interruptable = false;
+			FlxTween.cancelTweensOf(sprite);
+			var variant:Int = FlxG.random.int(1,4);
+			sprite.animation.play('car' + variant);
+	
+			var extraOffset = [0, 0];
+			var duration:Float = 2;
+			switch(variant)
+			{
+				case 1:
+					duration = FlxG.random.float(1, 1.7);
+				case 2:
+					extraOffset = [20, -15];
+					duration = FlxG.random.float(0.6, 1.2);
+				case 3:
+					extraOffset = [30, 50];
+					duration = FlxG.random.float(1.5, 2.5);
+				case 4:
+					extraOffset = [10, 60];
+					duration = FlxG.random.float(1.5, 2.5);
+			}
+	
+			var offset:Array<Float> = [306.6, 168.3];
+			sprite.offset.set(extraOffset[0], extraOffset[1]);
+	
+			var rotations:Array<Int> = [18, -8];
+			var path:Array<FlxPoint> = [
+					FlxPoint.get(3102 - offset[0], 1127 - offset[1] + 60),
+					FlxPoint.get(2400 - offset[0], 980 - offset[1] - 30),
+					FlxPoint.get(1570 - offset[0], 1049 - offset[1] - 10)
+			];
+	
+			FlxTween.angle(sprite, rotations[0], rotations[1], duration);
+			FlxTween.quadPath(sprite, path, duration, true, {onComplete: function(_) car2Interruptable = true});
+		}
 
 	public var closeLuas:Array<ModchartState> = [];
 	public var luaArray:Array<ModchartState> = [];
