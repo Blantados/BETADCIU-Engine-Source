@@ -18,6 +18,8 @@ class PsychVideoSprite extends VideoSprite
 	public var onEndCallback:Void->Void = null;
 
     public var destroyOnUse:Bool = false;
+    public var paused:Bool = false;
+    public var alreadyPaused:Bool = false;
 
     var _heldVideoPath:String = '';
 
@@ -95,12 +97,25 @@ class PsychVideoSprite extends VideoSprite
         play();
     }
 
+    public override function togglePaused():Void
+    {
+        if (bitmap != null){
+            paused = !paused;
+            bitmap.togglePaused();
+        }
+    }
+
     public static function globalPause() {
-        for (i in heldVideos) i.pause();
+        for (i in heldVideos){
+            if (i.paused) i.alreadyPaused = true;
+            i.pause();
+        }
     }
 
     public static function globalResume() {
-        for (i in heldVideos) i.resume();
+        for (i in heldVideos){
+            if (!i.alreadyPaused) i.resume();
+        }
     }
 
 }

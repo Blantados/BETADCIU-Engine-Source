@@ -133,6 +133,7 @@
 	<haxelib name="flixel" />
 	<haxelib name="flixel-ui" />
 	<haxelib name="flixel-addons" />
+	<haxelib name="haxe-concurrent" />
 	<haxelib name="tjson" />
 	
 	<!--Psych stuff needed-->

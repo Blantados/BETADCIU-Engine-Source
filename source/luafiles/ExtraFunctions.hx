@@ -142,7 +142,7 @@ class ExtraFunctions
 			if(obj != null){
 				return FlxG.mouse.overlaps(obj);
 			} 
-
+ 
 			return false;
 		});
 

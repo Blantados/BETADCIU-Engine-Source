@@ -146,6 +146,7 @@ class Note extends FlxSprite
 	public var noteSection:Int = 0;
 
 	public var separateSheets:Bool = false;	
+	public var separateXMLExists:Bool = false;	
 	public var texture(default, set):String = null;
 
 	private function set_texture(value:String):String {
@@ -375,7 +376,7 @@ class Note extends FlxSprite
 				scale.y /= PlayState.daPixelZoom;
 				scale.y *= noteScale;
 
-				offsetX += 3 + (separateSheets ? 33 : 0);
+				offsetX += 3 + (separateSheets ? 0 : 0);
 			}
 
 			if (becomePixelNote && !wasPixelNote) //fixes the scaling
@@ -383,7 +384,7 @@ class Note extends FlxSprite
 				scale.y /= noteScale;
 				scale.y *= PlayState.daPixelZoom;
 
-				offsetX -= 3 + (separateSheets ? 33 : 0);
+				offsetX -= 3 + (separateSheets ? 0 : 0);
 			}
 		}
 		
@@ -398,6 +399,7 @@ class Note extends FlxSprite
 	{
 		var initialStyle:String = daStyle;
 		separateSheets = false;
+		separateXMLExists = false;
 
 		switch (daStyle)
 		{
@@ -481,8 +483,14 @@ class Note extends FlxSprite
 					{
 						if (separateSheets){
 							if(isSustainNote){
-								var rawPic:Dynamic = Paths.returnGraphic(daStyle + "_hold");
-								loadGraphic(rawPic, true, 52, 87);
+								if (Assets.exists(Paths.xmlNew("images/" + daStyle + "_hold")) || FileSystem.exists(Paths.xmlNew("images/" + daStyle + "_hold"))){
+									frames = Paths.getSparrowAtlas(daStyle + "_hold");
+									separateXMLExists = true;
+								}else{
+									var rawPic:Dynamic = Paths.returnGraphic(daStyle + "_hold");
+									loadGraphic(rawPic, true, 52, 87);
+								}
+								
 							}else{
 								frames = Paths.getSparrowAtlas(daStyle);
 							}
@@ -575,9 +583,16 @@ class Note extends FlxSprite
 
 			if (separateSheets){
 				if (isSustainNote){
-					for (i in 0...length * 2){
-						animation.add(colorScroll[Std.int(i/2)] + "hold" + (i % 2 == 0 ? "" : "end"), [i]);
+					if (separateXMLExists){
+						for (i in 0...length * 2){
+							animation.addByPrefix(colorScroll[Std.int(i/2)] + "hold" + (i % 2 == 0 ? "" : "end"), colorScroll[Std.int(i/2)] + noteAnimSuffixes[i % 2 == 0 ? 1 : 2]);
+						}
+					}else{
+						for (i in 0...length * 2){
+							animation.add(colorScroll[Std.int(i/2)] + "hold" + (i % 2 == 0 ? "" : "end"), [i]);
+						}
 					}
+					
 				}
 				else{
 					var dirScroll:Array<String> = ["Left", "Down", "Up", "Right"];

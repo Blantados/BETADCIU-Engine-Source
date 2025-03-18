@@ -38,6 +38,30 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 		option.onChange = onChangeAntiAliasing; //Changing onChange is only needed if you want to make a special interaction after it changes the value
 		addOption(option);*/
 
+		var maxThreads:Int = Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS")); //trying to implement this cool thing i found on Sonic Legacy's source code
+		if (maxThreads > 1) {
+			var option:Option = new Option('Multi-thread Loading', //Name
+			'If checked, the engine can use multiple threads to speed up loading times on some songs.\nRecommended to leave on, unless it causes crashing', //Description
+			'multicoreLoading', //Save data variable name
+			'bool'); //Variable type
+			addOption(option);
+
+			option.defaultValue = false;
+
+			var option:Option = new Option('Loading Threads', //Name
+				'How many threads the game can use to load graphics when using Multi-thread Loading.\nThe maximum amount of threads depends on your processor', //Description
+				'loadingThreads', //Save data variable name
+				'int' //Variable type
+			); //Default value
+
+			option.defaultValue = Math.floor(maxThreads/2);
+			option.minValue = 1;
+			option.maxValue = Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS"));
+			option.displayFormat = '%v';
+
+			addOption(option);
+		}
+
 		var option:Option = new Option('Reduced Graphics', //Name
 			'If checked, lowers image quality for better performance,\nWarning: Will screw with a lot of character cameras.', //Description
 			'poltatoPC', //Save data variable name

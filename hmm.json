@@ -61,11 +61,23 @@
       "version": null
     },
     {
+      "name": "grig.audio",
+      "type": "haxelib",
+      "version": null
+    },
+    {
       "name": "discord_rpc",
       "type": "git",
       "dir": null,
       "ref": "master",
       "url": "https://github.com/Aidan63/linc_discord-rpc"
+    },
+    {
+      "name": "grig.audio",
+      "type": "git",
+      "dir": "src",
+      "ref": "57f5d47f2533fd0c3dcd025a86cb86c0dfa0b6d2",
+      "url": "https://gitlab.com/haxe-grig/grig.audio.git"
     },
     {
       "name": "linc_luajit",

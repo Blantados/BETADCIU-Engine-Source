@@ -245,8 +245,10 @@ class CustomLoading extends MusicBeatState
 
             trace("Character " + itemData[0] + " found!");
         }else if (listToCheck == stageList){
-            var loadedStage = new Stage(itemData[0], true);
-            trace("Stage " + itemData[0] + " found!");
+            sys.thread.Thread.create(() -> {
+                var loadedStage = new Stage(itemData[0], true);
+                trace("Stage " + itemData[0] + " found!");
+            });   
         }
 
         finishedCache++;

@@ -17,33 +17,11 @@ class NoteSplash extends FlxSprite
 
 		var skin:String = '';
 
-		if (FileSystem.exists(Paths.modsImages("noteSplashes-" + PlayState.instance.bfStrumStyle)))
-			skin = "noteSplashes-"+ PlayState.instance.bfStrumStyle;
-		else if (FileSystem.exists(Paths.modsImages("notes/noteSplashes-" + PlayState.instance.bfStrumStyle)))
-			skin = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
-		else
-			skin = PlayState.instance.splashSkin;
-
-		if (skin == 'normal' || skin == 'default') skin = "";
-
-		loadAnims(skin);
-
 		setupNoteSplash(x, y, note);
 	}
 
 	public function setupNoteSplash(x:Float, y:Float, note:Int = 0, texture:String = null, hueColor:Float = 0, satColor:Float = 0, brtColor:Float = 0) {
-		if(texture == null) {
-			texture = PlayState.instance.splashSkin;
-		}
-		else 
-		{
-			if (Assets.exists(Paths.image("noteSplashes-" + PlayState.instance.bfStrumStyle)) || FileSystem.exists(Paths.modsImages("noteSplashes-" + PlayState.instance.bfStrumStyle)))
-				texture = "noteSplashes-"+ PlayState.instance.bfStrumStyle;
-			else if (Assets.exists(Paths.image("notes/noteSplashes-" + PlayState.instance.bfStrumStyle)) || FileSystem.exists(Paths.modsImages("notes/noteSplashes-" + PlayState.instance.bfStrumStyle)))
-				texture = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
-			else if (Assets.exists(Paths.image("notes/"+texture)) || FileSystem.exists(Paths.modsImages("notes/"+texture)))
-				texture = "notes/"+texture;
-		}
+		texture = getNoteSplashesSkin();
 
 		if(textureLoaded != texture) {
 			loadAnims(texture);
@@ -90,22 +68,19 @@ class NoteSplash extends FlxSprite
 		//scuffed pixel notesplashes implementation
 
 		isPixel = width < 70;
-		
-		for (i in 1...3) {
-			animation.addByPrefix("note1-" + i, "note impact " + i + " blue", 24, false);
-			animation.addByPrefix("note2-" + i, "note impact " + i + " green", 24, false);
-			animation.addByPrefix("note0-" + i, "note impact " + i + " purple", 24, false);
-			animation.addByPrefix("note3-" + i, "note impact " + i + " red" , 24, false);
+		var psychNoteSplash = false;
+
+		animation.addByPrefix("note1-1", "note impact " + 1 + " blue", 24, false);
+
+		if (animation.getByName('note1-1') == null){
+			psychNoteSplash = true;
 		}
 
-		if (animation.getByName('note1-1') == null && animation.getByName('note2-2') == null) //psych notesplashes?
-		{
-			for (i in 1...3) {
-				animation.addByPrefix("note1-" + i, "note splash blue " + i, 24, false);
-				animation.addByPrefix("note2-" + i, "note splash green " + i, 24, false);
-				animation.addByPrefix("note0-" + i, "note splash purple " + i, 24, false);
-				animation.addByPrefix("note3-" + i, "note splash red " + i, 24, false);
-			}
+		for (i in 1...3) {
+			animation.addByPrefix("note0-" + i, (psychNoteSplash ? "note splash purple " + i : "note impact " + i + " purple"), 24, false);
+			animation.addByPrefix("note1-" + i, (psychNoteSplash ? "note splash blue " + i : "note impact " + i + " blue"), 24, false);
+			animation.addByPrefix("note2-" + i, (psychNoteSplash ? "note splash green " + i : "note impact " + i + " green"), 24, false);
+			animation.addByPrefix("note3-" + i, (psychNoteSplash ? "note splash red " + i : "note impact " + i + " red"), 24, false);
 		}
 
 		if (animation.getByName('note1-1') == null && animation.getByName('note2-2') == null) //if still null somehow!?
@@ -135,5 +110,22 @@ class NoteSplash extends FlxSprite
 		}
 
 		super.update(elapsed);
+	}
+
+	function getNoteSplashesSkin(){
+		var skin = "";
+		var noteSplashesDashStyle:String = "noteSplashes-" + PlayState.instance.bfStrumStyle;
+
+		if (Paths.fileExists2(Paths.image(noteSplashesDashStyle))){
+			skin = noteSplashesDashStyle;
+		}else if (Paths.fileExists2(Paths.image("notes/" + noteSplashesDashStyle))){
+			skin = "notes/" + noteSplashesDashStyle;
+		}else if (Paths.fileExists2(Paths.image("notes/" + PlayState.instance.bfStrumStyle + "/noteSplashes"))){
+			skin = "notes/" + PlayState.instance.bfStrumStyle + "/noteSplashes";
+		}else{
+			skin = PlayState.instance.splashSkin;
+		}
+
+		return skin;
 	}
 }
