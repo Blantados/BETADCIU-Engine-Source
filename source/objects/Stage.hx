@@ -691,6 +691,7 @@ class Stage extends MusicBeatState
 				var phillyHighwayLightsLightmap = new FlxSprite(284, 305).loadGraphic(Paths.image('phillyStreets/phillyHighwayLights_lightmap', suf));
 				phillyHighwayLightsLightmap.scrollFactor.set(1, 1);
 				phillyHighwayLightsLightmap.blend = "add";
+				phillyHighwayLightsLightmap.alpha = 0.6;
 				phillyHighwayLightsLightmap.antialiasing = true;
 				swagBacks['phillyHighwayLightsLightmap'] = phillyHighwayLightsLightmap;
 				toAdd.push(phillyHighwayLightsLightmap);
@@ -756,6 +757,7 @@ class Stage extends MusicBeatState
 				var phillyTrafficLightmap = new FlxSprite(1840, 608).loadGraphic(Paths.image(pre+'/phillyTraffic_lightmap', suf));
 				phillyTrafficLightmap.scrollFactor.set(0.9, 1);
 				phillyTrafficLightmap.blend = "add";
+				phillyTrafficLightmap.alpha = 0.6;
 				phillyTrafficLightmap.antialiasing = true;
 				swagBacks['phillyTrafficLightmap'] = phillyTrafficLightmap;
 				toAdd.push(phillyTrafficLightmap);
