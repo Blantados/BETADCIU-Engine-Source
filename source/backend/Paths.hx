@@ -594,6 +594,21 @@ class Paths
 		return false;
 	}
 
+	public static function imageExists2(key:String, ?library:String) {
+		#if MODS_ALLOWED
+		var modKey:String = modsImages(key);
+		if(FileSystem.exists(modKey)) {
+			return true;
+		}
+		#end
+
+		var path = getPath('images/$key.png', IMAGE, library);
+		if (OpenFlAssets.exists(path, IMAGE)) {
+			return true;
+		}
+		return false;
+	}
+
 	public static function cacheImage(key:String, ?library:String = null, ?forced:Bool = false, ?antialiasing:Bool = true, ?preloadedBitmap:BitmapData = null)
 	{
 		var path:String = "";

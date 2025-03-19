@@ -1170,6 +1170,10 @@ class ModchartState
 				}
 			});
 
+			Lua_helper.add_callback(lua, "imageExists", function(image:String, ?library:String) {
+				return Paths.imageExists2(image, library);
+			});
+
 			Lua_helper.add_callback(lua, "loadGraphic", function(variable:String, image:String, ?gridX:Int, ?gridY:Int) {
 				if (ModpackMaker.inModpackMaker){
 					ModpackMaker.luaImageList.push(image);
