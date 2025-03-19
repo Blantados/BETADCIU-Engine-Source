@@ -1,6 +1,3 @@
 function onCreate()
-    if getProperty("gf.curCharacter") == 'nene' then
-        addHScript("images/characters/jsons/nene")
-        setScrollFactor("gf", 1, 1)
-    end
+    addHScript("images/characters/jsons/nene") -- why they don't add hscript support in characters folder
 end
