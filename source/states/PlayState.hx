@@ -135,6 +135,24 @@ using StringTools;
 import objects.PsychVideoSprite;
 #end
 
+import sys.thread.Thread;
+import openfl.display.BitmapData;
+
+typedef AssetPreload = {
+	var path:String;
+	@:optional var type:String;
+	@:optional var library:String;
+	@:optional var terminate:Bool;
+}
+
+
+typedef PreloadResult = {
+	var thread:Thread;
+	var asset:AssetPreload;
+	@:optional var extraData:Array<Dynamic>;
+	@:optional var terminated:Bool;
+}
+
 class PlayState extends MusicBeatState
 {
 	public static var instance:PlayState;
@@ -211,7 +229,6 @@ class PlayState extends MusicBeatState
 	public var gf:Character;
 	public var boyfriend:Boyfriend;
 
-	public static var preloadChar:Character;
 	public static var changedDifficulty:Bool = false;
 	public static var chartingMode:Bool = false;
 
@@ -437,6 +454,10 @@ class PlayState extends MusicBeatState
 	public var engineDebugKeys:Array<FlxKey> = [FlxKey.ONE, FlxKey.TWO, FlxKey.THREE, FlxKey.FOUR, FlxKey.FIVE, FlxKey.SIX, FlxKey.SEVEN, FlxKey.EIGHT, FlxKey.NINE];
 	public static var inPlayState:Bool = false; //there's gotta be an easier way for this to be read.
 
+	// For multicore loading
+	public var charactersToLoad:Array<String> = [];
+	public var stagesToLoad:Array<String> = [];
+
 	override public function create()
 	{
 		instance = this;
@@ -634,6 +655,11 @@ class PlayState extends MusicBeatState
 				startCharLuas.push(characters[i]);
 			}
 		}
+
+		charactersToLoad.push(SONG.player1);
+		charactersToLoad.push(SONG.player2);
+		charactersToLoad.push(SONG.gfVersion);
+		stagesToLoad.push(SONG.stage);
 
 		if (Stage.hideGirlfriend)
 			gfVersion = 'emptygf';
@@ -880,6 +906,11 @@ class PlayState extends MusicBeatState
 		generateSong(SONG.song);
 
 		trace('generated');
+
+		//Multi Core Preloading. Thanks to Ryiuu for porting
+		if (ClientPrefs.data.multicoreLoading) { // multicore preload system "borrowed" from Sonic Legacy's source code -Ryiuu
+			multicoreLoading();
+		}
 
 		// add(strumLine);
 
@@ -2752,7 +2783,6 @@ class PlayState extends MusicBeatState
 
 	public var daSongData:SwagSong;
 
-	//test push
 	private function generateSong(dataPath:String):Void
 	{
 		// FlxG.log.add(ChartParser.parse());
@@ -2927,17 +2957,24 @@ class PlayState extends MusicBeatState
 				}
 
 				var newCharacter:String = event.value2;
-				preloadChar = new Character(0, 0, newCharacter);
-				startCharacterLua(preloadChar.curCharacter);
-				preloadChar.destroyAtlas();//for some reason atlas characters are kinda buggy with preloading so i'll just destroy them
+
+				if (ClientPrefs.data.multicoreLoading) {
+					charactersToLoad.push(newCharacter);
+				} else { // Old System
+					var preloadChar = new Character(0, 0, newCharacter);
+					startCharacterLua(preloadChar.curCharacter);
+					preloadChar.destroyAtlas();//for some reason atlas characters are kinda buggy with preloading so i'll just destroy them
+				}
 			case 'Change Stage':
 				//re-enabled it!
-				if (event.value1 == curStage)
-					return;
-
-				PreloadStage = new Stage(event.value1, true);
-				trace ('stages are ' + event.value1);
-
+				if (event.value1 != curStage){
+					if (ClientPrefs.data.multicoreLoading) {
+						stagesToLoad.push(event.value1);
+					} else { // Old System
+						PreloadStage = new Stage(event.value1, true);
+						trace ('Stage Loaded: ' + event.value1);
+					}
+				}
 			/*case 'Dadbattle Spotlight':
 				dadbattleBlack = new BGSprite(null, -800, -400, 0, 0);
 				dadbattleBlack.makeGraphic(Std.int(FlxG.width * 2), Std.int(FlxG.height * 2), FlxColor.BLACK);
@@ -5516,4 +5553,142 @@ class PlayState extends MusicBeatState
 	function inRange(a:Float, b:Float, tolerance:Float){
 		return (a <= b + tolerance && a >= b - tolerance);
 	}
+
+	function multicoreLoading(){
+		trace('multicore preload starting');
+	
+		var shitToLoad:Array<AssetPreload> = [
+			{path: "bruhtf", library: "shared"}
+		];
+	
+		for(character in charactersToLoad){
+			shitToLoad.push({
+				path: '$character',
+				type: 'CHARACTER'
+			});
+		}
+	
+		for(stage in stagesToLoad){
+			shitToLoad.push({
+				path: '$stage',
+				type: 'STAGE'
+			});
+		}
+	
+		// Remove duplicates
+		var seen:Map<String, Bool> = new Map();
+		shitToLoad = shitToLoad.filter(shit -> {
+			if (seen.exists(shit.path)) {
+				trace('heh. just removed a dupe of ${shit.path}. no need to thank me');
+				return false;
+			}
+			seen.set(shit.path, true);
+			return true;
+		});
+	
+		var threadLimit:Int = ClientPrefs.data.loadingThreads;
+		if (shitToLoad.length > 0 && threadLimit > 1) {
+			for (shit in shitToLoad)
+				if (shit.terminate) shit.terminate = false; // Ensure threads don't terminate too early
+	
+			var count = shitToLoad.length;
+			if (threadLimit > shitToLoad.length) threadLimit = shitToLoad.length;
+	
+			var sprites:Array<FlxSprite> = [];
+			var threads:Array<Thread> = [];
+			var main = Thread.current();
+			var loadIdx:Int = 0;
+	
+			trace("loading " + count + " items with " + threadLimit + " threads");
+	
+			for (i in 0...threadLimit) {
+				var thread:Thread = Thread.create(() -> {
+					while (true) {
+						var toLoad:Null<AssetPreload> = Thread.readMessage(true);
+						if (toLoad != null) {
+							if (toLoad.terminate == true) break;
+			
+							var toLoadExtra:Array<Dynamic> = [];
+
+							switch(toLoad.type){
+								case 'SOUND':
+									Paths.returnSound("sounds", toLoad.path, toLoad.library);
+								case 'MUSIC':
+									Paths.returnSound("music", toLoad.path, toLoad.library);
+								case 'SONG':
+									Paths.returnSound("songs", toLoad.path, toLoad.library);
+								case 'CHARACTER':
+									var preloadChar = new Character(0, 0, toLoad.path);
+									startCharacterLua(preloadChar.curCharacter);
+									preloadChar.destroyAtlas();
+								case 'STAGE':
+									PreloadStage = new Stage(toLoad.path, true);
+								default:			
+									var graphic = Paths.returnGraphic(toLoad.path, toLoad.library);
+									if(graphic!=null){
+										var sprite = new FlxSprite().loadGraphic(graphic);
+										sprite.alpha = 0.001;
+										add(sprite);
+										sprites.push(sprite);
+									}
+							}
+							
+			
+							main.sendMessage({
+								thread: Thread.current(),
+								asset: toLoad,
+								extraData: toLoadExtra,
+								terminated: false
+							});
+						}
+					}
+			
+					main.sendMessage({
+						thread: Thread.current(),
+						asset: {path: "", library: ""},
+						extraData: [],
+						terminated: true
+					});
+				});
+			
+				threads.push(thread);
+			}
+	
+			for (thread in threads)
+				thread.sendMessage(shitToLoad.pop());
+	
+			while (loadIdx < count) {
+				var res:Null<PreloadResult> = Thread.readMessage(true);
+				if (res != null) {
+					if (res.terminated) {
+						if (threads.contains(res.thread)) {
+							threads.remove(res.thread);
+						}
+					} else {
+						loadIdx++;
+
+						if(shitToLoad.length > 0)
+							res.thread.sendMessage(shitToLoad.pop()); // gives the thread the next thing it should load
+						else
+							res.thread.sendMessage({path: '', library:'', terminate: true}); // terminate the thread
+					}
+				}
+			}
+
+			// Paths.createGraphicsFromBitmaps();
+	
+			// Terminate all threads
+			var idx:Int = 0;
+			for (t in threads) {
+				t.sendMessage({path: '', library: '', terminate: true});
+				trace("terminating thread " + idx);
+				idx++;
+			}
+	
+			for (sprite in sprites)
+				remove(sprite);
+	
+			trace('multicore preload finished');
+		}
+	}	
 }

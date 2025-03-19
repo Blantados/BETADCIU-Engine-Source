@@ -71,6 +71,8 @@ import states.TitleState;
 	public var discordRPC:Bool = true;
 
 	public var useGL:Bool = false;
+	public var multicoreLoading:Bool = false;
+	public var loadingThreads:Int = Math.floor(Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS"))/2);
 	public var poltatoPC:Bool = false;
 	public var controllerMode:Bool = false;
 	public var psychUI:Bool = true;//the option no longer exists, but I'll leave it here just to avoid breaking some scripts
@@ -167,6 +169,14 @@ class ClientPrefs {
 			final refreshRate:Int = FlxG.stage.application.window.displayMode.refreshRate;
 			data.framerate = Std.int(FlxMath.bound(refreshRate, 60, 240));
 		} else data.framerate = FlxG.save.data.framerate;
+
+		if(FlxG.save.data.loadingThreads != null) {
+			data.loadingThreads = FlxG.save.data.loadingThreads;
+			if(data.loadingThreads > Math.floor(Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS")))){
+				data.loadingThreads = Math.floor(Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS")));
+				FlxG.save.data.loadingThreads = data.loadingThreads;
+			}
+		}
 
 		if(Main.fpsCounter != null) {
 			data.showFPS = FlxG.save.data.showFPS;

@@ -208,42 +208,7 @@ class Character extends FunkinSprite
 				preloadImageFile = imageFile;
 				spriteType = (json.spriteType != null ? json.spriteType.toUpperCase() : "SPARROW");
 
-				#if flxanimate
-				var animToFind:String = Paths.getPath('images/' + imageFile + '/Animation.json', TEXT, null, true);
-				if (#if MODS_ALLOWED FileSystem.exists(animToFind) || #end Assets.exists(animToFind)){
-					useAtlas = true;
-					preloadImageFile = preloadImageFile + "/spritemap";
-
-					var spriteMapPath =  Paths.image(imageFile);
-
-					//Assume it's spritemap1 if not spritemap
-					if (!Assets.exists(spriteMapPath) && !FileSystem.exists(spriteMapPath) && !FileSystem.exists(Paths.modsImages(spriteMapPath))){
-						preloadImageFile = preloadImageFile + "1";
-					}
-				}
-				#end
-
-				var imagePath = Paths.image(imageFile);
-				
-				if (!Paths.currentTrackedAssets.exists(preloadImageFile)){
-					{
-						if (Assets.exists(imagePath) && !FileSystem.exists(imagePath) && !FileSystem.exists(Paths.modsImages(imagePath)))
-							Paths.cacheImage(preloadImageFile, 'shared', false, !noAntialiasing);
-						else
-							Paths.cacheImage(preloadImageFile, 'preload', false, !noAntialiasing);	
-					}		
-				}
-				
-				if (!useAtlas){	
-					frames = Paths.getAtlasFromData(imageFile, spriteType);
-				}
-				else{
-					frames = Paths.getAtlasFromData("characters/blank", "SPARROW");
-
-					#if flxanimate
-					atlasChar = new FlxAnimate(x, y, Paths.getPath("images/" + json.image, TEXT, null, true));
-					#end
-				}			
+				loadCharacterGraphics();
 				
 				if(FlxG.save.data.poltatoPC)
 				{	
@@ -744,4 +709,43 @@ class Character extends FunkinSprite
 		if (atlasChar != null)
 			atlasChar = FlxDestroyUtil.destroy(atlasChar);
 	}	
+
+	public function loadCharacterGraphics() {
+		#if flxanimate
+		var animToFind:String = Paths.getPath('images/' + imageFile + '/Animation.json', TEXT, null, true);
+		if (#if MODS_ALLOWED FileSystem.exists(animToFind) || #end Assets.exists(animToFind)){
+			useAtlas = true;
+			preloadImageFile = preloadImageFile + "/spritemap";
+	
+			var spriteMapPath =  Paths.image(imageFile);
+	
+			// Assume it's spritemap1 if not spritemap
+			if (!Assets.exists(spriteMapPath) && !FileSystem.exists(spriteMapPath) && !FileSystem.exists(Paths.modsImages(spriteMapPath))){
+				preloadImageFile = preloadImageFile + "1";
+			}
+		}
+		#end
+	
+		var imagePath = Paths.image(imageFile);
+		
+		if (!Paths.currentTrackedAssets.exists(preloadImageFile)){
+			if (Assets.exists(imagePath) && !FileSystem.exists(imagePath) && !FileSystem.exists(Paths.modsImages(imagePath))) {
+				Paths.cacheImage(preloadImageFile, 'shared', false, !noAntialiasing);
+			} else {
+				Paths.cacheImage(preloadImageFile, 'preload', false, !noAntialiasing);
+			}
+		}
+	
+		if (!useAtlas) {	
+			frames = Paths.getAtlasFromData(imageFile, spriteType);
+		} else {
+			frames = Paths.getAtlasFromData("characters/blank", "SPARROW");
+	
+			#if flxanimate
+			var characterImagePath = Paths.getPath("images/" + imageFile, TEXT, null, true);
+			atlasChar = new FlxAnimate(x, y, characterImagePath);
+			#end
+		}			
+	}
+	
 }
