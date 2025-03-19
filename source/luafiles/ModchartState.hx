@@ -3181,7 +3181,8 @@ class ModchartState
 					case 'dad': charType = 1;
 					case 'gf' | 'girlfriend': charType = 2;
 				}
-				PlayState.preloadChar = new Character(0, 0, name);
+
+				PlayState.instance.charactersToLoad.push(name);
 				PlayState.instance.startCharacterLua(name);
 			});
 	

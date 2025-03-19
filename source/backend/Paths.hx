@@ -20,6 +20,7 @@ import backend.Mods;
 
 using StringTools;
 
+@:access(openfl.display.BitmapData)
 class Paths
 {
 	public static var charPath:Array<String> = [];
@@ -363,6 +364,7 @@ class Paths
 	}
 
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
+	public static var currentTrackedBitmaps:Map<String, BitmapData> = [];
 	public static var currentTrackedSounds:Map<String, Sound> = [];
 	public static var currentTrackedTextures:Map<String, Texture> = [];
 	public static var currentTrackedTexts:Map<String, String> = [];
@@ -576,85 +578,84 @@ class Paths
 		return false;
 	}
 
-	public static function cacheImage(key:String, ?library:String = null, ?forced:Bool = false, ?antialiasing:Bool = true)
+	public static function cacheImage(key:String, ?library:String = null, ?forced:Bool = false, ?antialiasing:Bool = true, ?preloadedBitmap:BitmapData = null)
 	{
-		var path:String = "ksajdlahfjhadjfhdshfkjhd";
-
-		var pathsToCheck:Array<String> = [FileSystem.absolutePath("assets/shared/images/"+key+".png"), Paths.image(key)];
-
-		if (library != null)
-			pathsToCheck.push(FileSystem.absolutePath("assets/"+library+"/images/"+key+".png"));
-
-		#if MODS_ALLOWED
-			pathsToCheck.push(modsImages(key));
-		#end
-
-		for (i in 0...pathsToCheck.length)
-		{
-			if(FileSystem.exists(pathsToCheck[i]) || Assets.exists(pathsToCheck[i])) {
-				path = pathsToCheck[i];
-				break;
+		var path:String = "";
+	
+		if (preloadedBitmap == null) {
+			var pathsToCheck:Array<String> = [
+				FileSystem.absolutePath("assets/shared/images/"+key+".png"), 
+				Paths.image(key)
+			];
+	
+			if (library != null)
+				pathsToCheck.push(FileSystem.absolutePath("assets/"+library+"/images/"+key+".png"));
+	
+			#if MODS_ALLOWED
+				pathsToCheck.push(modsImages(key));
+			#end
+	
+			for (i in 0...pathsToCheck.length) {
+				if (FileSystem.exists(pathsToCheck[i]) || Assets.exists(pathsToCheck[i])) {
+					path = pathsToCheck[i];
+					break;
+				}
 			}
 		}
-		
-		if (FileSystem.exists(path) || Assets.exists(path)) 
-		{	
-			if(!currentTrackedAssets.exists(key) || forced) 
-			{
-				var newBitmap:BitmapData;
-
-				if (FlxG.save.data.poltatoPC)
-				{
-					var matrix:Matrix = new Matrix();
-					matrix.scale(0.5, 0.5);
-
-					var bigBMP:BitmapData;
-
-					(FileSystem.exists(path) ? bigBMP = BitmapData.fromFile(path) : bigBMP = OpenFlAssets.getBitmapData(path));
-
-					if (bigBMP.width <= 1) //prevents having 0 width for cases like empty gf and empty strums
-						newBitmap = bigBMP;
-					else
-					{
-						newBitmap = new BitmapData(Std.int(bigBMP.width * 0.5), Std.int(bigBMP.height * 0.5), true, 0x000000);
-						newBitmap.draw(bigBMP, matrix, null, null, null, antialiasing);
 	
-						bigBMP.dispose();
-						bigBMP.disposeImage();
-						bigBMP = null;
-					}
-				}
-				else{
+		if (preloadedBitmap != null || FileSystem.exists(path) || Assets.exists(path)) 
+		{    
+			if (!currentTrackedAssets.exists(key) || forced) 
+			{
+				var newBitmap:BitmapData = preloadedBitmap;
+	
+				if (newBitmap == null) {
 					newBitmap = (FileSystem.exists(path) ? BitmapData.fromFile(path) : OpenFlAssets.getBitmapData(path));
 				}
-					
-				var newGraphic:FlxGraphic;
-
-				if (ClientPrefs.data.useGL) {
-					var texture:Texture = FlxG.stage.context3D.createTexture(newBitmap.width, newBitmap.height, BGRA, true);
-					texture.uploadFromBitmapData(newBitmap);
-					currentTrackedTextures.set(key, texture);
-
+	
+	
+				if (ClientPrefs.data.useGL && newBitmap.image != null) {
+					newBitmap.lock();
+					if (newBitmap.__texture == null) {
+						newBitmap.image.premultiplied = true;
+						newBitmap.getTexture(FlxG.stage.context3D);
+					}
+					newBitmap.getSurface();
 					newBitmap.disposeImage();
-					newBitmap.dispose();
-					newBitmap = null;
-
-					newGraphic = FlxGraphic.fromBitmapData(BitmapData.fromTexture(texture), false, key);
-				} 
-				else{
-					newGraphic = FlxGraphic.fromBitmapData(newBitmap, false, key);
+					newBitmap.image.data = null;
+					newBitmap.image = null;
+					newBitmap.readable = true;
 				}
-				
+	
+				var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(newBitmap, false, key);
 				newGraphic.persist = true;
 				currentTrackedAssets.set(key, newGraphic);
+
+				if (ClientPrefs.data.multicoreLoading){
+					currentTrackedBitmaps.set(key, newBitmap);
+				}
 			}
 			localTrackedAssets.push(key);
 			return currentTrackedAssets.get(key);
 		}
-
+	
 		trace('cacheImage: You failed dipshit! Key '+key+" not found!");
-		return null;		
+		return null;        
 	}
+
+	static public function createGraphicsFromBitmaps() {
+		for (key in currentTrackedBitmaps.keys()) {
+			var bitmap = currentTrackedBitmaps.get(key);
+			if (bitmap != null) {
+				var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, key); 
+				newGraphic.persist = true;
+				currentTrackedAssets.set(key, newGraphic);
+
+				currentTrackedBitmaps.remove(key);
+			}
+		}
+	}
+	
 
 	static public function getTextFromFile(key:String, ?ignoreMods:Bool = false):String
 	{
