@@ -1109,6 +1109,39 @@ class ModchartState
 					}
 				}
 				leSprite.antialiasing = antialiasing;
+				leSprite.active = true;
+
+				if (!preloading)
+					Stage.instance.swagBacks.set(tag, leSprite);
+			});
+
+			Lua_helper.add_callback(lua, "makeLuaSprite2", function(tag:String, image:String, x:Float, y:Float, ?antialiasing:Bool = true) {
+				if (ModpackMaker.inModpackMaker && image != null && image.length > 0){
+					ModpackMaker.luaImageList.push(image);
+					return;
+				}
+
+				tag = tag.replace('.', '');
+				var leSprite:ModchartSprite = new ModchartSprite(x, y);
+				if(image != null && image.length > 0) {
+
+					var rawPic:Dynamic;
+
+					if (!Paths.currentTrackedAssets.exists(image))
+						Paths.cacheImage(image);
+
+					rawPic = Paths.currentTrackedAssets.get(image);
+
+					leSprite.loadGraphic(rawPic);		
+					
+					if (FlxG.save.data.poltatoPC)
+					{
+						leSprite.scale.set(2, 2);
+						leSprite.updateHitbox();
+					}
+				}
+				leSprite.antialiasing = antialiasing;
+				leSprite.active = false;
 
 				if (!preloading)
 					Stage.instance.swagBacks.set(tag, leSprite);
@@ -1125,6 +1158,24 @@ class ModchartState
 				
 				loadFrames(leSprite, image, spriteType);
 				leSprite.antialiasing = true;
+				leSprite.active = true;
+
+				if (!preloading)
+					Stage.instance.swagBacks.set(tag, leSprite);
+			});
+
+			Lua_helper.add_callback(lua, "makeAnimatedLuaSprite2", function(tag:String, image:String, x:Float, y:Float,spriteType:String="sparrow") {
+				if (ModpackMaker.inModpackMaker && image != null && image.length > 0){
+					ModpackMaker.luaImageList.push(image);
+					return;
+				}
+
+				tag = tag.replace('.', '');
+				var leSprite:ModchartSprite = new ModchartSprite(x, y);
+				
+				loadFrames(leSprite, image, spriteType);
+				leSprite.antialiasing = true;
+				leSprite.active = false;
 
 				if (!preloading)
 					Stage.instance.swagBacks.set(tag, leSprite);
