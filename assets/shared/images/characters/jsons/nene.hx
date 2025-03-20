@@ -60,10 +60,12 @@ function onStepHit(){
     }
 }
 
-function onSectionHit(){
-    if(!mustHitSection) lookLeft();
-
-    if(mustHitSection) lookRight();
+function onMoveCamera(focus:String):Void {
+    if (focus == "dad") {
+        lookLeft();
+    } else if (focus == "boyfriend") {
+        lookRight();
+    }
 }
 
 var lookingAtRight:Bool = true;
