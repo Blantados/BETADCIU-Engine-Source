@@ -223,12 +223,12 @@
 		56,
 		-11
 	],
-	"healthicon": "face",
+	"healthicon": "nene",
 	"flip_x": false,
 	"healthbar_colors": [
-		161,
-		161,
-		161
+		255,
+		151,
+		190
 	],
 	"camera_position": [
 		0,

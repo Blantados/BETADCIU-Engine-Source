@@ -120,6 +120,7 @@ import luafiles.HScript;
 import luafiles.DebugLuaText;
 #end
 
+
 #if SScript
 import tea.SScript;
 #end
@@ -456,6 +457,8 @@ class PlayState extends MusicBeatState
 	// For multicore loading
 	public var charactersToLoad:Array<String> = [];
 	public var stagesToLoad:Array<String> = [];
+
+	public var isScoreBopPsych = ClientPrefs.data.scoreBopPsych;
 
 	override public function create()
 	{
@@ -2408,11 +2411,19 @@ class PlayState extends MusicBeatState
 
 			scoreTxt.scale.x = 1.075;
 			scoreTxt.scale.y = 1.075;
+
+			if(isScoreBopPsych){
+				scoreTxtTween = FlxTween.tween(scoreTxt.scale, {x: 1, y: 1}, 0.2, {
+					onComplete: function(twn:FlxTween) {
+						scoreTxtTween = null;
+					}});
+			}else{
 			scoreTxtTween = FlxTween.tween(scoreTxt.scale, {x: 1, y: 1}, 0.2, {ease: FlxEase.smootherStepOut,
 				onComplete: function(twn:FlxTween) {
 					scoreTxtTween = null;
 				}
 			});
+		}
 		}else{
 			if(!ClientPrefs.data.scoreZoom)
 				return;

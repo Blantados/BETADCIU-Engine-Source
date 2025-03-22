@@ -69,6 +69,12 @@ class VisualsUISubState extends BaseOptionsMenu
 			"If unchecked, disables the Score text zooming\neverytime you hit a note.",
 			'scoreZoom',
 			'bool');
+		addOption(option);
+
+		var option:Option = new Option('Score Text Zoom Psych',
+			"If checked, will do ScoreBop from Psych Engine",
+			'scoreBopPsych',
+			'bool');
 		addOption(option);/*
 
 		var option:Option = new Option('Health Bar Transparency',

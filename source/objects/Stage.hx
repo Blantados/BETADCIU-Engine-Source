@@ -646,16 +646,19 @@ class Stage extends MusicBeatState
 				scrollingSky.setPosition(-650, -375);
 				scrollingSky.scrollFactor.set(0.1, 0.1);
 				scrollingSky.scale.set(0.65, 0.65);
+				scrollingSky.antialiasing = true;
 				swagBacks['scrollingSky'] = scrollingSky;
 				toAdd.push(scrollingSky);
 
 				var phillySkyline = new FlxSprite(-545, -273).loadGraphic(Paths.image(pre+'/phillySkyline', suf));
 				phillySkyline.scrollFactor.set(0.2, 0.2);
+				phillySkyline.antialiasing = true;
 				swagBacks['phillySkyline'] = phillySkyline;
 				toAdd.push(phillySkyline);
 
 				var phillyForegroundCity = new FlxSprite(625, 94).loadGraphic(Paths.image(pre+'/phillyForegroundCity', suf));
 				phillyForegroundCity.scrollFactor.set(0.3, 0.3);
+				phillyForegroundCity.antialiasing = true;
 				swagBacks['phillyForegroundCity'] = phillyForegroundCity;
 				toAdd.push(phillyForegroundCity);
 
@@ -668,17 +671,20 @@ class Stage extends MusicBeatState
 					mist5.alpha = 1;
 					mist5.velocity.x = 20;
 					mist5.scale.set(1.1, 1.1);
+					mist5.antialiasing = true;
 					swagBacks['mist5'] = mist5;
 					toAdd.push(mist5);
 				}
 
 				var phillyConstruction = new FlxSprite(1800, 364).loadGraphic(Paths.image(pre+'/phillyConstruction', suf));
 				phillyConstruction.scrollFactor.set(0.7, 1);
+				phillyConstruction.antialiasing = true;
 				swagBacks['phillyConstruction'] = phillyConstruction;
 				toAdd.push(phillyConstruction);
 
 				var phillyHighwayLights = new FlxSprite(284, 305).loadGraphic(Paths.image(pre+'/phillyHighwayLights', suf));
 				phillyHighwayLights.scrollFactor.set(1, 1);
+				phillyHighwayLights.antialiasing = true;
 				swagBacks['phillyHighwayLights'] = phillyHighwayLights;
 				toAdd.push(phillyHighwayLights);
 				
@@ -686,16 +692,19 @@ class Stage extends MusicBeatState
 				phillyHighwayLightsLightmap.scrollFactor.set(1, 1);
 				phillyHighwayLightsLightmap.blend = "add";
 				phillyHighwayLightsLightmap.alpha = 0.6;
+				phillyHighwayLightsLightmap.antialiasing = true;
 				swagBacks['phillyHighwayLightsLightmap'] = phillyHighwayLightsLightmap;
 				toAdd.push(phillyHighwayLightsLightmap);
 
 				var phillyHighway = new FlxSprite(139, 209).loadGraphic(Paths.image(pre+'/phillyHighway', suf));
 				phillyHighway.scrollFactor.set(1, 1);
+				phillyHighway.antialiasing = true;
 				swagBacks['phillyHighway'] = phillyHighway;
 				toAdd.push(phillyHighway);
 
 				var phillySmog = new FlxSprite(-6, 245).loadGraphic(Paths.image(pre+'/phillySmog', suf));
 				phillySmog.scrollFactor.set(0.8, 1);
+				phillySmog.antialiasing = true;
 				swagBacks['phillySmog'] = phillySmog;
 				toAdd.push(phillySmog);
 
@@ -706,6 +715,7 @@ class Stage extends MusicBeatState
 				phillyCars.animation.addByPrefix('car2', 'car2', 24, false);
 				phillyCars.animation.addByPrefix('car3', 'car3', 24, false);
 				phillyCars.animation.addByPrefix('car4', 'car4', 24, false);
+				phillyCars.antialiasing = true;
 				swagBacks['phillyCars'] = phillyCars;
 				toAdd.push(phillyCars);
 
@@ -717,36 +727,11 @@ class Stage extends MusicBeatState
 				phillyCars2.animation.addByPrefix('car3', 'car3', 24, false);
 				phillyCars2.animation.addByPrefix('car4', 'car4', 24, false);
 				phillyCars2.flipX = true;
+				phillyCars2.antialiasing = true;
 				swagBacks['phillyCars2'] = phillyCars2;
 				toAdd.push(phillyCars2);
 
-				var phillyTraffic = new FlxSprite(1840, 608);
-				phillyTraffic.frames = Paths.getSparrowAtlas(pre+'/phillyTraffic', suf);
-				phillyTraffic.scrollFactor.set(0.9, 1);
-				phillyTraffic.animation.addByPrefix('redtogreen', 'redtogreen', 24, false);
-				phillyTraffic.animation.addByPrefix('greentored', 'greentored', 24, false);
-				swagBacks['phillyTraffic'] = phillyTraffic;
-				toAdd.push(phillyTraffic);
-
-				var phillyTrafficLightmap = new FlxSprite(1840, 608).loadGraphic(Paths.image(pre+'/phillyTraffic_lightmap', suf));
-				phillyTrafficLightmap.scrollFactor.set(0.9, 1);
-				phillyTrafficLightmap.blend = "add";
-				phillyTrafficLightmap.alpha = 0.6;
-				swagBacks['phillyTrafficLightmap'] = phillyTrafficLightmap;
-				toAdd.push(phillyTrafficLightmap);
-
 				if (curStage == 'phillyStreetsErect'){
-					var mist3 = new FlxBackdrop(Paths.image(pre+'/mistMid', suf), X, 0, 0);
-					mist3.setPosition(-650, -100);
-					mist3.scrollFactor.set(0.95, 0.95);
-					mist3.blend = "add";
-					mist3.color = 0xFF5c5c5c;
-					mist3.alpha = 0.5;
-					mist3.velocity.x = -50;
-					mist3.scale.set(0.8, 0.8);
-					swagBacks['mist3'] = mist3;
-					toAdd.push(mist3);
-
 					var mist4 = new FlxBackdrop(Paths.image(pre+'/mistBack', suf), X, 0, 0);
 					mist4.setPosition(-650, -100);
 					mist4.scrollFactor.set(0.8, 0.8);
@@ -755,13 +740,46 @@ class Stage extends MusicBeatState
 					mist4.alpha = 1;
 					mist4.velocity.x = 40;
 					mist4.scale.set(0.7, 0.7);
+					mist4.antialiasing = true;
 					swagBacks['mist4'] = mist4;
 					toAdd.push(mist4);
+				}
+
+				var phillyTraffic = new FlxSprite(1840, 608);
+				phillyTraffic.frames = Paths.getSparrowAtlas(pre+'/phillyTraffic', suf);
+				phillyTraffic.scrollFactor.set(0.9, 1);
+				phillyTraffic.animation.addByPrefix('redtogreen', 'redtogreen', 24, false);
+				phillyTraffic.animation.addByPrefix('greentored', 'greentored', 24, false);
+				phillyTraffic.antialiasing = true;
+				swagBacks['phillyTraffic'] = phillyTraffic;
+				toAdd.push(phillyTraffic);
+
+				var phillyTrafficLightmap = new FlxSprite(1840, 608).loadGraphic(Paths.image(pre+'/phillyTraffic_lightmap', suf));
+				phillyTrafficLightmap.scrollFactor.set(0.9, 1);
+				phillyTrafficLightmap.blend = "add";
+				phillyTrafficLightmap.alpha = 0.6;
+				phillyTrafficLightmap.antialiasing = true;
+				swagBacks['phillyTrafficLightmap'] = phillyTrafficLightmap;
+				toAdd.push(phillyTrafficLightmap);
+
+				if (curStage == 'phillyStreetsErect'){
+					var mist3 = new FlxBackdrop(Paths.image(pre+'/mistMid', suf), X);
+					mist3.setPosition(-650, -100);
+					mist3.scrollFactor.set(0.95, 0.95);
+					mist3.blend = "add";
+					mist3.color = 0xFF5c5c5c;
+					mist3.alpha = 0.5;
+					mist3.velocity.x = -50;
+					mist3.scale.set(0.8, 0.8);
+					mist3.antialiasing = true;
+					swagBacks['mist3'] = mist3;
+					toAdd.push(mist3);
 
 					var gray1 = new FlxSprite(88, 317).loadGraphic(Paths.image(pre+'/greyGradient', suf));
 					gray1.scrollFactor.set(1, 1);
 					gray1.alpha = 0.3;
 					gray1.blend = "add";
+					gray1.antialiasing = true;
 					swagBacks['gray1'] = gray1;
 					toAdd.push(gray1);
 		
@@ -769,50 +787,58 @@ class Stage extends MusicBeatState
 					gray2.scrollFactor.set(1, 1);
 					gray2.alpha = 0.8;
 					gray2.blend = "multiply";
+					gray2.antialiasing = true;
 					swagBacks['gray2'] = gray2;
 					toAdd.push(gray2);
 				}
 
 				var phillyForeground = new FlxSprite(88, 317).loadGraphic(Paths.image(pre+'/phillyForeground', suf));
 				phillyForeground.scrollFactor.set(1, 1);
+				phillyForeground.antialiasing = true;
 				swagBacks['phillyForeground'] = phillyForeground;
 				toAdd.push(phillyForeground);
 
-				var spraycanPile = new FlxSprite(920, 1045).loadGraphic(Paths.image('SpraycanPile', suf));
-				spraycanPile.scrollFactor.set(1, 1);
-				swagBacks['spraycanPile'] = spraycanPile;
-				toAdd.push(spraycanPile);
+				if(curStage == 'phillyStreets'){
+					var spraycanPile = new FlxSprite(920, 1045).loadGraphic(Paths.image('SpraycanPile', suf));
+					spraycanPile.scrollFactor.set(1, 1);
+					spraycanPile.antialiasing = true;
+					swagBacks['spraycanPile'] = spraycanPile;
+					layInFront[1].push(spraycanPile);
+				}
 
 				if (curStage == 'phillyStreetsErect'){
-					var mist0 = new FlxBackdrop(Paths.image(pre+'/mistMid', suf), X, 0, 0);
+					var mist0 = new FlxBackdrop(Paths.image(pre+'/mistMid', suf), X);
 					mist0.setPosition(-650, -100);
 					mist0.scrollFactor.set(1.2, 1.2);
 					mist0.blend = "add";
 					mist0.color = 0xFF5c5c5c;
 					mist0.alpha = 0.6;
 					mist0.velocity.x = 172;
-					layInFront[2].push(mist0);
+					mist0.antialiasing = true;
 					swagBacks['mist0'] = mist0;
+					layInFront[2].push(mist0);
 
-					var mist1 = new FlxBackdrop(Paths.image(pre+'/mistMid', suf), X, 0, 0);
+					var mist1 = new FlxBackdrop(Paths.image(pre+'/mistMid', suf), X);
 					mist1.setPosition(-650, -100);
 					mist1.scrollFactor.set(1.1, 1.1);
 					mist1.blend = "add";
 					mist1.color = 0xFF5c5c5c;
 					mist1.alpha = 0.6;
 					mist1.velocity.x = 150;
-					layInFront[2].push(mist1);
+					mist1.antialiasing = true;
 					swagBacks['mist1'] = mist1;
+					layInFront[2].push(mist1);
 				
-					var mist2 = new FlxBackdrop(Paths.image(pre+'/mistBack', suf), X, 0, 0);
+					var mist2 = new FlxBackdrop(Paths.image(pre+'/mistBack', suf), X);
 					mist2.setPosition(-650, -100);
 					mist2.scrollFactor.set(1.2, 1.2);
 					mist2.blend = "add";
 					mist2.color = 0xFF5c5c5c;
 					mist2.alpha = 0.8;
 					mist2.velocity.x = -80;
-					layInFront[2].push(mist2);
+					mist2.antialiasing = true;
 					swagBacks['mist2'] = mist2;
+					layInFront[2].push(mist2);
 				}
 
 				//if (ClientPrefs.data.shaders) setupRainShader();
@@ -945,6 +971,16 @@ class Stage extends MusicBeatState
 				moveTank();
 			case 'phillyStreets' | 'phillyStreetsErect': 
 				swagBacks['scrollingSky'].x -= elapsed * 22;
+
+				if (curStage == 'phillyStreetsErect'){
+					_timer += elapsed;
+					swagBacks['mist0'].y = 660 + (Math.sin(_timer*0.35)*70);
+					swagBacks['mist1'].y = 500 + (Math.sin(_timer*0.3)*80);
+					swagBacks['mist2'].y = 540 + (Math.sin(_timer*0.4)*60);
+					swagBacks['mist3'].y = 230 + (Math.sin(_timer*0.3)*70);
+					swagBacks['mist4'].y = 170 + (Math.sin(_timer*0.35)*50);
+					swagBacks['mist5'].y = -80 + (Math.sin(_timer*0.08)*100);
+				}
 
 				/*/
 				var remappedIntensityValue:Float = FlxMath.remapToRange(Conductor.songPosition, 0, (FlxG.sound.music != null ? FlxG.sound.music.length : 0),
