@@ -413,7 +413,7 @@ class ReflectionFunctions
 			case "ClientPrefs": classVar = "backend.ClientPrefs";
 			case "Conductor": classVar = "backend.Conductor";
 			case "LoadingState": classVar = "states.LoadingState";
-			case "ModchartState": classVar = "luafiles.PlayState";
+			case "ModchartState": classVar = "luafiles.ModchartState";
 			case "PlayState": classVar = "states.PlayState";
 		}
 

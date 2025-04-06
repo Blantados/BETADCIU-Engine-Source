@@ -127,7 +127,7 @@ class ChartingState extends MusicBeatState
 		['Change Character', "Value 1: Character to change (Dad, BF, GF)\nValue 2: New character's name"],
 		['Change Stage', "Changes the Stage\nValue 1: Stage's Name\nValue 2:Free value for use with onEvent"],
 		['Change Scroll Speed', "Value 1: Scroll Speed Multiplier (1 is default)\nValue 2: Time it takes to change fully in seconds."],
-		//['Change Rating Skin', "Value 1: Directory(Must end with a '/')\nValue 2: Skin Suffix(Example: -pixel)"],//TODO: Finish this
+		['Change Rating Skin', "Value 1: Directory(Must end with a '/')\nValue 2: Skin Suffix(Example: -pixel)"],
 		['Set Property', "Value 1: Variable name\nValue 2: New value"]
 	];
 	var curEventSelected:Int = 0;
@@ -616,58 +616,58 @@ class ChartingState extends MusicBeatState
 
 	//KADE ENGINE!!!
 	function shiftNotes(measure:Int = 0, step:Int = 0, ms:Int = 0):Void
-	{
-		var newSong = [];
-	
-		// Calculate the time to shift
-		var millisecadd = (((measure * 4) + step / 4) * (60000 / _song.bpm)) + ms;
-		var totaladdsection = Std.int((millisecadd / (60000 / _song.bpm) / 4));
-		trace(millisecadd, totaladdsection);
-	
-		// Copy sections before curSec without modification
-		for (daSection in 0...curSec)
-		{
-			newSong.push(_song.notes[daSection]); // Directly copy unmodified sections
-		}
-	
-		for (daSection in curSec..._song.notes.length)
-		{
-			var aimtosetsection = daSection + totaladdsection;
-			if (aimtosetsection < 0)
-				aimtosetsection = 0;
-	
-			while (newSong.length <= aimtosetsection)
-			{
-				newSong.push(newSection());
-			}
-	
-			newSong[aimtosetsection].mustHitSection = _song.notes[daSection].mustHitSection;
-			newSong[aimtosetsection].altAnim = _song.notes[daSection].altAnim;
-			newSong[aimtosetsection].bfAltAnim = _song.notes[daSection].bfAltAnim;
-	
-			for (daNote in _song.notes[daSection].sectionNotes)
-			{
-				var newtiming = daNote[0] + millisecadd;
-				if (newtiming < 0)
-					newtiming = 0;
-	
-				var futureSection = Math.floor(newtiming / 4 / (60000 / _song.bpm));
-	
-				while (newSong.length <= futureSection)
-				{
-					newSong.push(newSection());
-				}
-	
-				newSong[futureSection].sectionNotes.push([newtiming, daNote[1], daNote[2]]);
-			}
-		}
-	
-		_song.notes = newSong;
-		updateGrid();
-		updateSectionUI();
-		updateNoteUI();
-	}
-	
+    {
+        var newSong = [];
+    
+        // Calculate the time to shift
+        var millisecadd = (((measure * 4) + step / 4) * (60000 / _song.bpm)) + ms;
+        var totaladdsection = Std.int((millisecadd / (60000 / _song.bpm) / 4));
+        trace(millisecadd, totaladdsection);
+    
+        // Copy sections before curSec without modification
+        for (daSection in 0...curSec)
+        {
+            newSong.push(_song.notes[daSection]); // Directly copy unmodified sections
+        }
+    
+        for (daSection in curSec..._song.notes.length)
+        {
+            var aimtosetsection = daSection + totaladdsection;
+            if (aimtosetsection < 0)
+                aimtosetsection = 0;
+    
+            while (newSong.length <= aimtosetsection)
+            {
+                newSong.push(newSection());
+            }
+    
+            newSong[aimtosetsection].mustHitSection = _song.notes[daSection].mustHitSection;
+            newSong[aimtosetsection].altAnim = _song.notes[daSection].altAnim;
+            newSong[aimtosetsection].bfAltAnim = _song.notes[daSection].bfAltAnim;
+    
+            for (daNote in _song.notes[daSection].sectionNotes)
+            {
+                var newtiming = daNote[0] + millisecadd;
+                if (newtiming < 0)
+                    newtiming = 0;
+    
+                var futureSection = Math.floor(newtiming / 4 / (60000 / _song.bpm));
+    
+                while (newSong.length <= futureSection)
+                {
+                    newSong.push(newSection());
+                }
+    
+                newSong[futureSection].sectionNotes.push([newtiming, daNote[1], daNote[2]]);
+            }
+        }
+    
+        _song.notes = newSong;
+        updateGrid();
+        updateSectionUI();
+        updateNoteUI();
+    }
+		
 	var characters:Array<String>;
 	var stages:Array<String>;
 	var noteStyles:Array<String>;
@@ -3250,7 +3250,7 @@ class ChartingState extends MusicBeatState
 			_file.addEventListener(Event.COMPLETE, onSaveComplete);
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-			_file.save(data.trim(), _song.song.toLowerCase() + ".json");
+			_file.save(data.trim(), Paths.formatToSongPath(_song.song) + ".json");
 		}
 	}
 

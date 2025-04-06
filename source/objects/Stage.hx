@@ -929,6 +929,7 @@ class Stage extends MusicBeatState
 				if (luaArray.length >= 1){
 					isLuaStage = true;
 					callOnLuas('onCreate', []);	
+					if (preloading) callOnLuas('onCreatePost', []);	// to the scripts that builds it assets on the onCreatePost
 				}
 			}
 		}

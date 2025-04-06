@@ -17,6 +17,8 @@ class PsychVideoSprite extends VideoSprite
 	public var onFormatCallback:Void->Void = null;
 	public var onEndCallback:Void->Void = null;
 
+    public var globalPaused:Bool = false;
+    public var manuallyPaused:Bool = false;
     public var destroyOnUse:Bool = false;
     public var paused:Bool = false;
     public var alreadyPaused:Bool = false;
@@ -29,6 +31,14 @@ class PsychVideoSprite extends VideoSprite
 
         this.destroyOnUse = destroyOnUse;
         if (destroyOnUse) bitmap.onEndReached.add(() -> destroy());
+    }
+
+    public override function play():Bool {
+        if (bitmap == null) return false;
+
+        if (this.manuallyPaused) this.manuallyPaused = false;
+        
+        return bitmap.play();
     }
 
     public override function load(location:String, ?options:Array<String>):Bool
@@ -53,6 +63,7 @@ class PsychVideoSprite extends VideoSprite
 
     public override function pause() {
 
+        if (!this.globalPaused) this.manuallyPaused = true;
         super.pause();
         if (FlxG.autoPause) 
         {
@@ -63,6 +74,7 @@ class PsychVideoSprite extends VideoSprite
 
     public override function resume() {
 
+        if (!this.globalPaused) this.manuallyPaused = true;
         super.resume();
         if (FlxG.autoPause) 
         {
@@ -106,15 +118,21 @@ class PsychVideoSprite extends VideoSprite
     }
 
     public static function globalPause() {
-        for (i in heldVideos){
-            if (i.paused) i.alreadyPaused = true;
+        for (i in heldVideos) {
+            if (!i.manuallyPaused) {
+                i.globalPaused = true;
+            }
+            
             i.pause();
         }
     }
 
     public static function globalResume() {
-        for (i in heldVideos){
-            if (!i.alreadyPaused) i.resume();
+        for (i in heldVideos) {
+            if (i.globalPaused && !i.manuallyPaused) {
+                i.globalPaused = false;
+                i.resume();
+            }
         }
     }
 

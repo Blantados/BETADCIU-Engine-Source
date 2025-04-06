@@ -126,6 +126,17 @@ class Paths
 		return getPath(file, type, library);
 	}
 
+	inline static public function getContent(asset:String):Null<String>{
+		#if sys
+		if (FileSystem.exists(asset))
+			return File.getContent(asset);
+		#end
+
+		if (Assets.exists(asset))
+			return Assets.getText(asset);
+		return null;
+	}
+
 	inline static public function lua(key:String,?library:String)
 	{
 		if(FileSystem.exists(Paths.modFolders('data/' + key + '.lua')))

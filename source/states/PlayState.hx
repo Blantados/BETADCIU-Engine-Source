@@ -456,7 +456,10 @@ class PlayState extends MusicBeatState
 
 	// For multicore loading
 	public var charactersToLoad:Array<String> = [];
-	public var stagesToLoad:Array<String> = [];
+	public var stagesToLoad:Array<String> = []; // used for luas now.
+	public var notesToLoad:Array<String> = [];
+	public var luaSpritesToLoad:Array<String> = [];
+	public var luaSoundsToLoad:Array<String> = [];
 
 	public var isScoreBopPsych = ClientPrefs.data.scoreBopPsych;
 
@@ -658,10 +661,6 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		charactersToLoad.push(SONG.player1);
-		charactersToLoad.push(SONG.player2);
-		charactersToLoad.push(SONG.gfVersion);
-		stagesToLoad.push(SONG.stage);
 
 		if (Stage.hideGirlfriend)
 			gfVersion = 'emptygf';
@@ -1734,8 +1733,15 @@ class PlayState extends MusicBeatState
 				gfSpeed = value;
 
 			case 'Change Stage':
+				ratingSkinEventPre = null;//reseting the custom rating skin stuff.
+				ratingSkinEventSuf = null;//reseting the custom rating skin stuff.
+
 				ModchartState.changeStage(value1);
 				setCameraOffsets(); // never noticed these weren't set again because i rarely use stage camera offsets
+
+			case 'Change Rating Skin':
+				if(value1 != null) ratingSkinEventPre = value1;
+				if(value2 != null) ratingSkinEventSuf = value2;
 
 			case 'Add Camera Zoom':
 				if(ClientPrefs.data.camZooms && FlxG.camera.zoom < 1.35) {
@@ -1895,7 +1901,7 @@ class PlayState extends MusicBeatState
 		return pressed;
 	}
 
-	public function startCharacterLua(name:String)
+	public function startCharacterLua(name:String, ?preload:Bool=false)
 	{
 		#if LUA_ALLOWED
 		var doPush:Bool = false;
@@ -1919,7 +1925,7 @@ class PlayState extends MusicBeatState
 				if(lua.scriptName == luaFile) return;
 			}
 			trace (name +' has lua!');
-			luaArray.push(new ModchartState(luaFile));
+			luaArray.push(new ModchartState(luaFile, preload));
 		}
 		#end
 	}
@@ -2970,6 +2976,7 @@ class PlayState extends MusicBeatState
 
 				if (ClientPrefs.data.multicoreLoading) {
 					charactersToLoad.push(newCharacter);
+					startCharacterLua(newCharacter, true);
 				} else { // Old System
 					var preloadChar = new Character(0, 0, newCharacter);
 					startCharacterLua(preloadChar.curCharacter);
@@ -2978,12 +2985,8 @@ class PlayState extends MusicBeatState
 			case 'Change Stage':
 				//re-enabled it!
 				if (event.value1 != curStage){
-					if (ClientPrefs.data.multicoreLoading) {
-						stagesToLoad.push(event.value1);
-					} else { // Old System
-						PreloadStage = new Stage(event.value1, true);
-						trace ('Stage Loaded: ' + event.value1);
-					}
+					PreloadStage = new Stage(event.value1, true);
+					trace ('Stage Loaded: ' + event.value1);
 				}
 			/*case 'Dadbattle Spotlight':
 				dadbattleBlack = new BGSprite(null, -800, -400, 0, 0);
@@ -3885,6 +3888,9 @@ class PlayState extends MusicBeatState
 	public var comboGroup:FlxSpriteGroup;
 	public var coolText:FlxText = new FlxText(0, 0, 0, "lol", 32);
 
+	private var ratingSkinEventPre:String = null;
+	private var ratingSkinEventSuf:String = null;
+
 	private function popUpScore(daNote:Note = null):Void
 	{
 		var noteDiff:Float = Math.abs(Conductor.songPosition - daNote.strumTime);
@@ -3971,6 +3977,9 @@ class PlayState extends MusicBeatState
 			pixelShitPart2 = '-pixel';	
 		}
 
+		if(ratingSkinEventPre != null) pixelShitPart1 = ratingSkinEventPre;
+		if(ratingSkinEventSuf != null) pixelShitPart2 = ratingSkinEventSuf;
+	
 		if (!showRating || ratingsAlpha == 0){ //just don't run the rest if the rating is invisible
 			return;
 		}
@@ -5323,6 +5332,7 @@ class PlayState extends MusicBeatState
 			{
 				var data:Array<String> = stuff[i].split(' ');
 
+				notesToLoad.push(data[1]);
 				if (sectionNumber == Std.parseInt(data[0])){
 					(data[2] == 'dad' ? opponentSectionNoteStyle = data[1] : playerSectionNoteStyle = data[1]);
 				}
@@ -5566,22 +5576,88 @@ class PlayState extends MusicBeatState
 
 	function multicoreLoading(){
 		trace('multicore preload starting');
-	
+
+		var suf:String = '';
+		var preloadChar:Character;
+
+		if (FileSystem.exists(Paths.txt(songLowercase  + "/preload" + suf)))
+		{
+			var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(songLowercase  + "/preload" + suf));
+			for (i in 0...characters.length) {
+				var data:Array<String> = characters[i].split(' ');
+				charactersToLoad.push(characters[i]);
+			}
+		}
+
+		if (FileSystem.exists(Paths.txt(songLowercase  + "/preload-stage" + suf)))
+		{
+			var stages:Array<String> = CoolUtil.coolTextFile2(Paths.txt(songLowercase  + "/preload-stage" + suf));
+			for (i in 0...stages.length) {
+				var data:Array<String> = stages[i].split(' ');
+				stagesToLoad.push(stages[i]);
+			}
+		}
+
+		startLuasAsPreload();
+
+		for (stage in stagesToLoad) {
+			PreloadStage = new Stage(stage, true);
+			trace ('Stage Loaded: ' + stage);
+		}
+
 		var shitToLoad:Array<AssetPreload> = [
+			{path: "sick", library: "shared"},
+			{path: "good", library: "shared"},
+			{path: "bad", library: "shared"},
+			{path: "shit", library: "shared"},
+			{path: "notes/NOTE_assets", library: "shared"},
 			{path: "bruhtf", library: "shared"}
 		];
-	
+
+		for (number in 0...10)
+			shitToLoad.push({path: 'num$number'});
+
 		for(character in charactersToLoad){
+			// i don't know why. i don't need to know why. but this just works. and i don't want to touch this code anymore.
+			if (FileSystem.exists(Paths.modFolders('characters/'+character+'.lua')) || Assets.exists(Paths.modFolders('characters/'+character+'.lua'))) {
+				shitToLoad.push({
+					path: '$character',
+					type: 'CHARACTER'
+				});	
+			}
+
+			for(data in returnCharacterPreload(character))
+				shitToLoad.push(data);	
+		}
+
+		shitToLoad.push({
+			path: '${Paths.formatToSongPath(SONG.song)}/Inst',
+			type: 'SONG'
+		});
+
+		if (SONG.needsVoices) {
 			shitToLoad.push({
-				path: '$character',
-				type: 'CHARACTER'
+				path: '${Paths.formatToSongPath(SONG.song)}/Voices',
+				type: 'SONG'
 			});
 		}
-	
-		for(stage in stagesToLoad){
+
+		for(image in luaSpritesToLoad){
 			shitToLoad.push({
-				path: '$stage',
-				type: 'STAGE'
+				path: '$image'
+			});
+		}
+
+		for(note in notesToLoad){
+			shitToLoad.push({
+				path: 'notes/$note'
+			});
+		}
+
+		for(sound in luaSoundsToLoad){
+			shitToLoad.push({
+				path: '$sound',
+				type: 'SOUND'
 			});
 		}
 	
@@ -5627,11 +5703,15 @@ class PlayState extends MusicBeatState
 									Paths.returnSound("music", toLoad.path, toLoad.library);
 								case 'SONG':
 									Paths.returnSound("songs", toLoad.path, toLoad.library);
-								case 'CHARACTER':
-									var preloadChar = new Character(0, 0, toLoad.path);
-									startCharacterLua(preloadChar.curCharacter);
-									preloadChar.destroyAtlas();
-								case 'STAGE':
+								case 'CHARACTER': // apparently loading the actual character is better than just precaching the sprite image
+									preloadChar = new Character(0, 0, toLoad.path);
+									preloadChar.alpha = 0.0001;
+									add(preloadChar);
+									sprites.push(preloadChar);
+									startCharacterLua(preloadChar.curCharacter, true);
+									preloadChar.playCommonAnims();
+									preloadChar.destroyAtlas();	
+								case 'STAGE': // not used actually
 									PreloadStage = new Stage(toLoad.path, true);
 								default:			
 									var graphic = Paths.returnGraphic(toLoad.path, toLoad.library);
@@ -5694,11 +5774,64 @@ class PlayState extends MusicBeatState
 				trace("terminating thread " + idx);
 				idx++;
 			}
-	
-			for (sprite in sprites)
-				remove(sprite);
-	
-			trace('multicore preload finished');
+			new FlxTimer().start(0.05, function(_) { // adding this timer so the game can actually render the assets before removing it
+				for(sprite in sprites)
+					remove(sprite);
+			});
 		}
+		trace('multicore preload finished');
 	}	
+	
+	function startLuasAsPreload() { // making this a function so it doesn't bloat the create function even more
+		// Booting the luas as preload scripts so the preloader can load it assets too
+		#if LUA_ALLOWED
+		//DATA SCRIPTS
+		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), 'data/' + songName + '/'))
+		{
+			if(FileSystem.exists(folder)){
+				for (file in FileSystem.readDirectory(folder))
+				{
+					if(file.toLowerCase().endsWith('.lua')){
+						if (file == 'script.lua') //making sure it's the first one;
+							luaArray.insert(0, new ModchartState(folder + file, true));
+						else
+							luaArray.push(new ModchartState(folder + file, true));
+					}
+				}
+			}
+		}
+		// "GLOBAL" SCRIPTS
+		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), 'scripts/')){
+			if(FileSystem.exists(folder)){
+				for (file in FileSystem.readDirectory(folder))
+				{
+					if(file.toLowerCase().endsWith('.lua'))
+						luaArray.push(new ModchartState(folder + file, true));
+				}
+			}
+		}
+		
+		for (lua in luaArray) {
+			lua.call('onCreate', []);
+			// lua.call('onCreatePost', []); // to the scripts that builds it assets on the onCreatePost -- update: using this here crashes the game. i'll comment that until i find a fix for it
+			lua.call('onDestroy', []);
+			lua.stop();
+		}
+
+		luaArray = [];
+		ModchartState.customFunctions.clear();
+		#end
+	}
+
+	function returnCharacterPreload(characterName:String):Array<AssetPreload>{
+		var char = Character.getCharacterFile(characterName);
+		var name:String = 'icons/' + char.healthicon;
+		if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-' + char.healthicon; //Older versions of psych engine's support
+		if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-face'; //Prevents crash from missing icon
+
+		return [
+			{path: char.image}, // spritesheet
+			{path: name} // icon
+		];
+	}
 }

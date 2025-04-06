@@ -41,7 +41,7 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 		var maxThreads:Int = Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS")); //trying to implement this cool thing i found on Sonic Legacy's source code
 		if (maxThreads > 1) {
 			var option:Option = new Option('Multi-thread Loading', //Name
-			'If checked, the engine can use multiple threads to speed up loading times on some songs.\nRecommended to leave on, unless it causes crashing', //Description
+			"If checked, the engine can use multiple threads to speed up loading times on some songs.\nRecommended to leave on, unless it causes crashing\nWARNING: Doesn't work with GPU Rendering.", //Description
 			'multicoreLoading', //Save data variable name
 			'bool'); //Variable type
 			addOption(option);
@@ -49,10 +49,10 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 			option.defaultValue = false;
 
 			var option:Option = new Option('Loading Threads', //Name
-				'How many threads the game can use to load graphics when using Multi-thread Loading.\nThe maximum amount of threads depends on your processor', //Description
+				'How many threads the game can use to load graphics when using Multi-thread Loading.\nThe maximum amount of threads depends on your processor\nWARNING: Higher count of threads can cause crashes while loading.', //Description
 				'loadingThreads', //Save data variable name
 				'int' //Variable type
-			); //Default value
+			);
 
 			option.defaultValue = Math.floor(maxThreads/2);
 			option.minValue = 1;
@@ -61,7 +61,7 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 
 			addOption(option);
 		}
-
+		
 		var option:Option = new Option('Reduced Graphics', //Name
 			'If checked, lowers image quality for better performance,\nWarning: Will screw with a lot of character cameras.', //Description
 			'poltatoPC', //Save data variable name
@@ -78,7 +78,7 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 
 		//I LOVE KADE ENGINE LEGACY!!!
 		var option:Option = new Option('GPU Rendering', //Name
-			'If checked, loads sprites into VRAM on the GPU.', //Description
+			"If checked, loads sprites into VRAM on the GPU.\nWARNING: Doesn't work with Multi-thread Loading.", //Description
 			'useGL', //Save data variable name
 			'bool'); //Variable type
 		addOption(option);

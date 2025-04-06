@@ -121,6 +121,33 @@ class Character extends FunkinSprite
 	public var spriteType:String;
 	
 	public static var DEFAULT_CHARACTER:String = 'bf'; //In case a character is missing, it will use BF on its place
+
+	public static function getCharacterFile(character:String):CharacterFile{
+		var characterPath:String = 'images/characters/jsons/' + character;
+		var path:String = Paths.jsonNew(characterPath);
+
+		#if MODS_ALLOWED
+		if (FileSystem.exists(Paths.modFolders('characters/'+character+'.json')) || Assets.exists(Paths.modFolders('characters/'+character+'.json'))) {
+			path = Paths.modFolders('characters/'+character+'.json');
+		}
+		#end
+	
+		if (!FileSystem.exists(path) && !Assets.exists(path))
+		{
+			trace('oh no missingno. Character '+character+" not found.");
+			path = Paths.jsonNew('images/characters/jsons/' + DEFAULT_CHARACTER); //If a character couldn't be found, change to bf just to prevent a crash
+			character = DEFAULT_CHARACTER;
+		}
+
+		var rawJson:Dynamic;
+
+		(FileSystem.exists(path) ? rawJson = File.getContent(path) : rawJson = Assets.getText(path));
+		
+		var json:CharacterFile = cast Json.parse(rawJson);
+
+		return json;
+	}
+
 	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false)
 	{
 		super(x, y);
@@ -696,6 +723,14 @@ class Character extends FunkinSprite
 	{
 		curColor = Color;
 		return super.set_color(Color);
+	}
+
+	public function playCommonAnims()
+	{
+		var commonAnims:Array<String> = ['idle', 'singLEFT', 'singRIGHT', 'singUP', 'singDOWN','singLEFT-miss', 'singRIGHT-miss', 'singUP-miss', 'singDOWN-miss', 'dodge', 'attack'];
+
+		for (anim in commonAnims)
+			this.playAnim(anim, true);
 	}
 
 	public override function destroy()

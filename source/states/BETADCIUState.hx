@@ -515,6 +515,10 @@ class BETADCIUState extends MusicBeatState
 						if (Main.hiddenSongs.contains(songs[curSelected].songName.toLowerCase()) && !Main.isHidden || PlayState.SONG.song == 'Restore' && !Main.restoreUnlocked || PlayState.SONG.song == 'Deathmatch-Holo' && !Main.deathHolo)
 							LoadingState.loadAndSwitchState(new GoFindTheSecretState());
 						else
+							if (ClientPrefs.data.multicoreLoading) { // redirect to playstate since this doesn't have the multi thread loading **yet**
+								LoadingState.loadAndSwitchState(new PlayState());
+								return;
+							}
 							LoadingState.loadAndSwitchState(new CustomLoading());
 					}
 				});
@@ -530,6 +534,10 @@ class BETADCIUState extends MusicBeatState
 							if (Main.hiddenSongs.contains(songs[curSelected].songName.toLowerCase()) && !Main.isHidden || PlayState.SONG.song == 'Restore' && !Main.restoreUnlocked || PlayState.SONG.song == 'Deathmatch-Holo' && !Main.deathHolo)
 								LoadingState.loadAndSwitchState(new GoFindTheSecretState());
 							else
+								if (ClientPrefs.data.multicoreLoading) { // redirect to playstate since this doesn't have the multi thread loading **yet**
+									LoadingState.loadAndSwitchState(new PlayState());
+									return;
+								}
 								LoadingState.loadAndSwitchState(new CustomLoading());
 						}
 					}});
