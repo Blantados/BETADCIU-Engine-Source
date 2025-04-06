@@ -138,6 +138,11 @@ import objects.PsychVideoSprite;
 import sys.thread.Thread;
 import openfl.display.BitmapData;
 
+// Extra Stuff
+
+import funkin.vis.dsp.SpectralAnalyzer;
+import funkin.vis.audioclip.frontends.LimeAudioClip;
+
 typedef AssetPreload = {
 	var path:String;
 	@:optional var type:String;
@@ -462,6 +467,25 @@ class PlayState extends MusicBeatState
 	public var luaSoundsToLoad:Array<String> = [];
 
 	public var isScoreBopPsych = ClientPrefs.data.scoreBopPsych;
+
+	public var audioAnalyzer:SpectralAnalyzer;
+
+	public function initAnalyzer(barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30) {
+		@:privateAccess
+		if (FlxG.sound.music == null || FlxG.sound.music._channel == null || FlxG.sound.music._channel.__audioSource == null) return;
+
+		@:privateAccess
+		audioAnalyzer = new SpectralAnalyzer(FlxG.sound.music._channel.__audioSource, barCount, maxDelta, peakHold);
+
+		#if desktop
+		audioAnalyzer.fftN = 256;
+		#end
+	}
+
+	public function getAudioLevels() {
+		var levels = audioAnalyzer.getLevels();
+		return [for (i in levels) i.value];
+	}
 
 	override public function create()
 	{
