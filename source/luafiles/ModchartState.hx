@@ -2054,12 +2054,12 @@ class ModchartState
 			});
 
 			Lua_helper.add_callback(lua, "initAnalyzer", function(barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30) {
-				PlayState.instance.initAnalyzer(barCount, maxDelta, peakHold);
+				initAnalyzer(barCount, maxDelta, peakHold);
 				return true;
 			});
 
 			Lua_helper.add_callback(lua, "getAudioLevels", function(barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30) {
-				return PlayState.instance.getAudioLevels();
+				return getAudioLevels();
 			});
 
 			Lua_helper.add_callback(lua, "setOnLuas", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null) {
