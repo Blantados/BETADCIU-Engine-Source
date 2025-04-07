@@ -81,6 +81,11 @@ import luafiles.CustomSubstate;
 
 import substates.PauseSubState;
 
+// Extra Stuff
+
+import funkin.vis.dsp.SpectralAnalyzer;
+import funkin.vis.audioclip.frontends.LimeAudioClip;
+
 using StringTools;
 
 class ModchartState 
@@ -113,6 +118,25 @@ class ModchartState
 	
 	public var lastCalledFunction:String = '';
 	public static var lastCalledScript:ModchartState = null;
+
+	public var audioAnalyzer:SpectralAnalyzer;
+
+	public function initAnalyzer(barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30) {
+		@:privateAccess
+		if (FlxG.sound.music == null || FlxG.sound.music._channel == null || FlxG.sound.music._channel.__audioSource == null) return;
+
+		@:privateAccess
+		audioAnalyzer = new SpectralAnalyzer(FlxG.sound.music._channel.__audioSource, barCount, maxDelta, peakHold);
+
+		#if desktop
+		audioAnalyzer.fftN = 256;
+		#end
+	}
+
+	public function getAudioLevels() {
+		var levels = audioAnalyzer.getLevels();
+		return [for (i in levels) i.value];
+	}
 
 	public function call(func:String, args:Array<Dynamic>, ?type : String):Dynamic {
 		#if LUA_ALLOWED
