@@ -19,7 +19,7 @@ class MainMenuState extends MusicBeatState
 {
 	public static var finishedFunnyMove:Bool = false;
 	public static var psychEngineVersion:String = '1.0.4';
-	public static var betadciuVer:String = "1.1.1"; // This is also used for Discord RPC
+	public static var betadciuVer:String = "1.1.2"; // This is also used for Discord RPC
 	public static var curSelected:Int = 0;
 	public static var curColumn:MainMenuColumn = CENTER;
 	public static var mainMusic = true;

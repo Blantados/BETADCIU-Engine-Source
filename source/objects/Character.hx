@@ -170,6 +170,32 @@ class Character extends OffsettableSprite
 		dance();
 	}
 
+	public static function getCharacterFile(character:String):CharacterFile{
+		var characterPath:String = 'images/characters/jsons/' + character;
+		var path:String = Paths.json(characterPath);
+
+		#if MODS_ALLOWED
+		if (FileSystem.exists(Paths.modFolders('characters/'+character+'.json')) || Assets.exists(Paths.modFolders('characters/'+character+'.json'))) {
+			path = Paths.modFolders('characters/'+character+'.json');
+		}
+		#end
+	
+		if (!FileSystem.exists(path) && !Assets.exists(path))
+		{
+			trace('oh no missingno. Character '+character+" not found.");
+			path = Paths.json('images/characters/jsons/' + DEFAULT_CHARACTER); //If a character couldn't be found, change to bf just to prevent a crash
+			character = DEFAULT_CHARACTER;
+		}
+
+		var rawJson:Dynamic;
+
+		(FileSystem.exists(path) ? rawJson = File.getContent(path) : rawJson = Assets.getText(path));
+		
+		var json:CharacterFile = cast Json.parse(rawJson);
+
+		return json;
+	}
+
 	public function loadCharacterFile(json:Dynamic)
 	{
 		isAnimateAtlas = false;

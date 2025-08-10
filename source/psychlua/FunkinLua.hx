@@ -905,7 +905,19 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "getSongPosition", function() {
 			return Conductor.songPosition;
 		});
+		Lua_helper.add_callback(lua, "getCharacterImage", function(characterName:String, ?type:String="sprite") {
+			var char = Character.getCharacterFile(characterName);
+			var name:String = 'icons/' + char.healthicon;
+			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-' + char.healthicon; //Older versions of betadciu/psych engine's support
+			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-face'; //Prevents crash from missing icon
 
+			if (type.toLowerCase() == "sprite") return char.image;
+			else if (type.toLowerCase() == "icon") return name;
+			else {
+				luaTrace('getCharacterImage: invalid type!', false, false, FlxColor.RED);
+				return null;
+			}
+		});
 		Lua_helper.add_callback(lua, "getCharacterX", function(type:String) {
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
@@ -2233,6 +2245,18 @@ class FunkinLua {
 		});
 		//
 
+		Lua_helper.add_callback(lua, "Paths", function(type:String, tag:String):Dynamic {
+			switch(type.toLowerCase()) { // adding the others later... if i don't forget about it...
+				case 'image': return Paths.image(Std.string(tag));
+				case 'sound': return Paths.sound(Std.string(tag));
+				case 'music': return Paths.music(Std.string(tag));
+				case 'font': return Paths.font(Std.string(tag));
+				default: 
+					luaTrace('Paths: invalid type!', false, false, FlxColor.RED);
+					return null;
+			}
+		});
+
 		Lua_helper.add_callback(lua, "debugPrint", function(text:Dynamic = '', color:String = 'WHITE') PlayState.instance.addTextToDebug(text, CoolUtil.colorFromString(color)));
 
 		addLocalCallback("close", function() {
@@ -2369,8 +2393,8 @@ class FunkinLua {
 			case 'startCountdown': PlayState.instance.startCountdown();
 			case 'resyncVocals': PlayState.instance.resyncVocals();	
 			case 'doTimeTravel': PlayState.instance.doTimeTravel(val1, val2);		
-			//case 'uncacheImage': Paths.clearStoredMemory2(val1, 'image');	
-			//case 'uncacheSound': Paths.clearStoredMemory2(val1, 'sound');			
+			case 'uncacheImage': Paths.clearAssetFromMemory(val1, 'image');	
+			case 'uncacheSound': Paths.clearAssetFromMemory(val1, 'sound');			
 			case 'cacheImage': Paths.image(val1, ClientPrefs.data.cacheOnGPU);
 		}
 	}

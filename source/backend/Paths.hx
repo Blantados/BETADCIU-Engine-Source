@@ -113,6 +113,38 @@ class Paths
 		#if !html5 openfl.Assets.cache.clear("songs"); #end
 	}
 
+	// for softcode uncaching
+	@:access(flixel.system.frontEnds.BitmapFrontEnd._cache)
+	public static function clearAssetFromMemory(key:String, ?type:String = 'image') {
+		// clear anything not in the tracked assets list
+		trace ('uncaching ' + key);
+
+		if (type == 'sound') {
+			openfl.Assets.cache.clear(key);
+
+			if(currentTrackedSounds.exists(key)) {
+				currentTrackedSounds.remove(key);
+				trace('uncached sound: $key');
+			}
+		} else {
+			@:privateAccess
+			var obj = FlxG.bitmap._cache.get(key);
+			if (obj != null) {
+				openfl.Assets.cache.removeBitmapData(key);
+				@:privateAccess
+				FlxG.bitmap._cache.remove(key);
+				obj.destroy();
+
+				if(currentTrackedAssets.exists(key)) currentTrackedAssets.remove(key);
+				
+				trace ('uncached image: $key');
+			}
+		}
+		
+		System.gc();
+		trace ('check memory boi');
+	}
+
 	public static function freeGraphicsFromMemory()
 	{
 		var protectedGfx:Array<FlxGraphic> = [];

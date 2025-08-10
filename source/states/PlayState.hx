@@ -510,8 +510,8 @@ class PlayState extends MusicBeatState
 			timeTxt.y += 3;
 		}
 
-		preload();
 		generateSong();
+		preload();
 
 		noteGroup.add(grpNoteSplashes);
 
