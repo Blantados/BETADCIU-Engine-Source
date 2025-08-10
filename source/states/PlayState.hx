@@ -71,9 +71,6 @@ import sys.FileSystem;
 
 import flixel.addons.plugin.screengrab.FlxScreenGrab;
 
-import objects.FunkinSprite;
-import backend.EaseUtil;
-
 typedef PreloadResult = {
 	var thread:Thread;
 	var asset:String;
