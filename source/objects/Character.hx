@@ -171,8 +171,8 @@ class Character extends OffsettableSprite
 	}
 
 	public static function getCharacterFile(character:String):CharacterFile{
-		var characterPath:String = 'images/characters/jsons/' + character;
-		var path:String = Paths.json(characterPath);
+		var characterPath:String = 'characters/' + character;
+		var path:String = Paths.getPath(characterPath, TEXT);
 
 		#if MODS_ALLOWED
 		if (FileSystem.exists(Paths.modFolders('characters/'+character+'.json')) || Assets.exists(Paths.modFolders('characters/'+character+'.json'))) {
@@ -183,7 +183,7 @@ class Character extends OffsettableSprite
 		if (!FileSystem.exists(path) && !Assets.exists(path))
 		{
 			trace('oh no missingno. Character '+character+" not found.");
-			path = Paths.json('images/characters/jsons/' + DEFAULT_CHARACTER); //If a character couldn't be found, change to bf just to prevent a crash
+			path = Paths.getPath('characters/' + DEFAULT_CHARACTER, TEXT); //If a character couldn't be found, change to bf just to prevent a crash
 			character = DEFAULT_CHARACTER;
 		}
 

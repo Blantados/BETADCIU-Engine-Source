@@ -644,7 +644,6 @@ class PlayState extends MusicBeatState
 
 		resetRPC();
 
-		stagesFunc(function(stage:BaseStage) stage.createPost());
 		callOnScripts('onCreatePost');
 		
 		var splash:NoteSplash = new NoteSplash();
@@ -2664,6 +2663,8 @@ class PlayState extends MusicBeatState
 		deathCounter = 0;
 		seenCutscene = false;
 
+		cleanPreload();
+
 		#if ACHIEVEMENTS_ALLOWED
 		var weekNoMiss:String = WeekData.getWeekFileName() + '_nomiss';
 		checkForAchievement([weekNoMiss, 'ur_bad', 'ur_good', 'hype', 'two_keys', 'toastie' #if BASE_GAME_FILES, 'debugger' #end]);
@@ -4419,6 +4420,12 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	function cleanPreload(){ // clean every time you exit the song
+		grabStuffToPreload();
+		
+		// beta.
+	}
+
 	public function setStageDetails(stageData:StageFile){
 		defaultCamZoom = stageData.defaultZoom;
 
@@ -4551,6 +4558,7 @@ class PlayState extends MusicBeatState
 
 		addObjects(stageData);
 		stagesFunc(function(stage:BaseStage) stage.createPost());
+		callOnScripts('onCreatePost');
 
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 			// STAGE SCRIPTS

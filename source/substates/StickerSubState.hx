@@ -171,9 +171,9 @@ class StickerSubState extends MusicBeatSubstate
 
       #if sys
       #if MODS_ALLOWED
-      var modStickerDir = Paths.getPath('images/transitionSwag/'+ WeekData.getCurrentWeek().stickers[0], TEXT, null, true);
+      var modStickerDir = Paths.getPath('images/transitionSwag/'+ WeekData.getCurrentWeek().stickers[0] + '.json', TEXT, null, true);
       #else
-      var modStickerDir = Paths.getPath('images/transitionSwag/'+ WeekData.getCurrentWeek().stickers[0], TEXT, null);
+      var modStickerDir = Paths.getPath('images/transitionSwag/'+ WeekData.getCurrentWeek().stickers[0] + '.json', TEXT, null);
       #end
 
       try{
