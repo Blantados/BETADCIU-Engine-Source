@@ -137,6 +137,7 @@ class StickerSubState extends MusicBeatSubstate
     {
       new FlxTimer().start(sticker.timing, _ -> {
         sticker.visible = false;
+
         var daSound:String = FlxG.random.getObject(sounds);
         #if !LEGACY_PSYCH
         new FlxSound().loadEmbedded(Paths.sound(daSound)).play();
@@ -358,6 +359,7 @@ class StickerSubState extends MusicBeatSubstate
   override public function close():Void
   {
     if (switchingState) return;
+    Paths.clearUnusedMemory();
     super.close();
   }
 
@@ -372,7 +374,7 @@ class StickerSubState extends MusicBeatSubstate
 class StickerSprite extends FlxSprite
 {
   public var timing:Float = 0;
-  var stickerPath:String;
+  public var stickerPath:String;
   public function loadSticker() {
     loadGraphic(Paths.image(stickerPath));
     updateHitbox();

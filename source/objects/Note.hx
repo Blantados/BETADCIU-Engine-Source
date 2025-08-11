@@ -448,6 +448,7 @@ class Note extends OffsettableSprite
 		else skinPostfix = '';
 
 
+		var pathSplit:Array<String> = skin.split('/');
 		var curSkin = skin;
 
 		for (noteDirectory in ["noteSkins/", "notes/", "pixelUI/noteSkins/", "pixelUI/Notes/"]) {
@@ -457,7 +458,9 @@ class Note extends OffsettableSprite
 
 			if (Paths.fileExists('images/$weekendPath.png', IMAGE)) {
 				separateSheets = true;
-				jsonPath = '$noteDirectory$skin/$skin';
+				final jsonName = pathSplit[pathSplit.length - 1];
+				
+				jsonPath = '$noteDirectory$skin/$jsonName';
 				skin = weekendPath;
 			} else if (Paths.fileExists('images/$fullPath.png', IMAGE)) {
 				skin = fullPath;

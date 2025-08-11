@@ -65,8 +65,7 @@ class FreeplayState extends MusicBeatState
 
 	override function create()
 	{
-		//Paths.clearStoredMemory();
-		//Paths.clearUnusedMemory();
+		Paths.clearStoredMemory();
 
 		if (FlxG.sound.music.volume == 0 || !FlxG.sound.music.playing)
 		{
@@ -95,6 +94,10 @@ class FreeplayState extends MusicBeatState
 			openSubState(stickerSubState);
 			stickerSubState.degenStickers();
 		}
+		else{
+			Paths.clearUnusedMemory();
+		}
+
 		persistentUpdate = true;
 
 		#if DISCORD_ALLOWED

@@ -170,7 +170,7 @@ class TweenFunctions
 					var originalTag:String = tag;
 					tag = LuaUtils.formatVariable('tween_$tag');
 					var variables = MusicBeatState.getVariables();
-					variables.set(tag, FlxTween.num(penisExam, value, duration, {ease: LuaUtils.getTweenEaseByString("cubeout"),
+					variables.set(tag, FlxTween.num(penisExam, value, duration, {ease: LuaUtils.getTweenEaseByString(ease),
 						onComplete: function(twn:FlxTween)
 						{
 							variables.remove(tag);
