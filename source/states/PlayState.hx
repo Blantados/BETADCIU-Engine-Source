@@ -3330,7 +3330,7 @@ class PlayState extends MusicBeatState
 
 		if(char != null && (note == null || !note.noMissAnimation) && char.hasMissAnimations)
 		{
-			var canPlay = true; // char.specialAnim;
+			var canPlay = searchLuaVar('playBFSing', 'bool', false); // char.specialAnim;
 			var postfix:String = '';
 			if(note != null) postfix = note.animSuffix;
 

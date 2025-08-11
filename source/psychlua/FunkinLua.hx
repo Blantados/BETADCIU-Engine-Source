@@ -2846,8 +2846,8 @@ class FunkinLua {
 		PlayState.instance.gf = new Character(0, 0, id, flipped);
 		PlayState.instance.gf.flipMode = flipped;
 		var stageData:StageFile = PlayState.instance.stageData;
-		PlayState.instance.gf.x = stageData.girlfriend[0] + PlayState.instance.gf.positionArray[0];
-		PlayState.instance.gf.y = stageData.girlfriend[1] + PlayState.instance.gf.positionArray[1];
+		PlayState.instance.gf.x = PlayState.instance.GF_X + PlayState.instance.gf.positionArray[0];
+		PlayState.instance.gf.y = PlayState.instance.GF_Y + PlayState.instance.gf.positionArray[1];
 		// PlayState.instance.gf.scrollFactor.set(0.95, 0.95);
 		PlayState.instance.add(PlayState.instance.gf);
 

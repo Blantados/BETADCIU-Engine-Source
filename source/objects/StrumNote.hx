@@ -100,6 +100,7 @@ class StrumNote extends OffsettableSprite
 		if (texture == 'pixel') texture = "NOTE_assets-pixel";
 		if (texture == 'normal') texture = "NOTE_assets";
 
+		var pathSplit:Array<String> = texture.split('/');
 		var notePath:String = texture;
 
 		var curNotePath = notePath;
@@ -112,7 +113,9 @@ class StrumNote extends OffsettableSprite
 		
 			if (Paths.fileExists('images/$weekendPath.png', IMAGE)) {
 				separateSheets = true;
-				jsonPath = '$noteDirectory$notePath/$notePath';
+				final jsonName = pathSplit[pathSplit.length - 1];
+
+				jsonPath = '$noteDirectory$notePath/$jsonName';
 				notePath = weekendPath;
 			} else if (Paths.fileExists('images/$fullPath.png', IMAGE)) {
 				notePath = fullPath;
@@ -125,6 +128,8 @@ class StrumNote extends OffsettableSprite
 						addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
 					}
 				}
+
+				useRGBShader = json.rgbEnabled;
 			}
 		
 			if (curNotePath != notePath) {

@@ -1546,11 +1546,11 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					var data:Int = note.noteData;
 					if(note.strumTime >= Conductor.songPosition -100 && FlxG.sound.music.playing && note.noteData > -1) {
 						if(note.mustPress){
-							lilBf.animation.play("" + Std.string(data), false);
+							lilBf.animation.play("" + Std.string(data), true);
 							lilBf.color = 0xffffffff;
 						}
 						else if(!note.mustPress){
-							lilOpp.animation.play("" + Std.string(data), false);
+							lilOpp.animation.play("" + Std.string(data), true);
 							lilOpp.color = 0xffffffff;
 						}
 					}
@@ -3433,7 +3433,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		var shiftNoteButton:PsychUIButton = new PsychUIButton(objX, stepperShiftNoteDialMs.y + 40, "Shift", function()
 		{
-			shiftNotes(Std.int(stepperShiftNoteDial.value), Std.int(stepperShiftNoteDialStep.value), Std.int(stepperShiftNoteDialMs.value));
+			shiftNotes(Std.int(stepperShiftNoteDial.value), Std.int(stepperShiftNoteDialStep.value), Std.int(stepperShiftNoteDialMs.value), changeBpmStepper.value);
 		}, btnWid);
 		
 		tab_group.add(new FlxText(bpmStepper.x, bpmStepper.y - 15, 50, 'BPM:'));
@@ -5464,13 +5464,13 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	}
 
 	// KADE ENGINE!!!
-	function shiftNotes(measure:Int = 0, step:Int = 0, ms:Int = 0):Void {
+	function shiftNotes(measure:Int = 0, step:Int = 0, ms:Int = 0, bpm:Float):Void {
 		var newSong:Array<SwagSection> = [];
 		var newEvents:Array<Dynamic> = [];
 		
 		// Calculate the time to shift
-		var msAdd = (((measure * 4) + step / 4) * (60000 / PlayState.SONG.bpm)) + ms;
-		var totalAdd = Std.int((msAdd / (60000 / PlayState.SONG.bpm) / 4));
+		var msAdd = (((measure * 4) + step / 4) * (60000 / bpm)) + ms;
+		var totalAdd = Std.int((msAdd / (60000 / bpm) / 4));
 		
 		// Copy sections before curSec without modification
 		for (daSection in 0...curSec) {
@@ -5492,7 +5492,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			for (daNote in currentSection.sectionNotes) {
 				if (daNote != null) {
 					var newTiming = Math.max(0, daNote[0] + msAdd);
-					var futureSection = Math.floor(newTiming / 4 / (60000 / PlayState.SONG.bpm));
+					var futureSection = Math.floor(newTiming / 4 / (60000 / bpm));
 					
 					while (newSong.length <= futureSection) {
 						newSong.push(newSection());
