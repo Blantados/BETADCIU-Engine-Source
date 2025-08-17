@@ -9,7 +9,7 @@ class CoolUtil
 {
 	public static function checkForUpdates(url:String = null):String {
 		if (url == null || url.length == 0)
-			url = "https://raw.githubusercontent.com/Blantados/BETADCIU-Engine-Source/Psych-Based/gitVersion.txt";
+			url = "https://raw.githubusercontent.com/icaroleeb/BETADCIU-Engine-Source/Psych-Based/gitVersion.txt";
 		var version:String = states.MainMenuState.betadciuVer.trim();
 		if(ClientPrefs.data.checkForUpdates) {
 			trace('checking for updates...');

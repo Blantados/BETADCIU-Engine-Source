@@ -20,11 +20,13 @@ class HealthIcon extends FlxSprite
 		super.update(elapsed);
 
 		if (sprTracker != null)
-			if(!ClientPrefs.data.ogIconBop){
-				setPosition(sprTracker.x + sprTracker.width + 12, sprTracker.y - 30);
-			}else{
-				setPosition(sprTracker.x + sprTracker.width + 10, sprTracker.y - 30);
-			}
+			return;
+
+		if(!ClientPrefs.data.ogIconBop){
+			setPosition(sprTracker.x + sprTracker.width + 12, sprTracker.y - 30);
+		}else{
+			setPosition(sprTracker.x + sprTracker.width + 10, sprTracker.y - 30);
+		}
 	}
 
 	private var iconOffsets:Array<Float> = [0, 0];

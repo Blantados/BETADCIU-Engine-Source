@@ -472,12 +472,19 @@ class PlayState extends MusicBeatState
 		uiGroup = new FlxSpriteGroup();
 		comboGroup = new FlxSpriteGroup();
 		noteGroup = new FlxTypedGroup<FlxBasic>();
-		opponentHoldCovers = new HoldCover(enabledHolds, false);
-		playerHoldCovers = new HoldCover(enabledHolds, true);
+		
+		if(enabledHolds){
+			opponentHoldCovers = new HoldCover(enabledHolds, false);
+			playerHoldCovers = new HoldCover(enabledHolds, true);
+		}
+
 		add(comboGroup);
 		add(noteGroup);
-		add(opponentHoldCovers);
-		add(playerHoldCovers);
+
+		if(enabledHolds) {
+			add(opponentHoldCovers);
+			add(playerHoldCovers);
+		}
 
 		Conductor.songPosition = -Conductor.crochet * 5 + Conductor.offset;
 		var showTime:Bool = (ClientPrefs.data.timeBarType != 'Disabled');
@@ -581,8 +588,12 @@ class PlayState extends MusicBeatState
 		}
 		uiGroup.cameras = [camHUD]; 
 		noteGroup.cameras = [camHUD];
-		playerHoldCovers.cameras = [camHUD];
-		opponentHoldCovers.cameras = [camHUD];
+
+		if(enabledHolds){
+			playerHoldCovers.cameras = [camHUD];
+			opponentHoldCovers.cameras = [camHUD];
+		}
+
 		comboGroup.cameras = [camHUD];
 
 		startingSong = true;
@@ -2087,10 +2098,11 @@ class PlayState extends MusicBeatState
 		}
 		#end
 
-		if (strumLineNotes != null && !startingSong && strumLineNotes.length > 0){
+		if (enabledHolds && strumLineNotes != null && !startingSong && strumLineNotes.length > 0){
 			playerHoldCovers.updateHold(elapsed, enabledHolds);
 			opponentHoldCovers.updateHold(elapsed, enabledHolds);	
 		}
+
 		setOnScripts('botPlay', cpuControlled);
 		callOnScripts('onUpdatePost', [elapsed]);
 	}
@@ -3237,8 +3249,10 @@ class PlayState extends MusicBeatState
 				invalidateNote(note);
 		});
 
-		if (daNote != null) playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, daNote.noteData, daNote);
-		else playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, daNote.noteData);
+		if(enabledHolds){
+			if (daNote != null) playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, daNote.noteData, daNote);
+			else playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, daNote.noteData);
+		}
 
 		var dType:Int = 0;
 		if (daNote != null) dType = daNote.dType;
@@ -4514,15 +4528,13 @@ class PlayState extends MusicBeatState
 			hardCodedStage = null;
 		}
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-			// STAGE SCRIPTS
-			#if LUA_ALLOWED
-			stopLuasNamed('stages/' + curStage + '.lua', "stage");
-			
-			for (stage in addedStages) stopLuasNamed(stage, "stage");
+		// STAGE SCRIPTS
+		#if LUA_ALLOWED
+		stopLuasNamed('stages/' + curStage + '.lua', "stage");
+		for (stage in addedStages) stopLuasNamed(stage, "stage");
 		#end
-			#if HSCRIPT_ALLOWED 
-			stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); 
-			#end
+
+		#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 
 		var stageVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stageVariables");
@@ -4539,7 +4551,7 @@ class PlayState extends MusicBeatState
 		}
 	}	
 
-	public function addStage(?onlyLuas:Bool=false, ?stageDetails:Bool=true) {
+	public function addStage(?onlyLuas:Bool=false, ?stageDetails:Bool=true/*, ?createPost:Bool=true*/) {
 		if(stageDetails) setStageDetails(stageData); // for some reason they don't add the chars position on them.
 		switch (curStage.toLowerCase())
 		{
@@ -4558,17 +4570,12 @@ class PlayState extends MusicBeatState
 
 		addObjects(stageData);
 		stagesFunc(function(stage:BaseStage) stage.createPost());
-		callOnScripts('onCreatePost');
+		//if(createPost) callOnScripts('onCreatePost');
 
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-			// STAGE SCRIPTS
-			#if LUA_ALLOWED 
-				startLuasNamed('stages/' + curStage + '.lua', "stage"); 
-			#end
-
-			#if HSCRIPT_ALLOWED 
-				if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); 
-			#end
+		// STAGE SCRIPTS
+		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
+		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 	}
 }

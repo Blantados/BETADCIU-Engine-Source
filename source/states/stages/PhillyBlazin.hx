@@ -119,13 +119,12 @@ class PhillyBlazin extends BaseStage
 	
 	override function createPost()
 	{
-		FlxG.camera.focusOn(camFollow.getPosition());
+		//FlxG.camera.focusOn(camFollow.getPosition()); // I'm add that again when it's fixed.
 		FlxG.camera.fade(FlxColor.BLACK, 1.5, true, null, true);
 
-
-		boyfriend.color = 0xFFDEDEDE;
-		dad.color = 0xFFDEDEDE;
-		gf.color = 0xFF888888;
+		game.boyfriend.color = 0xFFDEDEDE;
+		game.dad.color = 0xFFDEDEDE;
+		game.gf.color = 0xFF888888;
 
 		var unspawnNotes:Array<Note> = cast game.unspawnNotes;
 		for (note in unspawnNotes)
@@ -136,8 +135,8 @@ class PhillyBlazin extends BaseStage
 			note.noAnimation = true;
 			note.noMissAnimation = true;
 		}
-		remove(dadGroup, true);
-		addBehindBF(dadGroup);
+		remove(game.dad, true);
+		addBehindBF(game.dad);
 	}
 
 	function setupRainShader()
