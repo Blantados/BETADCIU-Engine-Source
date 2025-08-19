@@ -24,6 +24,8 @@ class PhillyBlazin extends BaseStage
 	
 	var lightningTimer:Float = 3.0;
 
+	public static var rainShaderIntensity = 0.5; // now we can mess with lua now
+
 	override function create()
 	{
 		if (!PlayState.instance.variables.exists("stageVariables")){
@@ -146,7 +148,7 @@ class PhillyBlazin extends BaseStage
 
 		rainShader = new RainShader();
 		rainShader.scale = FlxG.height / 200;
-		rainShader.intensity = 0.5;
+		rainShader.intensity = rainShaderIntensity;
 
 
 		var filters = [];

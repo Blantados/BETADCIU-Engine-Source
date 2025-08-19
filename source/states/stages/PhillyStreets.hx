@@ -31,8 +31,8 @@ class PhillyStreets extends BaseStage
 	var blinkCountdown:Int = 3;
 
 	var rainShader:RainShader;
-	public var rainShaderStartIntensity:Float = 0.1;
-	public var rainShaderEndIntensity:Float = 0.2;
+	public static var rainShaderStartIntensity:Float = 0.1; // now we can mess with lua now
+	public static var rainShaderEndIntensity:Float = 0.2;
 	
 	var scrollingSky:FlxTiledSprite;
 	var phillyTraffic:BGSprite;

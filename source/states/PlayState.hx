@@ -430,7 +430,7 @@ class PlayState extends MusicBeatState
 		boyfriend = new Character(0, 0, SONG.player1, true);
 		startCharacterPos(boyfriend);
 		
-		addStage(false, false);
+		addStage(false, false, false); // jezz how many falses I have to put in this thing?
 		
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// "SCRIPTS FOLDER" SCRIPTS
@@ -4551,7 +4551,14 @@ class PlayState extends MusicBeatState
 		}
 	}	
 
-	public function addStage(?onlyLuas:Bool=false, ?stageDetails:Bool=true/*, ?createPost:Bool=true*/) {
+	public function addStage(?onlyLuas:Bool=false, ?stageDetails:Bool=true, ?createPost:Bool=true) {
+		/*
+		if (!FileSystem.exists(Paths.getSharedPath('stages/' + curStage + '.json')) && !FileSystem.exists(Paths.modFolders('stages/' + curStage + '.json')) && !Assets.exists(Paths.modFolders('stages/' + curStage + '.json'))){
+			trace('oops we usin the default stage');
+			curStage = 'stage';
+		}
+		*/
+
 		if(stageDetails) setStageDetails(stageData); // for some reason they don't add the chars position on them.
 		switch (curStage.toLowerCase())
 		{
@@ -4570,7 +4577,7 @@ class PlayState extends MusicBeatState
 
 		addObjects(stageData);
 		stagesFunc(function(stage:BaseStage) stage.createPost());
-		//if(createPost) callOnScripts('onCreatePost');
+		if(createPost) callOnScripts('onCreatePost'); // I don't think suppose put this here.
 
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// STAGE SCRIPTS
