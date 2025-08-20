@@ -19,7 +19,7 @@ class MainMenuState extends MusicBeatState
 {
 	public static var finishedFunnyMove:Bool = false;
 	public static var psychEngineVersion:String = '1.0.4';
-	public static var betadciuVer:String = "1.1.2"; // This is also used for Discord RPC
+	public static var betadciuEngineVersion:String = "1.1.2"; // This is also used for Discord RPC
 	public static var curSelected:Int = 0;
 	public static var curColumn:MainMenuColumn = CENTER;
 	public static var mainMusic = true;
@@ -120,7 +120,7 @@ class MainMenuState extends MusicBeatState
 		fnfVer.scrollFactor.set();
 		fnfVer.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(fnfVer);
-		var betadciuVer:FlxText = new FlxText(12, FlxG.height - 24, 0, "BETADCIU Engine Reworked v" + betadciuVer + "", 12); // Reworked sounds better than "Reboot"
+		var betadciuVer:FlxText = new FlxText(12, FlxG.height - 24, 0, "BETADCIU Engine Reworked v" + betadciuEngineVersion + "", 12); // Reworked sounds better than "Reboot"
 		betadciuVer.scrollFactor.set();
 		betadciuVer.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(betadciuVer);
@@ -138,7 +138,7 @@ class MainMenuState extends MusicBeatState
 		#end
 
 		#if CHECK_FOR_UPDATES
-		if (showOutdatedWarning && ClientPrefs.data.checkForUpdates && substates.OutdatedSubState.updateVersion != betadciuVer) {
+		if (showOutdatedWarning && ClientPrefs.data.checkForUpdates && substates.OutdatedSubState.updateVersion != betadciuEngineVersion) {
 			persistentUpdate = false;
 			showOutdatedWarning = false;
 			openSubState(new substates.OutdatedSubState());

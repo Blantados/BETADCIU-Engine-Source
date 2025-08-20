@@ -171,12 +171,9 @@ class StickerSubState extends MusicBeatSubstate
     // globalMods.push("assets/shared"); // base stickers
 
       #if sys
-      var modStickerDir = Paths.getPath('images/transitionSwag/$STICKER_SET',TEXT,null,true);
+      var modStickerDir = Paths.getPath('images/transitionSwag/$STICKER_SET/stickers.json',TEXT,null,true);
       if(!FileSystem.exists(modStickerDir)){
         //UserErrorSubstate.makeMessage("Missing sticker_set",'Couldn\'t find sticker set "$STICKER_SET"\n\nin $modStickerDir');
-      }
-      else if(!FileSystem.exists('$modStickerDir/stickers.json')){
-        //UserErrorSubstate.makeMessage("Missing manifest",'Sticker set $STICKER_SET doesn\'t contain a "stickers.json" file\n\nin $modStickerDir/stickers.json');
       }
       else{
 
@@ -204,7 +201,6 @@ class StickerSubState extends MusicBeatSubstate
       var sticky:StickerSprite = null;
       // Determinate if we actually have a valid set.
       if(stickers != null){
-
         // Select subsets defined by STICKER_PACK collection in the above "StickerSet"
         var stickerPack:Array<String> = stickers.getPack(STICKER_PACK);
         if(stickerPack == null){
@@ -219,9 +215,8 @@ class StickerSubState extends MusicBeatSubstate
         // get a random sticker 
         var sticker:String = FlxG.random.getObject(stickerSetCollection);
         sticky = new StickerSprite(0, 0, STICKER_SET, sticker);
-      }
-      else {
-        sticky = new StickerSprite(0, 0, null, "transitionSwag/faceSticker");
+      }else{
+        sticky = new StickerSprite(0, 0, null, 'transitionSwag/stickers-set-1/bfSticker3');
       }
       sticky.visible = false;
 
@@ -400,7 +395,7 @@ class StickerInfo
 
   public function new(stickerSet:String):Void
   {
-    var json = Json.parse(Paths.getTextFromFile('images/transitionSwag/'+ WeekData.getCurrentWeek().stickers[0] +'/stickers.json'));
+    var json = tjson.TJSON.parse(File.getContent(Paths.getPath('images/transitionSwag/'+ WeekData.getCurrentWeek().stickers[0] +'/stickers.json', TEXT, null, true)));
 
     // doin this dipshit nonsense cuz i dunno how to deal with casting a json object with
     // a dash in its name (sticker-packs)

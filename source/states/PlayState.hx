@@ -181,6 +181,8 @@ class PlayState extends MusicBeatState
 	public static var storyPlaylist:Array<String> = [];
 	public static var storyDifficulty:Int = 1;
 
+	public static var stopChangeHealthBarColor:Bool = false;
+
 	public var spawnTime:Float = 2000;
 
 	public var inst:FlxSound;
@@ -472,19 +474,12 @@ class PlayState extends MusicBeatState
 		uiGroup = new FlxSpriteGroup();
 		comboGroup = new FlxSpriteGroup();
 		noteGroup = new FlxTypedGroup<FlxBasic>();
-		
-		if(enabledHolds){
-			opponentHoldCovers = new HoldCover(enabledHolds, false);
-			playerHoldCovers = new HoldCover(enabledHolds, true);
-		}
-
+		opponentHoldCovers = new HoldCover(enabledHolds, false);
+		playerHoldCovers = new HoldCover(enabledHolds, true);
 		add(comboGroup);
 		add(noteGroup);
-
-		if(enabledHolds) {
-			add(opponentHoldCovers);
-			add(playerHoldCovers);
-		}
+		add(opponentHoldCovers);
+		add(playerHoldCovers);
 
 		Conductor.songPosition = -Conductor.crochet * 5 + Conductor.offset;
 		var showTime:Bool = (ClientPrefs.data.timeBarType != 'Disabled');
@@ -588,12 +583,8 @@ class PlayState extends MusicBeatState
 		}
 		uiGroup.cameras = [camHUD]; 
 		noteGroup.cameras = [camHUD];
-
-		if(enabledHolds){
-			playerHoldCovers.cameras = [camHUD];
-			opponentHoldCovers.cameras = [camHUD];
-		}
-
+		playerHoldCovers.cameras = [camHUD];
+		opponentHoldCovers.cameras = [camHUD];
 		comboGroup.cameras = [camHUD];
 
 		startingSong = true;
@@ -2098,7 +2089,7 @@ class PlayState extends MusicBeatState
 		}
 		#end
 
-		if (enabledHolds && strumLineNotes != null && !startingSong && strumLineNotes.length > 0){
+		if (strumLineNotes != null && !startingSong && strumLineNotes.length > 0){
 			playerHoldCovers.updateHold(elapsed, enabledHolds);
 			opponentHoldCovers.updateHold(elapsed, enabledHolds);	
 		}
@@ -2485,7 +2476,7 @@ class PlayState extends MusicBeatState
 						}
 					}
 				}
-				reloadHealthBarColors();
+				if(!stopChangeHealthBarColor) reloadHealthBarColors();
 
 			case 'Change Scroll Speed':
 				if (songSpeedType != "constant")
@@ -3249,10 +3240,8 @@ class PlayState extends MusicBeatState
 				invalidateNote(note);
 		});
 
-		if(enabledHolds){
-			if (daNote != null) playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, daNote.noteData, daNote);
-			else playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, daNote.noteData);
-		}
+		if (daNote != null) playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, daNote.noteData, daNote);
+		else playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, daNote.noteData);
 
 		var dType:Int = 0;
 		if (daNote != null) dType = daNote.dType;

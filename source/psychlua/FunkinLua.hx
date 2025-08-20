@@ -2742,7 +2742,7 @@ class FunkinLua {
 			PlayState.instance.healthBar.createFilledBar(FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]), FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]));
 			PlayState.instance.healthBar.updateBar();
 		}	*/
-		PlayState.instance.reloadHealthBarColors();
+		if(!PlayState.stopChangeHealthBarColor) PlayState.instance.reloadHealthBarColors();
 
 		if (PlayState.instance.boyfriend.animOffsets.exists(animationName))
 			PlayState.instance.boyfriend.playAnim(animationName, true, false, animationFrame);
@@ -2808,7 +2808,7 @@ class FunkinLua {
 			PlayState.instance.healthBar.updateBar();
 		}*/
 
-		PlayState.instance.reloadHealthBarColors();
+		if(!PlayState.stopChangeHealthBarColor) PlayState.instance.reloadHealthBarColors();
 
 		if (PlayState.instance.dad.animOffsets.exists(animationName))
 			PlayState.instance.dad.playAnim(animationName, true, false, animationFrame);
