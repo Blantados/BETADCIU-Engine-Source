@@ -15,6 +15,7 @@ import flixel.FlxState;
 import flixel.math.FlxRect;
 
 import flixel.addons.display.FlxBackdrop;
+import flixel.addons.display.FlxTiledSprite;
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 import openfl.filters.ShaderFilter;
@@ -826,8 +827,10 @@ class FunkinLua {
 			//addCharacterToList(newCharacter, charType);
 			game.charactersToLoad.push(newCharacter);
 		});
-		Lua_helper.add_callback(lua, "preloadStage", function(name:String) {
+		Lua_helper.add_callback(lua, "addStageToList", function(name:String) {
 			game.stagesToLoad.push(name);
+			trace('stage $name was sent to preload');
+			return true;
 		});
 		Lua_helper.add_callback(lua, "precacheImage", function(name:String, ?allowGPU:Bool = true) {
 			if (scriptType.toLowerCase() == "modpack" && name != null && name.length > 0){
@@ -1589,10 +1592,12 @@ class FunkinLua {
 			else{
 				var charPos = instance.members.indexOf(LuaUtils.getLowestCharacterGroup());
 
+				/*
 				if(inFront == 1 || inFront ==  "1" || inFront ==  "dad" || inFront ==  "opponent" || inFront ==  "opp") // why the number won't work holy shit.
 					charPos = instance.members.indexOf(game.dad) + 1;
 				else if(inFront == 0 || inFront ==  "0" || inFront ==  "gf" || inFront == "girlfriend")
 					charPos = instance.members.indexOf(game.gf) + 1;
+				*/
 
 					
 				if(PlayState.instance == null || !PlayState.instance.isDead)

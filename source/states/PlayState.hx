@@ -1280,7 +1280,9 @@ class PlayState extends MusicBeatState
 			dankCounter += 1;
 		}, 5);
 	}
-
+	
+	// removed cuz stage changes with HScript if you want add sprite in hscript remove "game." or "PlayState.instance."
+	/*
 	public function addBehindGF(obj:FlxBasic)
 	{
 		insert(members.indexOf(gf), obj);
@@ -1293,6 +1295,7 @@ class PlayState extends MusicBeatState
 	{
 		insert(members.indexOf(dad), obj);
 	}
+	*/
 
 	public function clearNotesBefore(time:Float)
 	{
@@ -4205,13 +4208,13 @@ class PlayState extends MusicBeatState
 					removeStage();
 					curStage = stage;
 					stageData = StageData.getStageFile(curStage); 
-					addStage(true);
+					addStage();
 					trace('Stage Loaded: ' + stage + '!');
 				}
 				removeStage();
 				curStage = ogStage;
 				stageData = StageData.getStageFile(curStage); 
-				addStage(true);
+				addStage();
 				stagesPreloaded = true;
 				trace('Stage Preloading Finished.');
 			}
@@ -4618,5 +4621,7 @@ class PlayState extends MusicBeatState
 		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
 		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
+
+		// the HScripts stages sprites wont add during start
 	}
 }

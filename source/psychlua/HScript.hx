@@ -29,6 +29,7 @@ typedef HScriptInfos = {
 class HScript extends Iris
 {
 	public var filePath:String;
+	public var daScriptType:String;
 	public var modFolder:String;
 	public var returnValue:Dynamic;
 
@@ -81,8 +82,6 @@ class HScript extends Iris
 	}
 	#end
 
-	public var scriptType:String = '';
-
 	public var origin:String;
 	public var scriptName:String = null;
 	override public function new(?parent:Dynamic, ?file:String, ?scriptType:String = "", ?varsToBring:Any = null, ?manualRun:Bool = false)
@@ -90,14 +89,8 @@ class HScript extends Iris
 		if (file == null)
 			file = '';
 
-		switch(scriptType.toLowerCase()){
-			case "stage":
-				if (!PlayState.instance.variables.exists("stageVariables")){
-					PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
-				}
-		}
-
 		filePath = file;
+		daScriptType = scriptType;
 		if (filePath != null && filePath.length > 0)
 		{
 			this.origin = filePath;
@@ -357,6 +350,57 @@ class HScript extends Iris
 		set('game', FlxG.state);
 		set('ModchartState', FunkinLua); // lazy ass fix for some scripts ported from betadciu engine
 		set('controls', Controls.instance);
+
+		// you don't need to add stageVars anymore.
+		set('add', function(tag:FlxBasic){
+			if(daScriptType.toLowerCase() == "stage") {
+				if (!PlayState.instance.variables.exists("stageVariables")){
+					PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
+				}
+		
+				var stageVars = PlayState.instance.variables.get("stageVariables");
+				stageVars.set(Std.string(tag), tag);
+			}
+
+			FlxG.state.add(tag);
+		});
+
+		set('addBehindGF', function(tag:FlxBasic){
+			if(daScriptType.toLowerCase() == "stage") {
+				if (!PlayState.instance.variables.exists("stageVariables")){
+					PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
+				}
+		
+				var stageVars = PlayState.instance.variables.get("stageVariables");
+				stageVars.set(Std.string(tag), tag);
+			}
+
+			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.gf), tag);
+		});
+		set('addBehindBF', function(tag:FlxBasic){
+			if(daScriptType.toLowerCase() == "stage") {
+				if (!PlayState.instance.variables.exists("stageVariables")){
+					PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
+				}
+		
+				var stageVars = PlayState.instance.variables.get("stageVariables");
+				stageVars.set(Std.string(tag), tag);
+			}
+
+			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.boyfriend), tag);
+		});
+		set('addBehindDad', function(tag:FlxBasic){
+			if(daScriptType.toLowerCase() == "stage") {
+				if (!PlayState.instance.variables.exists("stageVariables")){
+					PlayState.instance.variables.set("stageVariables", new Map<String, FlxBasic>());
+				}
+		
+				var stageVars = PlayState.instance.variables.get("stageVariables");
+				stageVars.set(Std.string(tag), tag);
+			}
+
+			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.dad), tag);
+		});
 
 		set('buildTarget', LuaUtils.getBuildTarget());
 		set('customSubstate', CustomSubstate.instance);
