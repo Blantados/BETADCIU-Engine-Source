@@ -144,7 +144,7 @@ class Note extends OffsettableSprite
 	public var copyAlpha:Bool = true;
 
 	public var hitHealth:Float = 0.02;
-	public var missHealth:Float = 0.1;
+	public var missHealth:Float = 0.1; // with "0.02 * 5" make it better
 	public var rating:String = 'unknown';
 	public var ratingMod:Float = 0; //9 = unknown, 0.25 = shit, 0.5 = bad, 0.75 = good, 1 = sick
 	public var ratingDisabled:Bool = false;
@@ -223,7 +223,7 @@ class Note extends OffsettableSprite
 	}
 
 	private function set_noteType(value:String):String {
-		noteSplashData.texture = PlayState.SONG != null ? PlayState.SONG.splashSkin : 'noteSplashes/noteSplashes';
+		noteSplashData.texture = PlayState.SONG != null ? PlayState.SONG.splashSkin : 'noteSplashes/noteSplashes-vanilla';
 		defaultRGB();
 
 		if(noteData > -1 && noteType != value) {
@@ -268,6 +268,11 @@ class Note extends OffsettableSprite
 	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?inEditor:Bool = false, ?createdFrom:Dynamic = null)
 	{
 		super();
+
+		if(ClientPrefs.data.legacyHealthSystem){
+			hitHealth = 0.0475;
+			missHealth = 0.2375;
+		}
 
 		animation = new PsychAnimationController(this);
 

@@ -205,7 +205,7 @@ class PhillyStreets extends BaseStage
 			if(!noteTypes.contains(note.noteType)) noteTypes.push(note.noteType);
 		}
 
-		if (PlayState.instance.curStage.toLowerCase() == 'phillystreets') precache();
+		/*/if (PlayState.instance.curStage.toLowerCase() == 'phillystreets')/*/ precache();
 		add(spraycanPile);
 		darkenable.push(spraycanPile);
 
@@ -459,6 +459,9 @@ class PhillyStreets extends BaseStage
 	var kneeCanSnd:FlxSound;
 	function precache()
 	{
+		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
+			return; 
+
 		var didCreateCan = false;
 		function createCan()
 		{
@@ -466,17 +469,17 @@ class PhillyStreets extends BaseStage
 			spraycan = new SpraycanAtlasSprite(spraycanPile.x + 530, spraycanPile.y - 240);
 			add(spraycan);
 
-			lightCanSnd = new FlxSound();
+			lightCanSnd = new FlxSound().loadEmbedded(Paths.sound('Darnell_Lighter'));
 			FlxG.sound.list.add(lightCanSnd);
-			lightCanSnd.loadEmbedded(Paths.sound('Darnell_Lighter'));
+			//lightCanSnd.loadEmbedded(Paths.sound('Darnell_Lighter'));
 			
-			kickCanSnd = new FlxSound();
+			kickCanSnd = new FlxSound().loadEmbedded(Paths.sound('Kick_Can_UP'));
 			FlxG.sound.list.add(kickCanSnd);
-			kickCanSnd.loadEmbedded(Paths.sound('Kick_Can_UP'));
+			//kickCanSnd.loadEmbedded(Paths.sound('Kick_Can_UP'));
 
-			kneeCanSnd = new FlxSound();
+			kneeCanSnd = new FlxSound().loadEmbedded(Paths.sound('Kick_Can_FORWARD'));
 			FlxG.sound.list.add(kneeCanSnd);
-			kneeCanSnd.loadEmbedded(Paths.sound('Kick_Can_FORWARD'));
+			//kneeCanSnd.loadEmbedded(Paths.sound('Kick_Can_FORWARD'));
 			didCreateCan = true;
 		}
 
@@ -957,7 +960,7 @@ class PhillyStreets extends BaseStage
 		switch(note.noteType)
 		{
 			case 'weekend-1-lightcan':
-				dad.holdTimer = 0;
+				game.dad.holdTimer = 0;
 				dad.playAnim('lightCan', true);
 				dad.specialAnim = true;
 				lightCanSnd.play(true, sndTime - 65);

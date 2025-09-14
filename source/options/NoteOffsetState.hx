@@ -58,6 +58,7 @@ class NoteOffsetState extends MusicBeatState
 		FlxG.sound.pause();
 
 		// Stage
+		BackgroundStage.inGameplay = false;
 		Paths.setCurrentLevel(stageDirectory);
 		new BackgroundStage();
 
@@ -405,6 +406,7 @@ class NoteOffsetState extends MusicBeatState
 			if(beatTween != null) beatTween.cancel();
 
 			persistentUpdate = false;
+			BackgroundStage.inGameplay = true;
 			MusicBeatState.switchState(new options.OptionsState());
 			if(OptionsState.onPlayState)
 			{

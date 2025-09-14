@@ -42,7 +42,7 @@ class NoteSplash extends FlxSprite
 	var spawned:Bool = false;
 	var noteDataMap:Map<Int, String> = new Map();
 
-	public static var defaultNoteSplash(default, never):String = "noteSplashes/noteSplashes";
+	public static var defaultNoteSplash(default, never):String = "noteSplashes/noteSplashes-vanilla";
 	public static var configs:Map<String, NoteSplashConfig> = new Map();
 
 	public function new(?x:Float = 0, ?y:Float = 0, ?splash:String)
@@ -69,7 +69,7 @@ class NoteSplash extends FlxSprite
 			if (PlayState.SONG != null && PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) splash = PlayState.SONG.splashSkin;
 		}
 
-		if (splash == 'noteSkins/NOTE_assets') splash  = 'noteSplashes/noteSplashes'; // lets avoid some problems with the default stuff.
+		if (splash == 'noteSkins/NOTE_assets') splash = 'noteSplashes/noteSplashes-vanilla'; // lets avoid some problems with the default stuff.
 		texture = splash;
 		var splashPaths:Array<String> = [
 			'notes/noteSplashes-$texture',
@@ -86,7 +86,7 @@ class NoteSplash extends FlxSprite
 				isLegacyNoteSkin = (path == 'notes/noteSplashes-$splash');
 				break;
 			} else {
-				texture = "noteSplashes/noteSplashes"; // default if couldn't find anything
+				texture = "noteSplashes/noteSplashes-vanilla"; // default if couldn't find anything
 			}
 		}
 
