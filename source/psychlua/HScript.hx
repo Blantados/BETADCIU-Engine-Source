@@ -359,7 +359,7 @@ class HScript extends Iris
 				}
 		
 				var stageVars = PlayState.instance.variables.get("stageVariables");
-				stageVars.set(Std.string(tag), tag);
+				stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
 			}
 
 			FlxG.state.add(tag);
@@ -372,7 +372,7 @@ class HScript extends Iris
 				}
 		
 				var stageVars = PlayState.instance.variables.get("stageVariables");
-				stageVars.set(Std.string(tag), tag);
+				stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
 			}
 
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.gf), tag);
@@ -384,7 +384,7 @@ class HScript extends Iris
 				}
 		
 				var stageVars = PlayState.instance.variables.get("stageVariables");
-				stageVars.set(Std.string(tag), tag);
+				stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
 			}
 
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.boyfriend), tag);
@@ -396,7 +396,7 @@ class HScript extends Iris
 				}
 		
 				var stageVars = PlayState.instance.variables.get("stageVariables");
-				stageVars.set(Std.string(tag), tag);
+				stageVars.set(Std.string(tag), tag); // Idk if "Std.string(tag);" was great idea.
 			}
 
 			FlxG.state.insert(PlayState.instance.members.indexOf(PlayState.instance.dad), tag);
