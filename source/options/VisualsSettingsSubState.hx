@@ -173,9 +173,9 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			BOOL);
 		addOption(option);
 
-		var option:Option = new Option('OG Icon Bop',
+		var option:Option = new Option('Legacy Icon Bop',
 		"If checked, The Icon will Bop Like in BETADCIU Engine Legacy",
-		'ogIconBop',
+		'legacyIconBop',
 			BOOL);
 		addOption(option);
 
@@ -200,10 +200,12 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		#end
 
 		var option:Option = new Option('Perfect Pixel Effect',
-		"if checked, the pixel rating & countdown sprites will do Perfect Pixel from V Slice \nNOTE: The Characters, Icons & Stages don't count",
+		"if checked, the pixel rating & countdown sprites will do Perfect Pixel based from V Slice \nNOTE: The Characters, Icons & Stages don't count",
 		'perfectPixel',
 		BOOL);
 		addOption(option);
+
+		//['Disable', 'All', 'Countdown & rating only']
 
 		super();
 		add(notes);

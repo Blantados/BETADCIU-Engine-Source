@@ -106,6 +106,7 @@ class FunkinLua {
 		set('luaDebugMode', false);
 		set('luaDeprecatedWarnings', true);
 		set('version', MainMenuState.psychEngineVersion.trim());
+		set('betadciuVersion', MainMenuState.betadciuEngineVersion.trim());
 		set('modFolder', this.modFolder);
 
 		// Song/Week shit
@@ -474,8 +475,8 @@ class FunkinLua {
 			return value;
 		});
 		Lua_helper.add_callback(lua, "changeStageData", function(id:String) {
-            PlayState.instance.curStage = id;
-            PlayState.instance.stageData = StageData.getStageFile(PlayState.instance.curStage); 
+            PlayState.curStage = id;
+            PlayState.instance.stageData = StageData.getStageFile(PlayState.curStage); 
             PlayState.instance.setStageDetails(PlayState.instance.stageData);
         });
 		Lua_helper.add_callback(lua, "getVar", function(varName:String) {
@@ -824,13 +825,11 @@ class FunkinLua {
 				case 'gf' | 'girlfriend': charType = 2;
 			}
 			var newCharacter:String = name;
-			//addCharacterToList(newCharacter, charType);
-			game.charactersToLoad.push(newCharacter);
+			game.addCharacterToList(newCharacter, charType);
+			//game.charactersToLoad.push(newCharacter);
 		});
 		Lua_helper.add_callback(lua, "addStageToList", function(name:String) {
 			game.stagesToLoad.push(name);
-			trace('stage $name was sent to preload');
-			return true;
 		});
 		Lua_helper.add_callback(lua, "precacheImage", function(name:String, ?allowGPU:Bool = true) {
 			if (scriptType.toLowerCase() == "modpack" && name != null && name.length > 0){
@@ -933,8 +932,10 @@ class FunkinLua {
 			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-' + char.healthicon; //Older versions of betadciu/psych engine's support
 			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-face'; //Prevents crash from missing icon
 
-			if (type.toLowerCase() == "sprite") return char.image;
-			else if (type.toLowerCase() == "icon") return name;
+			if (type.toLowerCase() == "sprite") 
+				return char.image;
+			else if (type.toLowerCase() == "icon") 
+				return name;
 			else {
 				luaTrace('getCharacterImage: invalid type!', false, false, FlxColor.RED);
 				return null;
@@ -1644,10 +1645,10 @@ class FunkinLua {
 		});
 		Lua_helper.add_callback(lua, "changeStage", function(id:String) {
 			PlayState.instance.removeStage(); // Remove current stage
-			PlayState.instance.curStage = id; // Set new stage name
-			PlayState.instance.stageData = StageData.getStageFile(PlayState.instance.curStage); 
+			PlayState.curStage = id; // Set new stage name
+			PlayState.instance.stageData = StageData.getStageFile(PlayState.curStage); 
 			PlayState.instance.addStage();
-			PlayState.instance.setOnScripts('curStage', PlayState.instance.curStage);
+			PlayState.instance.setOnScripts('curStage', PlayState.curStage);
 		});
 		Lua_helper.add_callback(lua, "makeHealthIcon", function(tag:String, character:String, player:Bool = false) {
 			if (scriptType.toLowerCase() == "modpack"){
@@ -2683,6 +2684,7 @@ class FunkinLua {
 			position = LuaUtils.getTargetInstance().members.indexOf(daChar);
 		}
 		
+		//PlayState.instance.stopCharacterScripts(shit.curCharacter);
 		LuaUtils.resetCharacterTag(tag);
 		var leSprite:Character = new Character(0, 0, character, isPlayer);
 		//leSprite.flipMode = flipped;

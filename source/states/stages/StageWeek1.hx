@@ -56,7 +56,7 @@ class StageWeek1 extends BaseStage
 	}
 	override function eventPushed(event:objects.Note.EventNote)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "stage" || PlayState.instance.curStage.toLowerCase() != "stageweek1") 
+		if (PlayState.curStage.toLowerCase() != "stage" || PlayState.curStage.toLowerCase() != "stageweek1") 
 			return; 
 
 		switch(event.event)
@@ -85,7 +85,7 @@ class StageWeek1 extends BaseStage
 
 	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "stage" || PlayState.instance.curStage.toLowerCase() != "stageweek1") 
+		if (PlayState.curStage.toLowerCase() != "stage" || PlayState.curStage.toLowerCase() != "stageweek1") 
 			return; 
 
 		switch(eventName)

@@ -150,7 +150,7 @@ class PlayState extends MusicBeatState
 	public var boyfriendGroup:FlxSpriteGroup;
 	public var dadGroup:FlxSpriteGroup;
 	public var gfGroup:FlxSpriteGroup;
-	public var curStage:String = '';
+	public static var curStage:String = '';
 
 	public static var stageUI(default, set):String = "normal";
 	public static var uiPrefix:String = "";
@@ -644,6 +644,7 @@ class PlayState extends MusicBeatState
 
 		resetRPC();
 
+		stagesFunc(function(stage:BaseStage) stage.createPost());
 		callOnScripts('onCreatePost');
 		
 		var splash:NoteSplash = new NoteSplash();
@@ -4197,20 +4198,22 @@ class PlayState extends MusicBeatState
 		var stagesPreloaded:Bool = false; // because this is looping for some reason?
 
 		for(stage in stagesToLoad){ // loading stages without the multithread because it didn't worked that well with it
-		var ogStage:String =  "";
-		if (curStage != null) ogStage = curStage;
+			var ogStage:String =  "";
+			if (curStage != null) ogStage = curStage;
+
 			if (!stagesPreloaded) {
 				for (stage in stagesToLoad) {
 					removeStage();
 					curStage = stage;
 					stageData = StageData.getStageFile(curStage); 
-					addStage();
+					addStage(false, true); // the createPost preload is kinda buggy so make it true.
 					trace('Stage Loaded: ' + stage + '!');
 				}
+				
 				removeStage();
 				curStage = ogStage;
 				stageData = StageData.getStageFile(curStage); 
-				addStage();
+				addStage(false, true); // the createPost preload is kinda buggy so make it true.
 				stagesPreloaded = true;
 				trace('Stage Preloading Finished.');
 			}
@@ -4560,16 +4563,18 @@ class PlayState extends MusicBeatState
 	public function removeStage(){
 		removeObjects(stageData);
 
-		if (ClientPrefs.data.comboCam == "Game") // this should help everytime you change the stage
+		if (ClientPrefs.data.comboCam == "Game") // this should help for base stages
 			remove(comboGroup);
+
+		stagesFunc(function(stage:BaseStage) stage.destroy());
 
 		if (hardCodedStage != null) {
 			hardCodedStage.destroy();
 			hardCodedStage = null;
 		}
 
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// STAGE SCRIPTS
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		#if LUA_ALLOWED stopLuasNamed('stages/' + curStage + '.lua', "stage");
 		for (stage in addedStages) stopLuasNamed(stage, "stage"); #end
 		#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
@@ -4580,6 +4585,7 @@ class PlayState extends MusicBeatState
 		if (stageVars != null) {
 			for (key in stageVars.keys()) {
 				var sprite:FlxSprite = stageVars.get(key);
+
 				if (sprite != null) {
 					remove(sprite);
 					variables.remove(key);
@@ -4608,16 +4614,16 @@ class PlayState extends MusicBeatState
 
 		addObjects(stageData);
 		if(!isCreate && ClientPrefs.data.comboCam == "Game") add(comboGroup);
-		
-		stagesFunc(function(stage:BaseStage) stage.createPost());
-		//if(!isCreate) callOnScripts('onCreatePost'); // I don't think suppose put this here.
 
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+		if(!isCreate){
+			stagesFunc(function(stage:BaseStage) stage.createPost());
+			callOnScripts('onCreatePost'); // I don't think suppose put this here.
+		}
+
 		// STAGE SCRIPTS
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
 		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
-
-		// the HScripts stages sprites wont add during start
 	}
 }

@@ -49,6 +49,12 @@ class SchoolEvil extends BaseStage
 	}
 	override function createPost()
 	{
+		if (!PlayState.instance.variables.exists("stageVariables")){
+			PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+		}
+		
+		var stageVars = PlayState.instance.variables.get("stageVariables");
+
 		if (dad.curCharacter == "spirit") {
 			trail = new FlxTrail(dad, null, 4, 24, 0.3, 0.069);
 			PlayState.instance.variables.get("stageVariables").set('trail', trail);
@@ -60,7 +66,7 @@ class SchoolEvil extends BaseStage
 	var bgGhouls:BGSprite;
 	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "schoolevil")
+		if (PlayState.curStage.toLowerCase() != "schoolevil")
 			return; 
 
 		switch(eventName)
@@ -75,7 +81,7 @@ class SchoolEvil extends BaseStage
 	}
 	override function eventPushed(event:objects.Note.EventNote)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "schoolevil") 
+		if (PlayState.curStage.toLowerCase() != "schoolevil") 
 			return; 
 
 		// used for preloading assets used on events
@@ -102,7 +108,7 @@ class SchoolEvil extends BaseStage
 	var doof:DialogueBox = null;
 	function initDoof()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "schoolevil") 
+		if (PlayState.curStage.toLowerCase() != "schoolevil") 
 			return; 
 		var file:String = Paths.txt('$songName/${songName}Dialogue_${ClientPrefs.data.language}'); //Checks for vanilla/Senpai dialogue
 		#if MODS_ALLOWED
@@ -134,7 +140,7 @@ class SchoolEvil extends BaseStage
 	
 	function schoolIntro():Void
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "schoolevil") 
+		if (PlayState.curStage.toLowerCase() != "schoolevil") 
 			return; 
 		inCutscene = true;
 		var red:FlxSprite = new FlxSprite(-100, -100).makeGraphic(FlxG.width * 2, FlxG.height * 2, 0xFFff1b31);

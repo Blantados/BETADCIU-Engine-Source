@@ -166,6 +166,10 @@ class HScript extends Iris
 		set('Paths', Paths);
 		set('Conductor', Conductor);
 		set('ClientPrefs', ClientPrefs);
+
+		set('EaseUtil', EaseUtil);
+		set('FunkinSprite', FunkinSprite);
+
 		#if ACHIEVEMENTS_ALLOWED
 		set('Achievements', Achievements);
 		#end
