@@ -391,6 +391,14 @@ class MainMenuState extends MusicBeatState
 
 					FlxTween.tween(memb, {alpha: 0}, 0.4, {ease: FlxEase.quadOut});
 				}
+
+				for (memb in menuItems2)
+				{
+					if(memb == item)
+						continue;
+
+					FlxTween.tween(memb, {alpha: 0}, 0.4, {ease: FlxEase.quadOut});
+				}
 			}
 			#if desktop
 			if (controls.justPressed('debug_1'))
