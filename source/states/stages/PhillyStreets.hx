@@ -31,8 +31,8 @@ class PhillyStreets extends BaseStage
 	var blinkCountdown:Int = 3;
 
 	var rainShader:RainShader;
-	var rainShaderStartIntensity:Float = 0.1;
-	var rainShaderEndIntensity:Float = 0.2;
+	public static var rainShaderStartIntensity:Float = 0.1; // now we can mess with lua now
+	public static var rainShaderEndIntensity:Float = 0.2;
 	
 	var scrollingSky:FlxTiledSprite;
 	var phillyTraffic:BGSprite;
@@ -191,6 +191,12 @@ class PhillyStreets extends BaseStage
 	var noteTypes:Array<String> = [];
 	override function createPost()
 	{
+		if (!PlayState.instance.variables.exists("stageVariables")){
+			PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+		}
+		
+		var stageVars = PlayState.instance.variables.get("stageVariables");
+
 		var unspawnNotes:Array<Note> = cast game.unspawnNotes;
 		for (note in unspawnNotes)
 		{
@@ -205,7 +211,7 @@ class PhillyStreets extends BaseStage
 			if(!noteTypes.contains(note.noteType)) noteTypes.push(note.noteType);
 		}
 
-		if (PlayState.instance.curStage.toLowerCase() == 'phillystreets') precache();
+		if (PlayState.curStage.toLowerCase() == 'phillystreets') precache();
 		add(spraycanPile);
 		darkenable.push(spraycanPile);
 
@@ -424,14 +430,14 @@ class PhillyStreets extends BaseStage
 
 	override function startSong()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
+		if (PlayState.curStage.toLowerCase() != "phillystreets") 
 			return; 
 		gf.animation.finishCallback = onNeneAnimationFinished;
 	}
 	
 	function onNeneAnimationFinished(name:String)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
+		if (PlayState.curStage.toLowerCase() != "phillystreets") 
 			return; 
 
 		if(!game.startedCountdown) return;
@@ -459,6 +465,9 @@ class PhillyStreets extends BaseStage
 	var kneeCanSnd:FlxSound;
 	function precache()
 	{
+		if (PlayState.curStage.toLowerCase() != "phillystreets") 
+			return; 
+
 		var didCreateCan = false;
 		function createCan()
 		{
@@ -466,17 +475,17 @@ class PhillyStreets extends BaseStage
 			spraycan = new SpraycanAtlasSprite(spraycanPile.x + 530, spraycanPile.y - 240);
 			add(spraycan);
 
-			lightCanSnd = new FlxSound();
+			lightCanSnd = new FlxSound().loadEmbedded(Paths.sound('Darnell_Lighter'));
 			FlxG.sound.list.add(lightCanSnd);
-			lightCanSnd.loadEmbedded(Paths.sound('Darnell_Lighter'));
+			//lightCanSnd.loadEmbedded(Paths.sound('Darnell_Lighter'));
 			
-			kickCanSnd = new FlxSound();
+			kickCanSnd = new FlxSound().loadEmbedded(Paths.sound('Kick_Can_UP'));
 			FlxG.sound.list.add(kickCanSnd);
-			kickCanSnd.loadEmbedded(Paths.sound('Kick_Can_UP'));
+			//kickCanSnd.loadEmbedded(Paths.sound('Kick_Can_UP'));
 
-			kneeCanSnd = new FlxSound();
+			kneeCanSnd = new FlxSound().loadEmbedded(Paths.sound('Kick_Can_FORWARD'));
 			FlxG.sound.list.add(kneeCanSnd);
-			kneeCanSnd.loadEmbedded(Paths.sound('Kick_Can_FORWARD'));
+			//kneeCanSnd.loadEmbedded(Paths.sound('Kick_Can_FORWARD'));
 			didCreateCan = true;
 		}
 
@@ -528,7 +537,7 @@ class PhillyStreets extends BaseStage
 
 	function setupRainShader()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
+		if (PlayState.curStage.toLowerCase() != "phillystreets") 
 			return; 
 
 		rainShader = new RainShader();
@@ -561,7 +570,7 @@ class PhillyStreets extends BaseStage
 	var animationFinished:Bool = false;
 	override function update(elapsed:Float)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
+		if (PlayState.curStage.toLowerCase() != "phillystreets") 
 			return; 
 
 		if(scrollingSky != null) scrollingSky.scrollX -= elapsed * 22;
@@ -582,7 +591,7 @@ class PhillyStreets extends BaseStage
 
 	function transitionState()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
+		if (PlayState.curStage.toLowerCase() != "phillystreets") 
 			return; 
 
 		switch (currentNeneState)
@@ -643,7 +652,7 @@ class PhillyStreets extends BaseStage
 
 	override function beatHit()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
+		if (PlayState.curStage.toLowerCase() != "phillystreets") 
 			return; 
 
 		switch(currentNeneState) {
@@ -677,7 +686,7 @@ class PhillyStreets extends BaseStage
 	
 	function changeLights(beat:Int):Void
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
+		if (PlayState.curStage.toLowerCase() != "phillystreets") 
 			return; 
 
 		lastChange = beat;
@@ -699,7 +708,7 @@ class PhillyStreets extends BaseStage
 
 	function finishCarLights(sprite:BGSprite):Void
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
+		if (PlayState.curStage.toLowerCase() != "phillystreets") 
 			return; 
 
 		carWaiting = false;
@@ -720,7 +729,7 @@ class PhillyStreets extends BaseStage
 
 	function driveCarLights(sprite:BGSprite):Void
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
+		if (PlayState.curStage.toLowerCase() != "phillystreets") 
 			return; 
 
 		carInterruptable = false;
@@ -764,7 +773,7 @@ class PhillyStreets extends BaseStage
 	
 	function driveCar(sprite:BGSprite):Void
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
+		if (PlayState.curStage.toLowerCase() != "phillystreets") 
 			return; 
 
 		carInterruptable = false;
@@ -805,7 +814,7 @@ class PhillyStreets extends BaseStage
 
 	function driveCarBack(sprite:FlxSprite):Void
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
+		if (PlayState.curStage.toLowerCase() != "phillystreets") 
 			return; 
 
 		car2Interruptable = false;
@@ -846,7 +855,7 @@ class PhillyStreets extends BaseStage
 
 	override function goodNoteHit(note:Note)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
+		if (PlayState.curStage.toLowerCase() != "phillystreets") 
 			return; 
 
 		// 10% chance of playing combo50/combo100 animations for Nene
@@ -909,7 +918,7 @@ class PhillyStreets extends BaseStage
 
 	function createCasing()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
+		if (PlayState.curStage.toLowerCase() != "phillystreets") 
 			return; 
 
 		if(ClientPrefs.data.lowQuality) return;
@@ -950,14 +959,14 @@ class PhillyStreets extends BaseStage
 
 	override function opponentNoteHit(note:Note)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
+		if (PlayState.curStage.toLowerCase() != "phillystreets") 
 			return; 
 
 		var sndTime:Float = note.strumTime - Conductor.songPosition;
 		switch(note.noteType)
 		{
 			case 'weekend-1-lightcan':
-				dad.holdTimer = 0;
+				game.dad.holdTimer = 0;
 				dad.playAnim('lightCan', true);
 				dad.specialAnim = true;
 				lightCanSnd.play(true, sndTime - 65);
@@ -993,7 +1002,7 @@ class PhillyStreets extends BaseStage
 	var picoFlicker:FlxTimer = null;
 	override function noteMiss(note:Note)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
+		if (PlayState.curStage.toLowerCase() != "phillystreets") 
 			return; 
 
 		switch(note.noteType)
@@ -1049,7 +1058,7 @@ class PhillyStreets extends BaseStage
 
 	function showPicoFade()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
+		if (PlayState.curStage.toLowerCase() != "phillystreets") 
 			return; 
 
 		if(ClientPrefs.data.lowQuality) return;
@@ -1070,7 +1079,7 @@ class PhillyStreets extends BaseStage
 	
 	function darkenStageProps()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillystreets") 
+		if (PlayState.curStage.toLowerCase() != "phillystreets") 
 			return; 
 
 		// Darken the background, then fade it back.

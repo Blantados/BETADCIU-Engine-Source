@@ -71,9 +71,6 @@ import sys.FileSystem;
 
 import flixel.addons.plugin.screengrab.FlxScreenGrab;
 
-import backend.FunkinSprite;
-import backend.EaseUtil;
-
 typedef PreloadResult = {
 	var thread:Thread;
 	var asset:String;
@@ -153,7 +150,7 @@ class PlayState extends MusicBeatState
 	public var boyfriendGroup:FlxSpriteGroup;
 	public var dadGroup:FlxSpriteGroup;
 	public var gfGroup:FlxSpriteGroup;
-	public var curStage:String = '';
+	public static var curStage:String = '';
 
 	public static var stageUI(default, set):String = "normal";
 	public static var uiPrefix:String = "";
@@ -183,6 +180,8 @@ class PlayState extends MusicBeatState
 	public static var storyWeek:Int = 0;
 	public static var storyPlaylist:Array<String> = [];
 	public static var storyDifficulty:Int = 1;
+
+	public static var stopChangeHealthBarColor:Bool = false;
 
 	public var spawnTime:Float = 2000;
 
@@ -433,7 +432,7 @@ class PlayState extends MusicBeatState
 		boyfriend = new Character(0, 0, SONG.player1, true);
 		startCharacterPos(boyfriend);
 		
-		addStage(false, false);
+		addStage(false, true); 
 		
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		// "SCRIPTS FOLDER" SCRIPTS
@@ -549,14 +548,12 @@ class PlayState extends MusicBeatState
 		iconP1.y = healthBar.y - 75;
 		iconP1.visible = !ClientPrefs.data.hideHud;
 		iconP1.alpha = ClientPrefs.data.healthBarAlpha;
-		variables.set('iconP1', iconP1); // because without adding it the changeIcon lua function don't work?
 		add(iconP1);
 
 		iconP2 = new HealthIcon(dad.healthIcon, false);
 		iconP2.y = healthBar.y - 75;
 		iconP2.visible = !ClientPrefs.data.hideHud;
 		iconP2.alpha = ClientPrefs.data.healthBarAlpha;
-		variables.set('iconP2', iconP2);
 		add(iconP2);
 
 		scoreTxt = new FlxText(0, healthBar.y + 40, FlxG.width, "", 20);
@@ -1227,6 +1224,66 @@ class PlayState extends MusicBeatState
 		return spr;
 	}
 
+	public function softCountdown(?style:String):Void
+	{
+		inCutscene = false;
+
+		var dankCounter:Int = 0;
+
+		if(isPixelStage) introSoundsSuffix = '-pixel';
+
+		startTimer = new FlxTimer().start(Conductor.crochet / 1000 / playbackRate, function(tmr:FlxTimer)
+		{
+			var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
+			var introImagesArray:Array<String> = switch(stageUI) {
+				case "pixel": ['pixelUI/ready-pixel', 'pixelUI/set-pixel', 'pixelUI/date-pixel'];
+				case "normal": ["ready", "set" ,"go"];
+				default: ['${uiPrefix}UI/ready${uiPostfix}', '${uiPrefix}UI/set${uiPostfix}', '${uiPrefix}UI/go${uiPostfix}'];
+			}
+			introAssets.set(stageUI, introImagesArray);
+
+			var isCustomCountdown:Bool = false;
+			var introAlts:Array<String> = introAssets.get(stageUI);
+			if (stageData.countdownAssets != null && stageData.countdownAssets != []) {
+				introAlts = stageData.countdownAssets;
+				isCustomCountdown = true;
+			}
+
+			var antialias:Bool = (ClientPrefs.data.antialiasing && !isPixelStage);
+			var tick:Countdown = THREE;
+
+			switch (dankCounter)
+			{
+				case 0:
+					countdownOnYourMarks = new FlxSprite().loadGraphic(Paths.image("notes/noStrums")); // in case someone really uses this i can add a thing to customize this later -- ryiuu
+					FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro3' + introSoundsSuffix), 0.6);
+					tick = THREE;
+				case 1:
+					countdownReady = createCountdownSprite(introAlts[0], antialias, isCustomCountdown);
+					FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro2' + introSoundsSuffix), 0.6);
+					tick = TWO;
+				case 2:
+					countdownSet = createCountdownSprite(introAlts[1], antialias, isCustomCountdown);
+					FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro1' + introSoundsSuffix), 0.6);
+					tick = ONE;
+				case 3:
+					countdownGo = createCountdownSprite(introAlts[2], antialias, isCustomCountdown);
+					FlxG.sound.play(Paths.sound(introSoundsPrefix + 'introGo' + introSoundsSuffix), 0.6);
+					tick = GO;
+				case 4:
+					tick = START;
+			}
+
+			stagesFunc(function(stage:BaseStage) stage.countdownTick(tick, dankCounter));
+			callOnLuas('onCountdownTick', [dankCounter]);
+			callOnHScript('onCountdownTick', [tick, dankCounter]);
+
+			dankCounter += 1;
+		}, 5);
+	}
+	
+	// removed cuz stage changes with HScript if you want add sprite in hscript remove "game." or "PlayState.instance."
+	/*
 	public function addBehindGF(obj:FlxBasic)
 	{
 		insert(members.indexOf(gf), obj);
@@ -1239,6 +1296,7 @@ class PlayState extends MusicBeatState
 	{
 		insert(members.indexOf(dad), obj);
 	}
+	*/
 
 	public function clearNotesBefore(time:Float)
 	{
@@ -2095,6 +2153,7 @@ class PlayState extends MusicBeatState
 			playerHoldCovers.updateHold(elapsed, enabledHolds);
 			opponentHoldCovers.updateHold(elapsed, enabledHolds);	
 		}
+
 		setOnScripts('botPlay', cpuControlled);
 		callOnScripts('onUpdatePost', [elapsed]);
 	}
@@ -2109,7 +2168,7 @@ class PlayState extends MusicBeatState
 				var icon:HealthIcon = iconScaleShit[i][0];
 				var scale:Float = iconScaleShit[i][1];
 				
-				if(ClientPrefs.data.ogIconBop){
+				if(ClientPrefs.data.legacyIconBop){
 					var mult:Float = FlxMath.lerp((scale-0.2), icon.scale.x, CoolUtil.boundTo((scale-0.2) - (elapsed * 9 * playbackRate), 0, 1));
 					icon.scale.set(mult, mult);
 					icon.updateHitbox();
@@ -2127,7 +2186,7 @@ class PlayState extends MusicBeatState
 		var iconOffset:Int = 26;
 		var healthPercent:Float = FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01;
 		
-		if(ClientPrefs.data.ogIconBop){
+		if(ClientPrefs.data.legacyIconBop){
 			iconP1.x = healthBar.x + (healthBar.width * healthPercent - iconOffset);
 			iconP2.x = healthBar.x + (healthBar.width * healthPercent) - (iconP2.width - iconOffset);
 		}else{
@@ -2477,7 +2536,7 @@ class PlayState extends MusicBeatState
 						}
 					}
 				}
-				reloadHealthBarColors();
+				if(!stopChangeHealthBarColor) reloadHealthBarColors();
 
 			case 'Change Scroll Speed':
 				if (songSpeedType != "constant")
@@ -3503,7 +3562,7 @@ class PlayState extends MusicBeatState
 			if(!note.noteSplashData.disabled && !note.isSustainNote) spawnNoteSplashOnNote(note);
 		}
 
-		if (enabledHolds) playerHoldCovers.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong);
+		if(enabledHolds) playerHoldCovers.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong);
 
 		stagesFunc(function(stage:BaseStage) stage.goodNoteHit(note));
 		var result:Dynamic = callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.dType]);
@@ -3813,10 +3872,6 @@ class PlayState extends MusicBeatState
 		try
 		{
 			newScript = new HScript(null, file, scriptType);
-			switch (scriptType.toLowerCase()){
-				case 'stage':
-					callOnHScript('onCreate'); // why this won't work?!
-			}
 			if (newScript.exists('onCreate')) newScript.call('onCreate');
 			trace('initialized hscript interp successfully: $file');
 			hscriptArray.push(newScript);
@@ -4143,20 +4198,22 @@ class PlayState extends MusicBeatState
 		var stagesPreloaded:Bool = false; // because this is looping for some reason?
 
 		for(stage in stagesToLoad){ // loading stages without the multithread because it didn't worked that well with it
-		var ogStage:String =  "";
-		if (curStage != null) ogStage = curStage;
+			var ogStage:String =  "";
+			if (curStage != null) ogStage = curStage;
+
 			if (!stagesPreloaded) {
 				for (stage in stagesToLoad) {
 					removeStage();
 					curStage = stage;
 					stageData = StageData.getStageFile(curStage); 
-					addStage(true);
+					addStage(false, true); // the createPost preload is kinda buggy so make it true.
 					trace('Stage Loaded: ' + stage + '!');
 				}
+				
 				removeStage();
 				curStage = ogStage;
 				stageData = StageData.getStageFile(curStage); 
-				addStage(true);
+				addStage(false, true); // the createPost preload is kinda buggy so make it true.
 				stagesPreloaded = true;
 				trace('Stage Preloading Finished.');
 			}
@@ -4505,20 +4562,22 @@ class PlayState extends MusicBeatState
 	public var addedStages:Array<String> = [];
 	public function removeStage(){
 		removeObjects(stageData);
+
+		if (ClientPrefs.data.comboCam == "Game") // this should help for base stages
+			remove(comboGroup);
+
+		stagesFunc(function(stage:BaseStage) stage.destroy());
+
 		if (hardCodedStage != null) {
 			hardCodedStage.destroy();
 			hardCodedStage = null;
 		}
+
+		// STAGE SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-			// STAGE SCRIPTS
-			#if LUA_ALLOWED
-			stopLuasNamed('stages/' + curStage + '.lua', "stage");
-			
-			for (stage in addedStages) stopLuasNamed(stage, "stage");
-		#end
-			#if HSCRIPT_ALLOWED 
-			stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); 
-			#end
+		#if LUA_ALLOWED stopLuasNamed('stages/' + curStage + '.lua', "stage");
+		for (stage in addedStages) stopLuasNamed(stage, "stage"); #end
+		#if HSCRIPT_ALLOWED stopHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 
 		var stageVars:Map<String, FlxSprite> = MusicBeatState.getVariables().get("stageVariables");
@@ -4526,6 +4585,7 @@ class PlayState extends MusicBeatState
 		if (stageVars != null) {
 			for (key in stageVars.keys()) {
 				var sprite:FlxSprite = stageVars.get(key);
+
 				if (sprite != null) {
 					remove(sprite);
 					variables.remove(key);
@@ -4535,8 +4595,8 @@ class PlayState extends MusicBeatState
 		}
 	}	
 
-	public function addStage(?onlyLuas:Bool=false, ?stageDetails:Bool=true) {
-		if(stageDetails) setStageDetails(stageData); // for some reason they don't add the chars position on them.
+	public function addStage(?onlyLuas:Bool=false, ?isCreate:Bool=false) {
+		if(!isCreate) setStageDetails(stageData); // for some reason they don't add the chars position on them.
 		switch (curStage.toLowerCase())
 		{
 			case 'stage': hardCodedStage = new StageWeek1(); 			//Week 1
@@ -4553,17 +4613,17 @@ class PlayState extends MusicBeatState
 		}
 
 		addObjects(stageData);
-		stagesFunc(function(stage:BaseStage) stage.createPost());
+		if(!isCreate && ClientPrefs.data.comboCam == "Game") add(comboGroup);
 
+		if(!isCreate){
+			stagesFunc(function(stage:BaseStage) stage.createPost());
+			callOnScripts('onCreatePost'); // I don't think suppose put this here.
+		}
+
+		// STAGE SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-			// STAGE SCRIPTS
-			#if LUA_ALLOWED 
-				startLuasNamed('stages/' + curStage + '.lua', "stage"); 
-			#end
-
-			#if HSCRIPT_ALLOWED 
-				if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); 
-			#end
+		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua', "stage"); #end
+		#if HSCRIPT_ALLOWED if (!onlyLuas) startHScriptsNamed('stages/' + curStage + '.hx', "stage"); #end
 		#end
 	}
 }

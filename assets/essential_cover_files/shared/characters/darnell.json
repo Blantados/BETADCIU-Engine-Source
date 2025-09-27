@@ -1,49 +1,103 @@
 {
 	"animations": [
 		{
-			"loop": false,
 			"offsets": [0, 0],
+			"loop": false,
+			"fps": 24,
 			"anim": "idle",
+			"indices": [],
+			"name": "Idle",
+			"playerOffsets": [0, 0]
+		},
+		{
+			"offsets": [0, 0],
+			"loop": false,
+			"fps": 24,
+			"anim": "singUP",
+			"indices": [],
+			"name": "Pose Up",
+			"playerOffsets": [-15, 2]
+		},
+		{
+			"offsets": [0, 0],
+			"loop": false,
+			"fps": 24,
+			"anim": "singRIGHT",
+			"indices": [],
+			"name": "Pose Right",
+			"playerOffsets": [0, 1]
+		},
+		{
+			"offsets": [0, 0],
+			"loop": false,
+			"fps": 24,
+			"anim": "singLEFT",
+			"indices": [],
+			"name": "Pose Left",
+			"playerOffsets": [-2, 2]
+		},
+		{
+			"offsets": [0, 0],
+			"loop": false,
+			"fps": 24,
+			"anim": "singDOWN",
+			"indices": [],
+			"name": "Pose Down",
+			"playerOffsets": [-8, -12]
+		},
+		{
+			"loop": false,
+			"offsets": [8, 1],
+			"anim": "lightCan",
 			"fps": 24,
 			"playerOffsets": [0, 0],
-			"name": "Idle",
+			"name": "Light Can0",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [15, 9],
+			"anim": "kickCan",
+			"fps": 24,
+			"playerOffsets": [0, 0],
+			"name": "Kick Up0",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [7, -1],
+			"anim": "kneeCan",
+			"fps": 24,
+			"playerOffsets": [0, 0],
+			"name": "Knee Forward0",
 			"indices": []
 		},
 		{
 			"loop": false,
 			"offsets": [0, 0],
-			"anim": "singUP",
+			"anim": "pissed",
 			"fps": 24,
-			"playerOffsets": [-15, 2],
-			"name": "Pose Up",
+			"playerOffsets": [0, 0],
+			"name": "Gets Pissed0",
 			"indices": []
 		},
 		{
 			"loop": false,
 			"offsets": [0, 0],
-			"anim": "singRIGHT",
+			"anim": "laugh",
 			"fps": 24,
-			"playerOffsets": [0, 1],
-			"name": "Pose Right",
+			"playerOffsets": [0, 0],
+			"name": "Laugh0",
 			"indices": []
 		},
 		{
 			"loop": false,
 			"offsets": [0, 0],
-			"anim": "singLEFT",
+			"anim": "laughCutscene",
 			"fps": 24,
-			"playerOffsets": [-2, 2],
-			"name": "Pose Left",
-			"indices": []
-		},
-		{
-			"loop": false,
-			"offsets": [0, 0],
-			"anim": "singDOWN",
-			"fps": 24,
-			"playerOffsets": [-8, -12],
-			"name": "Pose Down",
-			"indices": []
+			"playerOffsets": [0, 0],
+			"name": "Laugh0",
+			"indices": [0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5]
 		}
 	],
 	"vocals_file": "",
@@ -59,5 +113,5 @@
 	"sing_duration": 6.1,
 	"isPlayerChar": false,
 	"scale": 1,
-	"_editor_isPlayer": true
+	"_editor_isPlayer": false
 }

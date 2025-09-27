@@ -19,12 +19,13 @@ class HealthIcon extends FlxSprite
 	{
 		super.update(elapsed);
 
-		if (sprTracker != null)
-			if(!ClientPrefs.data.ogIconBop){
+		if (sprTracker != null){
+			if(!ClientPrefs.data.legacyIconBop){
 				setPosition(sprTracker.x + sprTracker.width + 12, sprTracker.y - 30);
 			}else{
 				setPosition(sprTracker.x + sprTracker.width + 10, sprTracker.y - 30);
 			}
+		}
 	}
 
 	private var iconOffsets:Array<Float> = [0, 0];
@@ -47,7 +48,7 @@ class HealthIcon extends FlxSprite
 			loadGraphic(graphic, true, Math.floor(graphic.width / realSize), Math.floor(graphic.height));
 			iconOffsets[0] = (width - 150) / realSize;
 			iconOffsets[1] = (height - 150) / iSize;
-			updateHitbox();
+			if(!ClientPrefs.data.legacyIconBop) updateHitbox();
 
 			var animArray:Array<Int> = [];
 			for(i in 0...3) animArray.push((i <= frames.frames.length - 1 ? i : 0)); // 0: Default | 1: Losing | 2: Winning
@@ -70,7 +71,7 @@ class HealthIcon extends FlxSprite
 		super.updateHitbox();
 		if(autoAdjustOffset)
 		{
-			if(!ClientPrefs.data.ogIconBop){
+			if(!ClientPrefs.data.legacyIconBop){
 				offset.x = iconOffsets[0];
 				offset.y = iconOffsets[1];
 			}

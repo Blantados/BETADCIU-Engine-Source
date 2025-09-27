@@ -249,31 +249,21 @@ class DeprecatedFunctions
 			}
 			FunkinLua.luaTrace('setCamFollow: Camera Follow Cannot be set to null.', false, true, FlxColor.RED);
 		});
-		Lua_helper.add_callback(lua, "getActorXMidpoint", function(variable:String) { // im not porting the other kade reflect stuff. im just porting this because some scripts still uses this... yeah, even with the getMidPointX available
-			var killMe:Array<String> = variable.split('.');
-			var obj:FlxSprite = LuaUtils.getObjectDirectly(killMe[0]);
-			if(killMe.length > 1) {
-				obj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(killMe), killMe[killMe.length-1]);
-			}
-			if(obj != null) {
-				return obj.getMidpoint().x;
-				FunkinLua.luaTrace('getActorXMidpoint is deprecated! Use getMidPointX instead.', false, true);
-			}
+		Lua_helper.add_callback(lua, "getActorXMidpoint", function(variable:String, ?graphic:Bool = false) { // im not porting the other kade reflect stuff. im just porting this because some scripts still uses this... yeah, even with the getMidPointX available
+			var shit:Dynamic = LuaUtils.getObjectDirectly(variable);
 
-			return 0;
+			if (graphic)
+				return shit.getGraphicMidpoint().x;
+
+			return shit.getMidpoint().x;
 		});
-		Lua_helper.add_callback(lua, "getActorYMidpoint", function(variable:String) { // im not porting the other kade reflect stuff. im just porting this because some scripts still uses this... yeah, even with the getMidPointY available
-			var killMe:Array<String> = variable.split('.');
-			var obj:FlxSprite = LuaUtils.getObjectDirectly(killMe[0]);
-			if(killMe.length > 1) {
-				obj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(killMe), killMe[killMe.length-1]);
-			}
-			if(obj != null) {
-				return obj.getMidpoint().y;
-				FunkinLua.luaTrace('getActorYMidpoint is deprecated! Use getMidPointY instead.', false, true);
-			}
+		Lua_helper.add_callback(lua, "getActorYMidpoint", function(variable:String, ?graphic:Bool = false) { // im not porting the other kade reflect stuff. im just porting this because some scripts still uses this... yeah, even with the getMidPointY available
+			var shit:Dynamic = LuaUtils.getObjectDirectly(variable);
 
-			return 0;
+			if (graphic)
+				return shit.getGraphicMidpoint().y;
+
+			return shit.getMidpoint().y;
 		});
 	}
 }

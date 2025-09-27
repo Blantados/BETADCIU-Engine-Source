@@ -291,7 +291,7 @@ class LuaUtils
 
 	public static inline function getLowestCharacterGroup():Character
 	{
-		var stageData:StageFile = StageData.getStageFile(PlayState.instance.curStage);
+		var stageData:StageFile = StageData.getStageFile(PlayState.curStage);
 		var character:Character = (stageData.hide_girlfriend ? PlayState.instance.boyfriend : PlayState.instance.gf);
 
 		var pos:Int = PlayState.instance.members.indexOf(character);

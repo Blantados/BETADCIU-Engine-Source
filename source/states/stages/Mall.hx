@@ -62,19 +62,19 @@ class Mall extends BaseStage
 	}
 
 	override function countdownTick(count:Countdown, num:Int){
-		if (PlayState.instance.curStage.toLowerCase() != "mall") 
+		if (PlayState.curStage.toLowerCase() != "mall") 
 			return; 
 		everyoneDance();
 	} 
 	override function beatHit() {
-		if (PlayState.instance.curStage.toLowerCase() != "mall") 
+		if (PlayState.curStage.toLowerCase() != "mall") 
 			return;
 		everyoneDance();
 	}
 
 	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "mall") 
+		if (PlayState.curStage.toLowerCase() != "mall") 
 			return; 
 
 		switch(eventName)
@@ -95,7 +95,7 @@ class Mall extends BaseStage
 
 	function everyoneDance()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "mall") 
+		if (PlayState.curStage.toLowerCase() != "mall") 
 			return; 
 
 		if(!ClientPrefs.data.lowQuality)

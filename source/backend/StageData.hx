@@ -194,7 +194,7 @@ class StageData {
 					if(data.scale != null && (data.scale[0] != 1.0 || data.scale[1] != 1.0))
 					{
 						spr.scale.set(data.scale[0], data.scale[1]);
-						spr.updateHitbox();
+						if(data.updateHitbox) spr.updateHitbox();
 					}
 					spr.scrollFactor.set(data.scroll[0], data.scroll[1]);
 					spr.color = CoolUtil.colorFromString(data.color);

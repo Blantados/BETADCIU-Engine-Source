@@ -33,11 +33,13 @@ import backend.BaseStage;
 import backend.Difficulty;
 import backend.Mods;
 import backend.Language;
+import backend.EaseUtil;
 
 import backend.ui.*; //Psych-UI
 
 import objects.Alphabet;
 import objects.BGSprite;
+import objects.FunkinSprite;
 
 import states.PlayState;
 import states.LoadingState;

@@ -24,6 +24,8 @@ class PhillyBlazin extends BaseStage
 	
 	var lightningTimer:Float = 3.0;
 
+	public static var rainShaderIntensity = 0.5; // now we can mess with lua now
+
 	override function create()
 	{
 		if (!PlayState.instance.variables.exists("stageVariables")){
@@ -122,7 +124,6 @@ class PhillyBlazin extends BaseStage
 		FlxG.camera.focusOn(camFollow.getPosition());
 		FlxG.camera.fade(FlxColor.BLACK, 1.5, true, null, true);
 
-
 		boyfriend.color = 0xFFDEDEDE;
 		dad.color = 0xFFDEDEDE;
 		gf.color = 0xFF888888;
@@ -136,18 +137,19 @@ class PhillyBlazin extends BaseStage
 			note.noAnimation = true;
 			note.noMissAnimation = true;
 		}
-		remove(dadGroup, true);
-		addBehindBF(dadGroup);
+
+		remove(PlayState.instance.dad, true);
+		addBehindBF(PlayState.instance.dad);
 	}
 
 	function setupRainShader()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillyblazin") 
+		if (PlayState.curStage.toLowerCase() != "phillyblazin") 
 			return; 
 
 		rainShader = new RainShader();
 		rainShader.scale = FlxG.height / 200;
-		rainShader.intensity = 0.5;
+		rainShader.intensity = rainShaderIntensity;
 
 
 		var filters = [];
@@ -170,7 +172,7 @@ class PhillyBlazin extends BaseStage
 
 	override function update(elapsed:Float)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillyblazin") 
+		if (PlayState.curStage.toLowerCase() != "phillyblazin") 
 			return; 
 
 		if(scrollingSky != null) scrollingSky.scrollX -= elapsed * 35;
@@ -192,7 +194,7 @@ class PhillyBlazin extends BaseStage
 	
 	function applyLightning():Void
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillyblazin") 
+		if (PlayState.curStage.toLowerCase() != "phillyblazin") 
 			return; 
 
 		if(ClientPrefs.data.lowQuality || game.endingSong) return;
@@ -240,7 +242,7 @@ class PhillyBlazin extends BaseStage
 	var darnellFight:DarnellBlazinHandler = new DarnellBlazinHandler();
 	override function goodNoteHit(note:Note)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillyblazin") 
+		if (PlayState.curStage.toLowerCase() != "phillyblazin") 
 			return; 
 
 		//trace('hit note! ${note.noteType}');
@@ -250,7 +252,7 @@ class PhillyBlazin extends BaseStage
 	}
 	override function noteMiss(note:Note)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillyblazin") 
+		if (PlayState.curStage.toLowerCase() != "phillyblazin") 
 			return; 
 
 		//trace('missed note!');
@@ -260,7 +262,7 @@ class PhillyBlazin extends BaseStage
 
 	override function noteMissPress(direction:Int)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillyblazin") 
+		if (PlayState.curStage.toLowerCase() != "phillyblazin") 
 			return; 
 
 		//trace('misinput!');
@@ -271,7 +273,7 @@ class PhillyBlazin extends BaseStage
 	// Darnell Note functions
 	override function opponentNoteHit(note:Note)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "phillyblazin") 
+		if (PlayState.curStage.toLowerCase() != "phillyblazin") 
 			return; 
 
 		//trace('opponent hit!');

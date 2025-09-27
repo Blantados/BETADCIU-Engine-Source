@@ -1,4 +1,4 @@
-package backend;
+package objects;
 
 import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 

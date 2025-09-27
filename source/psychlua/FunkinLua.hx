@@ -15,6 +15,7 @@ import flixel.FlxState;
 import flixel.math.FlxRect;
 
 import flixel.addons.display.FlxBackdrop;
+import flixel.addons.display.FlxTiledSprite;
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 import openfl.filters.ShaderFilter;
@@ -55,6 +56,8 @@ import funkin.vis.audioclip.frontends.LimeAudioClip;
 
 import options.ModpackMakerState;
 import options.ModpackMakerState.ModpackAssetRegistry;
+
+import backend.PsychCamera;
 
 class FunkinLua {
 	public var lua:State = null;
@@ -102,7 +105,12 @@ class FunkinLua {
 		set('Function_Continue', LuaUtils.Function_Continue);
 		set('luaDebugMode', false);
 		set('luaDeprecatedWarnings', true);
+
 		set('version', MainMenuState.psychEngineVersion.trim());
+		
+		set('betadciuVersion', MainMenuState.betadciuEngineVersion.trim());
+		set('psychVersion', MainMenuState.psychEngineVersion.trim());
+
 		set('modFolder', this.modFolder);
 
 		// Song/Week shit
@@ -282,7 +290,7 @@ class FunkinLua {
 			return true;
 		});
 
-		Lua_helper.add_callback(lua, "getAudioLevels", function(barCount:Int, maxDelta:Float = 0.01, peakHold:Int = 30) {
+		Lua_helper.add_callback(lua, "getAudioLevels", function() {
 			return getAudioLevels();
 		});
 
@@ -471,8 +479,8 @@ class FunkinLua {
 			return value;
 		});
 		Lua_helper.add_callback(lua, "changeStageData", function(id:String) {
-            PlayState.instance.curStage = id;
-            PlayState.instance.stageData = StageData.getStageFile(PlayState.instance.curStage); 
+            PlayState.curStage = id;
+            PlayState.instance.stageData = StageData.getStageFile(PlayState.curStage); 
             PlayState.instance.setStageDetails(PlayState.instance.stageData);
         });
 		Lua_helper.add_callback(lua, "getVar", function(varName:String) {
@@ -820,7 +828,12 @@ class FunkinLua {
 				case 'dad': charType = 1;
 				case 'gf' | 'girlfriend': charType = 2;
 			}
-			game.addCharacterToList(name, charType);
+			var newCharacter:String = name;
+			game.addCharacterToList(newCharacter, charType);
+			//game.charactersToLoad.push(newCharacter);
+		});
+		Lua_helper.add_callback(lua, "addStageToList", function(name:String) {
+			game.stagesToLoad.push(name);
 		});
 		Lua_helper.add_callback(lua, "precacheImage", function(name:String, ?allowGPU:Bool = true) {
 			if (scriptType.toLowerCase() == "modpack" && name != null && name.length > 0){
@@ -840,6 +853,14 @@ class FunkinLua {
 		});
 		Lua_helper.add_callback(lua, "precacheMusic", function(name:String) {
 			Paths.music(name);
+		});
+		Lua_helper.add_callback(lua, "precacheFont", function(name:String) {
+			if (scriptType.toLowerCase() == "modpack" && name != null && name.length > 0){
+				ModpackAssetRegistry.instance.addAsset("fonts", name);
+				return;
+			}
+
+			Paths.font(name);
 		});
 
 		// others
@@ -863,6 +884,10 @@ class FunkinLua {
 
 		Lua_helper.add_callback(lua, "startCountdown", function() {
 			game.startCountdown();
+			return true;
+		});
+		Lua_helper.add_callback(lua,"softCountdown", function(id:String) {
+			game.softCountdown(id);
 			return true;
 		});
 		Lua_helper.add_callback(lua, "endSong", function() {
@@ -911,8 +936,10 @@ class FunkinLua {
 			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-' + char.healthicon; //Older versions of betadciu/psych engine's support
 			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-face'; //Prevents crash from missing icon
 
-			if (type.toLowerCase() == "sprite") return char.image;
-			else if (type.toLowerCase() == "icon") return name;
+			if (type.toLowerCase() == "sprite") 
+				return char.image;
+			else if (type.toLowerCase() == "icon") 
+				return name;
 			else {
 				luaTrace('getCharacterImage: invalid type!', false, false, FlxColor.RED);
 				return null;
@@ -921,41 +948,41 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "getCharacterX", function(type:String) {
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
-					return game.dadGroup.x;
+					return game.dad.x;
 				case 'gf' | 'girlfriend':
-					return game.gfGroup.x;
+					return game.gf.x;
 				default:
-					return game.boyfriendGroup.x;
+					return game.boyfriend.x;
 			}
 		});
 		Lua_helper.add_callback(lua, "setCharacterX", function(type:String, value:Float) {
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
-					game.dadGroup.x = value;
+					game.dad.x = value;
 				case 'gf' | 'girlfriend':
-					game.gfGroup.x = value;
+					game.gf.x = value;
 				default:
-					game.boyfriendGroup.x = value;
+					game.boyfriend.x = value;
 			}
 		});
 		Lua_helper.add_callback(lua, "getCharacterY", function(type:String) {
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
-					return game.dadGroup.y;
+					return game.dad.y;
 				case 'gf' | 'girlfriend':
-					return game.gfGroup.y;
+					return game.gf.y;
 				default:
-					return game.boyfriendGroup.y;
+					return game.boyfriend.y;
 			}
 		});
 		Lua_helper.add_callback(lua, "setCharacterY", function(type:String, value:Float) {
 			switch(type.toLowerCase()) {
 				case 'dad' | 'opponent':
-					game.dadGroup.y = value;
+					game.dad.y = value;
 				case 'gf' | 'girlfriend':
-					game.gfGroup.y = value;
+					game.gf.y = value;
 				default:
-					game.boyfriendGroup.y = value;
+					game.boyfriend.y = value;
 			}
 		});
 		Lua_helper.add_callback(lua, "cameraSetTarget", function(target:String) {
@@ -1559,17 +1586,27 @@ class FunkinLua {
 
 			return daColor;
 		});
-		Lua_helper.add_callback(lua, "addLuaSprite", function(tag:String, ?inFront:Bool = false) {
+		Lua_helper.add_callback(lua, "addLuaSprite", function(tag:String, ?inFront:Dynamic = false) {
 			var mySprite:FlxSprite = MusicBeatState.getVariables().get(tag);
 			if(mySprite == null) return;
 
 			var instance = LuaUtils.getTargetInstance();
-			if(inFront)
+
+			if(inFront || inFront == 2 || inFront == "2" || inFront == "boyfriend" || inFront == "bf" || inFront == "player")
 				instance.add(mySprite);
-			else
-			{
+			else{
+				var charPos = instance.members.indexOf(LuaUtils.getLowestCharacterGroup());
+
+				/*
+				if(inFront == 1 || inFront ==  "1" || inFront ==  "dad" || inFront ==  "opponent" || inFront ==  "opp") // why the number won't work holy shit.
+					charPos = instance.members.indexOf(game.dad) + 1;
+				else if(inFront == 0 || inFront ==  "0" || inFront ==  "gf" || inFront == "girlfriend")
+					charPos = instance.members.indexOf(game.gf) + 1;
+				*/
+
+					
 				if(PlayState.instance == null || !PlayState.instance.isDead)
-					instance.insert(instance.members.indexOf(LuaUtils.getLowestCharacterGroup()), mySprite);
+					instance.insert(charPos, mySprite);
 				else
 					GameOverSubstate.instance.insert(GameOverSubstate.instance.members.indexOf(GameOverSubstate.instance.boyfriend), mySprite);
 			}
@@ -1612,10 +1649,10 @@ class FunkinLua {
 		});
 		Lua_helper.add_callback(lua, "changeStage", function(id:String) {
 			PlayState.instance.removeStage(); // Remove current stage
-			PlayState.instance.curStage = id; // Set new stage name
-			PlayState.instance.stageData = StageData.getStageFile(PlayState.instance.curStage); 
+			PlayState.curStage = id; // Set new stage name
+			PlayState.instance.stageData = StageData.getStageFile(PlayState.curStage); 
 			PlayState.instance.addStage();
-			PlayState.instance.setOnScripts('curStage', PlayState.instance.curStage);
+			PlayState.instance.setOnScripts('curStage', PlayState.curStage);
 		});
 		Lua_helper.add_callback(lua, "makeHealthIcon", function(tag:String, character:String, player:Bool = false) {
 			if (scriptType.toLowerCase() == "modpack"){
@@ -1626,8 +1663,17 @@ class FunkinLua {
 			makeIcon(tag, character, player);
 		});
 		Lua_helper.add_callback(lua, "changeIcon", function(tag:String, character:String){
-			var shit:HealthIcon = game.variables.get(tag);
-			shit.changeIcon(character);
+			var killMe:Array<String> = tag.split('.');
+			var object:HealthIcon = LuaUtils.getObjectDirectly(killMe[0]);
+			if(killMe.length > 1) {
+				object = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(killMe), killMe[killMe.length-1]);
+			}
+
+			if(object != null) {
+				object.changeIcon(character);
+				return;
+			}
+			luaTrace("changeIcon: Icon " + tag + " doesn't exist!", false, false, FlxColor.RED);
 		});
 		Lua_helper.add_callback(lua,"characterZoom", function(id:String, zoomAmount:Float, ?isSenpai:Bool = false) {
 			if(PlayState.instance.modchartCharacters.exists(id)) {
@@ -2391,6 +2437,7 @@ class FunkinLua {
 		switch (id)
 		{
 			case 'startCountdown': PlayState.instance.startCountdown();
+			case 'softCountdown': PlayState.instance.softCountdown();
 			case 'resyncVocals': PlayState.instance.resyncVocals();	
 			case 'doTimeTravel': PlayState.instance.doTimeTravel(val1, val2);		
 			case 'uncacheImage': Paths.clearAssetFromMemory(val1, 'image');	
@@ -2641,6 +2688,7 @@ class FunkinLua {
 			position = LuaUtils.getTargetInstance().members.indexOf(daChar);
 		}
 		
+		//PlayState.instance.stopCharacterScripts(shit.curCharacter);
 		LuaUtils.resetCharacterTag(tag);
 		var leSprite:Character = new Character(0, 0, character, isPlayer);
 		//leSprite.flipMode = flipped;
@@ -2742,7 +2790,7 @@ class FunkinLua {
 			PlayState.instance.healthBar.createFilledBar(FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]), FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]));
 			PlayState.instance.healthBar.updateBar();
 		}	*/
-		PlayState.instance.reloadHealthBarColors();
+		if(!PlayState.stopChangeHealthBarColor) PlayState.instance.reloadHealthBarColors();
 
 		if (PlayState.instance.boyfriend.animOffsets.exists(animationName))
 			PlayState.instance.boyfriend.playAnim(animationName, true, false, animationFrame);
@@ -2808,7 +2856,7 @@ class FunkinLua {
 			PlayState.instance.healthBar.updateBar();
 		}*/
 
-		PlayState.instance.reloadHealthBarColors();
+		if(!PlayState.stopChangeHealthBarColor) PlayState.instance.reloadHealthBarColors();
 
 		if (PlayState.instance.dad.animOffsets.exists(animationName))
 			PlayState.instance.dad.playAnim(animationName, true, false, animationFrame);

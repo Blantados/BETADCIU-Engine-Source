@@ -61,7 +61,7 @@ class Philly extends BaseStage
 	}
 	override function eventPushed(event:objects.Note.EventNote)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "philly") 
+		if (PlayState.curStage.toLowerCase() != "philly") 
 			return; 
 
 		switch(event.event)
@@ -91,7 +91,7 @@ class Philly extends BaseStage
 
 	override function update(elapsed:Float)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "philly") 
+		if (PlayState.curStage.toLowerCase() != "philly") 
 			return; 
 
 		phillyWindow.alpha -= (Conductor.crochet / 1000) * elapsed * 1.5;
@@ -107,7 +107,7 @@ class Philly extends BaseStage
 
 	override function beatHit()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "philly") 
+		if (PlayState.curStage.toLowerCase() != "philly") 
 			return; 
 
 		phillyTrain.beatHit(curBeat);
@@ -121,7 +121,7 @@ class Philly extends BaseStage
 
 	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "philly") 
+		if (PlayState.curStage.toLowerCase() != "philly") 
 			return; 
 
 		switch(eventName)

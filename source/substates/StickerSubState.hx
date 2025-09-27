@@ -19,12 +19,14 @@ import flixel.FlxState;
 import backend.WeekData;
 
 using Lambda;
+using backend.tools.IteratorTools;
 using StringTools;
+using backend.tools.ArrayTools;
 
 class StickerSubState extends MusicBeatSubstate
 {
-  public var STICKER_SET = "stickers-set-1";
-  public var STICKER_PACK = "all";
+  public var STICKER_SET = WeekData.getCurrentWeek().stickers[0];
+  public var STICKER_PACK = WeekData.getCurrentWeek().stickers[1];
   public var grpStickers:FlxTypedGroup<StickerSprite>;
 
   // yes... a damn OpenFL sprite!!!
@@ -169,23 +171,14 @@ class StickerSubState extends MusicBeatSubstate
     // globalMods.push("assets/shared"); // base stickers
 
       #if sys
-      #if !LEGACY_PSYCH
-      var modStickerDir = Paths.getPath('images/transitionSwag/'+ WeekData.getCurrentWeek().stickers[0],TEXT,null,true);
-      #else
-      //var modStickerDir = Paths.getPath('images/transitionSwag/'+ WeekData.getCurrentWeek().stickers[0],TEXT,null);
-      #end
+      var modStickerDir = Paths.getPath('images/transitionSwag/$STICKER_SET/stickers.json',TEXT,null,true);
       if(!FileSystem.exists(modStickerDir)){
-        var modStickerDir = Paths.getPath('images/transitionSwag/stickers-set-1',TEXT,null,true);
         //UserErrorSubstate.makeMessage("Missing sticker_set",'Couldn\'t find sticker set "$STICKER_SET"\n\nin $modStickerDir');
-      }
-      else if(!FileSystem.exists('$modStickerDir/stickers.json')){
-        var modStickerDir = Paths.getPath('images/transitionSwag/stickers-set-1',TEXT,null,true);
-        //UserErrorSubstate.makeMessage("Missing manifest",'Sticker set $STICKER_SET doesn\'t contain a "stickers.json" file\n\nin $modStickerDir/stickers.json');
       }
       else{
 
         try{
-          var infoObj = new StickerInfo(WeekData.getCurrentWeek().stickers[0]);
+          var infoObj = new StickerInfo(STICKER_SET);
           stickers = infoObj;
           //if(infoObj.getPack(STICKER_PACK) == null) UserErrorSubstate.makeMessage('Missing pack','Sticker set ${infoObj.name} doesn\'t contain "$STICKER_PACK" pack.\n\nAll available stickers will be loaded instead.');
         }
@@ -195,7 +188,7 @@ class StickerSubState extends MusicBeatSubstate
 
       }
       #else
-      var infoObj = new StickerInfo(WeekData.getCurrentWeek().stickers[0]);
+      var infoObj = new StickerInfo(STICKER_SET);
           stickers = infoObj;
       #end
     // sticker group -> array of sticker names
@@ -208,11 +201,10 @@ class StickerSubState extends MusicBeatSubstate
       var sticky:StickerSprite = null;
       // Determinate if we actually have a valid set.
       if(stickers != null){
-
         // Select subsets defined by STICKER_PACK collection in the above "StickerSet"
-        var stickerPack:Array<String> = stickers.getPack(WeekData.getCurrentWeek().stickers[1]);
+        var stickerPack:Array<String> = stickers.getPack(STICKER_PACK);
         if(stickerPack == null){
-          //stickerPack = stickers.stickers.keys();
+          stickerPack = stickers.stickers.keys().array();
         }
         // get all stickers from all subsets defined by "all" collection
         var stickerSetCollection:Array<String> = [];
@@ -222,10 +214,9 @@ class StickerSubState extends MusicBeatSubstate
 
         // get a random sticker 
         var sticker:String = FlxG.random.getObject(stickerSetCollection);
-        sticky = new StickerSprite(0, 0, WeekData.getCurrentWeek().stickers[0], sticker);
-      }
-      else {
-        sticky = new StickerSprite(0, 0, null, "justBf");
+        sticky = new StickerSprite(0, 0, STICKER_SET, sticker);
+      }else{
+        sticky = new StickerSprite(0, 0, null, 'transitionSwag/stickers-set-1/bfSticker3');
       }
       sticky.visible = false;
 
@@ -342,13 +333,10 @@ class StickerSubState extends MusicBeatSubstate
     lastOne.angle = 0;
     lastOne.screenCenter();
 
-    STICKER_SET = WeekData.getCurrentWeek().stickers[0];
-    STICKER_PACK = WeekData.getCurrentWeek().stickers[1];
-    #if !LEGACY_PSYCH
-      Mods.loadTopMod(); // We won't be messing with mods from here on
-    #else
-      WeekData.loadTheFirstEnabledMod();
-    #end
+    STICKER_SET = "stickers-set-1";
+    STICKER_PACK = "all";
+
+    WeekData.loadTheFirstEnabledMod(); // We won't be messing with mods from here on
   }
 
   override public function update(elapsed:Float):Void
@@ -407,7 +395,7 @@ class StickerInfo
 
   public function new(stickerSet:String):Void
   {
-    var json = Json.parse(Paths.getTextFromFile('images/transitionSwag/'+ WeekData.getCurrentWeek().stickers[0] +'/stickers.json'));
+    var json = tjson.TJSON.parse(File.getContent(Paths.getPath('images/transitionSwag/'+ stickerSet +'/stickers.json', TEXT, null, true)));
 
     // doin this dipshit nonsense cuz i dunno how to deal with casting a json object with
     // a dash in its name (sticker-packs)

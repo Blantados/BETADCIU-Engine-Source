@@ -94,6 +94,11 @@ class ReflectionFunctions
 				FunkinLua.luaTrace('getPropertyFromClass: Class $classVar not found', false, false, FlxColor.RED);
 				return null;
 			}
+			
+			if (classVar == "flixel.FlxG" && variable == "save.data.botplay") { // a lot of betadciu engine legacy scripts uses this to set the botplay, so i'll add this as a compatibility layer for scripts
+				trace('botplay was got!');
+				return PlayState.instance.cpuControlled;
+			}
 
 			var split:Array<String> = variable.split('.');
 			if(split.length > 1) {

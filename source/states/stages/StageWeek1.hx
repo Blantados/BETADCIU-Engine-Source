@@ -9,18 +9,20 @@ class StageWeek1 extends BaseStage
 	var dadbattleLight:BGSprite;
 	var dadbattleFog:DadBattleFog;
 
-	var inGameplay:Bool = false;
+	public static var inGameplay:Bool = true;
 	override function create()
 	{
 		var stageVars:Map<String, FlxSprite> = new Map<String, FlxSprite>(); // offset menu fix.
 
-		if (FlxG.state is PlayState) inGameplay = true;
+		if(FlxG.state is options.NoteOffsetState){ 
+			inGameplay = false;
+		}
 		
 		if (inGameplay){
 			if (!PlayState.instance.variables.exists("stageVariables")){
 				PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
 			}
-			var stageVars = PlayState.instance.variables.get("stageVariables");
+			stageVars = PlayState.instance.variables.get("stageVariables");
 		}
 
 		var bg:BGSprite = new BGSprite('stageback', -600, -200, 0.9, 0.9);
@@ -54,7 +56,7 @@ class StageWeek1 extends BaseStage
 	}
 	override function eventPushed(event:objects.Note.EventNote)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "stage" || PlayState.instance.curStage.toLowerCase() != "stageweek1") 
+		if (PlayState.curStage.toLowerCase() != "stage" || PlayState.curStage.toLowerCase() != "stageweek1") 
 			return; 
 
 		switch(event.event)
@@ -83,7 +85,7 @@ class StageWeek1 extends BaseStage
 
 	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "stage" || PlayState.instance.curStage.toLowerCase() != "stageweek1") 
+		if (PlayState.curStage.toLowerCase() != "stage" || PlayState.curStage.toLowerCase() != "stageweek1") 
 			return; 
 
 		switch(eventName)

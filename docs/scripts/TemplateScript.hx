@@ -242,14 +242,14 @@ function onMoveCamera(focus:String)
 
 
 // Event notes hooks
-function onEvent(name:String, value1:String, value2:String, strumTime:Float)
+function onEvent(name:String, value1:String, value2:String, value3:String, strumTime:Float)
 {
 	// Event note triggered
 
 	// print('Event triggered: ', name, value1, value2, strumTime);
 }
 
-function onEventPushed(name:String, value1:String, value2:String, strumTime:Float)
+function onEventPushed(name:String, value1:String, value2:String, value3:String, strumTime:Float)
 {
 	// Called for every event note, recommended to precache assets
 }

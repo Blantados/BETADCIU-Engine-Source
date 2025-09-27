@@ -53,14 +53,15 @@ class BETADCIUState extends MusicBeatState
 
 	public var playerBETADCIU:MusicPlayerBETADCIU;
 
-	var stickerSubState:StickerSubState;
+	var stickerSubState:Null<StickerSubState> = null;
+	
 	public function new(?stickers:StickerSubState = null)
 	{
 		super();
 
-		if (stickers != null)
+		if (stickers?.members != null)
 		{
-		stickerSubState = stickers;
+			stickerSubState = stickers;
 		}
 	}
 

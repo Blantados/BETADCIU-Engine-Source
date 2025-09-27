@@ -98,9 +98,16 @@ class Limo extends BaseStage
 	}
 	override function createPost()
 	{
-		var stageVars = PlayState.instance.variables.get("stageVariables");
-		addBehindGF(fastCar);
+		if (PlayState.curStage.toLowerCase() != "schoolevil") 
+			return;
 
+		if (!PlayState.instance.variables.exists("stageVariables")){
+			PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+		}
+		
+		var stageVars = PlayState.instance.variables.get("stageVariables");
+		
+		addBehindGF(fastCar);
 		addBehindDad(limo); //Shitty layering but whatev it works LOL
 	}
 
@@ -116,7 +123,7 @@ class Limo extends BaseStage
 	var limoSpeed:Float = 0;
 	override function update(elapsed:Float)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "limo") 
+		if (PlayState.curStage.toLowerCase() != "limo") 
 			return; 
 		
 		if(!ClientPrefs.data.lowQuality) {
@@ -203,7 +210,7 @@ class Limo extends BaseStage
 
 	override function beatHit()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "limo") 
+		if (PlayState.curStage.toLowerCase() != "limo") 
 			return; 
 
 		if(!ClientPrefs.data.lowQuality) {
@@ -220,7 +227,7 @@ class Limo extends BaseStage
 	// Substates for pausing/resuming tweens and timers
 	override function closeSubState()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "limo") 
+		if (PlayState.curStage.toLowerCase() != "limo") 
 			return; 
 
 		if(paused)
@@ -231,7 +238,7 @@ class Limo extends BaseStage
 
 	override function openSubState(SubState:flixel.FlxSubState)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "limo") 
+		if (PlayState.curStage.toLowerCase() != "limo") 
 			return; 
 
 		if(paused)
@@ -242,7 +249,7 @@ class Limo extends BaseStage
 
 	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "limo") 
+		if (PlayState.curStage.toLowerCase() != "limo") 
 			return; 
 
 		switch(eventName)

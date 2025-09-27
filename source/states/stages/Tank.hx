@@ -106,6 +106,12 @@ class Tank extends BaseStage
 	}
 	override function createPost()
 	{
+		if (!PlayState.instance.variables.exists("stageVariables")){
+			PlayState.instance.variables.set("stageVariables", new Map<String, FlxSprite>());
+		}
+		
+		var stageVars = PlayState.instance.variables.get("stageVariables");
+
 		add(foregroundSprites);
 
 		if(!ClientPrefs.data.lowQuality)
@@ -139,19 +145,19 @@ class Tank extends BaseStage
 	}
 
 	override function countdownTick(count:Countdown, num:Int) {
-		if (PlayState.instance.curStage.toLowerCase() != "tank") 
+		if (PlayState.curStage.toLowerCase() != "tank") 
 			return; 
 
 		if(num % 2 == 0) everyoneDance();
 	}
 	override function beatHit(){
-		if (PlayState.instance.curStage.toLowerCase() != "tank") 
+		if (PlayState.curStage.toLowerCase() != "tank") 
 			return; 
 		everyoneDance();
 	} 
 	function everyoneDance()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "tank") 
+		if (PlayState.curStage.toLowerCase() != "tank") 
 			return; 
 		if(!ClientPrefs.data.lowQuality) tankWatchtower.dance();
 		foregroundSprites.forEach(function(spr:BGSprite)
@@ -168,7 +174,7 @@ class Tank extends BaseStage
 	var audioPlaying:FlxSound;
 	function prepareCutscene()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "tank") 
+		if (PlayState.curStage.toLowerCase() != "tank") 
 			return; 
 		cutsceneHandler = new CutsceneHandler();
 
@@ -225,7 +231,7 @@ class Tank extends BaseStage
 
 	function ughIntro()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "tank") 
+		if (PlayState.curStage.toLowerCase() != "tank") 
 			return; 
 		prepareCutscene();
 		cutsceneHandler.endTime = 12;
@@ -280,7 +286,7 @@ class Tank extends BaseStage
 	}
 	function gunsIntro()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "tank") 
+		if (PlayState.curStage.toLowerCase() != "tank") 
 			return; 
 		prepareCutscene();
 		cutsceneHandler.endTime = 11.5;
@@ -315,7 +321,7 @@ class Tank extends BaseStage
 	var dualWieldAnimPlayed = 0;
 	function stressIntro()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "tank") 
+		if (PlayState.curStage.toLowerCase() != "tank") 
 			return; 
 		prepareCutscene();
 		
@@ -439,7 +445,7 @@ class Tank extends BaseStage
 
 	function zoomBack()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "tank") 
+		if (PlayState.curStage.toLowerCase() != "tank") 
 			return; 
 		var calledTimes:Int = 0;
 		camFollow.setPosition(630, 425);

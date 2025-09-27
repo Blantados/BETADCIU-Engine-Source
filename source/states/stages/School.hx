@@ -105,7 +105,7 @@ class School extends BaseStage
 
 	override function beatHit()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "school") 
+		if (PlayState.curStage.toLowerCase() != "school") 
 			return; 
 
 		if(bgGirls != null) bgGirls.dance();
@@ -114,7 +114,7 @@ class School extends BaseStage
 	// For events
 	override function eventCalled(eventName:String, value1:String, value2:String, value3:String, flValue1:Null<Float>, flValue2:Null<Float>, flValue3:Null<Float>, strumTime:Float)
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "school") 
+		if (PlayState.curStage.toLowerCase() != "school") 
 			return; 
 
 		switch(eventName)
@@ -127,7 +127,7 @@ class School extends BaseStage
 	var doof:DialogueBox = null;
 	function initDoof()
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "school") 
+		if (PlayState.curStage.toLowerCase() != "school") 
 			return; 
 
 		var file:String = Paths.txt('$songName/${songName}Dialogue_${ClientPrefs.data.language}'); //Checks for vanilla/Senpai dialogue
@@ -160,7 +160,7 @@ class School extends BaseStage
 	
 	function schoolIntro():Void
 	{
-		if (PlayState.instance.curStage.toLowerCase() != "school") 
+		if (PlayState.curStage.toLowerCase() != "school") 
 			return; 
 
 		inCutscene = true;

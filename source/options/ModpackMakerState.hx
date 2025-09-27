@@ -582,6 +582,7 @@ class ModpackMakerState extends MusicBeatState {
                 var evName = Std.string(event[1][i][0]);
                 var val1:String = Std.string(event[1][i][1]);
                 var val2:String = Std.string(event[1][i][2]);
+                var val3:String = Std.string(event[1][i][3]);
 
                 // Add event name if not already tracked
                 if (pushedEvents.indexOf(evName) < 0) pushedEvents.push(evName);

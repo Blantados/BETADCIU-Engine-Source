@@ -82,7 +82,8 @@ import states.TitleState;
 	public var loadingScreen:Bool = true;
 	public var language:String = 'en-US';
 	public var comboCam:String = "Game";// cam game by default because i like it.
-	public var ogIconBop:Bool = false;
+	public var legacyIconBop:Bool = false; // I should make this as legacy HUD to pretend that you're playing on legacy engine
+	public var legacyHealthSystem:Bool = false;
 	public var gameResolution:String = 'Native'; // Adding a resolution option
 	public var perfectPixel:Bool = false;
 }

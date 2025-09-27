@@ -1951,6 +1951,7 @@ class StageEditorMetaSprite
 				obj.x = x;
 				obj.y = y;
 				obj.scale = scale;
+				//obj.updateHitbox = updateHitbox;
 				obj.scroll = scroll;
 				obj.alpha = alpha;
 				obj.angle = angle;
