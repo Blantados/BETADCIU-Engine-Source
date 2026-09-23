@@ -141,7 +141,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 
 		if (controls.BACK) {
 			close();
-			FlxG.sound.play(Paths.sound('cancelMenu'));
+			FunkinSound.playOnce('cancelMenu');
 		}
 
 		if(nextAccept <= 0)
@@ -151,7 +151,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 				case BOOL:
 					if(controls.ACCEPT)
 					{
-						FlxG.sound.play(Paths.sound('scrollMenu'));
+						FunkinSound.playOnce('scrollMenu');
 						curOption.setValue((curOption.getValue() == true) ? false : true);
 						curOption.change();
 						reloadCheckboxes();
@@ -178,7 +178,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 						bindingKey = true;
 						holdingEsc = 0;
 						ClientPrefs.toggleVolumeKeys(false);
-						FlxG.sound.play(Paths.sound('scrollMenu'));
+						FunkinSound.playOnce('scrollMenu');
 					}
 
 				default:
@@ -229,7 +229,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 								}
 								updateTextFrom(curOption);
 								curOption.change();
-								FlxG.sound.play(Paths.sound('scrollMenu'));
+								FunkinSound.playOnce('scrollMenu');
 							}
 							else if(curOption.type != STRING)
 							{
@@ -257,7 +257,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 					}
 					else if(controls.UI_LEFT_R || controls.UI_RIGHT_R)
 					{
-						if(holdTime > 0.5) FlxG.sound.play(Paths.sound('scrollMenu'));
+						if(holdTime > 0.5) FunkinSound.playOnce('scrollMenu');
 						holdTime = 0;
 					}
 			}
@@ -280,7 +280,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 					updateBind(leOption);
 				}
 				leOption.change();
-				FlxG.sound.play(Paths.sound('cancelMenu'));
+				FunkinSound.playOnce('cancelMenu');
 				reloadCheckboxes();
 			}
 		}
@@ -297,7 +297,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 			holdingEsc += elapsed;
 			if(holdingEsc > 0.5)
 			{
-				FlxG.sound.play(Paths.sound('cancelMenu'));
+				FunkinSound.playOnce('cancelMenu');
 				closeBinding();
 			}
 		}
@@ -309,7 +309,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 				if (!controls.controllerMode) curOption.keys.keyboard = NONE;
 				else curOption.keys.gamepad = NONE;
 				updateBind(!controls.controllerMode ? InputFormatter.getKeyName(NONE) : InputFormatter.getGamepadName(NONE));
-				FlxG.sound.play(Paths.sound('cancelMenu'));
+				FunkinSound.playOnce('cancelMenu');
 				closeBinding();
 			}
 		}
@@ -386,7 +386,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 					key = InputFormatter.getGamepadName(FlxGamepadInputID.fromString(curOption.keys.gamepad));
 				}
 				updateBind(key);
-				FlxG.sound.play(Paths.sound('confirmMenu'));
+				FunkinSound.playOnce('confirmMenu');
 				closeBinding();
 			}
 		}
@@ -497,7 +497,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		descBox.updateHitbox();
 
 		curOption = optionsArray[curSelected]; //shorter lol
-		FlxG.sound.play(Paths.sound('scrollMenu'));
+		FunkinSound.playOnce('scrollMenu');
 	}
 
 	function reloadCheckboxes()

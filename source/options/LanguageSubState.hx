@@ -116,12 +116,12 @@ class LanguageSubState extends MusicBeatSubstate
 				MusicBeatState.resetState();
 			}
 			else close();
-			FlxG.sound.play(Paths.sound('cancelMenu'));
+			FunkinSound.playOnce('cancelMenu');
 		}
 
 		if(controls.ACCEPT)
 		{
-			FlxG.sound.play(Paths.sound('confirmMenu'), 0.6);
+			FunkinSound.playOnce('confirmMenu', 0.6);
 			ClientPrefs.data.language = languages[curSelected];
 			//trace(ClientPrefs.data.language);
 			ClientPrefs.saveSettings();
@@ -139,7 +139,7 @@ class LanguageSubState extends MusicBeatSubstate
 			lang.alpha = 0.6;
 			if(num == curSelected) lang.alpha = 1;
 		}
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
+		FunkinSound.playOnce('scrollMenu', 0.6);
 	}
 	#end
 }

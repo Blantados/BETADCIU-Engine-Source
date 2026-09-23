@@ -123,8 +123,7 @@ class TitleState extends MusicBeatState
 	function startIntro()
 	{
 		persistentUpdate = true;
-		if (!initialized && FlxG.sound.music == null)
-			FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+		FunkinSound.playMusic('freakyMenu', { startingVolume: !initialized ? 0 : 0.7, overrideExisting: true, persist: true });
 
 		loadJsonData();
 		Conductor.bpm = musicBPM;
@@ -334,7 +333,7 @@ class TitleState extends MusicBeatState
 				if(titleText != null) titleText.animation.play('press');
 
 				FlxG.camera.flash(ClientPrefs.data.flashing ? FlxColor.WHITE : 0x4CFFFFFF, 1);
-				FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
+				FunkinSound.playOnce('confirmMenu', 0.7);
 
 				transitioning = true;
 				// FlxG.sound.music.stop();
@@ -430,7 +429,6 @@ class TitleState extends MusicBeatState
 			{
 				case 1:
 					//FlxG.sound.music.stop();
-					FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 					FlxG.sound.music.fadeIn(4, 0, 0.7);
 				case 2:
 					createCoolText(['The', 'Funkin Crew Inc'], 40);

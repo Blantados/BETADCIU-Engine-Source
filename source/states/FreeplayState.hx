@@ -111,10 +111,8 @@ class FreeplayState extends MusicBeatState
 	{
 		Paths.clearStoredMemory();
 
-		final shouldPlay:Bool = (!FlxG.sound.music.playing || FlxG.sound.music.volume == 0 || MainMenuState.mainMusic);
-
-		if (shouldPlay) { // probably nuking this later to use song previews
-			FlxG.sound.playMusic(Paths.music('songSelect'));
+		if (FlxG.sound.music == null || !FlxG.sound.music.playing || FlxG.sound.music.volume == 0 || MainMenuState.mainMusic) {
+			FunkinSound.playMusic('songSelect', {overrideExisting: true, persist: true});
 			FlxG.sound.music.volume = 1;
 			MainMenuState.mainMusic = false;
 		}
@@ -313,7 +311,7 @@ class FreeplayState extends MusicBeatState
 
 				if(FlxG.mouse.wheel != 0)
 				{
-					FlxG.sound.play(Paths.sound('scrollMenu'), 0.2);
+					FunkinSound.playOnce('scrollMenu', 0.2);
 					changeSelection(-shiftMult * FlxG.mouse.wheel, false);
 				}
 				}
@@ -345,13 +343,13 @@ class FreeplayState extends MusicBeatState
 				player.playingMusic = false;
 				player.switchPlayMusic();
 
-				FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+				FunkinSound.playMusic('songSelect', {overrideExisting: true, startingVolume: 0, persist: true});
 				FlxTween.tween(FlxG.sound.music, {volume: 1}, 1);
 			}
 			else 
 			{
 				persistentUpdate = false;
-				FlxG.sound.play(Paths.sound('cancelMenu'));
+				FunkinSound.playOnce('cancelMenu');
 				fadeDots(false);
 				MusicBeatState.switchState(new MainMenuState());
 			}
@@ -423,7 +421,7 @@ class FreeplayState extends MusicBeatState
 					}
 				}
 
-				FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song), 0.8);
+				FunkinSound.playMusic(PlayState.SONG.song, {startingVolume: 0.8, overrideExisting: true, pathsFunction: INST});
 				FlxG.sound.music.pause();
 				instPlaying = curSelected;
 
@@ -448,7 +446,7 @@ class FreeplayState extends MusicBeatState
 		{
 			persistentUpdate = false;
 			openSubState(new ResetScoreSubState(songs[curSelected].songName, curDifficulty, songs[curSelected].songCharacter));
-			FlxG.sound.play(Paths.sound('scrollMenu'));
+			FunkinSound.playOnce('scrollMenu');
 		}
 
 		updateTexts(elapsed);
@@ -542,7 +540,7 @@ class FreeplayState extends MusicBeatState
 		missingText.visible = true;
 		missingTextBG.visible = true;
 
-		var errorSound:FlxSound = FlxG.sound.play(Paths.sound('confirmMenu'), FlxG.sound.volume - 0.4);
+		var errorSound:FlxSound = FunkinSound.playOnce('confirmMenu', FlxG.sound.volume - 0.4);
 		var musicLength:Float = errorSound.length;
 
 		if (item.songText.text != songs[curSelected].songName)
@@ -693,7 +691,7 @@ class FreeplayState extends MusicBeatState
 		_updateSongLastDifficulty();
 
 		if(playSound) 
-			FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+			FunkinSound.playOnce('scrollMenu', 0.4);
 
 		for (item in grpSongs.members)
 			if (item != null) item.selected = (item.targetY == curSelected);
@@ -779,7 +777,7 @@ class FreeplayState extends MusicBeatState
 
 		var confirmSound:FlxSound = null;
 		if (accepted) {
-			confirmSound = FlxG.sound.play(Paths.sound('confirmMenu'));
+			confirmSound = FunkinSound.playOnce('confirmMenu');
 			dj.confirm();
 		}
 
@@ -980,7 +978,6 @@ class FreeplayState extends MusicBeatState
 
 		FlxG.autoPause = ClientPrefs.data.autoPause;
 		FlxG.save.flush();
-		if (!FlxG.sound.music.playing && !stopMusicPlay) FlxG.sound.playMusic(Paths.music('freakyMenu'));
 	}	
 }
 

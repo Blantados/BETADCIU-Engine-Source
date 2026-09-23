@@ -54,7 +54,7 @@ class FlashingState extends MusicBeatState
 		}
 		var back:Bool = controls.BACK;
 		if (controls.UI_LEFT_P || controls.UI_RIGHT_P) {
-			FlxG.sound.play(Paths.sound("scrollMenu"), 0.7);
+			FunkinSound.playOnce("scrollMenu", 0.7);
 			isYes = !isYes;
 			updateItems();
 		}
@@ -65,7 +65,7 @@ class FlashingState extends MusicBeatState
 			if(!back) {
 				ClientPrefs.data.flashing = !isYes;
 				ClientPrefs.saveSettings();
-				FlxG.sound.play(Paths.sound('confirmMenu'));
+				FunkinSound.playOnce('confirmMenu');
 				final button = texts.members[isYes ? 1 : 2];
 				FlxFlicker.flicker(button, 1, 0.1, false, true, function(flk:FlxFlicker) {
 					new FlxTimer().start(0.5, function (tmr:FlxTimer) {
@@ -75,7 +75,7 @@ class FlashingState extends MusicBeatState
 					});
 				});
 			} else {
-				FlxG.sound.play(Paths.sound('cancelMenu'));
+				FunkinSound.playOnce('cancelMenu');
 				FlxTween.tween(texts, {alpha: 0}, 1, {
 					onComplete: (_) -> MusicBeatState.switchState(new TitleState())
 				});

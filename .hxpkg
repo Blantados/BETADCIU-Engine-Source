@@ -5,7 +5,8 @@
             {
                 "name": "flixel",
                 "link": "https://github.com/FunkinCrew/flixel",
-                "branch": "622bb65e7f49f0e1a03826b6593369d3ad5e54fa"
+                "branch": "622bb65e7f49f0e1a03826b6593369d3ad5e54fa",
+                "skipDependencies": true
             },
             {
                 "name": "flixel-addons",
@@ -84,8 +85,9 @@
             },
             {
                 "name": "grig.audio",
-                "link": "https://gitlab.com/haxe-grig/grig.audio.git",
-                "branch": "cbf91e2180fd2e374924fe74844086aab7891666"
+                "link": "https://github.com/FunkinCrew/grig.audio",
+                "branch": "8567c4dad34cfeaf2ff23fe12c3796f5db80685e",
+                "dir": "src"
             },
             {
                 "name": "extension-haptics",

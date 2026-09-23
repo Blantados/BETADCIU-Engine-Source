@@ -36,7 +36,7 @@ class TypedAlphabet extends Alphabet
 				showCharacterUpTo(_curLetter + 1);
 				if(!playedSound && sound != '' && (delay > 0.025 || _curLetter % 2 == 0))
 				{
-					FlxG.sound.play(Paths.sound(sound), volume);
+					FunkinSound.playOnce(sound, volume);
 				}
 				playedSound = true;
 
@@ -83,7 +83,7 @@ class TypedAlphabet extends Alphabet
 		if(finishedText) return;
 
 		showCharacterUpTo(letters.length - 1);
-		if(sound != '') FlxG.sound.play(Paths.sound(sound), volume);
+		if(sound != '') FunkinSound.playOnce(sound, volume);
 		finishedText = true;
 		
 		if(onFinish != null) onFinish();

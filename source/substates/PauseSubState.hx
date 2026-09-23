@@ -195,13 +195,13 @@ class PauseSubState extends MusicBeatSubstate
 			case 'Skip Time':
 				if (controls.UI_LEFT_P)
 				{
-					FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+					FunkinSound.playOnce('scrollMenu', 0.4);
 					curTime -= 1000;
 					holdTime = 0;
 				}
 				if (controls.UI_RIGHT_P)
 				{
-					FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+					FunkinSound.playOnce('scrollMenu', 0.4);
 					curTime += 1000;
 					holdTime = 0;
 				}
@@ -251,7 +251,7 @@ class PauseSubState extends MusicBeatSubstate
 					missingText.screenCenter(Y);
 					missingText.visible = true;
 					missingTextBG.visible = true;
-					FlxG.sound.play(Paths.sound('cancelMenu'));
+					FunkinSound.playOnce('cancelMenu');
 
 					super.update(elapsed);
 					return;
@@ -313,7 +313,7 @@ class PauseSubState extends MusicBeatSubstate
 					MusicBeatState.switchState(new OptionsState());
 					if(ClientPrefs.data.pauseMusic != 'None')
 					{
-						FlxG.sound.playMusic(Paths.music(Paths.formatToSongPath(ClientPrefs.data.pauseMusic)), pauseMusic.volume);
+						FunkinSound.playMusic(Paths.formatToSongPath(ClientPrefs.data.pauseMusic), {startingVolume: pauseMusic.volume, persist: true});
 						FlxTween.tween(FlxG.sound.music, {volume: 1}, 0.8);
 						FlxG.sound.music.time = pauseMusic.time;
 					}
@@ -393,7 +393,7 @@ class PauseSubState extends MusicBeatSubstate
 		}
 		missingText.visible = false;
 		missingTextBG.visible = false;
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+		FunkinSound.playOnce('scrollMenu', 0.4);
 	}
 
 	function regenMenu():Void {

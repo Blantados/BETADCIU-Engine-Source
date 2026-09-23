@@ -113,7 +113,7 @@ class OnlineModpackState extends MusicBeatState
 			item.alpha = 0.6;
 			if (item.targetY == 0) item.alpha = 1;
 		}
-		FlxG.sound.play(Paths.sound('scrollMenu'));
+		FunkinSound.playOnce('scrollMenu');
 	}
 
 	function downloadModpack(zipName:String)
@@ -136,7 +136,7 @@ class OnlineModpackState extends MusicBeatState
 					FileSystem.deleteFile(localZipPath);
 					
 					loadingText.text = "Download Complete!";
-					FlxG.sound.play(Paths.sound('confirmMenu'));
+					FunkinSound.playOnce('confirmMenu');
 					
 					haxe.Timer.delay(function() {
 						isDownloading = false;

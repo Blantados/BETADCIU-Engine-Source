@@ -35,6 +35,11 @@ class MasterEditorMenu extends MusicBeatState
 		DiscordClient.changePresence("Editors Main Menu", null);
 		#end
 
+		if (FlxG.sound.music == null || !FlxG.sound.music.playing || !MainMenuState.mainMusic) {
+			FunkinSound.playMusic('freakyMenu', { startingVolume: 0.7, overrideExisting: true, persist: true });
+			MainMenuState.mainMusic = true;
+		}
+
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.scrollFactor.set();
 		bg.color = 0xFF353535;
@@ -79,6 +84,9 @@ class MasterEditorMenu extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
+		if (FlxG.sound.music.volume < 0.8)
+			FlxG.sound.music.volume = Math.min(FlxG.sound.music.volume + 0.5 * elapsed, 0.8);
+
 		if (controls.UI_UP_P)
 		{
 			changeSelection(-1);
@@ -143,14 +151,14 @@ class MasterEditorMenu extends MusicBeatState
 
 	function changeSelection(change:Int = 0)
 	{
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+		FunkinSound.playOnce('scrollMenu', 0.4);
 		curSelected = FlxMath.wrap(curSelected + change, 0, options.length - 1);
 	}
 
 	#if MODS_ALLOWED
 	function changeDirectory(change:Int = 0)
 	{
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+		FunkinSound.playOnce('scrollMenu', 0.4);
 
 		curDirectory += change;
 

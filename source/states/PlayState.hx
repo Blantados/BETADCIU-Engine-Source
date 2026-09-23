@@ -191,9 +191,9 @@ class PlayState extends MusicBeatState
 	public var spawnTime:Float = 2000;
 	public static var holdSubdivisions:Int = 1;
 
-	public var inst:FlxSound;
-	public var vocals:FlxSound;
-	public var opponentVocals:FlxSound;
+	public var inst:FunkinSound;
+	public var vocals:FunkinSound;
+	public var opponentVocals:FunkinSound;
 
 	// public var dad:Character = null;
 	// public var gf:Character = null;
@@ -338,7 +338,10 @@ class PlayState extends MusicBeatState
 
 	override public function create()
 	{
-		FlxG.sound.music.volume = 0;
+		if (FlxG.sound.music != null) {
+			FlxG.sound.music.volume = 0;
+			FlxG.sound.music.stop();
+		}
 		
 		//trace('Playback Rate: ' + playbackRate);
 		_lastLoadedModDirectory = Mods.currentModDirectory;
@@ -368,8 +371,8 @@ class PlayState extends MusicBeatState
 			'note_right'
 		];
 
-		if(FlxG.sound.music != null)
-			FlxG.sound.music.stop();
+		// if(FlxG.sound.music != null)
+		// 	FlxG.sound.music.stop();
 
 		// Gameplay settings
 		healthGain = ClientPrefs.getGameplaySetting('healthgain');
@@ -1176,19 +1179,19 @@ class PlayState extends MusicBeatState
 					{
 						case 0:
 							countdownOnYourMarks = new FlxSprite().loadGraphic(Paths.image("notes/noStrums")); // in case someone really uses this i can add a thing to customize this later -- ryiuu
-							FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro3' + introSoundsSuffix), 0.6);
+							FunkinSound.playOnce(introSoundsPrefix + 'intro3' + introSoundsSuffix, 0.6);
 							tick = THREE;
 						case 1:
 							countdownReady = createCountdownSprite(introAlts[0], antialias, isCustomCountdown);
-							FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro2' + introSoundsSuffix), 0.6);
+							FunkinSound.playOnce(introSoundsPrefix + 'intro2' + introSoundsSuffix, 0.6);
 							tick = TWO;
 						case 2:
 							countdownSet = createCountdownSprite(introAlts[1], antialias, isCustomCountdown);
-							FlxG.sound.play(Paths.sound(introSoundsPrefix + 'intro1' + introSoundsSuffix), 0.6);
+							FunkinSound.playOnce(introSoundsPrefix + 'intro1' + introSoundsSuffix, 0.6);
 							tick = ONE;
 						case 3:
 							countdownGo = createCountdownSprite(introAlts[2], antialias, isCustomCountdown);
-							FlxG.sound.play(Paths.sound(introSoundsPrefix + 'introGo' + introSoundsSuffix), 0.6);
+							FunkinSound.playOnce(introSoundsPrefix + 'introGo' + introSoundsSuffix, 0.6);
 							tick = GO;
 						case 4:
 							tick = START;
@@ -1423,8 +1426,10 @@ class PlayState extends MusicBeatState
 	{
 		startingSong = false;
 
-		@:privateAccess
-		FlxG.sound.playMusic(inst._sound, 1, false);
+		inst.volume = 1;
+		FunkinSound.setMusic(inst);
+		inst.play();
+
 		#if FLX_PITCH FlxG.sound.music.pitch = playbackRate; #end
 		FlxG.sound.music.onComplete = finishSong.bind();
 		vocals.play();
@@ -1488,8 +1493,8 @@ class PlayState extends MusicBeatState
 
 		curSong = songData.song;
 
-		vocals = new FlxSound();
-		opponentVocals = new FlxSound();
+		vocals = new FunkinSound();
+		opponentVocals = new FunkinSound();
 		try
 		{
 			if (songData.needsVoices)
@@ -1541,13 +1546,14 @@ class PlayState extends MusicBeatState
 		FlxG.sound.list.add(vocals);
 		FlxG.sound.list.add(opponentVocals);
 
-		inst = new FlxSound();
+		inst = new FunkinSound();
 		try
 		{
-			inst.loadEmbedded(Paths.inst(songData.song));
+			// inst.loadEmbedded(Paths.inst(songData.song));
+			inst = FunkinSound.load(Paths.inst(songData.song), 1, false, false, false, true);
 		}
 		catch (e:Dynamic) {}
-		FlxG.sound.list.add(inst);
+		// FlxG.sound.list.add(inst); // load() already adds it to the list
 
 		notes = new FlxTypedGroup<Note>();
 		noteGroup.add(notes);
@@ -2737,7 +2743,7 @@ class PlayState extends MusicBeatState
 
 			case 'Play Sound':
 				if(flValue2 == null) flValue2 = 1;
-				FlxG.sound.play(Paths.sound(value1), flValue2);
+				FunkinSound.playOnce(value1, flValue2);
 			case "Change Stage":
 				if (value1 != null && value1 != "") {
 					callOnScripts('onStageChange', [value1]);
@@ -3526,7 +3532,7 @@ class PlayState extends MusicBeatState
 		else if (!startingSong) dType = PlayState.SONG.notes[curSection].dType;
 
 		noteMissCommon(direction);
-		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
+		FunkinSound.playOnce('missnote${FlxG.random.int(1, 3)}', FlxG.random.float(0.1, 0.2));
 		hardCodedStage?.noteMissPress(direction);
 		callOnScripts('noteMissPress', [direction, dType]);
 	}
@@ -3647,7 +3653,7 @@ class PlayState extends MusicBeatState
 			if (songName != 'tutorial') camZooming = true;
 		} else {
 			note.wasGoodHit = true;
-			if (note.hitsoundVolume > 0 && !note.hitsoundDisabled) FlxG.sound.play(Paths.sound(note.hitsound), note.hitsoundVolume);
+			if (note.hitsoundVolume > 0 && !note.hitsoundDisabled) FunkinSound.playOnce(note.hitsound, note.hitsoundVolume);
 		}
 
 		if (!causesMiss) {
@@ -3812,7 +3818,7 @@ class PlayState extends MusicBeatState
 
 		FlxG.camera.filters = [];
 
-		#if FLX_PITCH FlxG.sound.music.pitch = 1; #end
+		#if FLX_PITCH if (FlxG.sound.music != null) FlxG.sound.music.pitch = 1; #end
 		FlxG.animationTimeScale = 1;
 
 		NoteRGBShader.globalRgbShaders = [];

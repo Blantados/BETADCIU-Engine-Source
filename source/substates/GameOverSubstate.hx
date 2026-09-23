@@ -72,7 +72,7 @@ class GameOverSubstate extends MusicBeatSubstate
 		boyfriend.skipDance = true;
 		add(boyfriend);
 
-		FlxG.sound.play(Paths.sound(deathSoundName));
+		FunkinSound.playOnce(deathSoundName);
 		FlxG.camera.scroll.set();
 		FlxG.camera.target = null;
 
@@ -86,7 +86,8 @@ class GameOverSubstate extends MusicBeatSubstate
 		
 		PlayState.instance.setOnScripts('inGameOver', true);
 		PlayState.instance.callOnScripts('onGameOverStart', []);
-		FlxG.sound.music.loadEmbedded(Paths.music(loopSoundName), true);
+		FunkinSound.playMusic(loopSoundName, {persist: true}); // 'persist: true' bcuz the game crashes after a game over if you use it on false
+		FlxG.sound.music.pause(); // 'FunkinSound' doesn't have a parameter to "start paused"
 
 		if(characterName == 'pico-dead')
 		{
@@ -173,7 +174,6 @@ class GameOverSubstate extends MusicBeatSubstate
 				else
 					MusicBeatState.switchState(new FreeplayState());
 	
-				FlxG.sound.playMusic(Paths.music('freakyMenu'));
 				PlayState.instance.callOnScripts('onGameOverConfirm', [false]);
 			}
 			else if (justPlayedLoop)
@@ -186,22 +186,16 @@ class GameOverSubstate extends MusicBeatSubstate
 						var exclude:Array<Int> = [];
 						//if(!ClientPrefs.cursing) exclude = [1, 3, 8, 13, 17, 21];
 	
-						FlxG.sound.play(Paths.sound('jeffGameover/jeffGameover-' + FlxG.random.int(1, 25, exclude)), 1, false, null, true, function() {
-							if(!isEnding)
-							{
-								FlxG.sound.music.fadeIn(0.2, 1, 4);
-							}
+						// probably should remove this, since almost all the base game stuff is becoming soft coded, but i'll keep it here for now
+						FunkinSound.playOnce('jeffGameover/jeffGameover-' + FlxG.random.int(1, 25, exclude), 1, function() {
+							if (!isEnding) FlxG.sound.music.fadeIn(0.2, 1, 4);
 						});
-
 					default:
 						coolStartDeath();
 				}
 			}
 			
-			if (FlxG.sound.music.playing)
-			{
-				Conductor.songPosition = FlxG.sound.music.time;
-			}
+			if (FlxG.sound.music.playing) Conductor.songPosition = FlxG.sound.music.time;
 		}
 		PlayState.instance.callOnScripts('onUpdatePost', [elapsed]);
 	}
@@ -230,14 +224,8 @@ class GameOverSubstate extends MusicBeatSubstate
 				overlay.offset.set(overlayConfirmOffsets.x, overlayConfirmOffsets.y);
 			}
 			FlxG.sound.music.stop();
-			FlxG.sound.play(Paths.music(endSoundName));
-			new FlxTimer().start(0.7, function(tmr:FlxTimer)
-			{
-				FlxG.camera.fade(FlxColor.BLACK, 2, false, function()
-				{
-					MusicBeatState.resetState();
-				});
-			});
+			FunkinSound.playOnce(endSoundName, 1, null, null, false, "music");
+			new FlxTimer().start(0.7, function(tmr:FlxTimer) { FlxG.camera.fade(FlxColor.BLACK, 2, false, function() { MusicBeatState.resetState(); }); });
 			PlayState.instance.callOnScripts('onGameOverConfirm', [true]);
 		}
 	}

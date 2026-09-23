@@ -72,23 +72,6 @@ class ModpackMakerState extends MusicBeatState {
     }
 
     override function create() {
-        if (FlxG.sound.music.volume == 0 || !FlxG.sound.music.playing)
-		{
-			FlxG.sound.music.volume = 1;
-			FlxG.sound.playMusic(Paths.music('songSelect'));
-		}
-
-		if (FlxG.sound.music.playing || MainMenuState.mainMusic)
-		{
-			FlxG.sound.playMusic(Paths.music('songSelect'));
-			MainMenuState.mainMusic = false;
-		}
-		if (!FlxG.sound.music.playing || MainMenuState.mainMusic == false)
-		{
-			FlxG.sound.playMusic(Paths.music('songSelect'));
-			MainMenuState.mainMusic = false;
-		}
-
         // Cameras
         camEditor = initPsychCamera();
 
@@ -316,7 +299,7 @@ class ModpackMakerState extends MusicBeatState {
         ModpackAssetRegistry.instance.processAll(swagDirectory, modpackNameInput.text);
         createWeekFile();
 
-        FlxG.sound.play(Paths.sound('confirmMenu'));
+        FunkinSound.playOnce('confirmMenu');
         showToast("Modpack created successfully!");
     }
 
@@ -825,7 +808,7 @@ class ModpackMakerState extends MusicBeatState {
        	ClientPrefs.toggleVolumeKeys(canPress);
 
         if (canPress && FlxG.keys.justPressed.ESCAPE) {
-            MusicBeatState.switchState(new options.OptionsState());
+            MusicBeatState.switchState(new states.editors.MasterEditorMenu()); // how long this was switching to the options menu instead of the master editor menu???
             FlxG.mouse.visible = false;
             return;
         }
@@ -1015,7 +998,7 @@ class ModpackMakerState extends MusicBeatState {
             unzip(localZipPath, Paths.mods());
             FileSystem.deleteFile(localZipPath);
 
-            FlxG.sound.play(Paths.sound('confirmMenu'));
+            FunkinSound.playOnce('confirmMenu');
             showToast("Zipped modpack downloaded and extracted!");
             reloadSetupOptions();
         } catch (e:Dynamic) {

@@ -185,7 +185,7 @@ class CreditsState extends MusicBeatState
 			}
 			if (controls.BACK)
 			{
-				FlxG.sound.play(Paths.sound('cancelMenu'));
+				FunkinSound.playOnce('cancelMenu');
 				MusicBeatState.switchState(new MainMenuState());
 				quitting = true;
 			}
@@ -214,7 +214,7 @@ class CreditsState extends MusicBeatState
 	var moveTween:FlxTween = null;
 	function changeSelection(change:Int = 0)
 	{
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+		FunkinSound.playOnce('scrollMenu', 0.4);
 		do
 		{
 			curSelected = FlxMath.wrap(curSelected + change, 0, creditsStuff.length - 1);

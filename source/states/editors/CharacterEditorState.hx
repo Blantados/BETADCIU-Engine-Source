@@ -77,8 +77,9 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		Paths.clearUnusedMemory();
 		Paths.clearStoredMemory();
 	
-		FlxG.sound.music.stop();
-		FlxG.sound.playMusic(Paths.music('kawaruLofi'), 0.7);
+		FunkinSound.playMusic("kawaruLofi", {overrideExisting: true});
+		// FlxG.sound.music.stop();
+		// FlxG.sound.playMusic(Paths.music('kawaruLofi'), 0.7);
 		camEditor = initPsychCamera();
 
 		camHUD = new FlxCamera();
@@ -451,7 +452,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			else
 			{
 				reloadCharacterDropDown();
-				FlxG.sound.play(Paths.sound('cancelMenu'));
+				FunkinSound.playOnce('cancelMenu');
 			}
 		});
 		reloadCharacterDropDown();
@@ -1189,11 +1190,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		{
 			if(!_goToPlayState)
 			{
-				if(!unsavedProgress)
-				{
-					MusicBeatState.switchState(new states.editors.MasterEditorMenu());
-					FlxG.sound.playMusic(Paths.music('freakyMenu'));
-				}
+				if(!unsavedProgress) MusicBeatState.switchState(new states.editors.MasterEditorMenu());
 				else openSubState(new ExitConfirmationPrompt());
 			}
 			else

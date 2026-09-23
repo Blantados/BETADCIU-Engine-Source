@@ -248,7 +248,7 @@ class HScript extends IrisEx implements IFlxDestroyable
 		set("StageData", backend.StageData);
 		set('PlayState', PlayState);
 		set("GameOverSubstate", substates.GameOverSubstate);
-		// set('FunkinSound', funkin.audio.FunkinSound);
+		set('FunkinSound', backend.system.sound.FunkinSound);
 
 		// custom
 		set('FlxColor', CustomFlxColor);

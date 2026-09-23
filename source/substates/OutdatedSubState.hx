@@ -55,7 +55,7 @@ class OutdatedSubState extends MusicBeatSubstate
 			}
 			if(leftState)
 			{
-				FlxG.sound.play(Paths.sound('cancelMenu'));
+				FunkinSound.playOnce('cancelMenu');
 				FlxTween.tween(bg, { alpha: 0.0 }, 0.9, { ease: FlxEase.sineOut });
 				FlxTween.tween(warnText, {alpha: 0}, 1, {
 					ease: FlxEase.sineOut,

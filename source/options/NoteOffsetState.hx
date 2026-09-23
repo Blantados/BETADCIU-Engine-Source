@@ -169,7 +169,7 @@ class NoteOffsetState extends MusicBeatState
 		_lastControllerMode = true;
 
 		Conductor.bpm = 128.0;
-		FlxG.sound.playMusic(Paths.music('offsetSong'), 1, true);
+		FunkinSound.playMusic("offsetSong", {overrideExisting: true});
 
 		super.create();
 	}
@@ -411,11 +411,11 @@ class NoteOffsetState extends MusicBeatState
 			if(OptionsState.onPlayState)
 			{
 				if(ClientPrefs.data.pauseMusic != 'None')
-					FlxG.sound.playMusic(Paths.music(Paths.formatToSongPath(ClientPrefs.data.pauseMusic)));
+					FunkinSound.playMusic(Paths.formatToSongPath(ClientPrefs.data.pauseMusic), {persist: true, overrideExisting: true});
 				else
 					FlxG.sound.music.volume = 0;
 			}
-			else FlxG.sound.playMusic(Paths.music('freakyMenu'));
+			else FunkinSound.playMusic("freakyMenu", {persist: true, overrideExisting: true});
 			FlxG.mouse.visible = false;
 		}
 
