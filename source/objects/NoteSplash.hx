@@ -288,7 +288,7 @@ class NoteSplash extends FunkinSprite
 							else if (i == 2) tempShader.b = color;
 						}
 					} else {
-						if (!isLegacyNoteSkin && note.isLegacyNoteSkin && autoRGB) {
+						if (note != null && !isLegacyNoteSkin && note.isLegacyNoteSkin && autoRGB) {
 							final tones = NoteColorExtractor.generateTones(NoteColorExtractor.getDominantColor(note));
 
 							tempShader.r = tones.highlight;
