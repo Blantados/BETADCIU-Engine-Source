@@ -313,7 +313,7 @@ class PauseSubState extends MusicBeatSubstate
 					MusicBeatState.switchState(new OptionsState());
 					if(ClientPrefs.data.pauseMusic != 'None')
 					{
-						FunkinSound.playMusic(Paths.formatToSongPath(ClientPrefs.data.pauseMusic), {startingVolume: pauseMusic.volume, persist: true});
+						FunkinSound.playMusic(Paths.formatToSongPath(ClientPrefs.data.pauseMusic), {startingVolume: pauseMusic.volume, persist: true, loop:true});
 						FlxTween.tween(FlxG.sound.music, {volume: 1}, 0.8);
 						FlxG.sound.music.time = pauseMusic.time;
 					}
@@ -355,6 +355,7 @@ class PauseSubState extends MusicBeatSubstate
 
 	public static function restartSong(noTrans:Bool = false)
 	{
+		FlxG.sound.music.onComplete = null;
 		PlayState.restarted = true; // For lua
 		PlayState.instance.paused = true; // For lua
 		FlxG.sound.music.volume = 0;

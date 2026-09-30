@@ -77,7 +77,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		Paths.clearUnusedMemory();
 		Paths.clearStoredMemory();
 	
-		FunkinSound.playMusic("kawaruLofi", {overrideExisting: true});
+		FunkinSound.playMusic("kawaruLofi", {overrideExisting: true, persist:true});
 		// FlxG.sound.music.stop();
 		// FlxG.sound.playMusic(Paths.music('kawaruLofi'), 0.7);
 		camEditor = initPsychCamera();
